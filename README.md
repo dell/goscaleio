@@ -85,3 +85,9 @@ Setting `GOSCALEIO_SHOWHTTP` will log all HTTP requests and responses to `stdout
 ---------
 Licensed under the Apache License, Version 2.0 (the “License”); you may not use this file except in compliance with the License. You may obtain a copy of the License at <http://www.apache.org/licenses/LICENSE-2.0>
 
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+<a id="support">Support</a>
+-------
+
+Please file bugs and issues on the Github issues page for this project. This is to help keep track and document everything related to this repo. For general discussions and further support you can join the [{code} Community slack channel](https://community.thecodeteam.com/). The code and documentation are released with no warranties or SLAs and are intended to be supported through a community driven process.
