@@ -3,11 +3,13 @@ package goscaleio
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
 
 func (s *System) GetUser() ([]types.User, error) {
+	defer TimeSpent("GetUser", time.Now())
 
 	path := fmt.Sprintf("/api/instances/System::%v/relationships/User",
 		s.System.ID)

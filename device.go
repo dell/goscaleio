@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
@@ -31,9 +32,10 @@ func NewDeviceEx(client *Client, device *types.Device) *Device {
 func (sp *StoragePool) AttachDevice(
 	path string,
 	sdsID string) (string, error) {
+	defer TimeSpent("AttachDevice", time.Now())
 
 	deviceParam := &types.DeviceParam{
-		Name: path,
+		Name:                  path,
 		DeviceCurrentPathname: path,
 		StoragePoolID:         sp.StoragePool.ID,
 		SdsID:                 sdsID,
@@ -51,6 +53,7 @@ func (sp *StoragePool) AttachDevice(
 }
 
 func (sp *StoragePool) GetDevice() ([]types.Device, error) {
+	defer TimeSpent("GetDevice", time.Now())
 
 	path := fmt.Sprintf(
 		"/api/instances/StoragePool::%v/relationships/Device",
@@ -68,6 +71,7 @@ func (sp *StoragePool) GetDevice() ([]types.Device, error) {
 
 func (sp *StoragePool) FindDevice(
 	field, value string) (*types.Device, error) {
+	defer TimeSpent("FindDevice", time.Now())
 
 	devices, err := sp.GetDevice()
 	if err != nil {

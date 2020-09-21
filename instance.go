@@ -4,11 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
 
 func (c *Client) GetInstance(systemhref string) ([]*types.System, error) {
+	defer TimeSpent("GetInstance", time.Now())
 
 	var (
 		err     error
@@ -37,6 +39,7 @@ func (c *Client) GetInstance(systemhref string) ([]*types.System, error) {
 func (c *Client) GetVolume(
 	volumehref, volumeid, ancestorvolumeid, volumename string,
 	getSnapshots bool) ([]*types.Volume, error) {
+	defer TimeSpent("GetVolume", time.Now())
 
 	var (
 		err     error
@@ -90,6 +93,7 @@ func (c *Client) GetVolume(
 }
 
 func (c *Client) FindVolumeID(volumename string) (string, error) {
+	defer TimeSpent("FindVolumeID", time.Now())
 
 	volumeQeryIdByKeyParam := &types.VolumeQeryIdByKeyParam{
 		Name: volumename,
@@ -109,6 +113,7 @@ func (c *Client) FindVolumeID(volumename string) (string, error) {
 func (c *Client) CreateVolume(
 	volume *types.VolumeParam,
 	storagePoolName string) (*types.VolumeResp, error) {
+	defer TimeSpent("CreateVolume", time.Now())
 
 	path := "/api/types/Volume/instances"
 
@@ -132,6 +137,7 @@ func (c *Client) CreateVolume(
 
 func (c *Client) GetStoragePool(
 	storagepoolhref string) ([]*types.StoragePool, error) {
+	defer TimeSpent("GetStoragePool", time.Now())
 
 	var (
 		err          error
@@ -159,6 +165,7 @@ func (c *Client) GetStoragePool(
 
 func (c *Client) FindStoragePool(
 	id, name, href string) (*types.StoragePool, error) {
+	defer TimeSpent("FindStoragePool", time.Now())
 
 	storagePools, err := c.GetStoragePool(href)
 	if err != nil {

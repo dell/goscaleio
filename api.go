@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -367,5 +368,14 @@ func doLog(
 
 	if debug {
 		l(msg)
+	}
+}
+
+var ExternalTimeRecorder func(string, time.Duration)
+
+func TimeSpent(functionName string, startTime time.Time) {
+	if ExternalTimeRecorder != nil {
+		endTime := time.Now()
+		ExternalTimeRecorder(functionName, endTime.Sub(startTime))
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
@@ -28,6 +29,7 @@ func NewProtectionDomainEx(client *Client, pd *types.ProtectionDomain) *Protecti
 }
 
 func (s *System) CreateProtectionDomain(name string) (string, error) {
+	defer TimeSpent("CreateProtectionDomain", time.Now())
 
 	protectionDomainParam := &types.ProtectionDomainParam{
 		Name: name,
@@ -47,6 +49,7 @@ func (s *System) CreateProtectionDomain(name string) (string, error) {
 
 func (s *System) GetProtectionDomain(
 	pdhref string) ([]*types.ProtectionDomain, error) {
+	defer TimeSpent("GetprotectionDomain", time.Now())
 
 	var (
 		err error
@@ -81,6 +84,7 @@ func (s *System) GetProtectionDomain(
 
 func (s *System) FindProtectionDomain(
 	id, name, href string) (*types.ProtectionDomain, error) {
+	defer TimeSpent("FindProtectionDomain", time.Now())
 
 	pds, err := s.GetProtectionDomain(href)
 	if err != nil {
