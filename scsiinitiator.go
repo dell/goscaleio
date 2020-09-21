@@ -3,11 +3,13 @@ package goscaleio
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
 
 func (s *System) GetScsiInitiator() ([]types.ScsiInitiator, error) {
+	defer TimeSpent("GetScsiInitiator", time.Now())
 
 	path := fmt.Sprintf(
 		"/api/instances/System::%v/relationships/ScsiInitiator",

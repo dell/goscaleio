@@ -159,6 +159,31 @@ type Statistics struct {
 	FwdRebuildCapacityInKb                   int `json:"fwdRebuildCapacityInKb"`
 	FwdRebuildWriteBwc                       BWC `json:"fwdRebuildWriteBwc"`
 	PrimaryWriteBwc                          BWC `json:"primaryWriteBwc"`
+	NetUserDataCapacityInKb                  int `json:"netUserDataCapacityInKb"`
+	NetUnusedCapacityInKb                    int `json:"netUnusedCapacityInKb"`
+	VolumeAddressSpaceInKb                   int `json:"volumeAddressSpaceInKb"`
+}
+
+type SdcStatistics struct {
+	UserDataReadBwc         BWC      `json:"userDataReadBwc"`
+	UserDataWriteBwc        BWC      `json:"userDataWriteBwc"`
+	UserDataTrimBwc         BWC      `json:"userDataTrimBwc"`
+	UserDataSdcReadLatency  BWC      `json:"userDataSdcReadLatency"`
+	UserDataSdcWriteLatency BWC      `json:"userDataSdcWriteLatency"`
+	UserDataSdcTrimLatency  BWC      `json:"userDataSdcTrimLatency"`
+	VolumeIds               []string `json:"volumeIds"`
+	NumOfMappedVolumes      int      `json:"numOfMappedVolumes"`
+}
+
+type VolumeStatistics struct {
+	UserDataReadBwc         BWC      `json:"userDataReadBwc"`
+	UserDataWriteBwc        BWC      `json:"userDataWriteBwc"`
+	UserDataTrimBwc         BWC      `json:"userDataTrimBwc"`
+	UserDataSdcReadLatency  BWC      `json:"userDataSdcReadLatency"`
+	UserDataSdcWriteLatency BWC      `json:"userDataSdcWriteLatency"`
+	UserDataSdcTrimLatency  BWC      `json:"userDataSdcTrimLatency"`
+	MappedSdcIds            []string `json:"mappedSdcIds"`
+	NumOfMappedSdcs         int      `json:"numOfMappedSdcs"`
 }
 
 type User struct {
@@ -366,6 +391,10 @@ type VolumeParam struct {
 	VolumeType         string `json:"volumeType,omitempty"`
 	VolumeSizeInKb     string `json:"volumeSizeInKb,omitempty"`
 	Name               string `json:"name,omitempty"`
+}
+
+type SetVolumeSizeParam struct {
+  SizeInGB string `json:"sizeInGB,omitempty"`
 }
 
 type VolumeResp struct {

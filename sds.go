@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
@@ -30,6 +31,7 @@ func NewSdsEx(client *Client, sds *types.Sds) *Sds {
 
 func (pd *ProtectionDomain) CreateSds(
 	name string, ipList []string) (string, error) {
+	defer TimeSpent("CreateSds", time.Now())
 
 	sdsParam := &types.SdsParam{
 		Name:               name,
@@ -64,6 +66,7 @@ func (pd *ProtectionDomain) CreateSds(
 }
 
 func (pd *ProtectionDomain) GetSds() ([]types.Sds, error) {
+	defer TimeSpent("GetSds", time.Now())
 
 	path := fmt.Sprintf("/api/instances/ProtectionDomain::%v/relationships/Sds",
 		pd.ProtectionDomain.ID)
@@ -80,6 +83,7 @@ func (pd *ProtectionDomain) GetSds() ([]types.Sds, error) {
 
 func (pd *ProtectionDomain) FindSds(
 	field, value string) (*types.Sds, error) {
+	defer TimeSpent("FindSds", time.Now())
 
 	sdss, err := pd.GetSds()
 	if err != nil {

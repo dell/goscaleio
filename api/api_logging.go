@@ -35,7 +35,7 @@ func logRequest(
 	if err != nil {
 		return
 	}
-
+	/* #nosec G104 */
 	WriteIndented(w, buf)
 	fmt.Fprintln(w)
 
@@ -60,6 +60,7 @@ func logResponse(
 	}
 
 	bw := &bytes.Buffer{}
+	/* #nosec G104 */
 	WriteIndented(bw, buf)
 
 	scanner := bufio.NewScanner(bw)
@@ -186,7 +187,7 @@ func dumpRequest(req *http.Request, body bool) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	/* #nosec G104 */
 	io.WriteString(&b, "\r\n")
 
 	if req.Body != nil {
@@ -196,7 +197,9 @@ func dumpRequest(req *http.Request, body bool) ([]byte, error) {
 		}
 		_, err = io.Copy(dest, req.Body)
 		if chunked {
+			/* #nosec G104 */
 			dest.(io.Closer).Close()
+			/* #nosec G104 */
 			io.WriteString(&b, "\r\n")
 		}
 	}

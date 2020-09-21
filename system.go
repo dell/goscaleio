@@ -3,6 +3,7 @@ package goscaleio
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
@@ -21,6 +22,7 @@ func NewSystem(client *Client) *System {
 
 func (c *Client) FindSystem(
 	instanceID, name, href string) (*System, error) {
+	defer TimeSpent("FindSystem", time.Now())
 
 	systems, err := c.GetInstance(href)
 	if err != nil {
@@ -38,6 +40,7 @@ func (c *Client) FindSystem(
 }
 
 func (s *System) GetStatistics() (*types.Statistics, error) {
+	defer TimeSpent("GetStatistics", time.Now())
 
 	link, err := GetLink(s.System.Links,
 		"/api/System/relationship/Statistics")
@@ -57,6 +60,7 @@ func (s *System) GetStatistics() (*types.Statistics, error) {
 
 func (s *System) CreateSnapshotConsistencyGroup(
 	snapshotVolumesParam *types.SnapshotVolumesParam) (*types.SnapshotVolumesResp, error) {
+	defer TimeSpent("CreateSnapshotConsistencyGroup", time.Now())
 
 	link, err := GetLink(s.System.Links, "self")
 	if err != nil {

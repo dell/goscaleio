@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"reflect"
 	"strings"
+	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
@@ -24,6 +25,7 @@ func NewSdc(client *Client, sdc *types.Sdc) *Sdc {
 }
 
 func (s *System) GetSdc() ([]types.Sdc, error) {
+	defer TimeSpent("GetSdc", time.Now())
 
 	path := fmt.Sprintf("/api/instances/System::%v/relationships/Sdc",
 		s.System.ID)
@@ -39,6 +41,7 @@ func (s *System) GetSdc() ([]types.Sdc, error) {
 }
 
 func (s *System) FindSdc(field, value string) (*Sdc, error) {
+	defer TimeSpent("FindSdc", time.Now())
 
 	sdcs, err := s.GetSdc()
 	if err != nil {
@@ -56,24 +59,26 @@ func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	return nil, errors.New("Couldn't find SDC")
 }
 
-func (sdc *Sdc) GetStatistics() (*types.Statistics, error) {
+func (sdc *Sdc) GetStatistics() (*types.SdcStatistics, error) {
+	defer TimeSpent("GetStatistics", time.Now())
 
 	link, err := GetLink(sdc.Sdc.Links, "/api/Sdc/relationship/Statistics")
 	if err != nil {
 		return nil, err
 	}
 
-	var stats *types.Statistics
+	var stats types.SdcStatistics
 	err = sdc.client.getJSONWithRetry(
-		http.MethodGet, link.HREF, nil, stats)
+		http.MethodGet, link.HREF, nil, &stats)
 	if err != nil {
 		return nil, err
 	}
 
-	return stats, nil
+	return &stats, nil
 }
 
 func (sdc *Sdc) GetVolume() ([]*types.Volume, error) {
+	defer TimeSpent("GetVolume", time.Now())
 
 	link, err := GetLink(sdc.Sdc.Links, "/api/Sdc/relationship/Volume")
 	if err != nil {
@@ -90,7 +95,26 @@ func (sdc *Sdc) GetVolume() ([]*types.Volume, error) {
 	return vols, nil
 }
 
+func (sdc *Sdc) FindVolumes() ([]*Volume, error) {
+	defer TimeSpent("FindVolumes", time.Now())
+
+	var rlt []*Volume
+	vols, err := sdc.GetVolume()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range vols {
+		volClient := NewVolume(sdc.client)
+		volClient.Volume = v
+		rlt = append(rlt, volClient)
+	}
+
+	return rlt, nil
+}
+
 func GetSdcLocalGUID() (string, error) {
+	defer TimeSpent("GetSdcLocalGUID", time.Now())
 
 	// get sdc kernel guid
 	// /bin/emc/scaleio/drv_cfg --query_guid
@@ -108,6 +132,7 @@ func GetSdcLocalGUID() (string, error) {
 
 func (v *Volume) MapVolumeSdc(
 	mapVolumeSdcParam *types.MapVolumeSdcParam) error {
+	defer TimeSpent("MapVolumeSdc", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Volume::%s/action/addMappedSdc",
 		v.Volume.ID)
@@ -123,6 +148,7 @@ func (v *Volume) MapVolumeSdc(
 
 func (v *Volume) UnmapVolumeSdc(
 	unmapVolumeSdcParam *types.UnmapVolumeSdcParam) error {
+	defer TimeSpent("UnmapVolumeSdc", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Volume::%s/action/removeMappedSdc",
 		v.Volume.ID)
@@ -138,6 +164,7 @@ func (v *Volume) UnmapVolumeSdc(
 
 func (v *Volume) SetMappedSdcLimits(
 	setMappedSdcLimitsParam *types.SetMappedSdcLimitsParam) error {
+	defer TimeSpent("SetMappedSdcLimits", time.Now())
 
 	path := fmt.Sprintf(
 		"/api/instances/Volume::%s/action/setMappedSdcLimits",
