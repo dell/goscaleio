@@ -106,15 +106,12 @@ func WriteIndented(w io.Writer, b []byte) error {
 	return WriteIndentedN(w, b, 4)
 }
 
-
-
 var reqWriteExcludeHeaderDump = map[string]bool{
 	"Host":              true, // not in Header map anyway
 	"Transfer-Encoding": true,
 	"Trailer":           true,
 	"Authorization":     true,
 }
-
 
 func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 	if b == http.NoBody {
@@ -130,7 +127,6 @@ func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 	}
 	return ioutil.NopCloser(&buf), ioutil.NopCloser(bytes.NewReader(buf.Bytes())), nil
 }
-
 
 func dumpRequest(req *http.Request, body bool) ([]byte, error) {
 	var err error
@@ -210,8 +206,3 @@ func dumpRequest(req *http.Request, body bool) ([]byte, error) {
 	}
 	return b.Bytes(), nil
 }
-
-
-
-
-

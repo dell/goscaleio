@@ -48,11 +48,11 @@ func (s *System) FindSdc(field, value string) (*Sdc, error) {
 		return nil, err
 	}
 
-	for _, sdc := range sdcs {
+	for i, sdc := range sdcs {
 		valueOf := reflect.ValueOf(sdc)
 		switch {
 		case reflect.Indirect(valueOf).FieldByName(field).String() == value:
-			return NewSdc(s.client, &sdc), nil
+			return NewSdc(s.client, &sdcs[i]), nil
 		}
 	}
 

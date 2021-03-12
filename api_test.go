@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -135,5 +136,48 @@ func TestClientLogin(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatal("Expecting an error for bad Login, but did not")
+	}
+}
+
+type stubTypeWithMetaData struct{}
+
+func (s stubTypeWithMetaData) MetaData() http.Header {
+	h := make(http.Header)
+	h.Set("foo", "bar")
+	return h
+}
+
+func Test_addMetaData(t *testing.T) {
+	var tests = []struct {
+		name           string
+		givenHeader    map[string]string
+		expectedHeader map[string]string
+		body           interface{}
+	}{
+		{"nil header is a noop", nil, nil, nil},
+		{"nil body is a noop", nil, nil, nil},
+		{"header is updated", make(map[string]string), map[string]string{"Foo": "bar"}, stubTypeWithMetaData{}},
+		{"header is not updated", make(map[string]string), map[string]string{}, struct{}{}},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			addMetaData(tt.givenHeader, tt.body)
+
+			switch {
+			case tt.givenHeader == nil:
+				if tt.givenHeader != nil {
+					t.Errorf("(%s): expected %s, actual %s", tt.body, tt.expectedHeader, tt.givenHeader)
+				}
+			case tt.body == nil:
+				if len(tt.givenHeader) != 0 {
+					t.Errorf("(%s): expected %s, actual %s", tt.body, tt.expectedHeader, tt.givenHeader)
+				}
+			default:
+				if !reflect.DeepEqual(tt.expectedHeader, tt.givenHeader) {
+					t.Errorf("(%s): expected %s, actual %s", tt.body, tt.expectedHeader, tt.givenHeader)
+				}
+			}
+		})
 	}
 }

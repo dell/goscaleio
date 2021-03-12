@@ -27,11 +27,15 @@ func NewStoragePoolEx(client *Client, pool *types.StoragePool) *StoragePool {
 	}
 }
 
-func (pd *ProtectionDomain) CreateStoragePool(name string) (string, error) {
+func (pd *ProtectionDomain) CreateStoragePool(name string, mediaType string) (string, error) {
 
+	if mediaType == "" {
+		mediaType = "HDD"
+	}
 	storagePoolParam := &types.StoragePoolParam{
 		Name:               name,
 		ProtectionDomainID: pd.ProtectionDomain.ID,
+		MediaType:          mediaType,
 	}
 
 	path := fmt.Sprintf("/api/types/StoragePool/instances")
@@ -44,6 +48,32 @@ func (pd *ProtectionDomain) CreateStoragePool(name string) (string, error) {
 	}
 
 	return sp.ID, nil
+}
+
+// DeleteStoragePool will delete a storage pool
+func (pd *ProtectionDomain) DeleteStoragePool(name string) error {
+	// get the storage pool name
+	pool, err := pd.client.FindStoragePool("", name, "")
+	if err != nil {
+		return err
+	}
+
+	link, err := GetLink(pool.Links, "self")
+	if err != nil {
+		return err
+	}
+
+	storagePoolParam := &types.EmptyPayload{}
+
+	path := fmt.Sprintf("%v/action/removeStoragePool", link.HREF)
+
+	err = pd.client.getJSONWithRetry(
+		http.MethodPost, path, storagePoolParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (pd *ProtectionDomain) GetStoragePool(
