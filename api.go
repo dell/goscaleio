@@ -154,6 +154,7 @@ func (c *Client) getJSONWithRetry(
 	headers := make(map[string]string, 2)
 	headers[api.HeaderKeyAccept] = accHeader
 	headers[api.HeaderKeyContentType] = conHeader
+	addMetaData(headers, body)
 
 	err := c.api.DoWithHeaders(
 		context.Background(), method, uri, headers, body, resp)
@@ -201,6 +202,7 @@ func (c *Client) getStringWithRetry(
 	headers := make(map[string]string, 2)
 	headers[api.HeaderKeyAccept] = accHeader
 	headers[api.HeaderKeyContentType] = conHeader
+	addMetaData(headers, body)
 
 	checkResponse := func(resp *http.Response) (string, bool, error) {
 		defer resp.Body.Close()
@@ -377,5 +379,20 @@ func TimeSpent(functionName string, startTime time.Time) {
 	if ExternalTimeRecorder != nil {
 		endTime := time.Now()
 		ExternalTimeRecorder(functionName, endTime.Sub(startTime))
+	}
+}
+
+func addMetaData(headers map[string]string, body interface{}) {
+	if headers == nil || body == nil {
+		return
+	}
+	// If the body contains a MetaData method, extract the data
+	// and add as HTTP headers.
+	if vp, ok := interface{}(body).(interface {
+		MetaData() http.Header
+	}); ok {
+		for k := range vp.MetaData() {
+			headers[k] = vp.MetaData().Get(k)
+		}
 	}
 }

@@ -2,6 +2,8 @@ package goscaleio
 
 import (
 	"fmt"
+	"net/http"
+	"sync"
 )
 
 const errorWithDetails = "Error with details"
@@ -353,6 +355,7 @@ type StoragePoolParam struct {
 	ZeroPaddingEnabled       bool   `json:"zeroPaddingEnabled,omitempty"`
 	UseRmcache               bool   `json:"useRmcache,omitempty"`
 	RmcacheWriteHandlingMode string `json:"rmcacheWriteHandlingMode,omitempty"`
+	MediaType                string `json:"mediaType,omitempty"`
 }
 
 type StoragePoolResp struct {
@@ -385,16 +388,26 @@ type Volume struct {
 }
 
 type VolumeParam struct {
-	ProtectionDomainID string `json:"protectionDomainId,omitempty"`
-	StoragePoolID      string `json:"storagePoolId,omitempty"`
-	UseRmCache         string `json:"useRmcache,omitempty"`
-	VolumeType         string `json:"volumeType,omitempty"`
-	VolumeSizeInKb     string `json:"volumeSizeInKb,omitempty"`
-	Name               string `json:"name,omitempty"`
+	ProtectionDomainID string    `json:"protectionDomainId,omitempty"`
+	StoragePoolID      string    `json:"storagePoolId,omitempty"`
+	UseRmCache         string    `json:"useRmcache,omitempty"`
+	VolumeType         string    `json:"volumeType,omitempty"`
+	VolumeSizeInKb     string    `json:"volumeSizeInKb,omitempty"`
+	Name               string    `json:"name,omitempty"`
+	once               sync.Once // creates the metadata value once.
+	metadata           http.Header
+}
+
+// MetaData returns the metadata headers.
+func (vp *VolumeParam) MetaData() http.Header {
+	vp.once.Do(func() {
+		vp.metadata = make(http.Header)
+	})
+	return vp.metadata
 }
 
 type SetVolumeSizeParam struct {
-  SizeInGB string `json:"sizeInGB,omitempty"`
+	SizeInGB string `json:"sizeInGB,omitempty"`
 }
 
 type VolumeResp struct {
@@ -451,4 +464,7 @@ type VTree struct {
 
 type RemoveVolumeParam struct {
 	RemoveMode string `json:"removeMode"`
+}
+
+type EmptyPayload struct {
 }

@@ -20,6 +20,16 @@ func NewSystem(client *Client) *System {
 	}
 }
 
+func (c *Client) GetSystems() ([]*types.System, error) {
+	defer TimeSpent("GetSystems", time.Now())
+
+	systems, err := c.GetInstance("")
+	if err != nil {
+		return nil, fmt.Errorf("err: problem getting instances: %s", err)
+	}
+	return systems, nil
+}
+
 func (c *Client) FindSystem(
 	instanceID, name, href string) (*System, error) {
 	defer TimeSpent("FindSystem", time.Now())

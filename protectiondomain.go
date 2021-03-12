@@ -47,6 +47,32 @@ func (s *System) CreateProtectionDomain(name string) (string, error) {
 	return pd.ID, nil
 }
 
+// DeleteProtectionDomain will delete a protection domain
+func (s *System) DeleteProtectionDomain(name string) error {
+	// get the protection domain
+	domain, err := s.FindProtectionDomain("", name, "")
+	if err != nil {
+		return err
+	}
+
+	link, err := GetLink(domain.Links, "self")
+	if err != nil {
+		return err
+	}
+
+	protectionDomainParam := &types.EmptyPayload{}
+
+	path := fmt.Sprintf("%v/action/removeProtectionDomain", link.HREF)
+
+	err = s.client.getJSONWithRetry(
+		http.MethodPost, path, protectionDomainParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *System) GetProtectionDomain(
 	pdhref string) ([]*types.ProtectionDomain, error) {
 	defer TimeSpent("GetprotectionDomain", time.Now())
