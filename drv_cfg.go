@@ -17,6 +17,7 @@ const (
 	_IOCTLBase      = 'a'
 	_IOCTLQueryGUID = 14
 	_IOCTLQueryMDM  = 12
+	_IOCTLRescan    = 10
 	// IOCTLDevice is the default device to send queries to
 	IOCTLDevice = "/dev/scini"
 	mockGUID    = "9E56672F-2F4B-4A42-BFF4-88B6846FBFDA"
@@ -83,6 +84,31 @@ func DrvCfgQueryGUID() (string, error) {
 	u, err := uuid.Parse(g)
 	discoveredGUID := strings.ToUpper(u.String())
 	return discoveredGUID, nil
+}
+
+func DrvCfgQueryRescan() (string, error) {
+
+	f, err := os.Open(SDCDevice)
+	if err != nil {
+		return "", fmt.Errorf("Powerflex SDC is not installed")
+	}
+
+	defer func() {
+		_ = f.Close()
+	}()
+
+	opCode := _IO(_IOCTLBase, _IOCTLRescan)
+
+	var rc int64
+	// #nosec CWE-242, validated buffer is large enough to hold data
+	err = ioctl(f.Fd(), opCode, uintptr(unsafe.Pointer(&rc)))
+
+	if err != nil {
+		return "", fmt.Errorf("Rescan error: %v", err)
+	}
+	rc_code := strconv.FormatInt(rc, 10)
+
+	return rc_code, err
 }
 
 // internal, opaque to us, struct of IP addresses

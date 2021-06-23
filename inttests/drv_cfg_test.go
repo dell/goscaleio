@@ -99,3 +99,37 @@ func TestGetDrvCfgSystemsSDCNotInstalled(t *testing.T) {
 		assert.Equal(t, false, true, "Expected the SDC to report as not installed")
 	}
 }
+
+func TestGetDrvCfgQueryRescan(t *testing.T) {
+	goscaleio.SDCDevice = goscaleio.IOCTLDevice
+	rc, err := goscaleio.DrvCfgQueryRescan()
+
+	// The response depends on the installation state of the SDC
+	if goscaleio.DrvCfgIsSDCInstalled() {
+		// SDC is installed, we should get back a GUID and no error
+		assert.NotEmpty(t, rc)
+		assert.Nil(t, err)
+		assert.Equal(t, rc,"0","Device Rescan successfull")
+	} else {
+		// SDC is not installed, we should get an emptry string for GUID and an error
+		assert.Empty(t, rc)
+		assert.NotNil(t, err)
+		t.Skip("PowerFlex SDC is not installed. Cannot validate DrvCfg functionality")
+	}
+}
+
+
+
+// TestGetSrvCfgSystemsSDCNotInstalled will check the PowerFlex systems when the SDC is not installed
+func TestGetDrvCfgQueryRescanSDCNotInstalled(t *testing.T) {
+	goscaleio.SDCDevice = "/fff/dddddd/dddd"
+	systems, err := goscaleio.DrvCfgQueryRescan()
+
+	// SDC is not installed, should get no ConfiguredSystems and an error
+	assert.Empty(t, systems)
+	assert.NotNil(t, err)
+
+	if goscaleio.DrvCfgIsSDCInstalled() {
+		assert.Equal(t, false, true, "Expected the SDC to report as not installed")
+	}
+}
