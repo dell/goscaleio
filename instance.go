@@ -103,6 +103,7 @@ func (c *Client) FindVolumeID(volumename string) (string, error) {
 
 	volumeID, err := c.getStringWithRetry(http.MethodPost, path,
 		volumeQeryIdByKeyParam)
+	fmt.Printf("[FindVolumeID] volumeID: %+v\n", volumeID)
 	if err != nil {
 		return "", err
 	}

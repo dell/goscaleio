@@ -1,11 +1,18 @@
 package goscaleio
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"reflect"
+	"sync"
 	"testing"
+
+	v1 "github.com/dell/goscaleio/types/v1"
 )
 
 func setupClient(t *testing.T, hostAddr string) *Client {
@@ -179,5 +186,126 @@ func Test_addMetaData(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func Test_updateHeaders(t *testing.T) {
+	var wg sync.WaitGroup
+	for i := 0; i < 3; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			updateHeaders("3.5")
+		}()
+	}
+	wg.Wait()
+}
+
+func Test_getJSONWithRetry(t *testing.T) {
+	t.Run("retried request is similar to the original", func(t *testing.T) {
+		var (
+			paths     []string      // record the requested paths in order.
+			bodies    []string      // record the request bodies in order.
+			headers   []http.Header // record the headers in order.
+			callCount int           // how many times our endpoint was requested.
+		)
+		checkHeaders := []string{"Accept"} // only check these headers.
+
+		// mock a PowerFlex endpoint.
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Record the requested paths in order.
+			paths = append(paths, fmt.Sprintf("%s %s", r.Method, r.URL.Path))
+
+			switch r.URL.Path {
+			case "/testing":
+				callCount++
+				b := testReadAll(t, r.Body)
+				bodies = append(bodies, string(b))
+				headers = append(headers, testFilterHeaders(r.Header, checkHeaders))
+				// First request to error with HTTP 401  and trigger a login request.
+				if callCount == 1 {
+					w.WriteHeader(http.StatusUnauthorized)
+					testjsonEncode(t, w, testBuildError(http.StatusUnauthorized))
+				}
+			case "/api/login":
+				fmt.Fprintf(w, `"fakesessiontoken"`)
+			default:
+				t.Fatalf("unexpected path: %q", r.URL.Path)
+			}
+		}))
+		defer ts.Close()
+		c, err := NewClientWithArgs(ts.URL, "3.5", true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Call getJSONWithRetry with a dummy request and some
+		// map as the request body. We don't care about the
+		// response so pass in nil.
+		m := map[string]string{"foo": "bar"}
+		wantBody, err := json.Marshal(&m)
+		if err != nil {
+			t.Fatal(err)
+		}
+		c.getJSONWithRetry(http.MethodPost, "/testing", wantBody, nil)
+
+		// Assert the call order was as expected.
+		wantPaths := []string{"POST /testing", "GET /api/login", "POST /testing"}
+		if !reflect.DeepEqual(paths, wantPaths) {
+			t.Errorf("paths: got %+v, want %+v", paths, wantPaths)
+		}
+		// Assert the second body was the same as the first.
+		gotBodies, wantBodies := bodies[1], bodies[0]
+		if !reflect.DeepEqual(gotBodies, wantBodies) {
+			t.Errorf("retried body: got %q, want %q", gotBodies, wantBodies)
+		}
+		// Assert the headers for both requests were the same.
+		gotHeaders, wantHeaders := headers[1], headers[0]
+		if !reflect.DeepEqual(gotHeaders, wantHeaders) {
+			t.Errorf("retried headers: got %q, want %q", gotHeaders, wantHeaders)
+		}
+	})
+}
+
+// testFilterHeaders accepts a header and a list of header names
+// to filter on (inclusive).  The returned http.Header will include only
+// header fields with these names.
+func testFilterHeaders(h http.Header, filter []string) http.Header {
+	result := make(http.Header)
+	for _, v := range filter {
+		if _, ok := h[v]; !ok {
+			continue
+		}
+		result.Set(v, h.Get(v))
+	}
+	return result
+}
+
+func testBuildError(code int) error {
+	return &v1.Error{
+		Message:        "test message",
+		HTTPStatusCode: code,
+		ErrorCode:      0,
+		ErrorDetails:   nil,
+	}
+}
+
+func testReadAll(t *testing.T, rc io.ReadCloser) []byte {
+	t.Helper()
+	b, err := ioutil.ReadAll(rc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		rc.Close()
+	})
+	return b
+}
+
+func testjsonEncode(t *testing.T, w io.Writer, v interface{}) {
+	t.Helper()
+	err := json.NewEncoder(w).Encode(&v)
+	if err != nil {
+		t.Fatal(err)
 	}
 }

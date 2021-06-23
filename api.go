@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -21,6 +22,7 @@ import (
 )
 
 var (
+	mu        sync.Mutex // guards accHeader and conHeader
 	accHeader string
 	conHeader string
 
@@ -89,13 +91,19 @@ func (c *Client) updateVersion() error {
 	}
 	c.configConnect.Version = version
 
+	updateHeaders(version)
+
+	return nil
+}
+
+func updateHeaders(version string) {
+	mu.Lock()
+	defer mu.Unlock()
 	accHeader = api.HeaderValContentTypeJSON
 	if version != "" {
 		accHeader = accHeader + ";version=" + version
 	}
 	conHeader = accHeader
-
-	return nil
 }
 
 func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
@@ -171,9 +179,8 @@ func (c *Client) getJSONWithRetry(
 			if _, err := c.Authenticate(c.configConnect); err != nil {
 				return fmt.Errorf("Error Authenticating: %s", err)
 			}
-			return c.api.Do(
-				context.Background(),
-				method, uri, nil, resp)
+			return c.api.DoWithHeaders(
+				context.Background(), method, uri, headers, body, resp)
 		}
 	}
 	doLog(log.WithError(err).Error, "returning error")
@@ -189,8 +196,14 @@ func extractString(resp *http.Response) (string, error) {
 
 	s := string(bs)
 
-	s = strings.TrimRight(s, `"`)
+	// Remove any whitespace that might surround the JSON
+	// JSON tokens are separated by whitespace, but there is no specification
+	// determining what whitespace is to be expected so we have to prepare for the worst
+	// see: https://github.com/golang/go/issues/7767#issuecomment-66093559
+	s = strings.TrimSpace(s)
+
 	s = strings.TrimLeft(s, `"`)
+	s = strings.TrimRight(s, `"`)
 
 	return s, nil
 }
@@ -314,11 +327,7 @@ func NewClientWithArgs(
 		},
 	}
 
-	accHeader = api.HeaderValContentTypeJSON
-	if version != "" {
-		accHeader = accHeader + ";version=" + version
-	}
-	conHeader = accHeader
+	updateHeaders(version)
 
 	return client, nil
 }
