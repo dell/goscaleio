@@ -148,11 +148,12 @@ func New(
 		}
 	}
 
-	if opts.UseCerts {
+	if !opts.Insecure || opts.UseCerts {
 		pool, err := x509.SystemCertPool()
 		if err != nil {
 			return nil, errSysCerts
 		}
+
 		c.http.Transport = &http.Transport{
 			/* #nosec G402 */
 			TLSClientConfig: &tls.Config{
