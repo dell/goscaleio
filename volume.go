@@ -246,6 +246,18 @@ func (v *Volume) RemoveVolume(removeMode string) error {
 	return err
 }
 
+func (v *Volume) SetVolumeName(newName string) error {
+
+	path := fmt.Sprintf("/api/instances/Volume::%s/action/setVolumeName", v.Volume.ID)
+
+	payload := &types.SetVolumeNameParam{
+		NewName: newName,
+	}
+	err := v.client.getJSONWithRetry(
+		http.MethodPost, path, payload, nil)
+	return err
+}
+
 func (v *Volume) SetVolumeSize(sizeInGB string) error {
 
 	link, err := GetLink(v.Volume.Links, "self")
