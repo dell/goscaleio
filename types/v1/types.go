@@ -410,6 +410,10 @@ type SetVolumeSizeParam struct {
 	SizeInGB string `json:"sizeInGB,omitempty"`
 }
 
+type SetVolumeNameParam struct {
+	NewName string `json:"newName,omitempty"`
+}
+
 type VolumeResp struct {
 	ID string `json:"id"`
 }
