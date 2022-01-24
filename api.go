@@ -155,9 +155,10 @@ func basicAuth(username, password string) string {
 	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
-func (c *Client) getJSONWithRetry(
-	method, uri string,
-	body, resp interface{}) error {
+func (c *Client) getJSONWithRetry(method, uri string, body, resp interface{}) error {
+
+	mu.Lock()
+	defer mu.Unlock()
 
 	headers := make(map[string]string, 2)
 	headers[api.HeaderKeyAccept] = accHeader
