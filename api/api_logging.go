@@ -35,8 +35,11 @@ func logRequest(
 	if err != nil {
 		return
 	}
-	/* #nosec G104 */
-	WriteIndented(w, buf)
+
+	if err := WriteIndented(w, buf); err!= nil {
+		fmt.Printf("WriteIndented returned error: %s", err.Error())
+	}
+
 	fmt.Fprintln(w)
 
 	lf(log.Debug, w.String())
@@ -60,8 +63,11 @@ func logResponse(
 	}
 
 	bw := &bytes.Buffer{}
-	/* #nosec G104 */
-	WriteIndented(bw, buf)
+	
+	if err := WriteIndented(w, buf); err!= nil {
+                fmt.Printf("WriteIndented returned error: %s", err.Error())
+        }
+
 
 	scanner := bufio.NewScanner(bw)
 	for {
@@ -183,8 +189,10 @@ func dumpRequest(req *http.Request, body bool) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	/* #nosec G104 */
-	io.WriteString(&b, "\r\n")
+	
+	if _, err := io.WriteString(&b, "\r\n"); err!= nil {
+		fmt.Printf("io.WriteString returned error: %s", err.Error())
+	}
 
 	if req.Body != nil {
 		var dest io.Writer = &b
@@ -193,10 +201,14 @@ func dumpRequest(req *http.Request, body bool) ([]byte, error) {
 		}
 		_, err = io.Copy(dest, req.Body)
 		if chunked {
-			/* #nosec G104 */
-			dest.(io.Closer).Close()
-			/* #nosec G104 */
-			io.WriteString(&b, "\r\n")
+			if err := dest.(io.Closer).Close(); err!= nil {
+				fmt.Printf("io.Closer.Close() returned error: %s", err.Error())
+			}
+
+			if _, err := io.WriteString(&b, "\r\n"); err!= nil {
+                		fmt.Printf("io.WriteString returned error: %s", err.Error())
+        		}
+
 		}
 	}
 
