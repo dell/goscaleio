@@ -44,7 +44,6 @@ func checkAPIErr(t *testing.T, err error) {
 }
 
 func randString(n int) string {
-	//rand.Seed(time.Now().UnixNano())
 	b := make([]byte, n)
 	for i := range b {
 		randomInt, _ := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
