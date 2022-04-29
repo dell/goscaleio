@@ -19,8 +19,8 @@
 package inttests
 
 import (
-	"fmt"
 	"crypto/rand"
+	"fmt"
 	"math/big"
 	"testing"
 )
@@ -47,7 +47,7 @@ func randString(n int) string {
 	//rand.Seed(time.Now().UnixNano())
 	b := make([]byte, n)
 	for i := range b {
-		randomInt, _ := rand.Int(rand.Reader, big.NewInt( int64(len(letters))))
+		randomInt, _ := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
 		b[i] = letters[randomInt.Int64()]
 	}
 	return string(b)
