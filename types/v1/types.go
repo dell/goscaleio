@@ -127,7 +127,7 @@ type Statistics struct {
 	DegradedFailedVacInKb                    int `json:"degradedFailedVacInKb"`
 	NumOfSnapshots                           int `json:"numOfSnapshots"`
 	RebalanceCapacityInKb                    int `json:"rebalanceCapacityInKb"`
-	FwdRebuildReadBwc                        BWC `json:"fwdRebuildReadBwc"`
+	fwdRebuildReadBwc                        BWC `json:"fwdRebuildReadBwc"`
 	NumOfSdc                                 int `json:"numOfSdc"`
 	ActiveMovingInFwdRebuildJobs             int `json:"activeMovingInFwdRebuildJobs"`
 	NumOfVtrees                              int `json:"numOfVtrees"`
