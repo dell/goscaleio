@@ -8,12 +8,14 @@ import (
 
 const errorWithDetails = "Error with details"
 
+// ErrorMessageDetails defines contents of an error msg
 type ErrorMessageDetails struct {
 	Error        string `json:"error"`
 	ReturnCode   int    `json:"rc"`
 	ErrorMessage string `json:"errorMessage"`
 }
 
+// Error struct defines the structure of an error
 type Error struct {
 	Message        string                `json:"message"`
 	HTTPStatusCode int                   `json:"httpStatusCode"`
@@ -45,6 +47,7 @@ func (e Error) Error() string {
 // 	Link []*types.Link `xml:"Link"`
 // }
 
+// System defines struct of PFlex array
 type System struct {
 	MdmMode                               string   `json:"mdmMode"`
 	MdmClusterState                       string   `json:"mdmClusterState"`
@@ -74,17 +77,20 @@ type System struct {
 	Links                                 []*Link  `json:"links"`
 }
 
+// Link defines struct of Link
 type Link struct {
 	Rel  string `json:"rel"`
 	HREF string `json:"href"`
 }
 
+// BWC defines struct of BWC
 type BWC struct {
 	TotalWeightInKb int `json:"totalWeightInKb"`
 	NumOccured      int `json:"numOccured"`
 	NumSeconds      int `json:"numSeconds"`
 }
 
+// Statistics defines struct of Statistics for Pflex Array
 type Statistics struct {
 	PrimaryReadFromDevBwc                    BWC `json:"primaryReadFromDevBwc"`
 	NumOfStoragePools                        int `json:"numOfStoragePools"`
@@ -121,7 +127,7 @@ type Statistics struct {
 	DegradedFailedVacInKb                    int `json:"degradedFailedVacInKb"`
 	NumOfSnapshots                           int `json:"numOfSnapshots"`
 	RebalanceCapacityInKb                    int `json:"rebalanceCapacityInKb"`
-	fwdRebuildReadBwc                        BWC `json:"fwdRebuildReadBwc"`
+	FwdRebuildReadBwc                        BWC `json:"fwdRebuildReadBwc"`
 	NumOfSdc                                 int `json:"numOfSdc"`
 	ActiveMovingInFwdRebuildJobs             int `json:"activeMovingInFwdRebuildJobs"`
 	NumOfVtrees                              int `json:"numOfVtrees"`
@@ -166,6 +172,7 @@ type Statistics struct {
 	VolumeAddressSpaceInKb                   int `json:"volumeAddressSpaceInKb"`
 }
 
+// SdcStatistics defines struct of Statistics for PFlex SDC
 type SdcStatistics struct {
 	UserDataReadBwc         BWC      `json:"userDataReadBwc"`
 	UserDataWriteBwc        BWC      `json:"userDataWriteBwc"`
@@ -177,6 +184,7 @@ type SdcStatistics struct {
 	NumOfMappedVolumes      int      `json:"numOfMappedVolumes"`
 }
 
+// VolumeStatistics defines struct of Statistics for PFlex volume
 type VolumeStatistics struct {
 	UserDataReadBwc         BWC      `json:"userDataReadBwc"`
 	UserDataWriteBwc        BWC      `json:"userDataWriteBwc"`
@@ -188,6 +196,7 @@ type VolumeStatistics struct {
 	NumOfMappedSdcs         int      `json:"numOfMappedSdcs"`
 }
 
+// User defines struct of User for PFlex array
 type User struct {
 	SystemID              string  `json:"systemId"`
 	UserRole              string  `json:"userRole"`
@@ -197,6 +206,7 @@ type User struct {
 	Links                 []*Link `json:"links"`
 }
 
+// ScsiInitiator defines struct for ScsiInitiator
 type ScsiInitiator struct {
 	Name     string  `json:"name"`
 	IQN      string  `json:"iqn"`
@@ -204,6 +214,7 @@ type ScsiInitiator struct {
 	Links    []*Link `json:"links"`
 }
 
+// ProtectionDomain defines struct for PFlex ProtectionDomain
 type ProtectionDomain struct {
 	SystemID                          string  `json:"systemId"`
 	RebuildNetworkThrottlingInKbps    int     `json:"rebuildNetworkThrottlingInKbps"`
@@ -218,14 +229,17 @@ type ProtectionDomain struct {
 	Links                             []*Link `json:"links"`
 }
 
+// ProtectionDomainParam defines struct for ProtectionDomainParam
 type ProtectionDomainParam struct {
 	Name string `json:"name"`
 }
 
+// ProtectionDomainResp defines struct for ProtectionDomainResp
 type ProtectionDomainResp struct {
 	ID string `json:"id"`
 }
 
+// Sdc defines struct for PFlex Sdc
 type Sdc struct {
 	SystemID           string  `json:"systemId"`
 	SdcApproved        bool    `json:"sdcApproved"`
@@ -238,15 +252,18 @@ type Sdc struct {
 	Links              []*Link `json:"links"`
 }
 
+// SdsIp defines struct for SdsIp
 type SdsIp struct {
 	IP   string `json:"ip"`
 	Role string `json:"role"`
 }
 
+// SdsIpList defines struct for SdsIpList
 type SdsIpList struct {
 	SdsIP SdsIp `json:"SdsIp"`
 }
 
+// Sds defines struct for Sds
 type Sds struct {
 	ID                           string       `json:"id"`
 	Name                         string       `json:"name,omitempty"`
@@ -266,12 +283,14 @@ type Sds struct {
 	RmcacheMemoryAllocationState string       `json:"RmcacheMemoryAllocationState,omitempty"`
 }
 
+// DeviceInfo defines struct for DeviceInfo
 type DeviceInfo struct {
 	DevicePath    string `json:"devicePath"`
 	StoragePoolID string `json:"storagePoolId"`
 	DeviceName    string `json:"deviceName,omitempty"`
 }
 
+// SdsParam defines struct for SdsParam
 type SdsParam struct {
 	Name               string        `json:"name,omitempty"`
 	IPList             []*SdsIpList  `json:"sdsIpList"`
@@ -289,10 +308,12 @@ type SdsParam struct {
 	DeviceTestMode     string        `json:"deviceTestMode,omitempty"`
 }
 
+// SdsResp defines struct for SdsResp
 type SdsResp struct {
 	ID string `json:"id"`
 }
 
+// Device defines struct for Device
 type Device struct {
 	ID                     string `json:"id,omitempty"`
 	Name                   string `json:"name,omitempty"`
@@ -306,6 +327,7 @@ type Device struct {
 	SdsID                  string `json:"sdsId"`
 }
 
+// DeviceParam defines struct for DeviceParam
 type DeviceParam struct {
 	Name                  string `json:"name,omitempty"`
 	DeviceCurrentPathname string `json:"deviceCurrentPathname"`
@@ -316,10 +338,12 @@ type DeviceParam struct {
 	TestMode              string `json:"testMode,omitempty"`
 }
 
+// DeviceResp defines struct for DeviceParam
 type DeviceResp struct {
 	ID string `json:"id"`
 }
 
+// StoragePool defines struct for PFlex StoragePool
 type StoragePool struct {
 	ProtectionDomainID                               string  `json:"protectionDomainId"`
 	RebalanceioPriorityPolicy                        string  `json:"rebalanceIoPriorityPolicy"`
@@ -346,6 +370,7 @@ type StoragePool struct {
 	Links                                            []*Link `json:"links"`
 }
 
+// StoragePoolParam defines struct for StoragePoolParam
 type StoragePoolParam struct {
 	Name                     string `json:"name"`
 	SparePercentage          int    `json:"sparePercentage,omitempty"`
@@ -358,10 +383,12 @@ type StoragePoolParam struct {
 	MediaType                string `json:"mediaType,omitempty"`
 }
 
+// StoragePoolResp defines struct for StoragePoolResp
 type StoragePoolResp struct {
 	ID string `json:"id"`
 }
 
+// MappedSdcInfo defines struct for MappedSdcInfo
 type MappedSdcInfo struct {
 	SdcID         string `json:"sdcId"`
 	SdcIP         string `json:"sdcIp"`
@@ -369,6 +396,7 @@ type MappedSdcInfo struct {
 	LimitBwInMbps int    `json:"limitBwInMbps"`
 }
 
+// Volume defines struct for Volume
 type Volume struct {
 	StoragePoolID           string           `json:"storagePoolId"`
 	UseRmCache              bool             `json:"useRmcache"`
@@ -387,6 +415,7 @@ type Volume struct {
 	Links                   []*Link          `json:"links"`
 }
 
+// VolumeParam defines struct for VolumeParam
 type VolumeParam struct {
 	ProtectionDomainID string    `json:"protectionDomainId,omitempty"`
 	StoragePoolID      string    `json:"storagePoolId,omitempty"`
@@ -406,58 +435,70 @@ func (vp *VolumeParam) MetaData() http.Header {
 	return vp.metadata
 }
 
+// SetVolumeSizeParam defines struct for SetVolumeSizeParam
 type SetVolumeSizeParam struct {
 	SizeInGB string `json:"sizeInGB,omitempty"`
 }
 
+// SetVolumeNameParam defines struct for SetVolumeNameParam
 type SetVolumeNameParam struct {
 	NewName string `json:"newName,omitempty"`
 }
 
+// VolumeResp defines struct for SetVolumeNameParam
 type VolumeResp struct {
 	ID string `json:"id"`
 }
 
+// VolumeQeryIdByKeyParam defines struct for VolumeQeryIdByKeyParam
 type VolumeQeryIdByKeyParam struct {
 	Name string `json:"name"`
 }
 
+// VolumeQeryBySelectedIdsParam defines struct for VolumeQeryBySelectedIdsParam
 type VolumeQeryBySelectedIdsParam struct {
 	IDs []string `json:"ids"`
 }
 
+// MapVolumeSdcParam defines struct for MapVolumeSdcParam
 type MapVolumeSdcParam struct {
 	SdcID                 string `json:"sdcId,omitempty"`
 	AllowMultipleMappings string `json:"allowMultipleMappings,omitempty"`
 	AllSdcs               string `json:"allSdcs,omitempty"`
 }
 
+// UnmapVolumeSdcParam defines struct for UnmapVolumeSdcParam
 type UnmapVolumeSdcParam struct {
 	SdcID                string `json:"sdcId,omitempty"`
 	IgnoreScsiInitiators string `json:"ignoreScsiInitiators,omitempty"`
 	AllSdcs              string `json:"allSdcs,omitempty"`
 }
 
+// SetMappedSdcLimitsParam defines struct for SetMappedSdcLimitsParam
 type SetMappedSdcLimitsParam struct {
 	SdcID                string `json:"sdcId,omitempty"`
 	BandwidthLimitInKbps string `json:"bandwidthLimitInKbps,omitempty"`
 	IopsLimit            string `json:"iopsLimit,omitempty"`
 }
 
+// SnapshotDef defines struct for SnapshotDef
 type SnapshotDef struct {
 	VolumeID     string `json:"volumeId,omitempty"`
 	SnapshotName string `json:"snapshotName,omitempty"`
 }
 
+// SnapshotVolumesParam defines struct for SnapshotVolumesParam
 type SnapshotVolumesParam struct {
 	SnapshotDefs []*SnapshotDef `json:"snapshotDefs"`
 }
 
+// SnapshotVolumesResp defines struct for SnapshotVolumesResp
 type SnapshotVolumesResp struct {
 	VolumeIDList    []string `json:"volumeIdList"`
 	SnapshotGroupID string   `json:"snapshotGroupId"`
 }
 
+// VTree defines struct for VTree
 type VTree struct {
 	ID            string  `json:"id"`
 	Name          string  `json:"name"`
@@ -466,9 +507,11 @@ type VTree struct {
 	Links         []*Link `json:"links"`
 }
 
+// RemoveVolumeParam defines struct for RemoveVolumeParam
 type RemoveVolumeParam struct {
 	RemoveMode string `json:"removeMode"`
 }
 
+// EmptyPayload defines struct for EmptyPayload
 type EmptyPayload struct {
 }
