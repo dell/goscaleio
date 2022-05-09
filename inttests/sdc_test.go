@@ -73,7 +73,7 @@ func TestGetSdcByAttribute(t *testing.T) {
 	assert.NotNil(t, found)
 	assert.Equal(t, Sdc[0].Sdc.ID, found.Sdc.ID)
 
-	found, err = system.FindSdc("SdcGuid", Sdc[0].Sdc.SdcGUID)
+	found, err = system.FindSdc("SdcGUID", Sdc[0].Sdc.SdcGUID)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, Sdc[0].Sdc.SdcGUID, found.Sdc.SdcGUID)
