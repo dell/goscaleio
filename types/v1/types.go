@@ -450,8 +450,8 @@ type VolumeResp struct {
 	ID string `json:"id"`
 }
 
-// VolumeQeryIdByKeyParam defines struct for VolumeQeryIdByKeyParam
-type VolumeQeryIdByKeyParam struct {
+// VolumeQeryIDByKeyParam defines struct for VolumeQeryIDByKeyParam
+type VolumeQeryIDByKeyParam struct {
 	Name string `json:"name"`
 }
 

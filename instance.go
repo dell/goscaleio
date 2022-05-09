@@ -98,14 +98,14 @@ func (c *Client) GetVolume(
 func (c *Client) FindVolumeID(volumename string) (string, error) {
 	defer TimeSpent("FindVolumeID", time.Now())
 
-	volumeQeryIdByKeyParam := &types.VolumeQeryIdByKeyParam{
+	volumeQeryIDByKeyParam := &types.VolumeQeryIDByKeyParam{
 		Name: volumename,
 	}
 
 	path := fmt.Sprintf("/api/types/Volume/instances/action/queryIdByKey")
 
 	volumeID, err := c.getStringWithRetry(http.MethodPost, path,
-		volumeQeryIdByKeyParam)
+		volumeQeryIDByKeyParam)
 	fmt.Printf("[FindVolumeID] volumeID: %+v\n", volumeID)
 	if err != nil {
 		return "", err

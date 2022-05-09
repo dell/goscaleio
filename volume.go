@@ -105,14 +105,14 @@ func (sp *StoragePool) GetVolume(
 func (sp *StoragePool) FindVolumeID(volumename string) (string, error) {
 	defer TimeSpent("FindVolumeID", time.Now())
 
-	volumeQeryIdByKeyParam := &types.VolumeQeryIdByKeyParam{
+	volumeQeryIDByKeyParam := &types.VolumeQeryIDByKeyParam{
 		Name: volumename,
 	}
 
 	path := fmt.Sprintf("/api/types/Volume/instances/action/queryIdByKey")
 
 	volumeID, err := sp.client.getStringWithRetry(
-		http.MethodPost, path, volumeQeryIdByKeyParam)
+		http.MethodPost, path, volumeQeryIDByKeyParam)
 	if err != nil {
 		return "", err
 	}
