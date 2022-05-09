@@ -132,7 +132,7 @@ func (pd *ProtectionDomain) FindStoragePool(
 
 }
 
-// GetStatistics returns statistics 
+// GetStatistics returns statistics
 func (sp *StoragePool) GetStatistics() (*types.Statistics, error) {
 
 	link, err := GetLink(sp.StoragePool.Links,

@@ -12,7 +12,6 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
-
 // Sdc defines struct for Sdc
 type Sdc struct {
 	Sdc    *types.Sdc
@@ -64,7 +63,7 @@ func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	return nil, errors.New("Couldn't find SDC")
 }
 
-// GetStatistics returns a Sdc statistcs 
+// GetStatistics returns a Sdc statistcs
 func (sdc *Sdc) GetStatistics() (*types.SdcStatistics, error) {
 	defer TimeSpent("GetStatistics", time.Now())
 
@@ -83,7 +82,7 @@ func (sdc *Sdc) GetStatistics() (*types.SdcStatistics, error) {
 	return &stats, nil
 }
 
-// GetVolume returns a volume 
+// GetVolume returns a volume
 func (sdc *Sdc) GetVolume() ([]*types.Volume, error) {
 	defer TimeSpent("GetVolume", time.Now())
 
@@ -173,7 +172,7 @@ func (v *Volume) UnmapVolumeSdc(
 	return nil
 }
 
-// SetMappedSdcLimits sets Sdc mapped limits 
+// SetMappedSdcLimits sets Sdc mapped limits
 func (v *Volume) SetMappedSdcLimits(
 	setMappedSdcLimitsParam *types.SetMappedSdcLimitsParam) error {
 	defer TimeSpent("SetMappedSdcLimits", time.Now())

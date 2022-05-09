@@ -86,7 +86,7 @@ func DrvCfgQueryGUID() (string, error) {
 	return discoveredGUID, nil
 }
 
-// DrvCfgQueryRescan preforms a rescan 
+// DrvCfgQueryRescan preforms a rescan
 func DrvCfgQueryRescan() (string, error) {
 
 	f, err := os.Open(SDCDevice)

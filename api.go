@@ -112,7 +112,7 @@ func updateHeaders(version string) {
 	conHeader = accHeader
 }
 
-// Authenticate controls authentication to client 
+// Authenticate controls authentication to client
 func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
 
 	configConnect.Version = c.configConnect.Version

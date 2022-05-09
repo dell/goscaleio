@@ -40,7 +40,7 @@ func NewVolume(client *Client) *Volume {
 	}
 }
 
-// GetVolume returns a volume 
+// GetVolume returns a volume
 func (sp *StoragePool) GetVolume(
 	volumehref, volumeid, ancestorvolumeid, volumename string,
 	getSnapshots bool) ([]*types.Volume, error) {
@@ -142,7 +142,6 @@ func GetLocalVolumeMap() (mappedVolumes []*SdcMappedVolume, err error) {
 	return getVolumeMapping(`\w*`, `\w*`)
 }
 
-
 func getVolumeMapping(sysID string, volID string) (mappedVolumes []*SdcMappedVolume, err error) {
 	defer TimeSpent("GetLocalVolumeMap", time.Now())
 
@@ -175,7 +174,7 @@ func getVolumeMapping(sysID string, volID string) (mappedVolumes []*SdcMappedVol
 	return mappedVolumes, nil
 }
 
-// CreateVolume creates a volume 
+// CreateVolume creates a volume
 func (sp *StoragePool) CreateVolume(
 	volume *types.VolumeParam) (*types.VolumeResp, error) {
 	defer TimeSpent("CreateVolume", time.Now())
@@ -256,7 +255,7 @@ func (v *Volume) RemoveVolume(removeMode string) error {
 	return err
 }
 
-// SetVolumeName sets a volume's name 
+// SetVolumeName sets a volume's name
 func (v *Volume) SetVolumeName(newName string) error {
 
 	path := fmt.Sprintf("/api/instances/Volume::%s/action/setVolumeName", v.Volume.ID)

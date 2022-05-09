@@ -22,7 +22,7 @@ func NewSystem(client *Client) *System {
 	}
 }
 
-// GetSystems returns systems 
+// GetSystems returns systems
 func (c *Client) GetSystems() ([]*types.System, error) {
 	defer TimeSpent("GetSystems", time.Now())
 
@@ -53,7 +53,7 @@ func (c *Client) FindSystem(
 	return nil, fmt.Errorf("err: systemid or systemname not found")
 }
 
-// GetStatistics returns system statistics 
+// GetStatistics returns system statistics
 func (s *System) GetStatistics() (*types.Statistics, error) {
 	defer TimeSpent("GetStatistics", time.Now())
 

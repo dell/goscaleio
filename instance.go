@@ -140,7 +140,7 @@ func (c *Client) CreateVolume(
 	return vol, nil
 }
 
-// GetStoragePool returns a storagepool 
+// GetStoragePool returns a storagepool
 func (c *Client) GetStoragePool(
 	storagepoolhref string) ([]*types.StoragePool, error) {
 	defer TimeSpent("GetStoragePool", time.Now())

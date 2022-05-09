@@ -127,7 +127,7 @@ type Statistics struct {
 	DegradedFailedVacInKb                    int `json:"degradedFailedVacInKb"`
 	NumOfSnapshots                           int `json:"numOfSnapshots"`
 	RebalanceCapacityInKb                    int `json:"rebalanceCapacityInKb"`
-	fwdRebuildReadBwc                        BWC `json:"fwdRebuildReadBwc"`
+	FwdRebuildReadBwc                        BWC `json:"fwdRebuildReadBwc"`
 	NumOfSdc                                 int `json:"numOfSdc"`
 	ActiveMovingInFwdRebuildJobs             int `json:"activeMovingInFwdRebuildJobs"`
 	NumOfVtrees                              int `json:"numOfVtrees"`
@@ -243,24 +243,24 @@ type ProtectionDomainResp struct {
 type Sdc struct {
 	SystemID           string  `json:"systemId"`
 	SdcApproved        bool    `json:"sdcApproved"`
-	SdcIp              string  `json:"SdcIp"`
-	OnVmWare           bool    `json:"onVmWare"`
-	SdcGuid            string  `json:"sdcGuid"`
+	SdcIP              string  `json:"SdcIp"`
+	OnVMWare           bool    `json:"onVmWare"`
+	SdcGUID            string  `json:"sdcGuid"`
 	MdmConnectionState string  `json:"mdmConnectionState"`
 	Name               string  `json:"name"`
 	ID                 string  `json:"id"`
 	Links              []*Link `json:"links"`
 }
 
-// SdsIp defines struct for SdsIp
-type SdsIp struct {
+// SdsIP defines struct for SdsIP
+type SdsIP struct {
 	IP   string `json:"ip"`
 	Role string `json:"role"`
 }
 
-// SdsIpList defines struct for SdsIpList
-type SdsIpList struct {
-	SdsIP SdsIp `json:"SdsIp"`
+// SdsIPList defines struct for SdsIPList
+type SdsIPList struct {
+	SdsIP SdsIP `json:"SdsIp"`
 }
 
 // Sds defines struct for Sds
@@ -268,7 +268,7 @@ type Sds struct {
 	ID                           string       `json:"id"`
 	Name                         string       `json:"name,omitempty"`
 	ProtectionDomainID           string       `json:"protectionDomainId"`
-	IPList                       []*SdsIpList `json:"ipList"`
+	IPList                       []*SdsIPList `json:"ipList"`
 	Port                         int          `json:"port,omitempty"`
 	SdsState                     string       `json:"sdsState"`
 	MembershipState              string       `json:"membershipState"`
@@ -293,7 +293,7 @@ type DeviceInfo struct {
 // SdsParam defines struct for SdsParam
 type SdsParam struct {
 	Name               string        `json:"name,omitempty"`
-	IPList             []*SdsIpList  `json:"sdsIpList"`
+	IPList             []*SdsIPList  `json:"sdsIpList"`
 	Port               int           `json:"sdsPort,omitempty"`
 	DrlMode            string        `json:"drlMode,omitempty"`
 	RmcacheEnabled     bool          `json:"rmcacheEnabled,omitempty"`

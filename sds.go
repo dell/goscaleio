@@ -45,14 +45,14 @@ func (pd *ProtectionDomain) CreateSds(
 	if len(ipList) == 0 {
 		return "", fmt.Errorf("Must provide at least 1 SDS IP")
 	} else if len(ipList) == 1 {
-		sdsIP := types.SdsIp{IP: ipList[0], Role: "all"}
-		sdsIPList := &types.SdsIpList{SdsIP: sdsIP}
+		sdsIP := types.SdsIP{IP: ipList[0], Role: "all"}
+		sdsIPList := &types.SdsIPList{SdsIP: sdsIP}
 		sdsParam.IPList = append(sdsParam.IPList, sdsIPList)
 	} else if len(ipList) >= 2 {
-		sdsIP1 := types.SdsIp{IP: ipList[0], Role: "sdcOnly"}
-		sdsIP2 := types.SdsIp{IP: ipList[1], Role: "sdsOnly"}
-		sdsIPList1 := &types.SdsIpList{SdsIP: sdsIP1}
-		sdsIPList2 := &types.SdsIpList{SdsIP: sdsIP2}
+		sdsIP1 := types.SdsIP{IP: ipList[0], Role: "sdcOnly"}
+		sdsIP2 := types.SdsIP{IP: ipList[1], Role: "sdsOnly"}
+		sdsIPList1 := &types.SdsIPList{SdsIP: sdsIP1}
+		sdsIPList2 := &types.SdsIPList{SdsIP: sdsIP2}
 		sdsParam.IPList = append(sdsParam.IPList, sdsIPList1)
 		sdsParam.IPList = append(sdsParam.IPList, sdsIPList2)
 	}
