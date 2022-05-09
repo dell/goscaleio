@@ -8,6 +8,7 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// GetUser returns user
 func (s *System) GetUser() ([]types.User, error) {
 	defer TimeSpent("GetUser", time.Now())
 

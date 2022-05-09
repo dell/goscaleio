@@ -12,11 +12,14 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+
+// Sdc defines struct for Sdc
 type Sdc struct {
 	Sdc    *types.Sdc
 	client *Client
 }
 
+// NewSdc returns a new Sdc
 func NewSdc(client *Client, sdc *types.Sdc) *Sdc {
 	return &Sdc{
 		Sdc:    sdc,
@@ -24,6 +27,7 @@ func NewSdc(client *Client, sdc *types.Sdc) *Sdc {
 	}
 }
 
+// GetSdc returns a Sdc
 func (s *System) GetSdc() ([]types.Sdc, error) {
 	defer TimeSpent("GetSdc", time.Now())
 
@@ -40,6 +44,7 @@ func (s *System) GetSdc() ([]types.Sdc, error) {
 	return sdcs, nil
 }
 
+// FindSdc returns a Sdc
 func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	defer TimeSpent("FindSdc", time.Now())
 
@@ -59,6 +64,7 @@ func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	return nil, errors.New("Couldn't find SDC")
 }
 
+// GetStatistics returns a Sdc statistcs 
 func (sdc *Sdc) GetStatistics() (*types.SdcStatistics, error) {
 	defer TimeSpent("GetStatistics", time.Now())
 
@@ -77,6 +83,7 @@ func (sdc *Sdc) GetStatistics() (*types.SdcStatistics, error) {
 	return &stats, nil
 }
 
+// GetVolume returns a volume 
 func (sdc *Sdc) GetVolume() ([]*types.Volume, error) {
 	defer TimeSpent("GetVolume", time.Now())
 
@@ -95,6 +102,7 @@ func (sdc *Sdc) GetVolume() ([]*types.Volume, error) {
 	return vols, nil
 }
 
+// FindVolumes returns volumes
 func (sdc *Sdc) FindVolumes() ([]*Volume, error) {
 	defer TimeSpent("FindVolumes", time.Now())
 
@@ -113,6 +121,7 @@ func (sdc *Sdc) FindVolumes() ([]*Volume, error) {
 	return rlt, nil
 }
 
+// GetSdcLocalGUID returns GUID
 func GetSdcLocalGUID() (string, error) {
 	defer TimeSpent("GetSdcLocalGUID", time.Now())
 
@@ -130,6 +139,7 @@ func GetSdcLocalGUID() (string, error) {
 	return sdcGUID, nil
 }
 
+// MapVolumeSdc maps a volume to Sdc
 func (v *Volume) MapVolumeSdc(
 	mapVolumeSdcParam *types.MapVolumeSdcParam) error {
 	defer TimeSpent("MapVolumeSdc", time.Now())
@@ -146,6 +156,7 @@ func (v *Volume) MapVolumeSdc(
 	return nil
 }
 
+// UnmapVolumeSdc unmaps a volume from Sdc
 func (v *Volume) UnmapVolumeSdc(
 	unmapVolumeSdcParam *types.UnmapVolumeSdcParam) error {
 	defer TimeSpent("UnmapVolumeSdc", time.Now())
@@ -162,6 +173,7 @@ func (v *Volume) UnmapVolumeSdc(
 	return nil
 }
 
+// SetMappedSdcLimits sets Sdc mapped limits 
 func (v *Volume) SetMappedSdcLimits(
 	setMappedSdcLimitsParam *types.SetMappedSdcLimitsParam) error {
 	defer TimeSpent("SetMappedSdcLimits", time.Now())

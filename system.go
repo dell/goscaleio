@@ -8,11 +8,13 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// System defines struct for System
 type System struct {
 	System *types.System
 	client *Client
 }
 
+// NewSystem returns a new system
 func NewSystem(client *Client) *System {
 	return &System{
 		System: &types.System{},
@@ -20,6 +22,7 @@ func NewSystem(client *Client) *System {
 	}
 }
 
+// GetSystems returns systems 
 func (c *Client) GetSystems() ([]*types.System, error) {
 	defer TimeSpent("GetSystems", time.Now())
 
@@ -30,6 +33,7 @@ func (c *Client) GetSystems() ([]*types.System, error) {
 	return systems, nil
 }
 
+// FindSystem returns a system based on ID or name
 func (c *Client) FindSystem(
 	instanceID, name, href string) (*System, error) {
 	defer TimeSpent("FindSystem", time.Now())
@@ -49,6 +53,7 @@ func (c *Client) FindSystem(
 	return nil, fmt.Errorf("err: systemid or systemname not found")
 }
 
+// GetStatistics returns system statistics 
 func (s *System) GetStatistics() (*types.Statistics, error) {
 	defer TimeSpent("GetStatistics", time.Now())
 
@@ -68,6 +73,7 @@ func (s *System) GetStatistics() (*types.Statistics, error) {
 	return &stats, nil
 }
 
+// CreateSnapshotConsistencyGroup creates a snapshot consistency group
 func (s *System) CreateSnapshotConsistencyGroup(
 	snapshotVolumesParam *types.SnapshotVolumesParam) (*types.SnapshotVolumesResp, error) {
 	defer TimeSpent("CreateSnapshotConsistencyGroup", time.Now())

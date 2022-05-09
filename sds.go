@@ -10,11 +10,13 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// Sds defines struct for Sds
 type Sds struct {
 	Sds    *types.Sds
 	client *Client
 }
 
+// NewSds returns a new Sds
 func NewSds(client *Client) *Sds {
 	return &Sds{
 		Sds:    &types.Sds{},
@@ -22,6 +24,7 @@ func NewSds(client *Client) *Sds {
 	}
 }
 
+// NewSdsEx returns a new SdsEx
 func NewSdsEx(client *Client, sds *types.Sds) *Sds {
 	return &Sds{
 		Sds:    sds,
@@ -29,6 +32,7 @@ func NewSdsEx(client *Client, sds *types.Sds) *Sds {
 	}
 }
 
+// CreateSds creates a new Sds
 func (pd *ProtectionDomain) CreateSds(
 	name string, ipList []string) (string, error) {
 	defer TimeSpent("CreateSds", time.Now())
@@ -65,6 +69,7 @@ func (pd *ProtectionDomain) CreateSds(
 	return sds.ID, nil
 }
 
+// GetSds returns a Sds
 func (pd *ProtectionDomain) GetSds() ([]types.Sds, error) {
 	defer TimeSpent("GetSds", time.Now())
 
@@ -81,6 +86,7 @@ func (pd *ProtectionDomain) GetSds() ([]types.Sds, error) {
 	return sdss, nil
 }
 
+// FindSds returns a Sds
 func (pd *ProtectionDomain) FindSds(
 	field, value string) (*types.Sds, error) {
 	defer TimeSpent("FindSds", time.Now())

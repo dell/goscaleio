@@ -9,6 +9,7 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// GetInstance returns an instance
 func (c *Client) GetInstance(systemhref string) ([]*types.System, error) {
 	defer TimeSpent("GetInstance", time.Now())
 
@@ -36,6 +37,7 @@ func (c *Client) GetInstance(systemhref string) ([]*types.System, error) {
 	return systems, nil
 }
 
+// GetVolume returns a volume
 func (c *Client) GetVolume(
 	volumehref, volumeid, ancestorvolumeid, volumename string,
 	getSnapshots bool) ([]*types.Volume, error) {
@@ -92,6 +94,7 @@ func (c *Client) GetVolume(
 	return volumes, nil
 }
 
+// FindVolumeID returns a VolumeID
 func (c *Client) FindVolumeID(volumename string) (string, error) {
 	defer TimeSpent("FindVolumeID", time.Now())
 
@@ -111,6 +114,7 @@ func (c *Client) FindVolumeID(volumename string) (string, error) {
 	return volumeID, nil
 }
 
+// CreateVolume creates a volume
 func (c *Client) CreateVolume(
 	volume *types.VolumeParam,
 	storagePoolName string) (*types.VolumeResp, error) {
@@ -136,6 +140,7 @@ func (c *Client) CreateVolume(
 	return vol, nil
 }
 
+// GetStoragePool returns a storagepool 
 func (c *Client) GetStoragePool(
 	storagepoolhref string) ([]*types.StoragePool, error) {
 	defer TimeSpent("GetStoragePool", time.Now())
@@ -164,6 +169,7 @@ func (c *Client) GetStoragePool(
 	return storagePools, nil
 }
 
+// FindStoragePool returns a StoragePool
 func (c *Client) FindStoragePool(
 	id, name, href string) (*types.StoragePool, error) {
 	defer TimeSpent("FindStoragePool", time.Now())

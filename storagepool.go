@@ -8,11 +8,13 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// StoragePool struct defines struct for StoragePool
 type StoragePool struct {
 	StoragePool *types.StoragePool
 	client      *Client
 }
 
+// NewStoragePool returns a new StoragePool
 func NewStoragePool(client *Client) *StoragePool {
 	return &StoragePool{
 		StoragePool: &types.StoragePool{},
@@ -20,6 +22,7 @@ func NewStoragePool(client *Client) *StoragePool {
 	}
 }
 
+// NewStoragePoolEx returns a new StoragePoolEx
 func NewStoragePoolEx(client *Client, pool *types.StoragePool) *StoragePool {
 	return &StoragePool{
 		StoragePool: pool,
@@ -27,6 +30,7 @@ func NewStoragePoolEx(client *Client, pool *types.StoragePool) *StoragePool {
 	}
 }
 
+// CreateStoragePool creates a storage pool
 func (pd *ProtectionDomain) CreateStoragePool(name string, mediaType string) (string, error) {
 
 	if mediaType == "" {
@@ -76,6 +80,7 @@ func (pd *ProtectionDomain) DeleteStoragePool(name string) error {
 	return nil
 }
 
+// GetStoragePool returns a storage pool
 func (pd *ProtectionDomain) GetStoragePool(
 	storagepoolhref string) ([]*types.StoragePool, error) {
 
@@ -108,6 +113,7 @@ func (pd *ProtectionDomain) GetStoragePool(
 	return sps, nil
 }
 
+// FindStoragePool returns a storagepool based on id or name
 func (pd *ProtectionDomain) FindStoragePool(
 	id, name, href string) (*types.StoragePool, error) {
 
@@ -126,6 +132,7 @@ func (pd *ProtectionDomain) FindStoragePool(
 
 }
 
+// GetStatistics returns statistics 
 func (sp *StoragePool) GetStatistics() (*types.Statistics, error) {
 
 	link, err := GetLink(sp.StoragePool.Links,

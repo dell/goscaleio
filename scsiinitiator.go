@@ -8,6 +8,7 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// GetScsiInitiator returns a ScsiInitiator
 func (s *System) GetScsiInitiator() ([]types.ScsiInitiator, error) {
 	defer TimeSpent("GetScsiInitiator", time.Now())
 
