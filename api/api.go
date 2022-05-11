@@ -20,9 +20,13 @@ import (
 )
 
 const (
-	HeaderKeyAccept                       = "Accept"
-	HeaderKeyContentType                  = "Content-Type"
-	HeaderValContentTypeJSON              = "application/json"
+	// HeaderKeyAccept is key for  Accept
+	HeaderKeyAccept = "Accept"
+	// HeaderKeyContentType is key for Content-Type
+	HeaderKeyContentType = "Content-Type"
+	// HeaderValContentTypeJSON is key for application/json
+	HeaderValContentTypeJSON = "application/json"
+	// headerValContentTypeBinaryOctetStream is key for binary/octet-stream
 	headerValContentTypeBinaryOctetStream = "binary/octet-stream"
 )
 

@@ -19,10 +19,10 @@
 package inttests
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"testing"
-	"time"
 )
 
 const (
@@ -44,10 +44,10 @@ func checkAPIErr(t *testing.T, err error) {
 }
 
 func randString(n int) string {
-	rand.Seed(time.Now().UnixNano())
 	b := make([]byte, n)
 	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
+		randomInt, _ := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
+		b[i] = letters[randomInt.Int64()]
 	}
 	return string(b)
 }

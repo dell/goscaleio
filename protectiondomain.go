@@ -9,11 +9,13 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// ProtectionDomain defines a struct for ProtectionDomain
 type ProtectionDomain struct {
 	ProtectionDomain *types.ProtectionDomain
 	client           *Client
 }
 
+// NewProtectionDomain returns a new ProtectionDomain
 func NewProtectionDomain(client *Client) *ProtectionDomain {
 	return &ProtectionDomain{
 		ProtectionDomain: &types.ProtectionDomain{},
@@ -21,6 +23,7 @@ func NewProtectionDomain(client *Client) *ProtectionDomain {
 	}
 }
 
+// NewProtectionDomainEx returns a new ProtectionDomain
 func NewProtectionDomainEx(client *Client, pd *types.ProtectionDomain) *ProtectionDomain {
 	return &ProtectionDomain{
 		ProtectionDomain: pd,
@@ -28,6 +31,7 @@ func NewProtectionDomainEx(client *Client, pd *types.ProtectionDomain) *Protecti
 	}
 }
 
+// CreateProtectionDomain creates a ProtectionDomain
 func (s *System) CreateProtectionDomain(name string) (string, error) {
 	defer TimeSpent("CreateProtectionDomain", time.Now())
 
@@ -73,6 +77,7 @@ func (s *System) DeleteProtectionDomain(name string) error {
 	return nil
 }
 
+// GetProtectionDomain returns a ProtectionDomain
 func (s *System) GetProtectionDomain(
 	pdhref string) ([]*types.ProtectionDomain, error) {
 	defer TimeSpent("GetprotectionDomain", time.Now())
@@ -108,6 +113,7 @@ func (s *System) GetProtectionDomain(
 	return pds, nil
 }
 
+// FindProtectionDomain returns a ProtectionDomain
 func (s *System) FindProtectionDomain(
 	id, name, href string) (*types.ProtectionDomain, error) {
 	defer TimeSpent("FindProtectionDomain", time.Now())

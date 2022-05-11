@@ -86,6 +86,7 @@ func DrvCfgQueryGUID() (string, error) {
 	return discoveredGUID, nil
 }
 
+// DrvCfgQueryRescan preforms a rescan
 func DrvCfgQueryRescan() (string, error) {
 
 	f, err := os.Open(SDCDevice)
@@ -106,9 +107,9 @@ func DrvCfgQueryRescan() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Rescan error: %v", err)
 	}
-	rc_code := strconv.FormatInt(rc, 10)
+	rcCode := strconv.FormatInt(rc, 10)
 
-	return rc_code, err
+	return rcCode, err
 }
 
 // internal, opaque to us, struct of IP addresses

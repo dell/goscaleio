@@ -10,11 +10,13 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// Device defines struct for Device
 type Device struct {
 	Device *types.Device
 	client *Client
 }
 
+// NewDevice returns a new Device
 func NewDevice(client *Client) *Device {
 	return &Device{
 		Device: &types.Device{},
@@ -22,6 +24,7 @@ func NewDevice(client *Client) *Device {
 	}
 }
 
+// NewDeviceEx returns a new Device
 func NewDeviceEx(client *Client, device *types.Device) *Device {
 	return &Device{
 		Device: device,
@@ -29,6 +32,7 @@ func NewDeviceEx(client *Client, device *types.Device) *Device {
 	}
 }
 
+// AttachDevice attaches a device
 func (sp *StoragePool) AttachDevice(
 	path string,
 	sdsID string) (string, error) {
@@ -52,6 +56,7 @@ func (sp *StoragePool) AttachDevice(
 	return dev.ID, nil
 }
 
+// GetDevice returns a device
 func (sp *StoragePool) GetDevice() ([]types.Device, error) {
 	defer TimeSpent("GetDevice", time.Now())
 
@@ -69,6 +74,7 @@ func (sp *StoragePool) GetDevice() ([]types.Device, error) {
 	return devices, nil
 }
 
+// FindDevice returns a Device
 func (sp *StoragePool) FindDevice(
 	field, value string) (*types.Device, error) {
 	defer TimeSpent("FindDevice", time.Now())

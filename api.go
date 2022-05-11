@@ -34,14 +34,17 @@ var (
 	showHTTP, _ = strconv.ParseBool(os.Getenv("GOSCALEIO_SHOWHTTP"))
 )
 
+// Client defines struct for Client
 type Client struct {
 	configConnect *ConfigConnect
 	api           api.Client
 }
 
+// Cluster defines struct for Cluster
 type Cluster struct {
 }
 
+// ConfigConnect defines struct for ConfigConnect
 type ConfigConnect struct {
 	Endpoint string
 	Version  string
@@ -49,11 +52,13 @@ type ConfigConnect struct {
 	Password string
 }
 
+// ClientPersistent defines struct for ClientPersistent
 type ClientPersistent struct {
 	configConnect *ConfigConnect
 	client        *Client
 }
 
+// getVersion returns version
 func (c *Client) getVersion() (string, error) {
 
 	resp, err := c.api.DoAndGetResponseBody(
@@ -83,6 +88,7 @@ func (c *Client) getVersion() (string, error) {
 	return version, nil
 }
 
+// updateVersion updates version
 func (c *Client) updateVersion() error {
 
 	version, err := c.getVersion()
@@ -106,6 +112,7 @@ func updateHeaders(version string) {
 	conHeader = accHeader
 }
 
+// Authenticate controls authentication to client
 func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
 
 	configConnect.Version = c.configConnect.Version
@@ -265,14 +272,17 @@ func (c *Client) getStringWithRetry(
 	return s, nil
 }
 
+// SetToken sets token
 func (c *Client) SetToken(token string) {
 	c.api.SetToken(token)
 }
 
+// GetToken returns token
 func (c *Client) GetToken() string {
 	return c.api.GetToken()
 }
 
+// NewClient returns a new client
 func NewClient() (client *Client, err error) {
 	return NewClientWithArgs(
 		os.Getenv("GOSCALEIO_ENDPOINT"),
@@ -281,6 +291,7 @@ func NewClient() (client *Client, err error) {
 		os.Getenv("GOSCALEIO_USECERTS") == "true")
 }
 
+// NewClientWithArgs returns a new client
 func NewClientWithArgs(
 	endpoint string,
 	version string,
@@ -332,6 +343,7 @@ func NewClientWithArgs(
 	return client, nil
 }
 
+// GetLink returns a link
 func GetLink(links []*types.Link, rel string) (*types.Link, error) {
 	for _, link := range links {
 		if link.Rel == rel {
@@ -382,8 +394,10 @@ func doLog(
 	}
 }
 
+// ExternalTimeRecorder is used to track time
 var ExternalTimeRecorder func(string, time.Duration)
 
+// TimeSpent is used to track time spent
 func TimeSpent(functionName string, startTime time.Time) {
 	if ExternalTimeRecorder != nil {
 		endTime := time.Now()

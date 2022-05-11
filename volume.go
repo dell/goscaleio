@@ -13,9 +13,10 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
-// For unit testing on Windows - dev is not in the same place
+// FSDevDirectoryPrefix is for unit testing on Windows - dev is not in the same place
 var FSDevDirectoryPrefix string = ""
 
+// SdcMappedVolume defines struct for SdcMappedVolume
 type SdcMappedVolume struct {
 	MdmID     string
 	VolumeID  string
@@ -25,11 +26,13 @@ type SdcMappedVolume struct {
 	// Mapped    bool
 }
 
+// Volume defines struct for Volume
 type Volume struct {
 	Volume *types.Volume
 	client *Client
 }
 
+// NewVolume returns new volume
 func NewVolume(client *Client) *Volume {
 	return &Volume{
 		Volume: &types.Volume{},
@@ -37,6 +40,7 @@ func NewVolume(client *Client) *Volume {
 	}
 }
 
+// GetVolume returns a volume
 func (sp *StoragePool) GetVolume(
 	volumehref, volumeid, ancestorvolumeid, volumename string,
 	getSnapshots bool) ([]*types.Volume, error) {
@@ -97,17 +101,18 @@ func (sp *StoragePool) GetVolume(
 	return volumes, nil
 }
 
+// FindVolumeID retruns a volume ID based on name
 func (sp *StoragePool) FindVolumeID(volumename string) (string, error) {
 	defer TimeSpent("FindVolumeID", time.Now())
 
-	volumeQeryIdByKeyParam := &types.VolumeQeryIdByKeyParam{
+	volumeQeryIDByKeyParam := &types.VolumeQeryIDByKeyParam{
 		Name: volumename,
 	}
 
 	path := fmt.Sprintf("/api/types/Volume/instances/action/queryIdByKey")
 
 	volumeID, err := sp.client.getStringWithRetry(
-		http.MethodPost, path, volumeQeryIdByKeyParam)
+		http.MethodPost, path, volumeQeryIDByKeyParam)
 	if err != nil {
 		return "", err
 	}
@@ -169,6 +174,7 @@ func getVolumeMapping(sysID string, volID string) (mappedVolumes []*SdcMappedVol
 	return mappedVolumes, nil
 }
 
+// CreateVolume creates a volume
 func (sp *StoragePool) CreateVolume(
 	volume *types.VolumeParam) (*types.VolumeResp, error) {
 	defer TimeSpent("CreateVolume", time.Now())
@@ -188,6 +194,7 @@ func (sp *StoragePool) CreateVolume(
 	return volumeResp, nil
 }
 
+// GetVTree returns a volume's vtree
 func (v *Volume) GetVTree() (*types.VTree, error) {
 	defer TimeSpent("GetVTree", time.Now())
 
@@ -206,6 +213,7 @@ func (v *Volume) GetVTree() (*types.VTree, error) {
 	return vtree, nil
 }
 
+// GetVolumeStatistics returns a volume's statistics
 func (v *Volume) GetVolumeStatistics() (*types.VolumeStatistics, error) {
 	defer TimeSpent("GetStatistics", time.Now())
 
@@ -224,6 +232,7 @@ func (v *Volume) GetVolumeStatistics() (*types.VolumeStatistics, error) {
 	return &stats, nil
 }
 
+// RemoveVolume removes a volume
 func (v *Volume) RemoveVolume(removeMode string) error {
 	defer TimeSpent("RemoveVolume", time.Now())
 
@@ -246,6 +255,7 @@ func (v *Volume) RemoveVolume(removeMode string) error {
 	return err
 }
 
+// SetVolumeName sets a volume's name
 func (v *Volume) SetVolumeName(newName string) error {
 
 	path := fmt.Sprintf("/api/instances/Volume::%s/action/setVolumeName", v.Volume.ID)
@@ -258,6 +268,7 @@ func (v *Volume) SetVolumeName(newName string) error {
 	return err
 }
 
+// SetVolumeSize sets a volume's size
 func (v *Volume) SetVolumeSize(sizeInGB string) error {
 
 	link, err := GetLink(v.Volume.Links, "self")
