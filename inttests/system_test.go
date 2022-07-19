@@ -84,27 +84,3 @@ func TestGetSystemStatistics(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, stats)
 }
-
-// Test GetPeerMDMs
-func TestGetPeerMDMs(t *testing.T) {
-	peers, err := C.GetPeerMDMs()
-	assert.Nil(t, err)
-	for i:=0; i < len(peers); i++ {
-		t.Log(fmt.Printf("PeerMDM: %+v", peers[i]))
-	}
-}
-
-// Test GetReplicationConsistencyGroups
-func TestGetReplicationConsistencyGroups(t *testing.T) {
-	rcgs, err := C.GetReplicationConsistencyGroups()
-	assert.Nil(t, err)
-	for i:=0; i < len(rcgs); i++ {
-		t.Log(fmt.Printf("RCG: %+v", rcgs[i]))
-		pairs, err := C.GetReplicationPairs(rcgs[i].ID)
-		assert.Nil(t, err)
-		for j:=0; j < len(pairs); j++ {
-			t.Log(fmt.Printf("ReplicationPair: %+v", pairs[j]))
-		}
-
-	}
-}
