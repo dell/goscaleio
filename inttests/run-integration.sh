@@ -5,6 +5,8 @@
 # GOSCALEIO_NUMBER_SYSTEMS: The number of connected MDM clusters/systems
 # GOSCALEIO_SYSTEMID: the system (MDM cluster) ID of a connected clusters/system
 
+source GOSCALEIO_TEST.env
+
 # exit on failure
 set -e
 
@@ -38,6 +40,6 @@ else
 fi
 
 # Run the integration tests
-echo "Starting tests"
+echo "Starting tests GUID " $GOSCALEIO_SDC_GUID  "COUNT " $COUNT "MDM " $GOSCALEIO_SYSTEMID "ENDPOINT " $ENDPOINT "endpoint " $endpoint
 go test -v -coverprofile=c.out -coverpkg github.com/dell/goscaleio .
 
