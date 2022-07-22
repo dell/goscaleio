@@ -62,7 +62,9 @@ func (c *Client) GetReplicationConsistencyGroups() ([]*types.ReplicationConsiste
 }
 
 // CreateReplicationConsistencyGroup
-func (c *Client) CreateReplicationConsistencyGroup(rcg *types.ReplicationConsistencyGroupCreatePayload) (*ReplicationConsistencyGroup, error) {
+func (c *Client) CreateReplicationConsistencyGroup(rcg *types.ReplicationConsistencyGroupCreatePayload) (*types.ReplicationConsistencyGroupResp, error) {
+	debug = true
+	showHTTP = true
 	if rcg.RpoInSeconds == "" || rcg.ProtectionDomainId == "" || rcg.RemoteProtectionDomainId == "" {
 		return nil, errors.New("RpoInSeconds, ProtectionDomainId, and RemoteProtectionDomainId are required")
 	}
@@ -77,16 +79,34 @@ func (c *Client) CreateReplicationConsistencyGroup(rcg *types.ReplicationConsist
 	defer TimeSpent("CreateReplicationConsistencyGroup", time.Now())
 
 	path := "/api/types/ReplicationConsistencyGroup/instances"
-	rcgResp := &types.ReplicationConsistencyGroup{}
+	rcgResp := &types.ReplicationConsistencyGroupResp{}
 
-	err = c.getJSONWithRetry(http.MethodPost, path, rcg, &rcgResp)
+	err = c.getJSONWithRetry(http.MethodPost, path, rcg, rcgResp)
 	if err != nil {
-		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, rcg, &rcgResp) returned %s", err)
+		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, rcg, rcgResp) returned %s", err)
 		return nil, err
 	}
-	resp := NewReplicationConsistencyGroup(c)
-	resp.ReplicationConsistencyGroup = rcgResp
-	return resp, nil
+	return rcgResp, nil
+}
+
+// RemoveReplicationConsistencyGroup removes a replication consistency group
+// At this point I don't know when forceIgnoreConsistency might be required.
+func (rcg *ReplicationConsistencyGroup) RemoveReplicationConsistencyGroup(forceIgnoreConsistency bool) error {
+	defer TimeSpent("RemoveReplicationConsistencyGroup", time.Now())
+
+	link, err := GetLink(rcg.ReplicationConsistencyGroup.Links, "self")
+	if err != nil {
+		return err
+	}
+	path := fmt.Sprintf("%v/action/removeReplicationConsistencyGroup", link.HREF)
+
+	removeRCGParam := &types.RemoveReplicationConsistencyGroupParam{}
+	if forceIgnoreConsistency {
+		removeRCGParam.ForceIgnoreConsistency = "TRUE"
+	}
+
+	err = rcg.client.getJSONWithRetry(http.MethodPost, path, removeRCGParam, nil)
+	return err
 }
 
 // GetReplicationPairs returns a list of ReplicationPair objects. If a ReplicationConsistencyGroupId is specified, will be limited to paris of that RCG.
