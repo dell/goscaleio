@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	types "github.com/dell/goscaleio/types/v1"
 	"net/http"
 	"time"
+
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 // PeerMDM encpsulates a PeerMDM type and a client.
@@ -107,6 +108,31 @@ func (rcg *ReplicationConsistencyGroup) RemoveReplicationConsistencyGroup(forceI
 
 	err = rcg.client.getJSONWithRetry(http.MethodPost, path, removeRCGParam, nil)
 	return err
+}
+
+func (c *Client) CreateReplicationPair(rp *types.QueryReplicationPair) (*types.ReplicationPair, error) {
+	debug = true
+	showHTTP = true
+	if rp.CopyType == "" || rp.SourceVolumeID == "" || rp.DestinationVolumeID == "" || rp.ReplicationConsistencyGroupID == "" {
+		return nil, errors.New("CopyType, SourceVolumeID, DestinationVolumeID, and ReplicationConsistencyGroupID are required")
+	}
+
+	bytes, err := json.Marshal(rp)
+	if err != nil {
+		fmt.Printf("Marshal error: %s\n", err)
+	}
+	fmt.Printf("Marshal output: %s\n", string(bytes))
+	defer TimeSpent("CreateReplicationPair", time.Now())
+
+	path := "/api/types/ReplicationPair/instances"
+	rpResp := &types.ReplicationPair{}
+
+	err = c.getJSONWithRetry(http.MethodPost, path, rp, rpResp)
+	if err != nil {
+		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, rp, rpResp) returned %s", err)
+		return nil, err
+	}
+	return rpResp, nil
 }
 
 // GetReplicationPairs returns a list of ReplicationPair objects. If a ReplicationConsistencyGroupId is specified, will be limited to paris of that RCG.
