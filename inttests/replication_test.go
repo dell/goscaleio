@@ -287,6 +287,8 @@ func TestAddReplicationPair(t *testing.T) {
 		t.Logf("[TestAddReplicationPair] Response: %+v", rpResp)
 	}
 
+	rep.rpID = rpResp.ID
+
 	t.Logf("[TestAddReplicationPair] End")
 }
 
@@ -311,8 +313,6 @@ func TestQueryReplicationPairs(t *testing.T) {
 	}
 
 	t.Logf("[TestQueryReplicationPairs] End")
-
-	time.Sleep(60 * time.Second)
 }
 
 // Query Replication Pair Statistics
