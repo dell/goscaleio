@@ -17,7 +17,7 @@
 # GOSCALEIO_NUMBER_SYSTEMS: The number of connected MDM clusters/systems
 # GOSCALEIO_SYSTEMID: the system (MDM cluster) ID of a connected clusters/system
 
-source GOSCALEIO_TEST.env
+source ./GOSCALEIO_TEST.env
 
 # exit on failure
 set -e
