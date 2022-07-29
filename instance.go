@@ -122,6 +122,7 @@ func (c *Client) CreateVolume(
 
 	path := "/api/types/Volume/instances"
 
+
 	storagePool, err := c.FindStoragePool("", storagePoolName, "", protectionDomain)
 	if err != nil {
 		return nil, err
@@ -181,12 +182,8 @@ func (c *Client) FindStoragePool(
 
 	for _, storagePool := range storagePools {
 		if storagePool.ID == id || storagePool.Name == name || href != "" {
-			if protectionDomain != "" && storagePool.ProtectionDomainID == protectionDomain {
+			if storagePool.ProtectionDomainID == protectionDomain ||  protectionDomain == ""{
 				return storagePool, nil
-			} else if protectionDomain == "" && (storagePool.ID == id || storagePool.Name == name || href != "") {
-				return storagePool, nil
-			} else {
-				continue
 			}
 		}
 	}

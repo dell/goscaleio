@@ -382,13 +382,10 @@ func (c *client) ParseJSONError(r *http.Response) error {
 
 	jsonError := &types.Error{}
 
-	//this is rough patch for 4.0 issues- will implement more flexable fix soon
-	if r.StatusCode == 401 {
-		fmt.Printf("401 Returned, need to return proper error for GJWR to re-AUTH \n")
+	//Starting in 4.0, response may be in html; so we cannot always use a json decoder 
+	if strings.Contains(r.Header.Get("Content-Type"), "html") {
 		jsonError.HTTPStatusCode = r.StatusCode
-		if jsonError.Message == "" {
-			jsonError.Message = r.Status
-		}
+                jsonError.Message = r.Status
 		return jsonError
 	}
 
