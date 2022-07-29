@@ -381,6 +381,17 @@ func (c *client) GetToken() string {
 func (c *client) ParseJSONError(r *http.Response) error {
 
 	jsonError := &types.Error{}
+
+	//this is rough patch for 4.0 issues- will implement more flexable fix soon
+	if r.StatusCode == 401 {
+		fmt.Printf("401 Returned, need to return proper error for GJWR to re-AUTH \n")
+		jsonError.HTTPStatusCode = r.StatusCode
+		if jsonError.Message == "" {
+			jsonError.Message = r.Status
+		}
+		return jsonError
+	}
+
 	if err := json.NewDecoder(r.Body).Decode(jsonError); err != nil {
 		return err
 	}

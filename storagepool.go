@@ -57,7 +57,7 @@ func (pd *ProtectionDomain) CreateStoragePool(name string, mediaType string) (st
 // DeleteStoragePool will delete a storage pool
 func (pd *ProtectionDomain) DeleteStoragePool(name string) error {
 	// get the storage pool name
-	pool, err := pd.client.FindStoragePool("", name, "")
+	pool, err := pd.client.FindStoragePool("", name, "", "")
 	if err != nil {
 		return err
 	}
