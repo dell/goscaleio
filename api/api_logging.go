@@ -22,7 +22,7 @@ func logRequest(
 	ctx context.Context,
 	req *http.Request,
 	lf func(func(args ...interface{}), string)) {
-	
+
 	log.SetLevel(log.DebugLevel)
 
 	w := &bytes.Buffer{}

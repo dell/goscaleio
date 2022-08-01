@@ -382,10 +382,10 @@ func (c *client) ParseJSONError(r *http.Response) error {
 
 	jsonError := &types.Error{}
 
-	//Starting in 4.0, response may be in html; so we cannot always use a json decoder 
+	//Starting in 4.0, response may be in html; so we cannot always use a json decoder
 	if strings.Contains(r.Header.Get("Content-Type"), "html") {
 		jsonError.HTTPStatusCode = r.StatusCode
-                jsonError.Message = r.Status
+		jsonError.Message = r.Status
 		return jsonError
 	}
 

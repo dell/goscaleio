@@ -162,36 +162,45 @@ func TestGetInstanceStoragePool(t *testing.T) {
 	assert.NotNil(t, name)
 
 	// Find by name
-	pool, err := C.FindStoragePool("", name, "")
+	pool, err := C.FindStoragePool("", name, "", "")
 	assert.Nil(t, err)
 	assert.NotNil(t, pool)
 
 	// Find by ID
-	pool, err = C.FindStoragePool(pool.ID, "", "")
+	pool, err = C.FindStoragePool(pool.ID, "", "", "")
 	assert.Nil(t, err)
 	assert.NotNil(t, pool)
 
 	// Find by href
 	href := fmt.Sprintf("/api/instances/StoragePool::%s", pool.ID)
-	pool, err = C.FindStoragePool("", "", href)
+	pool, err = C.FindStoragePool("", "", href, "")
 	assert.Nil(t, err)
 	assert.NotNil(t, pool)
 
 	// Find with invalid name
-	pool, err = C.FindStoragePool("", invalidIdentifier, "")
+	pool, err = C.FindStoragePool("", invalidIdentifier, "", "")
 	assert.NotNil(t, err)
 	assert.Nil(t, pool)
 
 	// Find with invalid ID
-	pool, err = C.FindStoragePool(invalidIdentifier, "", "")
+	pool, err = C.FindStoragePool(invalidIdentifier, "", "", "")
 	assert.NotNil(t, err)
 	assert.Nil(t, pool)
 
 	// Find with invalid href
 	href = fmt.Sprintf("/api/badurl/willnotwork")
-	pool, err = C.FindStoragePool("", "", href)
+	pool, err = C.FindStoragePool("", "", href, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, pool)
+
+	//Find with name and Protection Domain ID
+	pd := getProtectionDomain(t)
+	assert.NotNil(t, pd)
+
+	pool, err = C.FindStoragePool("", name, "", pd.ProtectionDomain.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, pool)
+
 }
 
 func TestCreateDeleteStoragePool(t *testing.T) {

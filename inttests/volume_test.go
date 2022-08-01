@@ -392,7 +392,7 @@ func TestCreateInstanceVolume(t *testing.T) {
 		Name:           name,
 	}
 
-	volResp, err := C.CreateVolume(&volParams, poolName)
+	volResp, err := C.CreateVolume(&volParams, poolName, "")
 	assert.Nil(t, err)
 	assert.NotNil(t, volResp)
 
@@ -411,7 +411,7 @@ func TestCreateInstanceVolumeInvalidSize(t *testing.T) {
 		Name:           name,
 	}
 
-	volResp, err := C.CreateVolume(&volParams, poolName)
+	volResp, err := C.CreateVolume(&volParams, poolName, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, volResp)
 }
