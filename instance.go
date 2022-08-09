@@ -117,12 +117,12 @@ func (c *Client) FindVolumeID(volumename string) (string, error) {
 // CreateVolume creates a volume
 func (c *Client) CreateVolume(
 	volume *types.VolumeParam,
-	storagePoolName string) (*types.VolumeResp, error) {
+	storagePoolName, protectionDomain string) (*types.VolumeResp, error) {
 	defer TimeSpent("CreateVolume", time.Now())
 
 	path := "/api/types/Volume/instances"
 
-	storagePool, err := c.FindStoragePool("", storagePoolName, "")
+	storagePool, err := c.FindStoragePool("", storagePoolName, "", protectionDomain)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +171,7 @@ func (c *Client) GetStoragePool(
 
 // FindStoragePool returns a StoragePool
 func (c *Client) FindStoragePool(
-	id, name, href string) (*types.StoragePool, error) {
+	id, name, href, protectionDomain string) (*types.StoragePool, error) {
 	defer TimeSpent("FindStoragePool", time.Now())
 
 	storagePools, err := c.GetStoragePool(href)
@@ -181,7 +181,9 @@ func (c *Client) FindStoragePool(
 
 	for _, storagePool := range storagePools {
 		if storagePool.ID == id || storagePool.Name == name || href != "" {
-			return storagePool, nil
+			if storagePool.ProtectionDomainID == protectionDomain || protectionDomain == "" {
+				return storagePool, nil
+			}
 		}
 	}
 

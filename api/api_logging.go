@@ -23,6 +23,8 @@ func logRequest(
 	req *http.Request,
 	lf func(func(args ...interface{}), string)) {
 
+	log.SetLevel(log.DebugLevel)
+
 	w := &bytes.Buffer{}
 
 	fmt.Fprintln(w)
@@ -49,6 +51,8 @@ func logResponse(
 	ctx context.Context,
 	res *http.Response,
 	lf func(func(args ...interface{}), string)) {
+
+	log.SetLevel(log.DebugLevel)
 
 	w := &bytes.Buffer{}
 
