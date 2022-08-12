@@ -52,18 +52,24 @@ func NewReplicationConsistencyGroup(client *Client) *ReplicationConsistencyGroup
 }
 
 // GetReplicationConsistencyGroups returns a list of the ReplicationConsistencyGroups
-func (c *Client) GetReplicationConsistencyGroups(groupId string) ([]*types.ReplicationConsistencyGroup, error) {
-	path := "/api/types/ReplicationConsistencyGroup/instances"
+func (c *Client) GetReplicationConsistencyGroups() ([]*types.ReplicationConsistencyGroup, error) {
+	uri := "/api/types/ReplicationConsistencyGroup/instances"
 	var rcgs []*types.ReplicationConsistencyGroup
-	var err error
+
 	defer TimeSpent("GetReplicationConsistencyGroups", time.Now())
 
-	if groupId != "" {
-		path = "/api/instances/ReplicationConsistencyGroup::" + groupId
-	}
-
-	err = c.getJSONWithRetry(http.MethodGet, path, nil, &rcgs)
+	err := c.getJSONWithRetry(http.MethodGet, uri, nil, &rcgs)
 	return rcgs, err
+}
+
+func (c *Client) GetReplicationConsistencyGroupById(groupId string) (*types.ReplicationConsistencyGroup, error) {
+	uri := "/api/instances/ReplicationConsistencyGroup::" + groupId
+	var group *types.ReplicationConsistencyGroup
+
+	defer TimeSpent("GetReplicationConsistencyGroupById", time.Now())
+
+	err := c.getJSONWithRetry(http.MethodGet, uri, nil, &group)
+	return group, err
 }
 
 // CreateReplicationConsistencyGroup
