@@ -21,6 +21,7 @@ package inttests
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -47,7 +48,7 @@ type replication struct {
 	targetVolume             *siotypes.Volume
 	rcg                      *goscaleio.ReplicationConsistencyGroup
 	rcgID                    string
-	rpID                     string
+	replicationPair          *siotypes.ReplicationPair
 }
 
 var rep replication
@@ -66,8 +67,10 @@ func TestGetPeerMDMs(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
+	log.SetLevel(log.DebugLevel)
 	tgtpeers, err := C2.GetPeerMDMs()
 	assert.Nil(t, err)
+	log.SetLevel(log.InfoLevel)
 	for i := 0; i < len(tgtpeers); i++ {
 		t.Logf("Target PeerMDM: %+v", tgtpeers[i])
 		rep.targetSystemID = tgtpeers[i].SystemID
@@ -259,18 +262,31 @@ func TestAddReplicationPair(t *testing.T) {
 		t.Skip("[TestAddReplicationPair] no client connection to replication target system")
 	}
 
-	// Todo: Create temp volume to test with
-	localVolumeID, err := C.FindVolumeID("stkof-snaprw-5-snap-1")
+	srcName := os.Getenv("GOSCALEIO_REPLICATION_SOURCE_NAME")
+	assert.NotNil(t, srcName)
+	t.Logf("looking for source %s", srcName)
+
+	localVolumeID, err := C.FindVolumeID(srcName)
 	if err != nil {
-		t.Skip("Error finding volume inttest-snap")
+		t.Skip("Error finding source volume")
 	}
 	t.Logf("[TestAddReplicationPair] Local Volume ID: %s", localVolumeID)
 
-	remoteVolumeID, err := C2.FindVolumeID("inttest-replication")
+	dstName := os.Getenv("GOSCALEIO_REPLICATION_TARGET_NAME")
+	assert.NotNil(t, dstName)
+	t.Logf("looking for target %s", dstName)
+
+	remoteVolumeID, err := C2.FindVolumeID(dstName)
 	if err != nil {
-		t.Skip("Error finding volume inttest-snap")
+		t.Skip("Error finding target volume")
 	}
 	t.Logf("[TestAddReplicationPair] Remote Volume ID: %s", remoteVolumeID)
+
+	vol, err := C.GetVolume("", strings.TrimSpace(localVolumeID), "", "", false)
+	if err != nil {
+		t.Skip("[TestAddReplicationPair] Error retrieving volume")
+	}
+	t.Logf("looking for source %+v", vol[0])
 
 	rpPayload := &siotypes.QueryReplicationPair{
 		Name:                          "inttestrp",
@@ -285,9 +301,15 @@ func TestAddReplicationPair(t *testing.T) {
 		t.Logf("[TestAddReplicationPair] Error: %s", err.Error())
 	} else {
 		t.Logf("[TestAddReplicationPair] Response: %+v", rpResp)
+		t.Logf("ReplicationPairID: %s", rpResp.ID)
+		rep.replicationPair = rpResp
 	}
 
-	rep.rpID = rpResp.ID
+	vol, err = C.GetVolume("", strings.TrimSpace(localVolumeID), "", "", false)
+	if err != nil {
+		t.Skip("[TestAddReplicationPair] Error retrieving volume")
+	}
+	t.Logf("AFTER RP looking for source %+v", vol[0])
 
 	t.Logf("[TestAddReplicationPair] End")
 }
@@ -310,6 +332,7 @@ func TestQueryReplicationPairs(t *testing.T) {
 
 	for i, pair := range pairs {
 		t.Logf("%d, ReplicationPair: %+v", i, pair)
+		rep.replicationPair = pair
 	}
 
 	t.Logf("[TestQueryReplicationPairs] End")
@@ -325,13 +348,19 @@ func TestQueryReplicationPairsStatistics(t *testing.T) {
 	}
 
 	for i := 0; i < 20; i++ {
-		rpResp, err := C.GetReplicationPairStatistics(rep.rpID)
+		rpResp, err := C.GetReplicationPairStatistics(rep.replicationPair.ID)
 		if err != nil {
 			t.Logf("[TestQueryReplicationPairsStatistics] Error: %s", err.Error())
 			break
 		}
 
 		t.Logf("[TestQueryReplicationPairsStatistics] Response: %+v", rpResp)
+
+		vol, err := C.GetVolume("", strings.TrimSpace(rep.replicationPair.LocalVolumeID), "", "", false)
+		if err != nil {
+			t.Skip("[TestQueryReplicationPairsStatistics] Error retrieving volume")
+		}
+		t.Logf("Local Volume Ctx: %+v", vol[0])
 
 		// Check if complete
 		if rpResp.InitialCopyProgress == 1 {
@@ -369,21 +398,66 @@ func TestGetReplicationConsistencyGroups(t *testing.T) {
 }
 
 // Test RemoveReplicationPair
+func TestUnmarkForReplication(t *testing.T) {
+	vol, err := C.GetVolume("", strings.TrimSpace(rep.replicationPair.LocalVolumeID), "", "", false)
+	if err != nil {
+		t.Skip("[TestUnmarkForReplication] Error retrieving volume")
+	}
+	t.Logf("[TestUnmarkForReplication] Local Volume Ctx: %+v", vol[0])
+
+	unmarkingVol := goscaleio.NewVolume(C)
+	unmarkingVol.Volume = vol[0]
+
+	err = unmarkingVol.UnmarkForReplication()
+	if err != nil {
+		t.Skip("[TestUnmarkForReplication] Error unmarking volume")
+	}
+
+	vol, err = C.GetVolume("", strings.TrimSpace(rep.replicationPair.LocalVolumeID), "", "", false)
+	if err != nil {
+		t.Skip("[TestUnmarkForReplication] Error retrieving volume")
+	}
+	t.Logf("[TestUnmarkForReplication] AFTER: Local Volume Ctx: %+v", vol[0])
+
+	// Delay to verify on the UI.
+	time.Sleep(10 * time.Second)
+}
+
+// Test RemoveReplicationPair
 func TestRemoveReplicationPair(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
 
-	t.Logf("[TestRemoveReplicationPair] Removing replication pair: %s", rep.rpID)
+	log.SetLevel(log.DebugLevel)
+	t.Logf("[TestRemoveReplicationPair] Removing replication pair: %s", rep.replicationPair.ID)
 
-	pair, err := C.RemoveReplicationPair(rep.rpID)
+	pair, err := C.RemoveReplicationPair(rep.replicationPair.ID, true)
 	assert.Nil(t, err)
 	assert.NotNil(t, pair)
 
 	t.Logf("[TestRemoveReplicationPair] Removed the following pair: %+v", pair)
+	log.SetLevel(log.InfoLevel)
 
 	// Delay to verify on the UI.
-	time.Sleep(10 * time.Second)
+	time.Sleep(2 * time.Second)
+}
+
+// Test Freeze Replication Group
+func TestFreezeReplcationGroup(t *testing.T) {
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
+
+	t.Logf("[TestFreezeReplcationGroup] Freezing replication group: %s", rep.rcgID)
+
+	err := rep.rcg.FreezeReplicationConsistencyGroup(rep.rcgID)
+	assert.Nil(t, err)
+
+	t.Logf("[TestFreezeReplcationGroup] Froze replication pair, check UI")
+
+	// Delay to verify on the UI.
+	time.Sleep(2 * time.Second)
 }
 
 // Test RemoveReplicatonConsistencyGroup

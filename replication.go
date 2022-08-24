@@ -10,6 +10,14 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+const (
+	INCONSISTENT         string = "Inconsistent"
+	CONSISTENT           string = "Consistent"
+	PENDING              string = "Pending"
+	INVALID              string = "Invalid"
+	PARTIALLY_CONSISTENT string = "PartiallyConsistent"
+)
+
 // PeerMDM encpsulates a PeerMDM type and a client.
 type PeerMDM struct {
 	PeerMDM *types.PeerMDM
@@ -120,6 +128,22 @@ func (rcg *ReplicationConsistencyGroup) RemoveReplicationConsistencyGroup(forceI
 	return err
 }
 
+func (rcg *ReplicationConsistencyGroup) FreezeReplicationConsistencyGroup(id string) error {
+	defer TimeSpent("FreezeReplicationConsistencyGroup", time.Now())
+
+	link, err := GetLink(rcg.ReplicationConsistencyGroup.Links, "self")
+	if err != nil {
+		return err
+	}
+	params := types.EmptyPayload{}
+	path := fmt.Sprintf("%v/action/freezeApplyReplicationConsistencyGroup", link.HREF)
+	fmt.Printf("FreezeReplicationConsistencyGroup: path: %s\n", path)
+	// uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/freezeApplyReplicationConsistencyGroup"
+
+	err = rcg.client.getJSONWithRetry(http.MethodPost, path, params, nil)
+	return err
+}
+
 func (c *Client) CreateReplicationPair(rp *types.QueryReplicationPair) (*types.ReplicationPair, error) {
 	debug = true
 	showHTTP = true
@@ -146,15 +170,23 @@ func (c *Client) CreateReplicationPair(rp *types.QueryReplicationPair) (*types.R
 }
 
 // Remove the desired replication pair.
-func (c *Client) RemoveReplicationPair(id string) (*types.ReplicationPair, error) {
+func (c *Client) RemoveReplicationPair(id string, force bool) (*types.ReplicationPair, error) {
 	if id == "" {
 		return nil, errors.New("replication Pair ID is required to remove it")
 	}
 
 	uri := "/api/instances/ReplicationPair::" + id + "/action/removeReplicationPair"
 	resp := &types.ReplicationPair{}
+	param := &types.RemoveReplicationPair{
+		Force: "false",
+	}
+	if force {
+		param.Force = "true"
+	}
 
-	if err := c.getJSONWithRetry(http.MethodPost, uri, nil, resp); err != nil {
+	fmt.Printf("RemoveReplicationPair: path: %s\n", uri)
+
+	if err := c.getJSONWithRetry(http.MethodPost, uri, param, resp); err != nil {
 		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, rp, pair) returned %s", err)
 		return nil, err
 	}

@@ -620,6 +620,11 @@ type ReplicationPair struct {
 	InitialCopyPriority                int    `json:"initialCopyPriority"`
 }
 
+// Remove payload for ReplicationPair
+type RemoveReplicationPair struct {
+	Force string `json:"force,omitempty"`
+}
+
 // Used for querying replication pair.
 type QueryReplicationPair struct {
 	Name                          string `json:"name"`
