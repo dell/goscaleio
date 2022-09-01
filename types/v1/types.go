@@ -481,6 +481,10 @@ type SetMappedSdcLimitsParam struct {
 	IopsLimit            string `json:"iopsLimit,omitempty"`
 }
 
+type RenameSdcParam struct {
+	SdcName string `json:"sdcName,omitempty"`
+}
+
 // SnapshotDef defines struct for SnapshotDef
 type SnapshotDef struct {
 	VolumeID     string `json:"volumeId,omitempty"`

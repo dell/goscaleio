@@ -189,3 +189,21 @@ func (v *Volume) SetMappedSdcLimits(
 
 	return nil
 }
+
+func (v *Volume) RenameSdc(sdcID, name string) error {
+	path := fmt.Sprintf("/api/instances/Sdc::%s/action/setSdcName", sdcID)
+
+	renameSdcParam := &types.RenameSdcParam{
+                SdcName: name,
+        }
+
+
+        err := v.client.getJSONWithRetry(
+                http.MethodPost, path, renameSdcParam, nil)
+        if err != nil {
+                return err
+        }
+
+        return nil
+	 
+}
