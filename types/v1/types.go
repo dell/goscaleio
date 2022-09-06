@@ -226,19 +226,31 @@ type ScsiInitiator struct {
 	Links    []*Link `json:"links"`
 }
 
+type SdrSdsConnectivityInfo struct {
+	ClientServerConnStatus string `json:"clientServerConnStatus,omitempty"`
+	DisconnectedClientId   string `json:"disconnectedClientId,omitempty"`
+	DisconnectedClientName string `json:"disconnectedClientName,omitempty"`
+	DisconnectedServerId   string `json:"disconnectedServerId,omitempty"`
+	DisconnectedServerIp   string `json:"disconnectedServerIp"`
+}
+
 // ProtectionDomain defines struct for PFlex ProtectionDomain
 type ProtectionDomain struct {
-	SystemID                          string  `json:"systemId"`
-	RebuildNetworkThrottlingInKbps    int     `json:"rebuildNetworkThrottlingInKbps"`
-	RebalanceNetworkThrottlingInKbps  int     `json:"rebalanceNetworkThrottlingInKbps"`
-	OverallIoNetworkThrottlingInKbps  int     `json:"overallIoNetworkThrottlingInKbps"`
-	OverallIoNetworkThrottlingEnabled bool    `json:"overallIoNetworkThrottlingEnabled"`
-	RebuildNetworkThrottlingEnabled   bool    `json:"rebuildNetworkThrottlingEnabled"`
-	RebalanceNetworkThrottlingEnabled bool    `json:"rebalanceNetworkThrottlingEnabled"`
-	ProtectionDomainState             string  `json:"protectionDomainState"`
-	Name                              string  `json:"name"`
-	ID                                string  `json:"id"`
-	Links                             []*Link `json:"links"`
+	SystemID                                  string                  `json:"systemId"`
+	RebuildNetworkThrottlingInKbps            int                     `json:"rebuildNetworkThrottlingInKbps"`
+	RebalanceNetworkThrottlingInKbps          int                     `json:"rebalanceNetworkThrottlingInKbps"`
+	OverallIoNetworkThrottlingInKbps          int                     `json:"overallIoNetworkThrottlingInKbps"`
+	ProtectedMaintenanceModeThrottlingInKbps  int                     `json:"protectedMaintenanceModeNetworkThrottlingInKbps"`
+	OverallIoNetworkThrottlingEnabled         bool                    `json:"overallIoNetworkThrottlingEnabled"`
+	RebuildNetworkThrottlingEnabled           bool                    `json:"rebuildNetworkThrottlingEnabled"`
+	RebalanceNetworkThrottlingEnabled         bool                    `json:"rebalanceNetworkThrottlingEnabled"`
+	ProtectedMaintenanceModeThrottlingEnabled bool                    `json:"protectedMaintenanceModeNetworkThrottlingEnabled"`
+	ProtectionDomainState                     string                  `json:"protectionDomainState"`
+	Name                                      string                  `json:"name"`
+	ID                                        string                  `json:"id"`
+	ReplicationCapacityAlertLevel             string                  `json:"rplCapAlertLevel"`
+	SdrSdsConnectivityInfo                    *SdrSdsConnectivityInfo `json:"sdrSdsConnectivityInfo,omitempty"`
+	Links                                     []*Link                 `json:"links"`
 }
 
 // ProtectionDomainParam defines struct for ProtectionDomainParam
@@ -425,7 +437,7 @@ type Volume struct {
 	Name                    string           `json:"name"`
 	ID                      string           `json:"id"`
 	Links                   []*Link          `json:"links"`
-	VolumeReplicationState  string           `json:"volumeReplicationState"`
+	VolumeReplicationState  string           `json:"volumeReplicationState,omitempty"`
 }
 
 // VolumeParam defines struct for VolumeParam
@@ -561,7 +573,7 @@ type ReplicationConsistencyGroup struct {
 	PauseMode                   string `json:"pauseMode,omitempty"`
 	LifetimeState               string `json:"lifetimeState,omitempty"`
 	SnapCreationInProgress      bool   `json:"snapCreationInProgress,omitempty"`
-	LastSnapgroupId             int    `json:"lastSnapGroupId,omitempty"`
+	LastSnapGroupId             string `json:"lastSnapGroupId,omitempty"`
 	Type                        string `json:"type,omitempty"`
 	DisasterRecoveryState       string `json:"disasterRecoveryState,omitempty"`
 	RemoteDisasterRecoveryState string `json:"remoteDisasterRecoveryState,omitempty"`
@@ -623,6 +635,16 @@ type ReplicationPair struct {
 // Remove payload for ReplicationPair
 type RemoveReplicationPair struct {
 	Force string `json:"force,omitempty"`
+}
+
+// CreateReplicationConsistencyGroupSnapshotPayload
+type CreateReplicationConsistencyGroupSnapshot struct {
+	Force string `json:"force,omitempty"`
+}
+
+// CreateReplicationConsistencyGroupSnapshot response
+type CreateReplicationConsistencyGroupSnapshotResp struct {
+	SnapshotGroupID string `json:"snapshotGroupId"`
 }
 
 // Used for querying replication pair.
