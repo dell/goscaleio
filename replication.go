@@ -13,7 +13,7 @@ import (
 const (
 	INCONSISTENT         string = "Inconsistent"
 	CONSISTENT           string = "Consistent"
-	PENDING              string = "Pending"
+	CONSISTENT_PENDING   string = "ConsistentPending"
 	INVALID              string = "Invalid"
 	PARTIALLY_CONSISTENT string = "PartiallyConsistent"
 )
