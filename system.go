@@ -69,6 +69,13 @@ func (c *Client) FindSystem(
 func (s *System) GetStatistics() (*types.Statistics, error) {
 	defer TimeSpent("GetStatistics", time.Now())
 
+	if s == nil || s.System == nil {
+		return nil, fmt.Errorf("No connection to this System")
+	}
+	if s.System.Links == nil {
+		return nil, fmt.Errorf("Links for system ID %s nil", s.System.ID)
+	}
+
 	link, err := GetLink(s.System.Links,
 		"/api/System/relationship/Statistics")
 	if err != nil {
