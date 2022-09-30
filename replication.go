@@ -279,3 +279,29 @@ func (c *Client) ExecuteReverseOnReplicationGroup(id string) error {
 	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
 	return err
 }
+
+func (c *Client) ExecutePauseOnReplicationGroup(id string, mode types.PauseMode) error {
+	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/pauseReplicationConsistencyGroup"
+	param := types.PauseReplicationConsistencyGroup{
+		PauseMode: string(mode),
+	}
+
+	defer TimeSpent("ExecutePauseOnReplicationGroup", time.Now())
+
+	fmt.Printf("ExecutePauseOnReplicationGroup: path: %s\n", uri)
+
+	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}
+
+func (c *Client) ExecuteResumeOnReplicationGroup(id string) error {
+	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/resumeReplicationConsistencyGroup"
+	param := types.EmptyPayload{}
+
+	defer TimeSpent("ExecuteResumeOnReplicationGroup", time.Now())
+
+	fmt.Printf("ExecuteResumeOnReplicationGroup: path: %s\n", uri)
+
+	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}
