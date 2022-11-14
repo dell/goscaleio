@@ -54,4 +54,3 @@ fi
 # Run the integration tests
 echo "Starting tests GUID " $GOSCALEIO_SDC_GUID  "COUNT " $COUNT "MDM " $GOSCALEIO_SYSTEMID "ENDPOINT " $ENDPOINT "endpoint " $endpoint
 go test -v -coverprofile=c.out -coverpkg github.com/dell/goscaleio .
-

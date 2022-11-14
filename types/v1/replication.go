@@ -27,3 +27,11 @@ type FailoverParams struct {
 type PauseReplicationConsistencyGroup struct {
 	PauseMode string `json:"pauseMode"`
 }
+
+type SynchronizationResponse struct {
+	SyncNowKey string `json:"syncNowKey"`
+}
+
+type QuerySyncNowRequest struct {
+	SyncNowKey string `json:"syncNowKey"`
+}
