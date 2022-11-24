@@ -17,7 +17,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/dell/goscaleio/api"
+	"software/goscaleio/api"
+
 	types "github.com/dell/goscaleio/types/v1"
 )
 
@@ -193,6 +194,29 @@ func (c *Client) getJSONWithRetry(
 	doLog(log.WithError(err).Error, "returning error")
 
 	return err
+}
+
+func (c *Client) authorizedJSONWithRetry(method string, uri string,
+	body interface{}) (interface{}, error) {
+
+	fmt.Println("authorizedJSONWithRetry\n")
+	headers := make(map[string]string)
+	headers[api.HeaderKeyAccept] = accHeader
+	headers[api.HeaderKeyContentType] = conHeader
+	// ctx context.Context,
+	// 	method, path string,
+	// 	headers map[string]string,
+	// 	body, resp interface{}
+	resp, err := c.api.DoAndGetResponseBodyAuthorized(context.Background(), method, uri, headers, body)
+	// DoAndGetResponseBody(
+	// 	ctx, method, uri, headers, body)
+
+	if err == nil {
+		return resp, nil
+	}
+
+	// fmt.Println("err----------------------------------------------------------------", err)
+	return resp, err
 }
 
 func extractString(resp *http.Response) (string, error) {
