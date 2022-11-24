@@ -1,14 +1,29 @@
 package goscaleio
 
 import (
-	"fmt"
 	"net/http"
 	"software/template"
 	"time"
 )
 
-// CreateVolume creates a blank template
-func (c *Client) CreateTemplate(
+func (c *Client) CreateTemplate() *Client {
+	// func (c *Client) CreateTemplate(value interface{}) *Client {
+	// c.FringeObject = value
+
+	// switch v := c.FringeObject.(type) {
+	// case string:
+	// 	fmt.Printf("String:")
+	// case template.DefaultTemplate:
+	// 	fmt.Printf("template.DefaultTemplate:")
+	// default:
+	// 	fmt.Println("I don't know, ask stackoverflow.", v)
+	// }
+
+	return c
+}
+
+// CreateTemplate creates a blank template
+func (c *Client) FromModel(
 	templateParameters template.DefaultTemplate) (interface{}, error) {
 	defer TimeSpent("CreateTemplate", time.Now())
 
@@ -16,6 +31,32 @@ func (c *Client) CreateTemplate(
 
 	backResponse, err := c.authorizedJSONWithRetry(
 		http.MethodPost, path, templateParameters)
+	if err != nil {
+		return nil, err
+	}
+
+	return backResponse, nil
+}
+func (c *Client) FromString(
+	templateString string) (interface{}, error) {
+	defer TimeSpent("CreateTemplate", time.Now())
+
+	path := "api/v1/ServiceTemplate"
+	backResponse, err := c.authorizedJSONWithRetry(
+		http.MethodPost, path, templateString)
+	if err != nil {
+		return nil, err
+	}
+
+	return backResponse, nil
+}
+func (c *Client) UpdateTemplate(
+	templateString, templateID string) (interface{}, error) {
+	defer TimeSpent("CreateTemplate", time.Now())
+
+	path := "/api/v1/ServiceTemplate/" + templateID
+	backResponse, err := c.authorizedJSONWithRetry(
+		http.MethodPut, path, templateString)
 	if err != nil {
 		return nil, err
 	}
@@ -36,18 +77,15 @@ func (c *Client) GetTemplate(
 
 	return response, nil
 }
-func (c *Client) DiscardTemplate(
+func (c *Client) DeleteTemplate(
 	templateId string) (interface{}, error) {
-	defer TimeSpent("GetTemplate", time.Now())
 
-	path := "/Api/V1/ui/templates/discardtemplate"
+	defer TimeSpent("DeleteTemplate", time.Now())
 
-	type deletebody struct {
-		RequestObj []string `json:"requestObj"`
-	}
-	delete := deletebody{RequestObj: []string{templateId}}
-	fmt.Println("\n\ndelete", delete, "\n\n")
-	response, err := c.authorizedJSONWithRetry(http.MethodPost, path, delete)
+	path := "/api/v1/ServiceTemplate/" + templateId
+
+	var body interface{}
+	response, err := c.authorizedJSONWithRetry(http.MethodDelete, path, body)
 	if err != nil {
 		return nil, err
 	}

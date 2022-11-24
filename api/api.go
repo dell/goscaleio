@@ -343,7 +343,15 @@ func (c *client) DoAndGetResponseBodyAuthorized(
 		if err = enc.Encode(body); err != nil {
 			return nil, err
 		}
-		req, err = http.NewRequest(method, u.String(), buf)
+
+		switch body.(type) {
+		case string:
+			var jsonStr = []byte(body.(string))
+			req, err = http.NewRequest(method, u.String(), bytes.NewBuffer(jsonStr))
+		default:
+			req, err = http.NewRequest(method, u.String(), buf)
+		}
+
 		if v, ok := headers[HeaderKeyContentType]; ok {
 			req.Header.Set(HeaderKeyContentType, v)
 		} else {

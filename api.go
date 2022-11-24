@@ -51,6 +51,7 @@ var (
 type Client struct {
 	configConnect *ConfigConnect
 	api           api.Client
+	// FringeObject  interface{}
 }
 
 // Cluster defines struct for Cluster
@@ -210,7 +211,7 @@ func (c *Client) getJSONWithRetry(
 
 func (c *Client) authorizedJSONWithRetry(method string, uri string,
 	body interface{}) (interface{}, error) {
-
+	timeout := time.Second * 60
 	fmt.Println("authorizedJSONWithRetry\n")
 	headers := make(map[string]string)
 	headers[api.HeaderKeyAccept] = accHeader
@@ -219,15 +220,15 @@ func (c *Client) authorizedJSONWithRetry(method string, uri string,
 	// 	method, path string,
 	// 	headers map[string]string,
 	// 	body, resp interface{}
-	resp, err := c.api.DoAndGetResponseBodyAuthorized(context.Background(), method, uri, headers, body)
-	// DoAndGetResponseBody(
-	// 	ctx, method, uri, headers, body)
 
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	resp, err := c.api.DoAndGetResponseBodyAuthorized(ctx, method, uri, headers, body)
 	if err == nil {
 		return resp, nil
 	}
-
-	// fmt.Println("err----------------------------------------------------------------", err)
 	return resp, err
 }
 
