@@ -18,8 +18,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dell/goscaleio"
-	siotypes "github.com/dell/goscaleio/types/v1"
+	"github.com/AnshumanPradipPatil1506/goscaleio"
+	siotypes "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
 )
 

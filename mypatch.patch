@@ -6,10 +6,10 @@ index 22e3bac..fed63b7 100644
  
  	log "github.com/sirupsen/logrus"
  
--	"github.com/dell/goscaleio/api"
+-	"github.com/AnshumanPradipPatil1506/goscaleio/api"
 +	"software/goscaleio/api"
 +
- 	types "github.com/dell/goscaleio/types/v1"
+ 	types "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
  )
  
 @@ -195,6 +196,29 @@ func (c *Client) getJSONWithRetry(
@@ -195,7 +195,7 @@ index 612f2a2..0000000
 --- a/go.mod
 +++ /dev/null
 @@ -1,17 +0,0 @@
--module github.com/dell/goscaleio
+-module github.com/AnshumanPradipPatil1506/goscaleio
 -
 -require (
 -	github.com/google/uuid v1.3.0

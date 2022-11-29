@@ -15,7 +15,7 @@ package inttests
 import (
 	"testing"
 
-	"github.com/dell/goscaleio"
+	"github.com/AnshumanPradipPatil1506/goscaleio"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -19,7 +19,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	types "github.com/dell/goscaleio/types/v1"
+	types "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
 )
 

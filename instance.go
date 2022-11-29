@@ -18,7 +18,7 @@ import (
 	"net/http"
 	"time"
 
-	types "github.com/dell/goscaleio/types/v1"
+	types "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
 )
 
 // GetInstance returns an instance

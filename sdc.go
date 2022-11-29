@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	types "github.com/dell/goscaleio/types/v1"
+	types "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
 )
 
 // Sdc defines struct for Sdc

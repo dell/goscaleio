@@ -284,6 +284,6 @@ Starting tests
 === RUN   TestSetMappedSdcLimitsInvalid
 --- PASS: TestSetMappedSdcLimitsInvalid (0.91s)
 FAIL
-coverage: 67.1% of statements in github.com/dell/goscaleio
+coverage: 67.1% of statements in github.com/AnshumanPradipPatil1506/goscaleio
 FAIL    software/goscaleio/inttests     37.169s
 FAIL

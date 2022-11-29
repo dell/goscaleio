@@ -17,7 +17,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/dell/goscaleio"
+	"github.com/AnshumanPradipPatil1506/goscaleio"
 	"github.com/joho/godotenv"
 )
 

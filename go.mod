@@ -1,4 +1,4 @@
-module github.com/dell/goscaleio
+module github.com/AnshumanPradipPatil1506/goscaleio
 
 require (
 	github.com/google/uuid v1.3.0
