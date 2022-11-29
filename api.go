@@ -29,8 +29,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"software/goscaleio/api"
-
+	"github.com/AnshumanPradipPatil1506/goscaleio/api"
 	types "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
 )
 

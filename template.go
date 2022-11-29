@@ -2,8 +2,9 @@ package goscaleio
 
 import (
 	"net/http"
-	"software/template"
 	"time"
+
+	template "github.com/AnshumanPradipPatil1506/goscaleio/types/v1/template"
 )
 
 func (c *Client) CreateTemplate() *Client {
