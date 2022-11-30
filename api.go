@@ -211,7 +211,6 @@ func (c *Client) getJSONWithRetry(
 func (c *Client) authorizedJSONWithRetry(method string, uri string,
 	body interface{}) (interface{}, error) {
 	timeout := time.Second * 60
-	fmt.Println("authorizedJSONWithRetry\n")
 	headers := make(map[string]string)
 	headers[api.HeaderKeyAccept] = accHeader
 	headers[api.HeaderKeyContentType] = conHeader

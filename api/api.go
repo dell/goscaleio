@@ -303,7 +303,6 @@ func (c *client) DoAndGetResponseBodyAuthorized(
 		uriBeginsWithSlash = beginsWithSlash(uri)
 	)
 
-	fmt.Println("DoAndGetResponseBodyAuthorized\n")
 	ubf.WriteString(c.host)
 
 	if !hostEndsWithSlash && (luri > 0) {
@@ -322,8 +321,6 @@ func (c *client) DoAndGetResponseBodyAuthorized(
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("url    ", u, "\n")
-	fmt.Println("method    ", method, "\n")
 	var isContentTypeSet bool
 
 	// marshal the message body (assumes json format)
