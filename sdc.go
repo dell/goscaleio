@@ -55,6 +55,43 @@ func (s *System) GetSdc() ([]types.Sdc, error) {
 	return sdcs, nil
 }
 
+// GetSdcById returns a Sdc searched by id
+func (s *System) GetSdcById(id string) (*Sdc, error) {
+	defer TimeSpent("GetSdcById", time.Now())
+
+	path := fmt.Sprintf("api/instances/Sdc::%v", id)
+
+	var sdc types.Sdc
+	err := s.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &sdc)
+	if err != nil {
+		return NewSdc(s.client, &sdc), nil
+	}
+
+	return NewSdc(s.client, &sdc), nil
+}
+
+// ChangeSdcName returns a Sdc after changing its name
+func (s *System) ChangeSdcName(idOfSdc, name string) (*Sdc, error) {
+	defer TimeSpent("GetSdcById", time.Now())
+
+	path := fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcName", idOfSdc)
+
+	var sdc types.Sdc
+
+	var body types.ChangeSdcNameParam = types.ChangeSdcNameParam{
+		SdcName: name,
+	}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, body, &sdc)
+	if err != nil {
+		return NewSdc(s.client, &sdc), nil
+
+	}
+
+	return NewSdc(s.client, &sdc), nil
+}
+
 // FindSdc returns a Sdc
 func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	defer TimeSpent("FindSdc", time.Now())
