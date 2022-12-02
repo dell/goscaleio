@@ -17,7 +17,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/AnshumanPradipPatil1506/goscaleio"
+	"github.com/dell/goscaleio"
 	"github.com/stretchr/testify/assert"
 )
 

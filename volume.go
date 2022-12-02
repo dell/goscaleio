@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	types "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 // FSDevDirectoryPrefix is for unit testing on Windows - dev is not in the same place

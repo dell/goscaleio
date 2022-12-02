@@ -15,7 +15,7 @@ package inttests
 import (
 	"testing"
 
-	"github.com/AnshumanPradipPatil1506/goscaleio"
+	"github.com/dell/goscaleio"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -137,4 +137,23 @@ func TestFindSdcVolumes(t *testing.T) {
 		_, err := s.FindVolumes()
 		assert.Nil(t, err)
 	}
+}
+
+// TestChangeSdcName
+func TestChangeSdcName(t *testing.T) {
+
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	sdc, err := system.GetSdc()
+	assert.Nil(t, err)
+	firstSdc := sdc[0]
+
+	baseName := firstSdc.Name
+	nameChng, err := system.ChangeSdcName(firstSdc.ID, randString(10))
+	assert.Nil(t, err)
+	assert.NotNil(t, nameChng)
+	nameChngBack, err := system.ChangeSdcName(firstSdc.ID, baseName)
+	assert.Nil(t, err)
+	assert.NotNil(t, nameChngBack)
 }

@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"net/http"
 
-	types "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 // StoragePool struct defines struct for StoragePool

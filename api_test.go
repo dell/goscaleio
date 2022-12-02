@@ -24,7 +24,7 @@ import (
 	"sync"
 	"testing"
 
-	v1 "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
+	v1 "github.com/dell/goscaleio/types/v1"
 )
 
 func setupClient(t *testing.T, hostAddr string) *Client {

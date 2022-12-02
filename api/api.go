@@ -28,7 +28,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	types "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 const (
@@ -66,14 +66,6 @@ type Client interface {
 	// DoandGetREsponseBody sends an HTTP reqeust to the API and returns
 	// the raw response body
 	DoAndGetResponseBody(
-		ctx context.Context,
-		method, path string,
-		headers map[string]string,
-		body interface{}) (*http.Response, error)
-
-	// DoandGetResponseBodyAuthorized sends an HTTP reqeust to the API and returns
-	// the raw response body [Already available auth token is getting used]
-	DoAndGetResponseBodyAuthorized(
 		ctx context.Context,
 		method, path string,
 		headers map[string]string,
@@ -287,116 +279,6 @@ func (c *client) DoWithHeaders(
 	return nil
 }
 
-func (c *client) DoAndGetResponseBodyAuthorized(
-	ctx context.Context,
-	method, uri string,
-	headers map[string]string,
-	body interface{}) (*http.Response, error) {
-
-	var (
-		err                error
-		req                *http.Request
-		res                *http.Response
-		ubf                = &bytes.Buffer{}
-		luri               = len(uri)
-		hostEndsWithSlash  = endsWithSlash(c.host)
-		uriBeginsWithSlash = beginsWithSlash(uri)
-	)
-
-	ubf.WriteString(c.host)
-
-	if !hostEndsWithSlash && (luri > 0) {
-		ubf.WriteString("/")
-	}
-
-	if luri > 0 {
-		if uriBeginsWithSlash {
-			ubf.WriteString(uri[1:])
-		} else {
-			ubf.WriteString(uri)
-		}
-	}
-
-	u, err := url.Parse(ubf.String())
-	if err != nil {
-		return nil, err
-	}
-	var isContentTypeSet bool
-
-	// marshal the message body (assumes json format)
-	if r, ok := body.(io.ReadCloser); ok {
-		req, err = http.NewRequest(method, u.String(), r)
-		defer r.Close()
-		if v, ok := headers[HeaderKeyContentType]; ok {
-			req.Header.Set(HeaderKeyContentType, v)
-		} else {
-			req.Header.Set(
-				HeaderKeyContentType, headerValContentTypeBinaryOctetStream)
-		}
-		isContentTypeSet = true
-	} else if body != nil {
-		buf := &bytes.Buffer{}
-		enc := json.NewEncoder(buf)
-		if err = enc.Encode(body); err != nil {
-			return nil, err
-		}
-
-		switch body.(type) {
-		case string:
-			var jsonStr = []byte(body.(string))
-			req, err = http.NewRequest(method, u.String(), bytes.NewBuffer(jsonStr))
-		default:
-			req, err = http.NewRequest(method, u.String(), buf)
-		}
-
-		if v, ok := headers[HeaderKeyContentType]; ok {
-			req.Header.Set(HeaderKeyContentType, v)
-		} else {
-			req.Header.Set(HeaderKeyContentType, HeaderValContentTypeJSON)
-		}
-		isContentTypeSet = true
-	} else {
-		req, err = http.NewRequest(method, u.String(), nil)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	if !isContentTypeSet {
-		isContentTypeSet = req.Header.Get(HeaderKeyContentType) != ""
-	}
-
-	// add headers to the request
-	for header, value := range headers {
-		if header == HeaderKeyContentType && isContentTypeSet {
-			continue
-		}
-		req.Header.Add(header, value)
-	}
-
-	// set the auth token
-	if c.token != "" {
-		req.Header.Set("Authorization", "Bearer "+c.token)
-	}
-
-	if c.showHTTP {
-		logRequest(ctx, req, c.doLog)
-	}
-
-	// send the request
-	req = req.WithContext(ctx)
-
-	if res, err = c.http.Do(req); err != nil {
-		return nil, err
-	}
-
-	if c.showHTTP {
-		logResponse(ctx, res, c.doLog)
-	}
-
-	return res, err
-}
 func (c *client) DoAndGetResponseBody(
 	ctx context.Context,
 	method, uri string,
@@ -431,6 +313,7 @@ func (c *client) DoAndGetResponseBody(
 	if err != nil {
 		return nil, err
 	}
+
 	var isContentTypeSet bool
 
 	// marshal the message body (assumes json format)

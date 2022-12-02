@@ -19,7 +19,7 @@ import (
 	"reflect"
 	"time"
 
-	types "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 // Sds defines struct for Sds

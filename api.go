@@ -29,8 +29,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/AnshumanPradipPatil1506/goscaleio/api"
-	types "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
+	"github.com/dell/goscaleio/api"
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 var (
@@ -50,7 +50,6 @@ var (
 type Client struct {
 	configConnect *ConfigConnect
 	api           api.Client
-	// FringeObject  interface{}
 }
 
 // Cluster defines struct for Cluster
@@ -206,28 +205,6 @@ func (c *Client) getJSONWithRetry(
 	doLog(log.WithError(err).Error, "returning error")
 
 	return err
-}
-
-func (c *Client) authorizedJSONWithRetry(method string, uri string,
-	body interface{}) (interface{}, error) {
-	timeout := time.Second * 60
-	headers := make(map[string]string)
-	headers[api.HeaderKeyAccept] = accHeader
-	headers[api.HeaderKeyContentType] = conHeader
-	// ctx context.Context,
-	// 	method, path string,
-	// 	headers map[string]string,
-	// 	body, resp interface{}
-
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-
-	resp, err := c.api.DoAndGetResponseBodyAuthorized(ctx, method, uri, headers, body)
-	if err == nil {
-		return resp, nil
-	}
-	return resp, err
 }
 
 func extractString(resp *http.Response) (string, error) {

@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	types "github.com/AnshumanPradipPatil1506/goscaleio/types/v1"
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 // Sdc defines struct for Sdc
@@ -73,7 +73,7 @@ func (s *System) GetSdcById(id string) (*Sdc, error) {
 
 // ChangeSdcName returns a Sdc after changing its name
 func (s *System) ChangeSdcName(idOfSdc, name string) (*Sdc, error) {
-	defer TimeSpent("GetSdcById", time.Now())
+	defer TimeSpent("ChangeSdcName", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcName", idOfSdc)
 
