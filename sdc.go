@@ -55,9 +55,9 @@ func (s *System) GetSdc() ([]types.Sdc, error) {
 	return sdcs, nil
 }
 
-// GetSdcById returns a Sdc searched by id
-func (s *System) GetSdcById(id string) (*Sdc, error) {
-	defer TimeSpent("GetSdcById", time.Now())
+// GetSdcByID returns a Sdc searched by id
+func (s *System) GetSdcByID(id string) (*Sdc, error) {
+	defer TimeSpent("GetSdcByID", time.Now())
 
 	path := fmt.Sprintf("api/instances/Sdc::%v", id)
 
