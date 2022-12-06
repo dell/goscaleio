@@ -295,3 +295,22 @@ func (v *Volume) SetVolumeSize(sizeInGB string) error {
 		http.MethodPost, path, payload, nil)
 	return err
 }
+
+//Get the list of volume with specified IOPS or Bandwidth
+func (sp *StoragePool)FindVolumeByIopsorBandwidth(LimitIops int, LimitBwInMbps int) ([]*types.Volume, error) {
+	volList,err := sp.GetVolume("","","","",false)
+	if err != nil {
+		return nil,err
+	}
+	var volumesNew []*types.Volume
+	
+	for _,vol := range volList {
+		for _,iops := range vol.MappedSdcInfo{
+			if iops.LimitIops == LimitIops || iops.LimitBwInMbps == LimitBwInMbps {
+				volumesNew = append(volumesNew, vol)
+			}
+		}
+		
+	}
+	return volumesNew,nil
+}

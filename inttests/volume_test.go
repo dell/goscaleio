@@ -94,6 +94,61 @@ func deleteAllVolumes(t *testing.T) error {
 	return nil
 }
 
+func findVolumeByIopsorBandwidth(t *testing.T) ([]*siotypes.Volume, error){
+	pool := getStoragePool(t)
+	if pool == nil {
+		return nil,fmt.Errorf("Error when getting storagepool")
+	}
+
+	iops:= 0
+	bandwidth:= 0
+	
+	vols,err := pool.FindVolumeByIopsorBandwidth(iops,bandwidth)
+	if err != nil{
+		return nil,err
+	}
+	return vols,nil
+}
+
+func TestFindVolumeByIopsorBandwidth(t *testing.T) {	
+	//create a volume
+	volID, err := createVolume(t, "")
+	assert.Nil(t, err)
+	newVolume, err := getVolByID(volID)
+	assert.Nil(t, err)
+	vr := goscaleio.NewVolume(C)
+    vr.Volume = newVolume 
+
+	// get the SDCs and pick one...
+ 	sdcs := getAllSdc(t)
+ 	assert.NotEqual(t, 0, len(sdcs))
+ 	chosenSDC := sdcs[0]
+ 	mapVolumeSdcParam := &siotypes.MapVolumeSdcParam{
+ 		SdcID:                 chosenSDC.Sdc.ID,
+ 		AllowMultipleMappings: "FALSE",
+ 		AllSdcs:               "",
+ 	}
+
+	//map volume to sdc
+ 	vr.MapVolumeSdc(mapVolumeSdcParam)
+	vol,err := findVolumeByIopsorBandwidth(t)
+	assert.Nil(t,err)
+	assert.NotNil(t,vol)
+	unmapVolumeSdcParam := &siotypes.UnmapVolumeSdcParam{
+		SdcID:   chosenSDC.Sdc.ID,
+		AllSdcs: "",
+	}
+
+	//unmap volume to sdc	
+	err = vr.UnmapVolumeSdc(unmapVolumeSdcParam)
+	assert.Nil(t, err)
+	
+	//delete volume
+	err = deleteVolume(t, volID)
+	assert.Nil(t, err)
+	deleteAllVolumes(t)
+}
+
 func TestGetVolumes(t *testing.T) {
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
