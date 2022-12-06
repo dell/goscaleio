@@ -72,6 +72,7 @@ func (s *System) GetSdcById(id string) (*Sdc, error) {
 }
 
 // ChangeSdcName returns a Sdc after changing its name
+// https://developer.dell.com/apis/4008/versions/4.0/PowerFlex_REST_API.json/paths/~1api~1instances~1Sdc::%7Bid%7D~1action~1setSdcName/post
 func (s *System) ChangeSdcName(idOfSdc, name string) (*Sdc, error) {
 	defer TimeSpent("ChangeSdcName", time.Now())
 
