@@ -94,16 +94,11 @@ func deleteAllVolumes(t *testing.T) error {
 	return nil
 }
 
-func findVolumeByIopsorBandwidth(t *testing.T) ([]*siotypes.Volume, error){
-	pool := getStoragePool(t)
-	if pool == nil {
-		return nil,fmt.Errorf("Error when getting storagepool")
-	}
-
+func findVolumeByIopsorBandwidth(t *testing.T) ([]*siotypes.Volume, error){	
 	iops:= 0
 	bandwidth:= 0
 	
-	vols,err := pool.FindVolumeByIopsorBandwidth(iops,bandwidth)
+	vols,err := C.FindVolumeByIopsorBandwidth(iops,bandwidth)
 	if err != nil{
 		return nil,err
 	}
@@ -114,6 +109,7 @@ func TestFindVolumeByIopsorBandwidth(t *testing.T) {
 	//create a volume
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
+	//get Volume by Id
 	newVolume, err := getVolByID(volID)
 	assert.Nil(t, err)
 	vr := goscaleio.NewVolume(C)
@@ -123,23 +119,25 @@ func TestFindVolumeByIopsorBandwidth(t *testing.T) {
  	sdcs := getAllSdc(t)
  	assert.NotEqual(t, 0, len(sdcs))
  	chosenSDC := sdcs[0]
+
+	//map volume to sdc
  	mapVolumeSdcParam := &siotypes.MapVolumeSdcParam{
  		SdcID:                 chosenSDC.Sdc.ID,
  		AllowMultipleMappings: "FALSE",
  		AllSdcs:               "",
  	}
-
-	//map volume to sdc
  	vr.MapVolumeSdc(mapVolumeSdcParam)
+	
+	//find Volume by Iops or bandwidth
 	vol,err := findVolumeByIopsorBandwidth(t)
 	assert.Nil(t,err)
 	assert.NotNil(t,vol)
+
+	//unmap volume to sdc
 	unmapVolumeSdcParam := &siotypes.UnmapVolumeSdcParam{
 		SdcID:   chosenSDC.Sdc.ID,
 		AllSdcs: "",
-	}
-
-	//unmap volume to sdc	
+	}	
 	err = vr.UnmapVolumeSdc(unmapVolumeSdcParam)
 	assert.Nil(t, err)
 	

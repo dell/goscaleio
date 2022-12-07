@@ -297,17 +297,29 @@ func (v *Volume) SetVolumeSize(sizeInGB string) error {
 }
 
 //Get the list of volume with specified IOPS or Bandwidth
-func (sp *StoragePool)FindVolumeByIopsorBandwidth(LimitIops int, LimitBwInMbps int) ([]*types.Volume, error) {
-	volList,err := sp.GetVolume("","","","",false)
+//negative value of LimitIops or LimitBwInMbps indicates that 
+//don't populates volumes based on that value
+func (c *Client)FindVolumeByIopsorBandwidth(LimitIops int, LimitBwInMbps int) ([]*types.Volume, error) {
+	volList,err := c.GetVolume("","","","",false)
 	if err != nil {
 		return nil,err
 	}
 	var volumesNew []*types.Volume
 	
 	for _,vol := range volList {
-		for _,iops := range vol.MappedSdcInfo{
-			if iops.LimitIops == LimitIops || iops.LimitBwInMbps == LimitBwInMbps {
-				volumesNew = append(volumesNew, vol)
+		for _,sdc := range vol.MappedSdcInfo{
+			if LimitIops >= 0 && LimitBwInMbps >= 0 {
+				if sdc.LimitIops == LimitIops && sdc.LimitBwInMbps == LimitBwInMbps {
+					volumesNew = append(volumesNew, vol)
+				}
+			} else if LimitIops >= 0 && LimitBwInMbps < 0{
+				if sdc.LimitIops == LimitIops  {
+					volumesNew = append(volumesNew, vol)
+				}
+			}else if LimitIops < 0 && LimitBwInMbps >= 0{
+				if sdc.LimitBwInMbps == LimitBwInMbps  {
+					volumesNew = append(volumesNew, vol)
+				}
 			}
 		}
 		
