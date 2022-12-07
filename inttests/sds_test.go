@@ -120,3 +120,15 @@ func TestCreateSdsInvalid(t *testing.T) {
 	assert.Equal(t, "", sdsID)
 
 }
+
+// TestDeleteSds will attempt to delete an SDS, which results in faliure
+func TestDeleteSds(t *testing.T) {
+	pd := getProtectionDomain(t)
+	assert.NotNil(t, pd)
+
+	// attempt to delete an SDS with a invalid Id
+	// this is done, in a failure mode, to prevent removing the data in existance
+	sdsId := "invalid"
+	err := pd.DeleteSds(sdsId)
+	assert.NotNil(t, err)
+}
