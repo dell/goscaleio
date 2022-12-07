@@ -160,7 +160,7 @@ type ioctlQueryMDMs struct {
 	mdms [20]ioctlMdmInfo
 }
 
-//DrvCfgQuerySystems will return the configured MDM endpoints for the locally installed SDC
+// DrvCfgQuerySystems will return the configured MDM endpoints for the locally installed SDC
 func DrvCfgQuerySystems() (*[]ConfiguredCluster, error) {
 	clusters := make([]ConfiguredCluster, 0)
 

@@ -304,7 +304,7 @@ type AutoSnapshotParam struct {
 
 // LockAutoSnapshot locks volume's auto snapshot in snapshotpolicy
 func (v *Volume) LockAutoSnapshot() error {
-	if v.Volume.VolumeType != "Snapshot"{
+	if v.Volume.VolumeType != "Snapshot" {
 		return errors.New("Volume type should be snapshot")
 	}
 	link, err := GetLink(v.Volume.Links, "self")
@@ -323,10 +323,10 @@ func (v *Volume) LockAutoSnapshot() error {
 
 // UnlockAutoSnapshot unlocks volume's auto snapshot in snapshotpolicy
 func (v *Volume) UnlockAutoSnapshot() error {
-	if v.Volume.VolumeType != "Snapshot"{
+	if v.Volume.VolumeType != "Snapshot" {
 		return errors.New("Volume type should be snapshot")
 	}
-	
+
 	link, err := GetLink(v.Volume.Links, "self")
 	if err != nil {
 		return err
@@ -359,5 +359,3 @@ func (v *Volume) SetVolumeAccessModeLimit(mode string) error {
 	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
 	return err
 }
-
-
