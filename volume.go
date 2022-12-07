@@ -296,16 +296,15 @@ func (v *Volume) SetVolumeSize(sizeInGB string) error {
 	return err
 }
 
-//Get the list of volume with specified IOPS or Bandwidth
-//negative value of LimitIops or LimitBwInMbps indicates that 
-//don't populates volumes based on that value
-func (c *Client)FindVolumeByIopsorBandwidth(LimitIops int, LimitBwInMbps int) ([]*types.Volume, error) {
+// FindVolumeByIopsOrBandwidth : Get the list of volume with specified IOPS or Bandwidth
+func (c *Client)FindVolumeByIopsOrBandwidth(LimitIops int, LimitBwInMbps int) ([]*types.Volume, error) {
 	volList,err := c.GetVolume("","","","",false)
 	if err != nil {
 		return nil,err
 	}
 	var volumesNew []*types.Volume
-	
+	//negative value of LimitIops or LimitBwInMbps indicates that 
+	//don't populates volumes based on that value
 	for _,vol := range volList {
 		for _,sdc := range vol.MappedSdcInfo{
 			if LimitIops >= 0 && LimitBwInMbps >= 0 {

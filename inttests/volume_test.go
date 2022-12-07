@@ -94,18 +94,18 @@ func deleteAllVolumes(t *testing.T) error {
 	return nil
 }
 
-func findVolumeByIopsorBandwidth(t *testing.T) ([]*siotypes.Volume, error){	
+func findVolumeByIopsOrBandwidth(t *testing.T) ([]*siotypes.Volume, error){	
 	iops:= 0
 	bandwidth:= 0
 	
-	vols,err := C.FindVolumeByIopsorBandwidth(iops,bandwidth)
+	vols,err := C.FindVolumeByIopsOrBandwidth(iops,bandwidth)
 	if err != nil{
 		return nil,err
 	}
 	return vols,nil
 }
 
-func TestFindVolumeByIopsorBandwidth(t *testing.T) {	
+func TestFindVolumeByIopsOrBandwidth(t *testing.T) {	
 	//create a volume
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
@@ -129,7 +129,7 @@ func TestFindVolumeByIopsorBandwidth(t *testing.T) {
  	vr.MapVolumeSdc(mapVolumeSdcParam)
 	
 	//find Volume by Iops or bandwidth
-	vol,err := findVolumeByIopsorBandwidth(t)
+	vol,err := findVolumeByIopsOrBandwidth(t)
 	assert.Nil(t,err)
 	assert.NotNil(t,vol)
 
