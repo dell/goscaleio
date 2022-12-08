@@ -187,7 +187,7 @@ func (pd *ProtectionDomain) SetSdsName(id, name string) error {
 	return nil
 }
 
-// SetSdsName sets sds name
+// SetSdsPort sets sds name
 func (pd *ProtectionDomain) SetSdsPort(id, port string) error {
 	defer TimeSpent("SetSdsPort", time.Now())
 
