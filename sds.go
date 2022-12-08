@@ -131,3 +131,76 @@ func (pd *ProtectionDomain) DeleteSds(id string) error {
 
 	return nil
 }
+
+// SetSDSIPRole sets IP and Role of SDS
+func (pd *ProtectionDomain) SetSDSIPRole(id, ip, role string) error {
+	defer TimeSpent("SetSDSIPRole", time.Now())
+
+	sdsParam := &types.SdsIPRole{
+		SdsIPToSet: ip,
+		NewRole:    role,
+	}
+
+	path := fmt.Sprintf("/api/instances/Sds::%v/action/setSdsIpRole", id)
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// RemoveSDSIP sets IP and Role of SDS
+func (pd *ProtectionDomain) RemoveSDSIP(id, ip string) error {
+	defer TimeSpent("RemoveSDSIP", time.Now())
+
+	sdsParam := &types.SdsIP{
+		IP: ip,
+	}
+
+	path := fmt.Sprintf("/api/instances/Sds::%v/action/removeSdsIp", id)
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SetSdsName sets sds name
+func (pd *ProtectionDomain) SetSdsName(id, name string) error {
+	defer TimeSpent("SetSdsName", time.Now())
+
+	sdsParam := &types.SdsName{
+		Name: name,
+	}
+
+	path := fmt.Sprintf("/api/instances/Sds::%v/action/setSdsName", id)
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SetSdsName sets sds name
+func (pd *ProtectionDomain) SetSdsPort(id, port string) error {
+	defer TimeSpent("SetSdsPort", time.Now())
+
+	sdsParam := &types.SdsPort{
+		SdsPort: port,
+	}
+
+	path := fmt.Sprintf("/api/instances/Sds::%v/action/setSdsPort", id)
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

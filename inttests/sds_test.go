@@ -128,7 +128,58 @@ func TestDeleteSds(t *testing.T) {
 
 	// attempt to delete an SDS with a invalid Id
 	// this is done, in a failure mode, to prevent removing the data in existance
-	sdsId := "invalid"
+	sdsId := "invalid_dc4a564f00000002"
 	err := pd.DeleteSds(sdsId)
+	assert.NotNil(t, err)
+}
+
+// TestSetSDSIPRole will attempt to set IP and Role to an SDS, which results in faliure
+func TestSetSDSIPRole(t *testing.T) {
+	pd := getProtectionDomain(t)
+	assert.NotNil(t, pd)
+
+	// attempt to set IP and Role to an SDS
+	// this is done, in a failure mode, to prevent changing the data in existance
+	sdsId := "invalid_dc4a564f00000002"
+	sdsIP := "192.168.0.203"
+	sdsRole := "all"
+	err := pd.SetSDSIPRole(sdsId, sdsIP, sdsRole)
+	assert.NotNil(t, err)
+}
+
+// TestRemoveSDSIP removes IP from SDS
+func TestRemoveSDSIP(t *testing.T) {
+	pd := getProtectionDomain(t)
+	assert.NotNil(t, pd)
+
+	// attempt to remove IP from an SDS
+	// this is done, in a failure mode, to prevent removing the data in existance
+	sdsId := "invalid_dc4a564f00000002"
+	sdsIP := "192.168.0.203"
+	err := pd.RemoveSDSIP(sdsId, sdsIP)
+	assert.NotNil(t, err)
+}
+
+// TestSetSdsName sets SDS name
+func TestSetSdsName(t *testing.T) {
+	pd := getProtectionDomain(t)
+	assert.NotNil(t, pd)
+
+	// attempt to set SDS name
+	// this is done, in a failure mode, to prevent changing the data in existance
+	sdsId := "invalid_dc4a564f00000002"
+	err := pd.SetSdsName(sdsId, "sds123")
+	assert.NotNil(t, err)
+}
+
+// TestSetSdsPort sets SDS port
+func TestSetSdsPort(t *testing.T) {
+	pd := getProtectionDomain(t)
+	assert.NotNil(t, pd)
+
+	// attempt to set SDS port
+	// this is done, in a failure mode, to prevent changing the data in existance
+	sdsId := "Invalid_dc4a564f00000002"
+	err := pd.SetSdsPort(sdsId, "7072")
 	assert.NotNil(t, err)
 }
