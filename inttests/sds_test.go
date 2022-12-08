@@ -128,8 +128,8 @@ func TestDeleteSds(t *testing.T) {
 
 	// attempt to delete an SDS with a invalid Id
 	// this is done, in a failure mode, to prevent removing the data in existance
-	sdsId := "invalid_dc4a564f00000002"
-	err := pd.DeleteSds(sdsId)
+	sdsID := "invalid_dc4a564f00000002"
+	err := pd.DeleteSds(sdsID)
 	assert.NotNil(t, err)
 }
 
@@ -140,10 +140,10 @@ func TestSetSDSIPRole(t *testing.T) {
 
 	// attempt to set IP and Role to an SDS
 	// this is done, in a failure mode, to prevent changing the data in existance
-	sdsId := "invalid_dc4a564f00000002"
+	sdsID := "invalid_dc4a564f00000002"
 	sdsIP := "192.168.0.203"
 	sdsRole := "all"
-	err := pd.SetSDSIPRole(sdsId, sdsIP, sdsRole)
+	err := pd.SetSDSIPRole(sdsID, sdsIP, sdsRole)
 	assert.NotNil(t, err)
 }
 
@@ -154,9 +154,9 @@ func TestRemoveSDSIP(t *testing.T) {
 
 	// attempt to remove IP from an SDS
 	// this is done, in a failure mode, to prevent removing the data in existance
-	sdsId := "invalid_dc4a564f00000002"
+	sdsID := "invalid_dc4a564f00000002"
 	sdsIP := "192.168.0.203"
-	err := pd.RemoveSDSIP(sdsId, sdsIP)
+	err := pd.RemoveSDSIP(sdsID, sdsIP)
 	assert.NotNil(t, err)
 }
 
@@ -167,8 +167,8 @@ func TestSetSdsName(t *testing.T) {
 
 	// attempt to set SDS name
 	// this is done, in a failure mode, to prevent changing the data in existance
-	sdsId := "invalid_dc4a564f00000002"
-	err := pd.SetSdsName(sdsId, "sds123")
+	sdsID := "invalid_dc4a564f00000002"
+	err := pd.SetSdsName(sdsID, "sds123")
 	assert.NotNil(t, err)
 }
 
@@ -179,7 +179,7 @@ func TestSetSdsPort(t *testing.T) {
 
 	// attempt to set SDS port
 	// this is done, in a failure mode, to prevent changing the data in existance
-	sdsId := "Invalid_dc4a564f00000002"
-	err := pd.SetSdsPort(sdsId, "7072")
+	sdsID := "Invalid_dc4a564f00000002"
+	err := pd.SetSdsPort(sdsID, "7072")
 	assert.NotNil(t, err)
 }
