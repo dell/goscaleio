@@ -395,6 +395,21 @@ type StoragePoolParam struct {
 	MediaType                string `json:"mediaType,omitempty"`
 }
 
+type ModifyStoragePoolName struct {
+	Name string `json:"name"`
+}
+
+type StoragePoolMediaType struct {
+	MediaType string `json:"mediaType"`
+}
+
+type StoragePoolUseRmCache struct {
+	UseRmcache string `json:"useRmcache"`
+}
+
+type StoragePoolUseRfCache struct {
+}
+
 // StoragePoolResp defines struct for StoragePoolResp
 type StoragePoolResp struct {
 	ID string `json:"id"`

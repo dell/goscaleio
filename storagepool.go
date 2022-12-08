@@ -66,6 +66,96 @@ func (pd *ProtectionDomain) CreateStoragePool(name string, mediaType string) (st
 	return sp.ID, nil
 }
 
+// Modify storagepool Name
+func (sp *ProtectionDomain) ModifyStoragePoolName(ID, name string) (string, error) {
+
+	storagePoolParam := &types.ModifyStoragePoolName{
+		Name: name,
+	}
+
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setStoragePoolName", ID)
+
+	spresp := types.StoragePoolResp{}
+	err := sp.client.getJSONWithRetry(
+		http.MethodPost, path, storagePoolParam, &spresp)
+	if err != nil {
+		return "", err
+	}
+
+	return spresp.ID, nil
+}
+
+// Modify storagepool Media Type
+func (sp *ProtectionDomain) ModifyStoragePoolMedia(ID, mediaType string) (string, error) {
+
+	storagePool := &types.StoragePoolMediaType{
+		MediaType: mediaType,
+	}
+
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setMediaType", ID)
+
+	spResp := types.StoragePoolResp{}
+	err := sp.client.getJSONWithRetry(
+		http.MethodPost, path, storagePool, &spResp)
+	if err != nil {
+		return "", err
+	}
+
+	return spResp.ID, nil
+}
+
+// Modify storagepool RMcache
+func (sp *StoragePool) ModifyRMCache(useRmcache string) error {
+
+	link, err := GetLink(sp.StoragePool.Links, "self")
+	if err != nil {
+		return err
+	}
+	path := fmt.Sprintf("%v/action/setUseRmcache", link.HREF)
+	fmt.Println(path)
+	payload := &types.StoragePoolUseRmCache{
+		UseRmcache: useRmcache,
+	}
+	err1 := sp.client.getJSONWithRetry(
+		http.MethodPost, path, payload, nil)
+	return err1
+}
+
+// Enable storagepool RFcache
+func (sp *ProtectionDomain) EnableRFCache(ID string) (string, error) {
+
+	storagePoolParam := &types.StoragePoolUseRfCache{}
+
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/enableRfcache", ID)
+
+	spResp := types.StoragePoolResp{}
+	err := sp.client.getJSONWithRetry(
+		http.MethodPost, path, storagePoolParam, &spResp)
+	if err != nil {
+		return "", err
+	}
+
+	return spResp.ID, nil
+}
+
+// Disable storagepool RFcache
+func (sp *ProtectionDomain) DisableRFCache(ID string) (string, error) {
+
+	payload := &types.StoragePoolUseRfCache{}
+
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/disableRfcache", ID)
+
+	spResp := types.StoragePoolResp{}
+	err := sp.client.getJSONWithRetry(
+
+		http.MethodPost, path, payload, &spResp)
+	if err != nil {
+		return "", err
+	}
+
+	return spResp.ID, nil
+}
+
 // DeleteStoragePool will delete a storage pool
 func (pd *ProtectionDomain) DeleteStoragePool(name string) error {
 	// get the storage pool name
