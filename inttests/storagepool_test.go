@@ -224,6 +224,7 @@ func TestCreateDeleteStoragePool(t *testing.T) {
 
 }
 
+// Modify Test Storagepool Name
 func TestModifyStoragePoolName(t *testing.T) {
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
@@ -232,6 +233,7 @@ func TestModifyStoragePoolName(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+// Modify Test Storagepool Media Type
 func TestStoragePoolMediaType(t *testing.T) {
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
@@ -240,6 +242,7 @@ func TestStoragePoolMediaType(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// Modify Test Storagepool Enable RF cache
 func TestEnableRFCache(t *testing.T) {
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
@@ -248,6 +251,7 @@ func TestEnableRFCache(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// Modify Test Storagepool Disable RF cache
 func TestDisableRFCache(t *testing.T) {
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
@@ -256,6 +260,7 @@ func TestDisableRFCache(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// Set Test Storagepool RMcache
 func TestSetRmcache(t *testing.T) {
 	pd := getProtectionDomain(t)
 	name := getStoragePoolName(t)
