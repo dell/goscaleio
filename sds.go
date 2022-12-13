@@ -38,6 +38,7 @@ func NewSds(client *Client) *Sds {
 
 // NewSdsEx returns a new SdsEx
 func NewSdsEx(client *Client, sds *types.Sds) *Sds {
+
 	return &Sds{
 		Sds:    sds,
 		client: client,
