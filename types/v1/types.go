@@ -395,18 +395,22 @@ type StoragePoolParam struct {
 	MediaType                string `json:"mediaType,omitempty"`
 }
 
+// ModifyStoragePoolName defines struct for ModifyStoragePoolName
 type ModifyStoragePoolName struct {
 	Name string `json:"name"`
 }
 
+// StoragePoolMediaType defines struct for StoragePoolMediaType
 type StoragePoolMediaType struct {
 	MediaType string `json:"mediaType"`
 }
 
+// StoragePoolUseRmCache defines struct for StoragePoolUseRmCache
 type StoragePoolUseRmCache struct {
 	UseRmcache string `json:"useRmcache"`
 }
 
+// StoragePoolUseRfCache defines struct for StoragePoolUseRfCache
 type StoragePoolUseRfCache struct {
 }
 

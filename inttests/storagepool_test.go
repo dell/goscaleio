@@ -224,50 +224,44 @@ func TestCreateDeleteStoragePool(t *testing.T) {
 
 }
 
-// Modify Test Storagepool Name
+// Modify TestModifyStoragePoolName
 func TestModifyStoragePoolName(t *testing.T) {
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
-	s, err := domain.ModifyStoragePoolName("Invalid", "STPnew")
-	fmt.Println(s)
+	_, err := domain.ModifyStoragePoolName("Invalid", "STPnew")
 	assert.NotNil(t, err)
 }
 
-// Modify Test Storagepool Media Type
+// Modify TestStoragePoolMediaType
 func TestStoragePoolMediaType(t *testing.T) {
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
-	s, err := domain.ModifyStoragePoolMedia("b9b0be6600000004", "SSD")
-	fmt.Println(s)
+	_, err := domain.ModifyStoragePoolMedia("b9b0be6600000004", "SSD")
 	assert.Nil(t, err)
 }
 
-// Modify Test Storagepool Enable RF cache
+// Modify TestEnableRFCache
 func TestEnableRFCache(t *testing.T) {
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
-	s, err := domain.EnableRFCache("b9b0be6400000003")
-	fmt.Println(s)
+	_, err := domain.EnableRFCache("b9b0be6400000003")
 	assert.Nil(t, err)
 }
 
-// Modify Test Storagepool Disable RF cache
+// Modify TestDisableRFCache
 func TestDisableRFCache(t *testing.T) {
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
-	s, err := domain.DisableRFCache("b9b0be6400000003")
-	fmt.Println(s)
+	_, err := domain.DisableRFCache("b9b0be6400000003")
 	assert.Nil(t, err)
 }
 
-// Set Test Storagepool RMcache
+// Set TestSetRmcache
 func TestSetRmcache(t *testing.T) {
 	pd := getProtectionDomain(t)
 	name := getStoragePoolName(t)
-	fmt.Println("STPnew", name)
 
-	pool, err := pd.FindStoragePool("", name, "")
-	fmt.Println(err, pool)
+	pool, _ := pd.FindStoragePool("", name, "")
 
 	// create a StoragePool instance to return
 	domain := goscaleio.NewStoragePoolEx(C, pool)
@@ -276,6 +270,5 @@ func TestSetRmcache(t *testing.T) {
 	tempPool := goscaleio.NewStoragePool(C)
 	tempPool.StoragePool = pool
 
-	err = domain.ModifyRMCache("true")
-	fmt.Println(err)
+	_ = domain.ModifyRMCache("true")
 }

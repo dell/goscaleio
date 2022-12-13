@@ -66,8 +66,8 @@ func (pd *ProtectionDomain) CreateStoragePool(name string, mediaType string) (st
 	return sp.ID, nil
 }
 
-// Modify storagepool Name
-func (sp *ProtectionDomain) ModifyStoragePoolName(ID, name string) (string, error) {
+// ModifyStoragePoolName Modifies Storagepool Name
+func (pd *ProtectionDomain) ModifyStoragePoolName(ID, name string) (string, error) {
 
 	storagePoolParam := &types.ModifyStoragePoolName{
 		Name: name,
@@ -76,7 +76,7 @@ func (sp *ProtectionDomain) ModifyStoragePoolName(ID, name string) (string, erro
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setStoragePoolName", ID)
 
 	spresp := types.StoragePoolResp{}
-	err := sp.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(
 		http.MethodPost, path, storagePoolParam, &spresp)
 	if err != nil {
 		return "", err
@@ -85,8 +85,8 @@ func (sp *ProtectionDomain) ModifyStoragePoolName(ID, name string) (string, erro
 	return spresp.ID, nil
 }
 
-// Modify storagepool Media Type
-func (sp *ProtectionDomain) ModifyStoragePoolMedia(ID, mediaType string) (string, error) {
+// ModifyStoragePoolMedia Modifies Storagepool Media Type
+func (pd *ProtectionDomain) ModifyStoragePoolMedia(ID, mediaType string) (string, error) {
 
 	storagePool := &types.StoragePoolMediaType{
 		MediaType: mediaType,
@@ -95,7 +95,7 @@ func (sp *ProtectionDomain) ModifyStoragePoolMedia(ID, mediaType string) (string
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setMediaType", ID)
 
 	spResp := types.StoragePoolResp{}
-	err := sp.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(
 		http.MethodPost, path, storagePool, &spResp)
 	if err != nil {
 		return "", err
@@ -104,7 +104,7 @@ func (sp *ProtectionDomain) ModifyStoragePoolMedia(ID, mediaType string) (string
 	return spResp.ID, nil
 }
 
-// Modify storagepool RMcache
+// ModifyRMCache Sets Read RAM Cache
 func (sp *StoragePool) ModifyRMCache(useRmcache string) error {
 
 	link, err := GetLink(sp.StoragePool.Links, "self")
@@ -112,24 +112,23 @@ func (sp *StoragePool) ModifyRMCache(useRmcache string) error {
 		return err
 	}
 	path := fmt.Sprintf("%v/action/setUseRmcache", link.HREF)
-	fmt.Println(path)
 	payload := &types.StoragePoolUseRmCache{
 		UseRmcache: useRmcache,
 	}
-	err1 := sp.client.getJSONWithRetry(
+	err = sp.client.getJSONWithRetry(
 		http.MethodPost, path, payload, nil)
-	return err1
+	return err
 }
 
-// Enable storagepool RFcache
-func (sp *ProtectionDomain) EnableRFCache(ID string) (string, error) {
+// EnableRFCache Enables RFCache
+func (pd *ProtectionDomain) EnableRFCache(ID string) (string, error) {
 
 	storagePoolParam := &types.StoragePoolUseRfCache{}
 
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/enableRfcache", ID)
 
 	spResp := types.StoragePoolResp{}
-	err := sp.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(
 		http.MethodPost, path, storagePoolParam, &spResp)
 	if err != nil {
 		return "", err
@@ -138,15 +137,15 @@ func (sp *ProtectionDomain) EnableRFCache(ID string) (string, error) {
 	return spResp.ID, nil
 }
 
-// Disable storagepool RFcache
-func (sp *ProtectionDomain) DisableRFCache(ID string) (string, error) {
+// DisableRFCache Disables RFCache
+func (pd *ProtectionDomain) DisableRFCache(ID string) (string, error) {
 
 	payload := &types.StoragePoolUseRfCache{}
 
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/disableRfcache", ID)
 
 	spResp := types.StoragePoolResp{}
-	err := sp.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(
 
 		http.MethodPost, path, payload, &spResp)
 	if err != nil {
