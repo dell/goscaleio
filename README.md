@@ -10,6 +10,7 @@ The *Goscaleio* project represents API bindings that can be used to provide Scal
 ## Use Cases
 Any application written in Go can take advantage of these bindings.  Specifically, things that are involved in monitoring, management, and more specifically infrastructrue as code would find these bindings relevant.
 
+Hey!
 
 ## <a id="state">Current State</a>
 Early build-out and pre-documentation stages.  The basics around authentication and object models are there.
