@@ -138,3 +138,22 @@ func TestFindSdcVolumes(t *testing.T) {
 		assert.Nil(t, err)
 	}
 }
+
+// TestChangeSdcName function tests Change name functionality of SDC.
+func TestChangeSdcName(t *testing.T) {
+
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	sdc, err := system.GetSdc()
+	assert.Nil(t, err)
+	firstSdc := sdc[0]
+
+	baseName := firstSdc.Name
+	nameChng, err := system.ChangeSdcName(firstSdc.ID, randString(10))
+	assert.Nil(t, err)
+	assert.NotNil(t, nameChng)
+	nameChngBack, err := system.ChangeSdcName(firstSdc.ID, baseName)
+	assert.Nil(t, err)
+	assert.NotNil(t, nameChngBack)
+}
