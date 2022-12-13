@@ -410,21 +410,34 @@ type MappedSdcInfo struct {
 
 // Volume defines struct for Volume
 type Volume struct {
-	StoragePoolID           string           `json:"storagePoolId"`
-	UseRmCache              bool             `json:"useRmcache"`
-	MappingToAllSdcsEnabled bool             `json:"mappingToAllSdcsEnabled"`
-	MappedSdcInfo           []*MappedSdcInfo `json:"mappedSdcInfo"`
-	IsObfuscated            bool             `json:"isObfuscated"`
-	VolumeType              string           `json:"volumeType"`
-	ConsistencyGroupID      string           `json:"consistencyGroupId"`
-	VTreeID                 string           `json:"vtreeId"`
-	AncestorVolumeID        string           `json:"ancestorVolumeId"`
-	MappedScsiInitiatorInfo string           `json:"mappedScsiInitiatorInfo"`
-	SizeInKb                int              `json:"sizeInKb"`
-	CreationTime            int              `json:"creationTime"`
-	Name                    string           `json:"name"`
-	ID                      string           `json:"id"`
-	Links                   []*Link          `json:"links"`
+	StoragePoolID                      string           `json:"storagePoolId"`
+	UseRmCache                         bool             `json:"useRmcache"`
+	MappingToAllSdcsEnabled            bool             `json:"mappingToAllSdcsEnabled"`
+	MappedSdcInfo                      []*MappedSdcInfo `json:"mappedSdcInfo"`
+	IsObfuscated                       bool             `json:"isObfuscated"`
+	VolumeType                         string           `json:"volumeType"`
+	ConsistencyGroupID                 string           `json:"consistencyGroupId"`
+	VTreeID                            string           `json:"vtreeId"`
+	AncestorVolumeID                   string           `json:"ancestorVolumeId"`
+	MappedScsiInitiatorInfo            string           `json:"mappedScsiInitiatorInfo"`
+	SizeInKb                           int              `json:"sizeInKb"`
+	CreationTime                       int              `json:"creationTime"`
+	Name                               string           `json:"name"`
+	ID                                 string           `json:"id"`
+	DataLayout                         string           `json:"dataLayout"`
+	NotGenuineSnapshot                 bool             `json:"notGenuineSnapshot"`
+	AccessModeLimit                    string           `json:"accessModeLimit"`
+	SecureSnapshotExpTime              int              `json:"secureSnapshotExpTime"`
+	ManagedBy                          string           `json:"managedBy"`
+	LockedAutoSnapshot                 bool             `json:"lockedAutoSnapshot"`
+	LockedAutoSnapshotMarkedForRemoval bool             `json:"lockedAutoSnapshotMarkedForRemoval"`
+	CompressionMethod                  string           `json:"compressionMethod"`
+	TimeStampIsAccurate                bool             `json:"timeStampIsAccurate"`
+	OriginalExpiryTime                 int              `json:"originalExpiryTime"`
+	VolumeReplicationState             string           `json:"volumeReplicationState"`
+	ReplicationJournalVolume           bool             `json:"replicationJournalVolume"`
+	ReplicationTimeStamp               int              `json:"replicationTimeStamp"`
+	Links                              []*Link          `json:"links"`
 }
 
 // VolumeParam defines struct for VolumeParam
