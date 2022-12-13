@@ -65,7 +65,7 @@ func (s *System) GetSdcByID(id string) (*Sdc, error) {
 	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &sdc)
 	if err != nil {
-		return NewSdc(s.client, &sdc), nil
+		return nil, err
 	}
 
 	return NewSdc(s.client, &sdc), nil
