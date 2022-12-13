@@ -416,7 +416,7 @@ func TestMapQueryUnmapSnapshot(t *testing.T) {
 	sr := goscaleio.NewVolume(C)
 	sr.Volume = snap
 	err = sr.SetVolumeAccessModeLimit("ReadWrite")
-	assert.Nil(t,err)
+	assert.Nil(t, err)
 	// get the SDCs and pick one...
 	sdcs := getAllSdc(t)
 	assert.NotEqual(t, 0, len(sdcs))
@@ -488,7 +488,7 @@ func TestMapQueryUnmapSnapshotInvalid(t *testing.T) {
 	sr := goscaleio.NewVolume(C)
 	sr.Volume = snap
 	err = sr.SetVolumeAccessModeLimit(invalidIdentifier)
-	assert.NotNil(t,err)
+	assert.NotNil(t, err)
 	// get the SDCs and pick one...
 	sdcs := getAllSdc(t)
 	assert.NotEqual(t, 0, len(sdcs))
