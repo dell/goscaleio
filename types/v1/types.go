@@ -402,10 +402,13 @@ type StoragePoolResp struct {
 
 // MappedSdcInfo defines struct for MappedSdcInfo
 type MappedSdcInfo struct {
-	SdcID         string `json:"sdcId"`
-	SdcIP         string `json:"sdcIp"`
-	LimitIops     int    `json:"limitIops"`
-	LimitBwInMbps int    `json:"limitBwInMbps"`
+	SdcID                 string `json:"sdcId"`
+	SdcIP                 string `json:"sdcIp"`
+	LimitIops             int    `json:"limitIops"`
+	LimitBwInMbps         int    `json:"limitBwInMbps"`
+	SdcName               string `json:"sdcName"`
+	AccessMode            string `json:"accessMode"`
+	IsDirectBufferMapping bool   `json:"isDirectBufferMapping"`
 }
 
 // Volume defines struct for Volume
