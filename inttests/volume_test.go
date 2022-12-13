@@ -415,8 +415,80 @@ func TestMapQueryUnmapSnapshot(t *testing.T) {
 	assert.Nil(t, err)
 	sr := goscaleio.NewVolume(C)
 	sr.Volume = snap
-	sr.SetVolumeAccessModeLimit("ReadWrite")
+	err = sr.SetVolumeAccessModeLimit("ReadWrite")
+	assert.Nil(t,err)
+	// get the SDCs and pick one...
+	sdcs := getAllSdc(t)
+	assert.NotEqual(t, 0, len(sdcs))
+	chosenSDC := sdcs[0]
+	mapVolumeSdcParam := &siotypes.MapVolumeSdcParam{
+		SdcID:                 chosenSDC.Sdc.ID,
+		AllowMultipleMappings: "FALSE",
+		AllSdcs:               "",
+	}
+	err = sr.MapVolumeSdc(mapVolumeSdcParam)
+	assert.Nil(t, err)
 
+	unmapVolumeSdcParam := &siotypes.UnmapVolumeSdcParam{
+		SdcID:   chosenSDC.Sdc.ID,
+		AllSdcs: "",
+	}
+	sr.UnmapVolumeSdc(unmapVolumeSdcParam)
+	assert.Nil(t, err)
+
+	// Delete Snapshot and Volume
+	err = deleteVolume(t, sr.Volume.ID)
+	assert.Nil(t, err)
+	err = deleteVolume(t, volID)
+	assert.Nil(t, err)
+
+}
+
+func TestMapQueryUnmapSnapshotInvalid(t *testing.T) {
+	volID, err := createVolume(t, "")
+	assert.Nil(t, err)
+	newVolume, err := getVolByID(volID)
+	assert.Nil(t, err)
+
+	// now make a snapshot
+	snapshotDefs := make([]*siotypes.SnapshotDef, 0)
+	snapname := fmt.Sprintf("%s-%s", newVolume.Name, "snap")
+
+	snapDef := &siotypes.SnapshotDef{
+		VolumeID:     volID,
+		SnapshotName: snapname,
+	}
+	snapshotDefs = append(snapshotDefs, snapDef)
+	snapParam := &siotypes.SnapshotVolumesParam{
+		SnapshotDefs: snapshotDefs,
+	}
+
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	// Create snapshot
+	snapResponse, err := system.CreateSnapshotConsistencyGroup(snapParam)
+	assert.Nil(t, err)
+	assert.NotZero(t, len(snapResponse.VolumeIDList))
+
+	// Get StoragePool
+	pool := getStoragePool(t)
+	volumes, err := pool.GetVolume("", volID, "", "", true)
+	assert.Nil(t, err)
+	assert.NotNil(t, volumes)
+
+	// Get Snapshot
+	volumes, err = pool.GetVolume("", snapResponse.VolumeIDList[0], "", "", true)
+	assert.Nil(t, err)
+	assert.NotNil(t, volumes)
+
+	// Lock Snapshot
+	snap, err := getVolByID(volumes[0].ID)
+	assert.Nil(t, err)
+	sr := goscaleio.NewVolume(C)
+	sr.Volume = snap
+	err = sr.SetVolumeAccessModeLimit(invalidIdentifier)
+	assert.NotNil(t,err)
 	// get the SDCs and pick one...
 	sdcs := getAllSdc(t)
 	assert.NotEqual(t, 0, len(sdcs))
@@ -616,6 +688,19 @@ func TestSetVolumeAccessModeLimit(t *testing.T) {
 	vr.Volume = vol
 	err = vr.SetVolumeAccessModeLimit("ReadOnly")
 	assert.Nil(t, err)
+	err = deleteVolume(t, volID)
+	assert.Nil(t, err)
+}
+
+func TestSetVolumeAccessModeLimitInvalid(t *testing.T) {
+	volID, err := createVolume(t, "")
+	assert.Nil(t, err)
+	vol, err := getVolByID(volID)
+	assert.Nil(t, err)
+	vr := goscaleio.NewVolume(C)
+	vr.Volume = vol
+	err = vr.SetVolumeAccessModeLimit(invalidIdentifier)
+	assert.NotNil(t, err)
 	err = deleteVolume(t, volID)
 	assert.Nil(t, err)
 }
