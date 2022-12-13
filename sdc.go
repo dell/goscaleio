@@ -86,8 +86,7 @@ func (s *System) ChangeSdcName(idOfSdc, name string) (*Sdc, error) {
 	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, body, &sdc)
 	if err != nil {
-		return NewSdc(s.client, &sdc), nil
-
+		return nil, err
 	}
 
 	return NewSdc(s.client, &sdc), nil
