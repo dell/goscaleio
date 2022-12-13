@@ -223,3 +223,52 @@ func TestCreateDeleteStoragePool(t *testing.T) {
 	assert.NotNil(t, err)
 
 }
+
+// Modify TestModifyStoragePoolName
+func TestModifyStoragePoolName(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+	_, err := domain.ModifyStoragePoolName("Invalid", "STPnew")
+	assert.NotNil(t, err)
+}
+
+// Modify TestStoragePoolMediaType
+func TestStoragePoolMediaType(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+	_, err := domain.ModifyStoragePoolMedia("b9b0be6600000004", "SSD")
+	assert.Nil(t, err)
+}
+
+// Modify TestEnableRFCache
+func TestEnableRFCache(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+	_, err := domain.EnableRFCache("b9b0be6400000003")
+	assert.Nil(t, err)
+}
+
+// Modify TestDisableRFCache
+func TestDisableRFCache(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+	_, err := domain.DisableRFCache("b9b0be6400000003")
+	assert.Nil(t, err)
+}
+
+// Set TestSetRmcache
+func TestSetRmcache(t *testing.T) {
+	pd := getProtectionDomain(t)
+	name := getStoragePoolName(t)
+
+	pool, _ := pd.FindStoragePool("", name, "")
+
+	// create a StoragePool instance to return
+	domain := goscaleio.NewStoragePoolEx(C, pool)
+
+	// create a storagePool via NewStoragePool to test
+	tempPool := goscaleio.NewStoragePool(C)
+	tempPool.StoragePool = pool
+
+	_ = domain.ModifyRMCache("true")
+}
