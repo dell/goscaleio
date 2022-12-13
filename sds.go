@@ -118,7 +118,7 @@ func (pd *ProtectionDomain) FindSds(
 	return nil, errors.New("Couldn't find SDS")
 }
 
-// DeleteSds deleted a Sds against Id
+// DeleteSds deletes a Sds against Id
 func (pd *ProtectionDomain) DeleteSds(id string) error {
 	defer TimeSpent("DeleteSds", time.Now())
 
