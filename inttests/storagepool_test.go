@@ -223,3 +223,13 @@ func TestCreateDeleteStoragePool(t *testing.T) {
 	assert.NotNil(t, err)
 
 }
+
+// TestGetSDSStoragePool gets the SDS instances associated with storage pool
+func TestGetSDSStoragePool(t *testing.T) {
+	pool := getStoragePool(t)
+	assert.NotNil(t, pool)
+
+	stats, err := pool.GetSDSStoragePool()
+	assert.Nil(t, err)
+	assert.NotNil(t, stats)
+}

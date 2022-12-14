@@ -162,3 +162,21 @@ func (sp *StoragePool) GetStatistics() (*types.Statistics, error) {
 
 	return &stats, nil
 }
+
+// GetSDSStoragePool return SDS instances associated with storage pool
+func (sp *StoragePool) GetSDSStoragePool() ([]types.Sds, error) {
+	link, err := GetLink(sp.StoragePool.Links,
+		"/api/StoragePool/relationship/SpSds")
+	if err != nil {
+		return nil, err
+	}
+
+	sds := []types.Sds{}
+	err = sp.client.getJSONWithRetry(
+		http.MethodGet, link.HREF, nil, &sds)
+	if err != nil {
+		return nil, err
+	}
+
+	return sds, nil
+}
