@@ -266,7 +266,7 @@ func TestDisableRFCache(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-// Set TestModifyRmCache
+// Modify TestModifyRmCache
 func TestModifyRmCache(t *testing.T) {
 	pd := getProtectionDomain(t)
 	name := getStoragePoolName(t)
