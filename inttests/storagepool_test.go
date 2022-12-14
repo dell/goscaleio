@@ -266,8 +266,8 @@ func TestDisableRFCache(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-// Set TestSetRmcache
-func TestSetRmcache(t *testing.T) {
+// Set TestModifyRmCache
+func TestModifyRmCache(t *testing.T) {
 	pd := getProtectionDomain(t)
 	name := getStoragePoolName(t)
 
@@ -280,5 +280,6 @@ func TestSetRmcache(t *testing.T) {
 	tempPool := goscaleio.NewStoragePool(C)
 	tempPool.StoragePool = pool
 
-	_ = domain.ModifyRMCache("true")
+	err := domain.ModifyRMCache("true")
+	assert.Nil(t, err)
 }

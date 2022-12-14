@@ -75,14 +75,14 @@ func (pd *ProtectionDomain) ModifyStoragePoolName(ID, name string) (string, erro
 
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setStoragePoolName", ID)
 
-	spresp := types.StoragePoolResp{}
+	spResp := types.StoragePoolResp{}
 	err := pd.client.getJSONWithRetry(
-		http.MethodPost, path, storagePoolParam, &spresp)
+		http.MethodPost, path, storagePoolParam, &spResp)
 	if err != nil {
 		return "", err
 	}
 
-	return spresp.ID, nil
+	return spResp.ID, nil
 }
 
 // ModifyStoragePoolMedia Modifies Storagepool Media Type
