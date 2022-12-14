@@ -246,6 +246,11 @@ type ProtectionDomainParam struct {
 	Name string `json:"name"`
 }
 
+// ChangeSdcNameParam defines struct for passing parameters to changeSDCname endpoint
+type ChangeSdcNameParam struct {
+	SdcName string `json:"sdcName"`
+}
+
 // ProtectionDomainResp defines struct for ProtectionDomainResp
 type ProtectionDomainResp struct {
 	ID string `json:"id"`
