@@ -272,7 +272,7 @@ type Sdc struct {
 // SdsIP defines struct for SdsIP
 type SdsIP struct {
 	IP   string `json:"ip"`
-	Role string `json:"role"`
+	Role string `json:"role,omitempty"`
 }
 
 // SdsIPList defines struct for SdsIPList
@@ -328,6 +328,22 @@ type SdsParam struct {
 // SdsResp defines struct for SdsResp
 type SdsResp struct {
 	ID string `json:"id"`
+}
+
+// SdsIPRole defines struct for Sds IP and Role
+type SdsIPRole struct {
+	SdsIPToSet string `json:"sdsIpToSet"`
+	NewRole    string `json:"newRole"`
+}
+
+// SdsName defines struct for Sds Name
+type SdsName struct {
+	Name string `json:"name"`
+}
+
+// SdsPort defines struct for Sds Port
+type SdsPort struct {
+	SdsPort string `json:"sdsPort"`
 }
 
 // Device defines struct for Device
