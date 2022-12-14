@@ -66,6 +66,95 @@ func (pd *ProtectionDomain) CreateStoragePool(name string, mediaType string) (st
 	return sp.ID, nil
 }
 
+// ModifyStoragePoolName Modifies Storagepool Name
+func (pd *ProtectionDomain) ModifyStoragePoolName(ID, name string) (string, error) {
+
+	storagePoolParam := &types.ModifyStoragePoolName{
+		Name: name,
+	}
+
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setStoragePoolName", ID)
+
+	spResp := types.StoragePoolResp{}
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, storagePoolParam, &spResp)
+	if err != nil {
+		return "", err
+	}
+
+	return spResp.ID, nil
+}
+
+// ModifyStoragePoolMedia Modifies Storagepool Media Type
+func (pd *ProtectionDomain) ModifyStoragePoolMedia(ID, mediaType string) (string, error) {
+
+	storagePool := &types.StoragePoolMediaType{
+		MediaType: mediaType,
+	}
+
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setMediaType", ID)
+
+	spResp := types.StoragePoolResp{}
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, storagePool, &spResp)
+	if err != nil {
+		return "", err
+	}
+
+	return spResp.ID, nil
+}
+
+// ModifyRMCache Sets Read RAM Cache
+func (sp *StoragePool) ModifyRMCache(useRmcache string) error {
+
+	link, err := GetLink(sp.StoragePool.Links, "self")
+	if err != nil {
+		return err
+	}
+	path := fmt.Sprintf("%v/action/setUseRmcache", link.HREF)
+	payload := &types.StoragePoolUseRmCache{
+		UseRmcache: useRmcache,
+	}
+	err = sp.client.getJSONWithRetry(
+		http.MethodPost, path, payload, nil)
+	return err
+}
+
+// EnableRFCache Enables RFCache
+func (pd *ProtectionDomain) EnableRFCache(ID string) (string, error) {
+
+	storagePoolParam := &types.StoragePoolUseRfCache{}
+
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/enableRfcache", ID)
+
+	spResp := types.StoragePoolResp{}
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, storagePoolParam, &spResp)
+	if err != nil {
+		return "", err
+	}
+
+	return spResp.ID, nil
+}
+
+// DisableRFCache Disables RFCache
+func (pd *ProtectionDomain) DisableRFCache(ID string) (string, error) {
+
+	payload := &types.StoragePoolUseRfCache{}
+
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/disableRfcache", ID)
+
+	spResp := types.StoragePoolResp{}
+	err := pd.client.getJSONWithRetry(
+
+		http.MethodPost, path, payload, &spResp)
+	if err != nil {
+		return "", err
+	}
+
+	return spResp.ID, nil
+}
+
 // DeleteStoragePool will delete a storage pool
 func (pd *ProtectionDomain) DeleteStoragePool(name string) error {
 	// get the storage pool name
