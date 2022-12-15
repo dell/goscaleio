@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -293,5 +294,68 @@ func (v *Volume) SetVolumeSize(sizeInGB string) error {
 	}
 	err = v.client.getJSONWithRetry(
 		http.MethodPost, path, payload, nil)
+	return err
+}
+
+// AutoSnapshotParam defines type for autosnapshot parameter for method LockAutoSnapshot/UnlockAutoSnapshot
+type AutoSnapshotParam struct {
+	AutoSnapshotWillBeRemoved bool `json:"autoSnapshotWillBeRemoved,omitempty"`
+}
+
+// LockAutoSnapshot locks volume's auto snapshot in snapshotpolicy
+func (v *Volume) LockAutoSnapshot() error {
+	if v.Volume.VolumeType != "Snapshot" {
+		return errors.New("Volume type should be snapshot")
+	}
+	link, err := GetLink(v.Volume.Links, "self")
+	if err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("%v/action/lockAutoSnapshot", link.HREF)
+	payload := AutoSnapshotParam{
+		AutoSnapshotWillBeRemoved: false,
+	}
+	err = v.client.getJSONWithRetry(
+		http.MethodPost, path, payload, nil)
+	return err
+}
+
+// UnlockAutoSnapshot unlocks volume's auto snapshot in snapshotpolicy
+func (v *Volume) UnlockAutoSnapshot() error {
+	if v.Volume.VolumeType != "Snapshot" {
+		return errors.New("Volume type should be snapshot")
+	}
+
+	link, err := GetLink(v.Volume.Links, "self")
+	if err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("%v/action/unlockAutoSnapshot", link.HREF)
+	payload := AutoSnapshotParam{
+		AutoSnapshotWillBeRemoved: false,
+	}
+	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	return err
+}
+
+// SetVolumeAccessModeLimitParam defines type for volume access mode parameter for method SetVolumeAccessModeLimit
+type SetVolumeAccessModeLimitParam struct {
+	AccessModeLimit string `json:"accessModeLimit"`
+}
+
+// SetVolumeAccessModeLimit sets access mode for volume/snapshot
+func (v *Volume) SetVolumeAccessModeLimit(mode string) error {
+	link, err := GetLink(v.Volume.Links, "self")
+	if err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("%v/action/setVolumeAccessModeLimit", link.HREF)
+	payload := SetVolumeAccessModeLimitParam{
+		AccessModeLimit: mode,
+	}
+	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
 	return err
 }

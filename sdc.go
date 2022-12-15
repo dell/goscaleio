@@ -55,6 +55,43 @@ func (s *System) GetSdc() ([]types.Sdc, error) {
 	return sdcs, nil
 }
 
+// GetSdcByID returns a Sdc searched by id
+func (s *System) GetSdcByID(id string) (*Sdc, error) {
+	defer TimeSpent("GetSdcByID", time.Now())
+
+	path := fmt.Sprintf("api/instances/Sdc::%v", id)
+
+	var sdc types.Sdc
+	err := s.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &sdc)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewSdc(s.client, &sdc), nil
+}
+
+// ChangeSdcName returns a Sdc after changing its name
+// https://developer.dell.com/apis/4008/versions/4.0/PowerFlex_REST_API.json/paths/~1api~1instances~1Sdc::%7Bid%7D~1action~1setSdcName/post
+func (s *System) ChangeSdcName(idOfSdc, name string) (*Sdc, error) {
+	defer TimeSpent("ChangeSdcName", time.Now())
+
+	path := fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcName", idOfSdc)
+
+	var sdc types.Sdc
+
+	var body types.ChangeSdcNameParam = types.ChangeSdcNameParam{
+		SdcName: name,
+	}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, body, &sdc)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewSdc(s.client, &sdc), nil
+}
+
 // FindSdc returns a Sdc
 func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	defer TimeSpent("FindSdc", time.Now())

@@ -302,6 +302,11 @@ type ProtectionDomainParam struct {
 	Name string `json:"name"`
 }
 
+// ChangeSdcNameParam defines struct for passing parameters to changeSDCname endpoint
+type ChangeSdcNameParam struct {
+	SdcName string `json:"sdcName"`
+}
+
 // ProtectionDomainResp defines struct for ProtectionDomainResp
 type ProtectionDomainResp struct {
 	ID string `json:"id"`
@@ -323,7 +328,7 @@ type Sdc struct {
 // SdsIP defines struct for SdsIP
 type SdsIP struct {
 	IP   string `json:"ip"`
-	Role string `json:"role"`
+	Role string `json:"role,omitempty"`
 }
 
 // SdsIPList defines struct for SdsIPList
@@ -381,6 +386,22 @@ type SdsResp struct {
 	ID string `json:"id"`
 }
 
+// SdsIPRole defines struct for Sds IP and Role
+type SdsIPRole struct {
+	SdsIPToSet string `json:"sdsIpToSet"`
+	NewRole    string `json:"newRole"`
+}
+
+// SdsName defines struct for Sds Name
+type SdsName struct {
+	Name string `json:"name"`
+}
+
+// SdsPort defines struct for Sds Port
+type SdsPort struct {
+	SdsPort string `json:"sdsPort"`
+}
+
 // Device defines struct for Device
 type Device struct {
 	ID                     string `json:"id,omitempty"`
@@ -413,29 +434,54 @@ type DeviceResp struct {
 
 // StoragePool defines struct for PFlex StoragePool
 type StoragePool struct {
-	ProtectionDomainID                               string  `json:"protectionDomainId"`
-	RebalanceioPriorityPolicy                        string  `json:"rebalanceIoPriorityPolicy"`
-	RebuildioPriorityPolicy                          string  `json:"rebuildIoPriorityPolicy"`
-	RebuildioPriorityBwLimitPerDeviceInKbps          int     `json:"rebuildIoPriorityBwLimitPerDeviceInKbps"`
-	RebuildioPriorityNumOfConcurrentIosPerDevice     int     `json:"rebuildIoPriorityNumOfConcurrentIosPerDevice"`
-	RebalanceioPriorityNumOfConcurrentIosPerDevice   int     `json:"rebalanceIoPriorityNumOfConcurrentIosPerDevice"`
-	RebalanceioPriorityBwLimitPerDeviceInKbps        int     `json:"rebalanceIoPriorityBwLimitPerDeviceInKbps"`
-	RebuildioPriorityAppIopsPerDeviceThreshold       int     `json:"rebuildIoPriorityAppIopsPerDeviceThreshold"`
-	RebalanceioPriorityAppIopsPerDeviceThreshold     int     `json:"rebalanceIoPriorityAppIopsPerDeviceThreshold"`
-	RebuildioPriorityAppBwPerDeviceThresholdInKbps   int     `json:"rebuildIoPriorityAppBwPerDeviceThresholdInKbps"`
-	RebalanceioPriorityAppBwPerDeviceThresholdInKbps int     `json:"rebalanceIoPriorityAppBwPerDeviceThresholdInKbps"`
-	RebuildioPriorityQuietPeriodInMsec               int     `json:"rebuildIoPriorityQuietPeriodInMsec"`
-	RebalanceioPriorityQuietPeriodInMsec             int     `json:"rebalanceIoPriorityQuietPeriodInMsec"`
-	ZeroPaddingEnabled                               bool    `json:"zeroPaddingEnabled"`
-	UseRmcache                                       bool    `json:"useRmcache"`
-	SparePercentage                                  int     `json:"sparePercentage"`
-	RmCacheWriteHandlingMode                         string  `json:"rmcacheWriteHandlingMode"`
-	RebuildEnabled                                   bool    `json:"rebuildEnabled"`
-	RebalanceEnabled                                 bool    `json:"rebalanceEnabled"`
-	NumofParallelRebuildRebalanceJobsPerDevice       int     `json:"numOfParallelRebuildRebalanceJobsPerDevice"`
-	Name                                             string  `json:"name"`
-	ID                                               string  `json:"id"`
-	Links                                            []*Link `json:"links"`
+	ProtectionDomainID                                            string  `json:"protectionDomainId"`
+	RebalanceioPriorityPolicy                                     string  `json:"rebalanceIoPriorityPolicy"`
+	RebuildioPriorityPolicy                                       string  `json:"rebuildIoPriorityPolicy"`
+	RebuildioPriorityBwLimitPerDeviceInKbps                       int     `json:"rebuildIoPriorityBwLimitPerDeviceInKbps"`
+	RebuildioPriorityNumOfConcurrentIosPerDevice                  int     `json:"rebuildIoPriorityNumOfConcurrentIosPerDevice"`
+	RebalanceioPriorityNumOfConcurrentIosPerDevice                int     `json:"rebalanceIoPriorityNumOfConcurrentIosPerDevice"`
+	RebalanceioPriorityBwLimitPerDeviceInKbps                     int     `json:"rebalanceIoPriorityBwLimitPerDeviceInKbps"`
+	RebuildioPriorityAppIopsPerDeviceThreshold                    int     `json:"rebuildIoPriorityAppIopsPerDeviceThreshold"`
+	RebalanceioPriorityAppIopsPerDeviceThreshold                  int     `json:"rebalanceIoPriorityAppIopsPerDeviceThreshold"`
+	RebuildioPriorityAppBwPerDeviceThresholdInKbps                int     `json:"rebuildIoPriorityAppBwPerDeviceThresholdInKbps"`
+	RebalanceioPriorityAppBwPerDeviceThresholdInKbps              int     `json:"rebalanceIoPriorityAppBwPerDeviceThresholdInKbps"`
+	RebuildioPriorityQuietPeriodInMsec                            int     `json:"rebuildIoPriorityQuietPeriodInMsec"`
+	RebalanceioPriorityQuietPeriodInMsec                          int     `json:"rebalanceIoPriorityQuietPeriodInMsec"`
+	ZeroPaddingEnabled                                            bool    `json:"zeroPaddingEnabled"`
+	UseRmcache                                                    bool    `json:"useRmcache"`
+	SparePercentage                                               int     `json:"sparePercentage"`
+	RmCacheWriteHandlingMode                                      string  `json:"rmcacheWriteHandlingMode"`
+	RebuildEnabled                                                bool    `json:"rebuildEnabled"`
+	RebalanceEnabled                                              bool    `json:"rebalanceEnabled"`
+	NumofParallelRebuildRebalanceJobsPerDevice                    int     `json:"numOfParallelRebuildRebalanceJobsPerDevice"`
+	Name                                                          string  `json:"name"`
+	ID                                                            string  `json:"id"`
+	Links                                                         []*Link `json:"links"`
+	BackgroundScannerBWLimitKBps                                  int     `json:"backgroundScannerBWLimitKBps"`
+	ProtectedMaintenanceModeIoPriorityNumOfConcurrentIosPerDevice int     `json:"protectedMaintenanceModeIoPriorityNumOfConcurrentIosPerDevice"`
+	DataLayout                                                    string  `json:"dataLayout"`
+	VtreeMigrationIoPriorityBwLimitPerDeviceInKbps                int     `json:"vtreeMigrationIoPriorityBwLimitPerDeviceInKbps"`
+	VtreeMigrationIoPriorityPolicy                                string  `json:"vtreeMigrationIoPriorityPolicy"`
+	AddressSpaceUsage                                             string  `json:"addressSpaceUsage"`
+	ExternalAccelerationType                                      string  `json:"externalAccelerationType"`
+	PersistentChecksumState                                       string  `json:"persistentChecksumState"`
+	UseRfcache                                                    bool    `json:"useRfcache"`
+	ChecksumEnabled                                               bool    `json:"checksumEnabled"`
+	CompressionMethod                                             string  `json:"compressionMethod"`
+	FragmentationEnabled                                          bool    `json:"fragmentationEnabled"`
+	CapacityUsageState                                            string  `json:"capacityUsageState"`
+	CapacityUsageType                                             string  `json:"capacityUsageType"`
+	AddressSpaceUsageType                                         string  `json:"addressSpaceUsageType"`
+	BgScannerCompareErrorAction                                   string  `json:"bgScannerCompareErrorAction"`
+	BgScannerReadErrorAction                                      string  `json:"bgScannerReadErrorAction"`
+	ReplicationCapacityMaxRatio                                   int     `json:"replicationCapacityMaxRatio"`
+	PersistentChecksumEnabled                                     bool    `json:"persistentChecksumEnabled"`
+	PersistentChecksumBuilderLimitKb                              int     `json:"persistentChecksumBuilderLimitKb"`
+	PersistentChecksumValidateOnRead                              bool    `json:"persistentChecksumValidateOnRead"`
+	VtreeMigrationIoPriorityNumOfConcurrentIosPerDevice           int     `json:"vtreeMigrationIoPriorityNumOfConcurrentIosPerDevice"`
+	ProtectedMaintenanceModeIoPriorityPolicy                      string  `json:"protectedMaintenanceModeIoPriorityPolicy"`
+	BackgroundScannerMode                                         string  `json:"backgroundScannerMode"`
+	MediaType                                                     string  `json:"mediaType"`
 }
 
 // StoragePoolParam defines struct for StoragePoolParam
@@ -451,6 +497,25 @@ type StoragePoolParam struct {
 	MediaType                string `json:"mediaType,omitempty"`
 }
 
+// ModifyStoragePoolName defines struct for ModifyStoragePoolName
+type ModifyStoragePoolName struct {
+	Name string `json:"name"`
+}
+
+// StoragePoolMediaType defines struct for StoragePoolMediaType
+type StoragePoolMediaType struct {
+	MediaType string `json:"mediaType"`
+}
+
+// StoragePoolUseRmCache defines struct for StoragePoolUseRmCache
+type StoragePoolUseRmCache struct {
+	UseRmcache string `json:"useRmcache"`
+}
+
+// StoragePoolUseRfCache defines struct for StoragePoolUseRfCache
+type StoragePoolUseRfCache struct {
+}
+
 // StoragePoolResp defines struct for StoragePoolResp
 type StoragePoolResp struct {
 	ID string `json:"id"`
@@ -458,29 +523,45 @@ type StoragePoolResp struct {
 
 // MappedSdcInfo defines struct for MappedSdcInfo
 type MappedSdcInfo struct {
-	SdcID         string `json:"sdcId"`
-	SdcIP         string `json:"sdcIp"`
-	LimitIops     int    `json:"limitIops"`
-	LimitBwInMbps int    `json:"limitBwInMbps"`
+	SdcID                 string `json:"sdcId"`
+	SdcIP                 string `json:"sdcIp"`
+	LimitIops             int    `json:"limitIops"`
+	LimitBwInMbps         int    `json:"limitBwInMbps"`
+	SdcName               string `json:"sdcName"`
+	AccessMode            string `json:"accessMode"`
+	IsDirectBufferMapping bool   `json:"isDirectBufferMapping"`
 }
 
 // Volume defines struct for Volume
 type Volume struct {
-	StoragePoolID           string           `json:"storagePoolId"`
-	UseRmCache              bool             `json:"useRmcache"`
-	MappingToAllSdcsEnabled bool             `json:"mappingToAllSdcsEnabled"`
-	MappedSdcInfo           []*MappedSdcInfo `json:"mappedSdcInfo"`
-	IsObfuscated            bool             `json:"isObfuscated"`
-	VolumeType              string           `json:"volumeType"`
-	ConsistencyGroupID      string           `json:"consistencyGroupId"`
-	VTreeID                 string           `json:"vtreeId"`
-	AncestorVolumeID        string           `json:"ancestorVolumeId"`
-	MappedScsiInitiatorInfo string           `json:"mappedScsiInitiatorInfo"`
-	SizeInKb                int              `json:"sizeInKb"`
-	CreationTime            int              `json:"creationTime"`
-	Name                    string           `json:"name"`
-	ID                      string           `json:"id"`
-	Links                   []*Link          `json:"links"`
+	StoragePoolID                      string           `json:"storagePoolId"`
+	UseRmCache                         bool             `json:"useRmcache"`
+	MappingToAllSdcsEnabled            bool             `json:"mappingToAllSdcsEnabled"`
+	MappedSdcInfo                      []*MappedSdcInfo `json:"mappedSdcInfo"`
+	IsObfuscated                       bool             `json:"isObfuscated"`
+	VolumeType                         string           `json:"volumeType"`
+	ConsistencyGroupID                 string           `json:"consistencyGroupId"`
+	VTreeID                            string           `json:"vtreeId"`
+	AncestorVolumeID                   string           `json:"ancestorVolumeId"`
+	MappedScsiInitiatorInfo            string           `json:"mappedScsiInitiatorInfo"`
+	SizeInKb                           int              `json:"sizeInKb"`
+	CreationTime                       int              `json:"creationTime"`
+	Name                               string           `json:"name"`
+	ID                                 string           `json:"id"`
+	DataLayout                         string           `json:"dataLayout"`
+	NotGenuineSnapshot                 bool             `json:"notGenuineSnapshot"`
+	AccessModeLimit                    string           `json:"accessModeLimit"`
+	SecureSnapshotExpTime              int              `json:"secureSnapshotExpTime"`
+	ManagedBy                          string           `json:"managedBy"`
+	LockedAutoSnapshot                 bool             `json:"lockedAutoSnapshot"`
+	LockedAutoSnapshotMarkedForRemoval bool             `json:"lockedAutoSnapshotMarkedForRemoval"`
+	CompressionMethod                  string           `json:"compressionMethod"`
+	TimeStampIsAccurate                bool             `json:"timeStampIsAccurate"`
+	OriginalExpiryTime                 int              `json:"originalExpiryTime"`
+	VolumeReplicationState             string           `json:"volumeReplicationState"`
+	ReplicationJournalVolume           bool             `json:"replicationJournalVolume"`
+	ReplicationTimeStamp               int              `json:"replicationTimeStamp"`
+	Links                              []*Link          `json:"links"`
 }
 
 // VolumeParam defines struct for VolumeParam
