@@ -226,8 +226,10 @@ type ScsiInitiator struct {
 	Links    []*Link `json:"links"`
 }
 
+// PDRfCacheOpMode is an enum type for Protection Domain Rf Cache Operational Mode
 type PDRfCacheOpMode string
 
+// Available values for enum type PDRfCacheOpMode
 const (
 	PDRCModeRead         PDRfCacheOpMode = "Read"
 	PDRCModeWrite        PDRfCacheOpMode = "Write"
@@ -235,24 +237,27 @@ const (
 	PDRCModeWriteMiss    PDRfCacheOpMode = "WriteMiss"
 )
 
+// PDCounterWindow defines one window for a Protection Domain Failure Counter
 type PDCounterWindow struct {
 	Threshold       int `json:"threshold"`
 	WindowSizeInSec int `json:"windowSizeInSec"`
 }
 
+// PDCounterParams defines all the windows for a Protection Domain Failure Counter
 type PDCounterParams struct {
 	ShortWindow  PDCounterWindow `json:"shortWindow"`
 	MediumWindow PDCounterWindow `json:"mediumWindow"`
 	LongWindow   PDCounterWindow `json:"longWindow"`
 }
 
+// PDConnInfo defines Protection Domain Connection information
 type PDConnInfo struct {
 	ClientServerConnStatus string  `json:"clientServerConnStatus"`
-	DisconnectedClientId   *string `json:"disconnectedClientId"`
+	DisconnectedClientID   *string `json:"disconnectedClientId"`
 	DisconnectedClientName *string `json:"disconnectedClientName"`
-	DisconnectedServerId   *string `json:"disconnectedServerId"`
+	DisconnectedServerID   *string `json:"disconnectedServerId"`
 	DisconnectedServerName *string `json:"disconnectedServerName"`
-	DisconnectedServerIp   *string `json:"disconnectedServerIp"`
+	DisconnectedServerIP   *string `json:"disconnectedServerIp"`
 }
 
 // ProtectionDomain defines struct for PFlex ProtectionDomain
