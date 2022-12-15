@@ -226,19 +226,75 @@ type ScsiInitiator struct {
 	Links    []*Link `json:"links"`
 }
 
+type PDRfCacheOpMode string
+
+const (
+	PDRCModeRead         PDRfCacheOpMode = "Read"
+	PDRCModeWrite        PDRfCacheOpMode = "Write"
+	PDRCModeReadAndWrite PDRfCacheOpMode = "ReadAndWrite"
+	PDRCModeWriteMiss    PDRfCacheOpMode = "WriteMiss"
+)
+
+type PDCounterWindow struct {
+	Threshold       int `json:"threshold"`
+	WindowSizeInSec int `json:"windowSizeInSec"`
+}
+
+type PDCounterParams struct {
+	ShortWindow  PDCounterWindow `json:"shortWindow"`
+	MediumWindow PDCounterWindow `json:"mediumWindow"`
+	LongWindow   PDCounterWindow `json:"longWindow"`
+}
+
+type PDConnInfo struct {
+	ClientServerConnStatus string  `json:"clientServerConnStatus"`
+	DisconnectedClientId   *string `json:"disconnectedClientId"`
+	DisconnectedClientName *string `json:"disconnectedClientName"`
+	DisconnectedServerId   *string `json:"disconnectedServerId"`
+	DisconnectedServerName *string `json:"disconnectedServerName"`
+	DisconnectedServerIp   *string `json:"disconnectedServerIp"`
+}
+
 // ProtectionDomain defines struct for PFlex ProtectionDomain
 type ProtectionDomain struct {
-	SystemID                          string  `json:"systemId"`
-	RebuildNetworkThrottlingInKbps    int     `json:"rebuildNetworkThrottlingInKbps"`
-	RebalanceNetworkThrottlingInKbps  int     `json:"rebalanceNetworkThrottlingInKbps"`
-	OverallIoNetworkThrottlingInKbps  int     `json:"overallIoNetworkThrottlingInKbps"`
-	OverallIoNetworkThrottlingEnabled bool    `json:"overallIoNetworkThrottlingEnabled"`
-	RebuildNetworkThrottlingEnabled   bool    `json:"rebuildNetworkThrottlingEnabled"`
-	RebalanceNetworkThrottlingEnabled bool    `json:"rebalanceNetworkThrottlingEnabled"`
-	ProtectionDomainState             string  `json:"protectionDomainState"`
-	Name                              string  `json:"name"`
-	ID                                string  `json:"id"`
-	Links                             []*Link `json:"links"`
+	SystemID               string     `json:"systemId"`
+	SdrSdsConnectivityInfo PDConnInfo `json:"sdrSdsConnectivityInfo"`
+
+	// Network throttling params
+	RebuildNetworkThrottlingInKbps                   int  `json:"rebuildNetworkThrottlingInKbps"`
+	RebalanceNetworkThrottlingInKbps                 int  `json:"rebalanceNetworkThrottlingInKbps"`
+	OverallIoNetworkThrottlingInKbps                 int  `json:"overallIoNetworkThrottlingInKbps"`
+	VTreeMigrationNetworkThrottlingInKbps            int  `json:"vtreeMigrationNetworkThrottlingInKbps"`
+	ProtectedMaintenanceModeNetworkThrottlingInKbps  int  `json:"protectedMaintenanceModeNetworkThrottlingInKbps"`
+	OverallIoNetworkThrottlingEnabled                bool `json:"overallIoNetworkThrottlingEnabled"`
+	RebuildNetworkThrottlingEnabled                  bool `json:"rebuildNetworkThrottlingEnabled"`
+	RebalanceNetworkThrottlingEnabled                bool `json:"rebalanceNetworkThrottlingEnabled"`
+	VTreeMigrationNetworkThrottlingEnabled           bool `json:"vtreeMigrationNetworkThrottlingEnabled"`
+	ProtectedMaintenanceModeNetworkThrottlingEnabled bool `json:"protectedMaintenanceModeNetworkThrottlingEnabled"`
+
+	// Fine Granularity Params
+	FglDefaultNumConcurrentWrites int  `json:"fglDefaultNumConcurrentWrites"`
+	FglMetadataCacheEnabled       bool `json:"fglMetadataCacheEnabled"`
+	FglDefaultMetadataCacheSize   int  `json:"fglDefaultMetadataCacheSize"`
+
+	// RfCache Params
+	RfCacheEnabled         bool            `json:"rfcacheEnabled"`
+	RfCacheAccpID          string          `json:"rfcacheAccpId"`
+	RfCacheOperationalMode PDRfCacheOpMode `json:"rfcacheOpertionalMode"`
+	RfCachePageSizeKb      int             `json:"rfcachePageSizeKb"`
+	RfCacheMaxIoSizeKb     int             `json:"rfcacheMaxIoSizeKb"`
+
+	// Counter Params
+	SdsConfigurationFailureCP            PDCounterParams `json:"sdsConfigurationFailureCounter"`
+	SdsDecoupledCP                       PDCounterParams `json:"sdsDecoupledCounterParameters"`
+	MdmSdsNetworkDisconnectionsCP        PDCounterParams `json:"mdmSdsNetworkDisconnectionsCounterParameters"`
+	SdsSdsNetworkDisconnectionsCP        PDCounterParams `json:"sdsSdsNetworkDisconnectionsCounterParameters"`
+	SdsReceiveBufferAllocationFailuresCP PDCounterParams `json:"sdsReceiveBufferAllocationFailuresCounterParameters"`
+
+	ProtectionDomainState string  `json:"protectionDomainState"`
+	Name                  string  `json:"name"`
+	ID                    string  `json:"id"`
+	Links                 []*Link `json:"links"`
 }
 
 // ProtectionDomainParam defines struct for ProtectionDomainParam
