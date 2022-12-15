@@ -15,3 +15,7 @@
 
 # A macOS metadata file
 .DS_Store
+
+GOSCALEIO_TEST.env
+
+
