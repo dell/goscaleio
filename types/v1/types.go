@@ -262,8 +262,9 @@ type PDConnInfo struct {
 
 // ProtectionDomain defines struct for PFlex ProtectionDomain
 type ProtectionDomain struct {
-	SystemID               string     `json:"systemId"`
-	SdrSdsConnectivityInfo PDConnInfo `json:"sdrSdsConnectivityInfo"`
+	SystemID                    string     `json:"systemId"`
+	SdrSdsConnectivityInfo      PDConnInfo `json:"sdrSdsConnectivityInfo"`
+	ReplicationCapacityMaxRatio *int       `json:"replicationCapacityMaxRatio"`
 
 	// Network throttling params
 	RebuildNetworkThrottlingInKbps                   int  `json:"rebuildNetworkThrottlingInKbps"`
