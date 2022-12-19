@@ -16,6 +16,6 @@
 # A macOS metadata file
 .DS_Store
 
+gosec.log
+
 GOSCALEIO_TEST.env
-
-
