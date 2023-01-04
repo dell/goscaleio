@@ -22,6 +22,13 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// SDS IPs can have 3 roles.
+const (
+	RoleSdsOnly = "sdsOnly"
+	RoleSdcOnly = "sdcOnly"
+	RoleAll     = "all"
+)
+
 // Sds defines struct for Sds
 type Sds struct {
 	Sds    *types.Sds
@@ -44,7 +51,7 @@ func NewSdsEx(client *Client, sds *types.Sds) *Sds {
 	}
 }
 
-// CreateSds creates a new Sds
+// CreateSds creates a new Sds with automatically assigned roles to IPs
 func (pd *ProtectionDomain) CreateSds(
 	name string, ipList []string) (string, error) {
 	defer TimeSpent("CreateSds", time.Now())
@@ -57,18 +64,65 @@ func (pd *ProtectionDomain) CreateSds(
 	if len(ipList) == 0 {
 		return "", fmt.Errorf("Must provide at least 1 SDS IP")
 	} else if len(ipList) == 1 {
-		sdsIP := types.SdsIP{IP: ipList[0], Role: "all"}
+		sdsIP := types.SdsIP{IP: ipList[0], Role: RoleAll}
 		sdsIPList := &types.SdsIPList{SdsIP: sdsIP}
 		sdsParam.IPList = append(sdsParam.IPList, sdsIPList)
-	} else if len(ipList) >= 2 {
-		sdsIP1 := types.SdsIP{IP: ipList[0], Role: "sdcOnly"}
-		sdsIP2 := types.SdsIP{IP: ipList[1], Role: "sdsOnly"}
+	} else if len(ipList) == 2 {
+		sdsIP1 := types.SdsIP{IP: ipList[0], Role: RoleSdcOnly}
+		sdsIP2 := types.SdsIP{IP: ipList[1], Role: RoleSdsOnly}
 		sdsIPList1 := &types.SdsIPList{SdsIP: sdsIP1}
 		sdsIPList2 := &types.SdsIPList{SdsIP: sdsIP2}
 		sdsParam.IPList = append(sdsParam.IPList, sdsIPList1)
 		sdsParam.IPList = append(sdsParam.IPList, sdsIPList2)
+	} else {
+		return "", fmt.Errorf("Must explicitly provide IP role for more than 2 SDS IPs")
 	}
 
+	return pd.createSds(sdsParam)
+}
+
+// CreateSdsWithIPRole creates a new Sds with user-assigned roles to IPs
+func (pd *ProtectionDomain) CreateSdsWithIPRole(
+	name string, ipList []types.SdsIP) (string, error) {
+	defer TimeSpent("CreateSdsWithIPRole", time.Now())
+
+	sdsParam := &types.SdsParam{
+		Name:               name,
+		ProtectionDomainID: pd.ProtectionDomain.ID,
+	}
+
+	if len(ipList) == 0 {
+		return "", fmt.Errorf("Must provide at least 1 SDS IP")
+	} else if len(ipList) == 1 {
+		if ipList[0].Role != RoleAll {
+			return "", fmt.Errorf("The only IP assigned to an SDS must be assigned \"%s\" role", RoleAll)
+		}
+		sdsIPList := &types.SdsIPList{SdsIP: ipList[0]}
+		sdsParam.IPList = append(sdsParam.IPList, sdsIPList)
+	} else if len(ipList) >= 2 {
+		nSdsOnly, nSdcOnly := 0, 0
+		for _, i := range ipList {
+			if i.Role == RoleAll || i.Role == RoleSdcOnly {
+				nSdcOnly++
+			}
+			if i.Role == RoleAll || i.Role == RoleSdsOnly {
+				nSdsOnly++
+			}
+			sdsIPList := &types.SdsIPList{SdsIP: i}
+			sdsParam.IPList = append(sdsParam.IPList, sdsIPList)
+		}
+		if nSdsOnly < 1 {
+			return "", fmt.Errorf("At least one IP must be assigned %s or %s role", RoleSdsOnly, RoleAll)
+		}
+		if nSdcOnly < 1 {
+			return "", fmt.Errorf("At least one IP must be assigned %s or %s role", RoleSdcOnly, RoleAll)
+		}
+	}
+
+	return pd.createSds(sdsParam)
+}
+
+func (pd *ProtectionDomain) createSds(sdsParam *types.SdsParam) (string, error) {
 	path := fmt.Sprintf("/api/types/Sds/instances")
 
 	sds := types.SdsResp{}
