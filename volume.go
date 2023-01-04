@@ -359,3 +359,21 @@ func (v *Volume) SetVolumeAccessModeLimit(mode string) error {
 	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
 	return err
 }
+
+type SetSnapshotSecurityParam struct {
+	RetentionPeriodInMin int `json:"retentionPeriodInMin"`
+}
+
+func (v *Volume) SetSnapshotSecurity(retentionPeriodInMin int) error {
+	link, err := GetLink(v.Volume.Links, "self")
+	if err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("%v/action/setSnapshotSecurity", link.HREF)
+	payload := SetSnapshotSecurityParam{
+		RetentionPeriodInMin: retentionPeriodInMin,
+	}
+	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	return err
+}
