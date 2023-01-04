@@ -645,9 +645,9 @@ type SnapshotDef struct {
 // SnapshotVolumesParam defines struct for SnapshotVolumesParam
 type SnapshotVolumesParam struct {
 	SnapshotDefs []*SnapshotDef `json:"snapshotDefs"`
-	RetentionPeriodInMin string `json:"retentionPeriodInMin"`
-	AccessMode string `json:"accessModeLimit"`
-	allowOnExtManagedVol bool `json:"allowOnExtManagedVol"`
+	RetentionPeriodInMin string `json:"retentionPeriodInMin,omitempty"`
+	AccessMode string `json:"accessModeLimit,omitempty"`
+	allowOnExtManagedVol bool `json:"allowOnExtManagedVol,omitempty"`
 }
 
 // SnapshotVolumesResp defines struct for SnapshotVolumesResp
