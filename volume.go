@@ -361,10 +361,10 @@ func (v *Volume) SetVolumeAccessModeLimit(mode string) error {
 }
 
 type SetSnapshotSecurityParam struct {
-	RetentionPeriodInMin int `json:"retentionPeriodInMin"`
+	RetentionPeriodInMin string `json:"retentionPeriodInMin"`
 }
 
-func (v *Volume) SetSnapshotSecurity(retentionPeriodInMin int) error {
+func (v *Volume) SetSnapshotSecurity(retentionPeriodInMin string) error {
 	link, err := GetLink(v.Volume.Links, "self")
 	if err != nil {
 		return err
