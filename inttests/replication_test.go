@@ -348,7 +348,7 @@ func TestGetReplicationConsistencyGroups(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
-	rcgs, err := C.GetReplicationConsistencyGroups("")
+	rcgs, err := C.GetReplicationConsistencyGroups()
 	assert.Nil(t, err)
 	for i := 0; i < len(rcgs); i++ {
 		t.Logf("RCG: %+v\n\n", rcgs[i])
