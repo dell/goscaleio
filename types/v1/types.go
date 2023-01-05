@@ -846,7 +846,7 @@ type ReplicationConsistencyGroup struct {
 	DisasterRecoveryState       string `json:"disasterRecoveryState,omitempty"`
 	RemoteDisasterRecoveryState string `json:"remoteDisasterRecoveryState,omitempty"`
 	TargetVolumeAccessMode      string `json:"targetVolumeAccessMode,omitempty"`
-	FailverType                 string `json:"failoverType,omitempty"`
+	FailoverType                string `json:"failoverType,omitempty"`
 	FailoverState               string `json:"failoverState,omitempty"`
 	ActiveLocal                 bool   `json:"activeLocal,omitempty"`
 	ActiveRemote                bool   `json:"activeRemote,omitempty"`
