@@ -400,3 +400,15 @@ func (v *Volume) SetVolumeMappingAccessMode(accessmode string, sdcid string) err
 	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
 	return err
 }
+
+// Depricated Message (3.6)
+func (v *Volume) UnmarkForReplication() error {
+
+	path := fmt.Sprintf("/api/instances/Volume::%s/action/unmarkForReplication", v.Volume.ID)
+
+	payload := &types.EmptyPayload{}
+
+	err := v.client.getJSONWithRetry(
+		http.MethodPost, path, payload, nil)
+	return err
+}
