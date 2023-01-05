@@ -147,3 +147,10 @@ func (c *Client) GetReplicationPairs(RCGId string) ([]*types.ReplicationPair, er
 	err = c.getJSONWithRetry(http.MethodGet, path, nil, &pairs)
 	return pairs, err
 }
+
+func (c *Client) GetReplicationPairStatistics(id string) (*types.QueryReplicationPairStatistics, error) {
+	path := "/api/instances/ReplicationPair::" + id + "/relationships/Statistics"
+	rpResp := &types.QueryReplicationPairStatistics{}
+	err := c.getJSONWithRetry(http.MethodGet, path, nil, &rpResp)
+	return rpResp, err
+}
