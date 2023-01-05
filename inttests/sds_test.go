@@ -17,6 +17,8 @@ import (
 
 	"github.com/dell/goscaleio"
 	"github.com/stretchr/testify/assert"
+
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 // getAllSds will return all SDS instances
@@ -116,6 +118,24 @@ func TestCreateSdsInvalid(t *testing.T) {
 	sdsName := "invalid"
 	sdsIPList := []string{"0.1.1.1", "0.2.2.2"}
 	sdsID, err := pd.CreateSds(sdsName, sdsIPList)
+	assert.NotNil(t, err)
+	assert.Equal(t, "", sdsID)
+
+}
+
+// TestCreateSdsInvalid will attempt to add an SDS, which results in failure
+func TestCreateSdsIPRoleInvalid(t *testing.T) {
+	pd := getProtectionDomain(t)
+	assert.NotNil(t, pd)
+
+	// attempt to create an SDS with a number of invalid IPs
+	// this is done, in a failure mode, to prevent changing the Protection Domain used for testing
+	sdsName := "invalid"
+	sdsIPList := []types.SdsIP{
+		{IP: "0.1.1.1", Role: goscaleio.RoleAll},
+		{IP: "0.2.2.2", Role: goscaleio.RoleSdcOnly},
+	}
+	sdsID, err := pd.CreateSdsWithIPRole(sdsName, sdsIPList)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", sdsID)
 
