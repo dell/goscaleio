@@ -841,7 +841,7 @@ type ReplicationConsistencyGroup struct {
 	PauseMode                   string `json:"pauseMode,omitempty"`
 	LifetimeState               string `json:"lifetimeState,omitempty"`
 	SnapCreationInProgress      bool   `json:"snapCreationInProgress,omitempty"`
-	LastSnapgroupId             int    `json:"lastSnapGroupId,omitempty"`
+	LastSnapGroupId             string `json:"lastSnapGroupId,omitempty"`
 	Type                        string `json:"type,omitempty"`
 	DisasterRecoveryState       string `json:"disasterRecoveryState,omitempty"`
 	RemoteDisasterRecoveryState string `json:"remoteDisasterRecoveryState,omitempty"`
@@ -903,6 +903,16 @@ type ReplicationPair struct {
 // Remove payload for ReplicationPair
 type RemoveReplicationPair struct {
 	Force string `json:"force,omitempty"`
+}
+
+// CreateReplicationConsistencyGroupSnapshotPayload
+type CreateReplicationConsistencyGroupSnapshot struct {
+	Force string `json:"force,omitempty"`
+}
+
+// CreateReplicationConsistencyGroupSnapshot response
+type CreateReplicationConsistencyGroupSnapshotResp struct {
+	SnapshotGroupID string `json:"snapshotGroupId"`
 }
 
 // Used for querying replication pair.

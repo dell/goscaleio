@@ -150,7 +150,6 @@ func (c *Client) CreateReplicationPair(rp *types.QueryReplicationPair) (*types.R
 	if rp.CopyType == "" || rp.SourceVolumeID == "" || rp.DestinationVolumeID == "" || rp.ReplicationConsistencyGroupID == "" {
 		return nil, errors.New("CopyType, SourceVolumeID, DestinationVolumeID, and ReplicationConsistencyGroupID are required")
 	}
-
 	bytes, err := json.Marshal(rp)
 	if err != nil {
 		fmt.Printf("Marshal error: %s\n", err)
@@ -212,4 +211,21 @@ func (c *Client) GetReplicationPairStatistics(id string) (*types.QueryReplicatio
 	rpResp := &types.QueryReplicationPairStatistics{}
 	err := c.getJSONWithRetry(http.MethodGet, path, nil, &rpResp)
 	return rpResp, err
+}
+
+func (c *Client) CreateReplicationConsistencyGroupSnapshot(id string, force bool) (*types.CreateReplicationConsistencyGroupSnapshotResp, error) {
+	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/createReplicationConsistencyGroupSnapshots"
+	param := &types.CreateReplicationConsistencyGroupSnapshot{
+		Force: "false",
+	}
+	if force {
+		param.Force = "true"
+	}
+	resp := &types.CreateReplicationConsistencyGroupSnapshotResp{}
+	defer TimeSpent("GetReplicationPairs", time.Now())
+
+	fmt.Printf("CreateReplicationConsistencyGroupSnapshot: path: %s\n", uri)
+
+	err := c.getJSONWithRetry(http.MethodPost, uri, param, resp)
+	return resp, err
 }
