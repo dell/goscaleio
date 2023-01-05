@@ -525,6 +525,30 @@ func TestExecuteReverseOnReplicationGroup(t *testing.T) {
 	time.Sleep(10 * time.Second)
 }
 
+// Test ExecutePauseOnReplicationGroup
+func TestExecutePauseOnReplicationGroup(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+
+	err := C.ExecutePauseOnReplicationGroup(rep.rcgID, siotypes.ONLY_TRACK_CHANGES)
+	assert.Nil(t, err)
+
+	log.SetLevel(log.InfoLevel)
+
+	time.Sleep(10 * time.Second)
+}
+
+// Test ExecuteResumeOnReplicationGroup
+func TestExecuteResumeOnReplicationGroup(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+
+	err := C.ExecuteResumeOnReplicationGroup(rep.rcgID)
+	assert.Nil(t, err)
+
+	log.SetLevel(log.InfoLevel)
+
+	time.Sleep(10 * time.Second)
+}
+
 // Test RemoveReplicationPair
 func TestRemoveReplicationPairFromVolume(t *testing.T) {
 	if C2 == nil {
