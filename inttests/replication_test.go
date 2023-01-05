@@ -20,13 +20,14 @@ package inttests
 
 import (
 	"fmt"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/dell/goscaleio"
 	siotypes "github.com/dell/goscaleio/types/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
-	"time"
 )
 
 // Replication global variables used to set up the replication relationships
@@ -45,9 +46,12 @@ type replication struct {
 	targetStoragePool        *goscaleio.StoragePool
 	targetVolume             *siotypes.Volume
 	rcg                      *goscaleio.ReplicationConsistencyGroup
+	rcgID                    string
 }
 
 var rep replication
+
+const delay_s = 15
 
 // Test GetPeerMDMs
 func TestGetPeerMDMs(t *testing.T) {
@@ -236,12 +240,78 @@ func TestCreateReplicationConsistencyGroup(t *testing.T) {
 	log.SetLevel(log.InfoLevel)
 	assert.Nil(t, err)
 	log.Infof("RCG ID: %s", rcgResp.ID)
+	rep.rcgID = rcgResp.ID
 }
 
 // TestDelayAfterRCGCreation
 func TestDelayAfterRCGCreation(t *testing.T) {
 	t.Logf("WAITING 30 SECONDS AFTER ATTEMPTING RCG CREATE")
-	time.Sleep(30 * time.Second)
+	time.Sleep(5 * time.Second)
+}
+
+// Add Replication Pair
+func TestAddReplicationPair(t *testing.T) {
+	t.Logf("[TestAddReplicationPair] Start")
+
+	var err error
+	if C2 == nil {
+		t.Skip("[TestAddReplicationPair] no client connection to replication target system")
+	}
+
+	// Todo: Create temp volume to test with
+	localVolumeID, err := C.FindVolumeID("stkof-snaprw-5-snap-1")
+	if err != nil {
+		t.Skip("Error finding volume inttest-snap")
+	}
+	t.Logf("[TestAddReplicationPair] Local Volume ID: %s", localVolumeID)
+
+	remoteVolumeID, err := C2.FindVolumeID("inttest-replication")
+	if err != nil {
+		t.Skip("Error finding volume inttest-snap")
+	}
+	t.Logf("[TestAddReplicationPair] Remote Volume ID: %s", remoteVolumeID)
+
+	rpPayload := &siotypes.QueryReplicationPair{
+		Name:                          "inttestrp",
+		SourceVolumeID:                localVolumeID,
+		DestinationVolumeID:           remoteVolumeID,
+		ReplicationConsistencyGroupID: rep.rcgID,
+		CopyType:                      "OnlineCopy",
+	}
+
+	rpResp, err := C.CreateReplicationPair(rpPayload)
+	if err != nil {
+		t.Logf("[TestAddReplicationPair] Error: %s", err.Error())
+	} else {
+		t.Logf("[TestAddReplicationPair] Response: %+v", rpResp)
+	}
+
+	t.Logf("[TestAddReplicationPair] End")
+}
+
+// Query Replication Pair
+func TestQueryReplicationPairs(t *testing.T) {
+	t.Logf("[TestQueryReplicationPairs] Start")
+
+	var err error
+	if C2 == nil {
+		t.Skip("[TestQueryReplicationPairs] no client connection to replication target system")
+	}
+
+	pairs, err := C.GetReplicationPairs(rep.rcgID)
+
+	if err != nil {
+		t.Logf("[TestQueryReplicationPairs] Error: %s", err.Error())
+		return
+	}
+
+	for i, pair := range pairs {
+		t.Logf("%d, ReplicationPair: %+v", i, pair)
+	}
+
+	t.Logf("[TestQueryReplicationPairs] End")
+
+	time.Sleep(60 * time.Second)
 }
 
 // Test GetReplicationConsistencyGroups
@@ -252,7 +322,9 @@ func TestGetReplicationConsistencyGroups(t *testing.T) {
 	rcgs, err := C.GetReplicationConsistencyGroups()
 	assert.Nil(t, err)
 	for i := 0; i < len(rcgs); i++ {
-		t.Logf("RCG: %+v", rcgs[i])
+		t.Logf("RCG: %+v\n\n", rcgs[i])
+		// t.Logf("Links: %+v\n\n", rcgs[i].Links)
+		parseLinks(rcgs[i].Links, t)
 		pairs, err := C.GetReplicationPairs(rcgs[i].ID)
 		assert.Nil(t, err)
 		for j := 0; j < len(pairs); j++ {
@@ -274,4 +346,15 @@ func TestRemoveReplicationConsistencyGroup(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-// Test
+func parseLinks(links []*siotypes.Link, t *testing.T) {
+	length := len(links)
+
+	if length == 0 {
+		t.Logf("No links found in the RCG")
+		return
+	}
+
+	for _, link := range links {
+		t.Logf("Rel: %s\nHREF: %s\n", link.Rel, link.HREF)
+	}
+}
