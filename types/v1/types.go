@@ -855,6 +855,8 @@ type ReplicationConsistencyGroup struct {
 	LocalActivityState          string `json:"localActivityState,omitempty"`
 	RemoteActivityState         string `json:"remoteActivityState,omitempty"`
 	InactiveReason              int    `json:"inactiveReason,omitempty"`
+
+	Links []*Link `json:"links"`
 }
 
 // ReplicationConsistencyGroupCreatePayload works around a problem where the RpoInSeconds must be enclosed
@@ -868,6 +870,16 @@ type ReplicationConsistencyGroupCreatePayload struct {
 	RemoteProtectionDomainId string `json:"remoteProtectionDomainId"`
 	DestinationSystemId      string `json:"destinationSystemId,omitempty"`
 	PeerMdmId                string `json:"peerMdmId,omitempty"`
+}
+
+// Response from add ReplicationConsistencyGroup
+type ReplicationConsistencyGroupResp struct {
+	ID string `json:"id"`
+}
+
+// RemoveReplicationConsistencyGroupParam
+type RemoveReplicationConsistencyGroupParam struct {
+	ForceIgnoreConsistency string `json:"forceIgnoreConsistency,omitempty"`
 }
 
 // ReplicationPair represents a pair of volumes in a replication relationship

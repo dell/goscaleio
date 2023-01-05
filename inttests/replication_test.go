@@ -20,38 +20,40 @@ package inttests
 
 import (
 	"fmt"
-	"os"
-	"testing"
-	"github.com/stretchr/testify/assert"
 	"github.com/dell/goscaleio"
 	siotypes "github.com/dell/goscaleio/types/v1"
+	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
+	"os"
+	"testing"
 	"time"
 )
 
 // Replication global variables used to set up the replication relationships
 type replication struct {
-	sourcePeerMDM *goscaleio.PeerMDM
-	targetPeerMDM *goscaleio.PeerMDM
-	sourceSystem *goscaleio.System
-	targetSystem *goscaleio.System
-	sourceSystemID string
+	sourcePeerMDM            *goscaleio.PeerMDM
+	targetPeerMDM            *goscaleio.PeerMDM
+	sourceSystem             *goscaleio.System
+	targetSystem             *goscaleio.System
+	sourceSystemID           string
 	sourceProtectionDomainID string
-	sourceProtectionDomain *goscaleio.ProtectionDomain
-	sourceStoragePool *goscaleio.StoragePool
-	sourceVolume *siotypes.Volume
-	targetSystemID string
-	targetProtectionDomain *goscaleio.ProtectionDomain
-	targetStoragePool *goscaleio.StoragePool
-	targetVolume *siotypes.Volume
-	rcg *goscaleio.ReplicationConsistencyGroup
+	sourceProtectionDomain   *goscaleio.ProtectionDomain
+	sourceStoragePool        *goscaleio.StoragePool
+	sourceVolume             *siotypes.Volume
+	targetSystemID           string
+	targetProtectionDomain   *goscaleio.ProtectionDomain
+	targetStoragePool        *goscaleio.StoragePool
+	targetVolume             *siotypes.Volume
+	rcg                      *goscaleio.ReplicationConsistencyGroup
 }
+
 var rep replication
 
 // Test GetPeerMDMs
 func TestGetPeerMDMs(t *testing.T) {
 	srcpeers, err := C.GetPeerMDMs()
 	assert.Nil(t, err)
-	for i:=0; i < len(srcpeers); i++ {
+	for i := 0; i < len(srcpeers); i++ {
 		t.Logf("Source PeerMDM: %+v", srcpeers[i])
 		rep.sourceSystemID = srcpeers[i].SystemID
 	}
@@ -61,14 +63,14 @@ func TestGetPeerMDMs(t *testing.T) {
 	}
 	tgtpeers, err := C2.GetPeerMDMs()
 	assert.Nil(t, err)
-	for i:=0; i < len(tgtpeers); i++ {
+	for i := 0; i < len(tgtpeers); i++ {
 		t.Logf("Target PeerMDM: %+v", tgtpeers[i])
 		rep.targetSystemID = tgtpeers[i].SystemID
 	}
 
 	// Test systems are validly paired
 	foundTarget := false
-	for i:=0; i < len(srcpeers); i++ {
+	for i := 0; i < len(srcpeers); i++ {
 		if srcpeers[i].PeerSystemID == rep.targetSystemID {
 			foundTarget = true
 			if srcpeers[i].CouplingRC != "SUCCESS" {
@@ -85,7 +87,7 @@ func TestGetPeerMDMs(t *testing.T) {
 	}
 
 	foundSource := false
-	for i:=0; i < len(tgtpeers); i++ {
+	for i := 0; i < len(tgtpeers); i++ {
 		if tgtpeers[i].PeerSystemID == rep.sourceSystemID {
 			foundSource = true
 			if tgtpeers[i].CouplingRC != "SUCCESS" {
@@ -127,7 +129,7 @@ func TestGetProtectionDomain(t *testing.T) {
 	t.Logf("get ProtectionDomain href %s", href)
 	protectionDomains, err := getSystem().GetProtectionDomain(href)
 	assert.Nil(t, err)
-	for _,pd := range protectionDomains {
+	for _, pd := range protectionDomains {
 		t.Logf("source protection domain %+v", pd)
 	}
 }
@@ -136,7 +138,7 @@ func TestGetProtectionDomain(t *testing.T) {
 func getTargetProtectionDomain() *goscaleio.ProtectionDomain {
 	TargetProtectionDomainName := os.Getenv("GOSCALEIO_PROTECTIONDOMAIN2")
 	protectionDomains, _ := rep.targetSystem.GetProtectionDomain("")
-	for i:=0; i < len(protectionDomains); i++ {
+	for i := 0; i < len(protectionDomains); i++ {
 		fmt.Printf("target protection domain %+v", protectionDomains[i])
 		if protectionDomains[i].Name == TargetProtectionDomainName {
 			rep.targetProtectionDomain = goscaleio.NewProtectionDomainEx(C2, protectionDomains[i])
@@ -158,7 +160,7 @@ func TestTargetProtectionDomain(t *testing.T) {
 func getTargetStoragePool() *goscaleio.StoragePool {
 	TargetStoragePoolName := os.Getenv("GOSCALEIO_STORAGEPOOL2")
 	storagePools, _ := rep.targetProtectionDomain.GetStoragePool("")
-	for i:=0; i < len(storagePools); i++ {
+	for i := 0; i < len(storagePools); i++ {
 		if storagePools[i].Name == TargetStoragePoolName {
 			rep.targetStoragePool = goscaleio.NewStoragePoolEx(C2, storagePools[i])
 			return rep.targetStoragePool
@@ -211,39 +213,35 @@ func TestLocateVolumesToBeReplicated(t *testing.T) {
 	t.Logf("sourceVolume %s targetVolume %s", rep.sourceVolume.Name, rep.targetVolume.Name)
 }
 
-// TestDelayBeforeRCGCreation
-func TestDelayBeforeRCGCreation(t *testing.T) {
-	t.Logf("WAITING 30 SECONDS BEFORE ATTEMPTING RCG CREATE")
-	time.Sleep(1 * time.Second)
-}
-
-
 // Test createReplicationConsistencyGroup
 func TestCreateReplicationConsistencyGroup(t *testing.T) {
 	var err error
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
-	rcgPayload := &siotypes.ReplicationConsistencyGroupCreatePayload {
-		Name: "inttestrcg",
-		RpoInSeconds: "60",
-		ProtectionDomainId: rep.sourceProtectionDomain.ProtectionDomain.ID,
+	rcgPayload := &siotypes.ReplicationConsistencyGroupCreatePayload{
+		Name:                     "inttestrcg",
+		RpoInSeconds:             "60",
+		ProtectionDomainId:       rep.sourceProtectionDomain.ProtectionDomain.ID,
 		RemoteProtectionDomainId: rep.targetProtectionDomain.ProtectionDomain.ID,
-		PeerMdmId: rep.sourcePeerMDM.PeerMDM.ID, 
-		//DestinationSystemId: rep.targetSystem.System.ID,
+		//PeerMdmId:                rep.sourcePeerMDM.PeerMDM.ID,
+		DestinationSystemId: rep.targetSystem.System.ID,
 	}
 	t.Logf("rcgPayload %+v", rcgPayload)
-	rep.rcg, err = C2.CreateReplicationConsistencyGroup(rcgPayload)
+	log.SetLevel(log.DebugLevel)
+	rcgResp, err := C.CreateReplicationConsistencyGroup(rcgPayload)
 	if err != nil {
 		t.Logf("Error creating RCG: %s", err.Error())
 	}
+	log.SetLevel(log.InfoLevel)
 	assert.Nil(t, err)
+	log.Infof("RCG ID: %s", rcgResp.ID)
 }
 
 // TestDelayAfterRCGCreation
 func TestDelayAfterRCGCreation(t *testing.T) {
 	t.Logf("WAITING 30 SECONDS AFTER ATTEMPTING RCG CREATE")
-	time.Sleep(5 * time.Second)
+	time.Sleep(30 * time.Second)
 }
 
 // Test GetReplicationConsistencyGroups
@@ -253,15 +251,27 @@ func TestGetReplicationConsistencyGroups(t *testing.T) {
 	}
 	rcgs, err := C.GetReplicationConsistencyGroups()
 	assert.Nil(t, err)
-	for i:=0; i < len(rcgs); i++ {
+	for i := 0; i < len(rcgs); i++ {
 		t.Logf("RCG: %+v", rcgs[i])
 		pairs, err := C.GetReplicationPairs(rcgs[i].ID)
 		assert.Nil(t, err)
-		for j:=0; j < len(pairs); j++ {
+		for j := 0; j < len(pairs); j++ {
 			t.Logf("ReplicationPair: %+v", pairs[j])
 		}
-
+		if rcgs[i].Name == "inttestrcg" {
+			rcg := goscaleio.NewReplicationConsistencyGroup(C)
+			rcg.ReplicationConsistencyGroup = rcgs[i]
+			rep.rcg = rcg
+		}
 	}
+	assert.NotNil(t, rep.rcg)
+}
+
+// Test RemoveReplicatonConsistencyGroup
+func TestRemoveReplicationConsistencyGroup(t *testing.T) {
+	assert.NotNil(t, rep.rcg)
+	err := rep.rcg.RemoveReplicationConsistencyGroup(false)
+	assert.Nil(t, err)
 }
 
 // Test
