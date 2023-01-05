@@ -229,3 +229,53 @@ func (c *Client) CreateReplicationConsistencyGroupSnapshot(id string, force bool
 	err := c.getJSONWithRetry(http.MethodPost, uri, param, resp)
 	return resp, err
 }
+
+func (c *Client) ExecuteFailoverOnReplicationGroup(id string) error {
+	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/failoverReplicationConsistencyGroup"
+	param := types.EmptyPayload{}
+
+	defer TimeSpent("ExecuteFailoverOnReplicationGroup", time.Now())
+
+	fmt.Printf("ExecuteFailoverOnReplicationGroup: path: %s\n", uri)
+
+	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}
+
+func (c *Client) ExecuteSwitchoverOnReplicationGroup(id string, force bool) error {
+	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/switchoverReplicationConsistencyGroup"
+
+	// API is incorrect. No params needed.
+	param := types.EmptyPayload{}
+
+	defer TimeSpent("ExecuteSwitchoverOnReplicationGroup", time.Now())
+
+	fmt.Printf("ExecuteSwitchoverOnReplicationGroup: path: %s\n", uri)
+
+	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}
+
+func (c *Client) ExecuteRestoreOnReplicationGroup(id string) error {
+	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/restoreReplicationConsistencyGroup"
+	param := types.EmptyPayload{}
+
+	defer TimeSpent("ExecuteRestoreOnReplicationGroup", time.Now())
+
+	fmt.Printf("ExecuteRestoreOnReplicationGroup: path: %s\n", uri)
+
+	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}
+
+func (c *Client) ExecuteReverseOnReplicationGroup(id string) error {
+	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/reverseReplicationConsistencyGroup"
+	param := types.EmptyPayload{}
+
+	defer TimeSpent("ExecuteReverseOnReplicationGroup", time.Now())
+
+	fmt.Printf("ExecuteReverseOnReplicationGroup: path: %s\n", uri)
+
+	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}

@@ -20,6 +20,7 @@ package inttests
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -410,7 +411,7 @@ func TestGetReplicationConsistencyGroups(t *testing.T) {
 
 // Test CreateReplicationConsistencyGroupSnapshot
 func TestCreateReplicationConsistencyGroupSnapshot(t *testing.T) {
-	time.Sleep(30 * time.Second)
+	time.Sleep(5 * time.Second)
 	log.SetLevel(log.DebugLevel)
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
@@ -420,7 +421,7 @@ func TestCreateReplicationConsistencyGroupSnapshot(t *testing.T) {
 	log.SetLevel(log.InfoLevel)
 	fmt.Printf("SnapshotGroupID: %s\n", resp.SnapshotGroupID)
 	rep.snapshotGroupID = resp.SnapshotGroupID
-	time.Sleep(30 * time.Second)
+	// time.Sleep(30 * time.Second)
 }
 
 // Test SnapshotRetrieval
@@ -457,6 +458,69 @@ func TestSnapshotRetrieval(t *testing.T) {
 	}
 
 	fmt.Printf("Action Attributes Result: %+v\n", actionAttributes)
+
+	// time.Sleep(10 * time.Second)
+}
+
+// Test ExecuteFailoverOnReplicationGroup
+func TestExecuteFailoverOnReplicationGroup(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
+
+	err := C.ExecuteFailoverOnReplicationGroup(rep.rcgID)
+	assert.Nil(t, err)
+
+	log.SetLevel(log.InfoLevel)
+
+	time.Sleep(10 * time.Second)
+}
+
+// Test ExecuteRestoreOnReplicationGroup
+func TestExecuteRestoreOnReplicationGroup(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
+
+	err := C.ExecuteRestoreOnReplicationGroup(rep.rcgID)
+	assert.Nil(t, err)
+
+	log.SetLevel(log.InfoLevel)
+
+	time.Sleep(10 * time.Second)
+}
+
+// Test ExecuteSwitchoverOnReplicationGroup
+func TestExecuteSwitchoverOnReplicationGroup(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
+
+	err := waitForConsistency(t)
+	assert.Nil(t, err)
+
+	err = C.ExecuteSwitchoverOnReplicationGroup(rep.rcgID, false)
+	assert.Nil(t, err)
+
+	log.SetLevel(log.InfoLevel)
+
+	time.Sleep(10 * time.Second)
+}
+
+// Test ExecuteReverseOnReplicationGroup
+func TestExecuteReverseOnReplicationGroup(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
+
+	err := C.ExecuteReverseOnReplicationGroup(rep.rcgID)
+	assert.Nil(t, err)
+
+	log.SetLevel(log.InfoLevel)
 
 	time.Sleep(10 * time.Second)
 }
@@ -553,4 +617,21 @@ func parseLinks(links []*siotypes.Link, t *testing.T) {
 	for _, link := range links {
 		t.Logf("Rel: %s\nHREF: %s\n", link.Rel, link.HREF)
 	}
+}
+
+func waitForConsistency(t *testing.T) error {
+	for i := 0; i < 10; i++ {
+		group, err := C.GetReplicationConsistencyGroupById(rep.rcgID)
+		if err != nil {
+			continue
+		}
+
+		if group.CurrConsistMode == "Consistent" {
+			t.Logf("Consistency Group %s - Reached Consistency.", rep.rcgID)
+			return nil
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+	return errors.New("consistency group did not reach consistency.")
 }
