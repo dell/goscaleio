@@ -368,6 +368,24 @@ func TestGetReplicationConsistencyGroups(t *testing.T) {
 	assert.NotNil(t, rep.rcg)
 }
 
+// Test RemoveReplicationPair
+func TestRemoveReplicationPair(t *testing.T) {
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
+
+	t.Logf("[TestRemoveReplicationPair] Removing replication pair: %s", rep.rpID)
+
+	pair, err := C.RemoveReplicationPair(rep.rpID)
+	assert.Nil(t, err)
+	assert.NotNil(t, pair)
+
+	t.Logf("[TestRemoveReplicationPair] Removed the following pair: %+v", pair)
+
+	// Delay to verify on the UI.
+	time.Sleep(10 * time.Second)
+}
+
 // Test RemoveReplicatonConsistencyGroup
 func TestRemoveReplicationConsistencyGroup(t *testing.T) {
 	assert.NotNil(t, rep.rcg)
