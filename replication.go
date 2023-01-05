@@ -74,7 +74,7 @@ func (c *Client) CreateReplicationConsistencyGroup(rcg *types.ReplicationConsist
 		return nil, errors.New("RpoInSeconds, ProtectionDomainId, and RemoteProtectionDomainId are required")
 	}
 	if rcg.DestinationSystemId == "" && rcg.PeerMdmId == "" {
-		return nil, errors.New("Either DestinationSystemId or PeerMdmId are required")
+		return nil, errors.New("either DestinationSystemId or PeerMdmId are required")
 	}
 	bytes, err := json.Marshal(rcg)
 	if err != nil {
@@ -137,6 +137,23 @@ func (c *Client) CreateReplicationPair(rp *types.QueryReplicationPair) (*types.R
 		return nil, err
 	}
 	return rpResp, nil
+}
+
+// Remove the desired replication pair.
+func (c *Client) RemoveReplicationPair(id string) (*types.ReplicationPair, error) {
+	if id == "" {
+		return nil, errors.New("replication Pair ID is required to remove it")
+	}
+
+	uri := "/api/instances/ReplicationPair::" + id + "/action/removeReplicationPair"
+	resp := &types.ReplicationPair{}
+
+	if err := c.getJSONWithRetry(http.MethodPost, uri, nil, resp); err != nil {
+		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, rp, pair) returned %s", err)
+		return nil, err
+	}
+
+	return resp, nil
 }
 
 // GetReplicationPairs returns a list of ReplicationPair objects. If a ReplicationConsistencyGroupId is specified, will be limited to paris of that RCG.
