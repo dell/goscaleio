@@ -891,10 +891,20 @@ type ReplicationPair struct {
 	RemoteCapacityInMB                 int    `json:"remoteCapacityInMB"`
 	LocalVolumeID                      string `json:"localVolumeId"`
 	RemoteVolumeID                     string `json:"remoteVolumeId"`
+	RemoteVolumeName                   string `json:"remoteVolumeName"`
 	ReplicationConsistencyGroupID      string `json:"replicationConsistencyGroupId"`
 	CopyType                           string `json:"copyType"`
 	LifetimeState                      string `json:"lifetimeState"`
 	PeerSystemName                     string `json:"peerSystemName"`
 	InitialCopyState                   string `json:"initialCopyState"`
 	InitialCopyPriority                int    `json:"initialCopyPriority"`
+}
+
+// Used for querying replication pair.
+type QueryReplicationPair struct {
+	Name                          string `json:"name"`
+	SourceVolumeID                string `json:"sourceVolumeId"`
+	DestinationVolumeID           string `json:"destinationVolumeId"`
+	ReplicationConsistencyGroupID string `json:"replicationConsistencyGroupId"`
+	CopyType                      string `json:"copyType"`
 }
