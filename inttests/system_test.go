@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/dell/goscaleio"
@@ -55,6 +56,7 @@ func TestGetSingleSystemID(t *testing.T) {
 func TestGetSingleSystemByIDInvalid(t *testing.T) {
 	// then try to get the first one returned, explicitly
 	system, err := C.FindSystem(invalidIdentifier, "", "")
+	fmt.Printf("system %v err %s\n", system, err)
 	assert.NotNil(t, err)
 	assert.Nil(t, system)
 }
@@ -81,4 +83,28 @@ func TestGetSystemStatistics(t *testing.T) {
 	stats, err := system.GetStatistics()
 	assert.Nil(t, err)
 	assert.NotNil(t, stats)
+}
+
+// Test GetPeerMDMs
+func TestGetPeerMDMs(t *testing.T) {
+	peers, err := C.GetPeerMDMs()
+	assert.Nil(t, err)
+	for i:=0; i < len(peers); i++ {
+		t.Log(fmt.Printf("PeerMDM: %+v", peers[i]))
+	}
+}
+
+// Test GetReplicationConsistencyGroups
+func TestGetReplicationConsistencyGroups(t *testing.T) {
+	rcgs, err := C.GetReplicationConsistencyGroups()
+	assert.Nil(t, err)
+	for i:=0; i < len(rcgs); i++ {
+		t.Log(fmt.Printf("RCG: %+v", rcgs[i]))
+		pairs, err := C.GetReplicationPairs(rcgs[i].ID)
+		assert.Nil(t, err)
+		for j:=0; j < len(pairs); j++ {
+			t.Log(fmt.Printf("ReplicationPair: %+v", pairs[j]))
+		}
+
+	}
 }

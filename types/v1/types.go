@@ -808,3 +808,66 @@ type SnapshotPolicy struct {
 type SnapshotPolicyQueryIDByKeyParam struct {
 	Name string `json:"name"`
 }
+
+// PeerMDM defines a replication peer system.
+type PeerMDM struct {
+	ID                  string `json:"id"`
+	Name                string `json:"name"`
+	Port                int    `json:port"`
+	PeerSystemID        string `json:"peerSystemId"`
+	SystemID            string `json:"systemId"`
+	SoftwareVersionInfo string `json:"softwareVersionInfo"`
+	MembershipState     string `json:"membershipState"`
+	PerfProfile         string `json:"perfProfile"`
+	NetworkType         string `json:"networkType"`
+	CouplingRC          string `json:couplingRC"`
+}
+
+// ReplicationConsistencyGroup (RCG) has information about a replication session
+type ReplicationConsistencyGroup struct {
+	ID                          string `json:"id"`
+	Name                        string `json:"name"`
+	RemoteID                    string `json:"remoteId"`
+	RemoteMdmId                 string `json:"remoteMdmId"`
+	RpolNSeconds                int    `json:"rpolnSeconds"`
+	ReplicationDirection        string `json:"replicationDirection"`
+	CurrConsistMode             string `json:"currConsistMode"`
+	FreezeState                 string `json:"freezeState"`
+	PauseMode                   string `json:"pauseMode"`
+	LifetimeState               string `json:"lifetimeState"`
+	SnapCreationInProgress      bool   `json:"snapCreationInProgress"`
+	LastSnapgroupId             int    `json:"lastSnapGroupId"`
+	PeerMdmId                   string `json:"peerMdmId"`
+	DisasterRecoveryState       string `json:"disasterRecoveryState"`
+	RemoteDisasterRecoveryState string `json:"remoteDisasterRecoveryState"`
+	Type                        string `json:"type"`
+	ProtectionDomainId          string `json:"protectionDomainId"`
+	RemoteProtectionDomainId    string `json:"remoteProtectionDomainId"`
+	TargetVolumeAccessMode      string `json:"targetVolumeAccessMode"`
+	FailverType                 string `json:"failoverType"`
+	FailoverState               string `json:"failoverState"`
+	ActiveLocal                 bool   `json:"activeLocal"`
+	ActiveRemote                bool   `json:"activeRemote"`
+	AbstractState               string `json:"abstractState"`
+	Error                       int    `json:"error"`
+	LocalActivityState          string `json:"localActivityState"`
+	RemoteActivityState         string `json:"remoteActivityState"`
+	InactiveReason              int    `json:"inactiveReason"`
+}
+
+// ReplicationPair represents a pair of volumes in a replication relationship
+type ReplicationPair struct {
+	ID                                 string `json:"id"`
+	Name                               string `json:"name"`
+	RemoteID                           string `json:"remoteId"`
+	UserRequestedPauseTransmitInitCopy bool   `json:"userRequestedPauseTransmitInitCopy"`
+	RemoteCapacityInMB                 int    `json:"remoteCapacityInMB"`
+	LocalVolumeID                      string `json:"localVolumeId"`
+	RemoteVolumeID                     string `json:"remoteVolumeId"`
+	ReplicationConsistencyGroupID      string `json:"replicationConsistencyGroupId"`
+	CopyType                           string `json:"copyType"`
+	LifetimeState                      string `json:"lifetimeState"`
+	PeerSystemName                     string `json:"peerSystemName"`
+	InitialCopyState                   string `json:"initialCopyState"`
+	InitialCopyPriority                int    `json:"initialCopyPriority"`
+}
