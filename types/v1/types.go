@@ -830,9 +830,9 @@ type ReplicationConsistencyGroup struct {
 	RpoInSeconds             int    `json:"rpoInSeconds"`
 	ProtectionDomainId       string `json:"protectionDomainId"`
 	RemoteProtectionDomainId string `json:"remoteProtectionDomainId"`
-	DestinationSystemId      string `json:"destinationSystemId"`
+	DestinationSystemId      string `json:"destinationSystemId,omitempty"`
+	PeerMdmId                string `json:"peerMdmId,omitempty"`
 
-	PeerMdmId                   string `json:"peerMdmId,omitempty"`
 	RemoteID                    string `json:"remoteId,omitempty"`
 	RemoteMdmId                 string `json:"remoteMdmId,omitempty"`
 	ReplicationDirection        string `json:"replicationDirection,omitempty"`
@@ -855,6 +855,19 @@ type ReplicationConsistencyGroup struct {
 	LocalActivityState          string `json:"localActivityState,omitempty"`
 	RemoteActivityState         string `json:"remoteActivityState,omitempty"`
 	InactiveReason              int    `json:"inactiveReason,omitempty"`
+}
+
+// ReplicationConsistencyGroupCreatePayload works around a problem where the RpoInSeconds must be enclosed
+// in quotes when creating an RCG, but is treated as an integer when it is returned.
+// This is a bug in the PowerFlex REST implementation.
+// This information was obtained from Bubis, Zeev <Zeev.Bubis@dell.com>.
+type ReplicationConsistencyGroupCreatePayload struct {
+	Name                     string `json:"name"`
+	RpoInSeconds             string `json:"rpoInSeconds"` // note this field different
+	ProtectionDomainId       string `json:"protectionDomainId"`
+	RemoteProtectionDomainId string `json:"remoteProtectionDomainId"`
+	DestinationSystemId      string `json:"destinationSystemId,omitempty"`
+	PeerMdmId                string `json:"peerMdmId,omitempty"`
 }
 
 // ReplicationPair represents a pair of volumes in a replication relationship

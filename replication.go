@@ -62,8 +62,8 @@ func (c *Client) GetReplicationConsistencyGroups() ([]*types.ReplicationConsiste
 }
 
 // CreateReplicationConsistencyGroup
-func (c *Client) CreateReplicationConsistencyGroup(rcg *types.ReplicationConsistencyGroup) (*ReplicationConsistencyGroup, error) {
-	if rcg.RpoInSeconds == 0 || rcg.ProtectionDomainId == "" || rcg.RemoteProtectionDomainId == "" {
+func (c *Client) CreateReplicationConsistencyGroup(rcg *types.ReplicationConsistencyGroupCreatePayload) (*ReplicationConsistencyGroup, error) {
+	if rcg.RpoInSeconds == "" || rcg.ProtectionDomainId == "" || rcg.RemoteProtectionDomainId == "" {
 		return nil, errors.New("RpoInSeconds, ProtectionDomainId, and RemoteProtectionDomainId are required")
 	}
 	if rcg.DestinationSystemId == "" && rcg.PeerMdmId == "" {
@@ -75,14 +75,18 @@ func (c *Client) CreateReplicationConsistencyGroup(rcg *types.ReplicationConsist
 	}
 	fmt.Printf("Marshal output: %s\n", string(bytes))
 	defer TimeSpent("CreateReplicationConsistencyGroup", time.Now())
-	path := "/api/types/ReplicationConsistencyGroup/instances"
-	rcgResp := NewReplicationConsistencyGroup(c)
 
-	err = c.getJSONWithRetry(http.MethodPost, path, rcg, &rcgResp.ReplicationConsistencyGroup)
+	path := "/api/types/ReplicationConsistencyGroup/instances"
+	rcgResp := &types.ReplicationConsistencyGroup{}
+
+	err = c.getJSONWithRetry(http.MethodPost, path, rcg, &rcgResp)
 	if err != nil {
+		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, rcg, &rcgResp) returned %s", err)
 		return nil, err
 	}
-	return rcgResp, nil
+	resp := NewReplicationConsistencyGroup(c)
+	resp.ReplicationConsistencyGroup = rcgResp
+	return resp, nil
 }
 
 // GetReplicationPairs returns a list of ReplicationPair objects. If a ReplicationConsistencyGroupId is specified, will be limited to paris of that RCG.
