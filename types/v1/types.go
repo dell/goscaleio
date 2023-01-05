@@ -825,34 +825,36 @@ type PeerMDM struct {
 
 // ReplicationConsistencyGroup (RCG) has information about a replication session
 type ReplicationConsistencyGroup struct {
-	ID                          string `json:"id"`
-	Name                        string `json:"name"`
-	RemoteID                    string `json:"remoteId"`
-	RemoteMdmId                 string `json:"remoteMdmId"`
-	RpolNSeconds                int    `json:"rpolnSeconds"`
-	ReplicationDirection        string `json:"replicationDirection"`
-	CurrConsistMode             string `json:"currConsistMode"`
-	FreezeState                 string `json:"freezeState"`
-	PauseMode                   string `json:"pauseMode"`
-	LifetimeState               string `json:"lifetimeState"`
-	SnapCreationInProgress      bool   `json:"snapCreationInProgress"`
-	LastSnapgroupId             int    `json:"lastSnapGroupId"`
-	PeerMdmId                   string `json:"peerMdmId"`
-	DisasterRecoveryState       string `json:"disasterRecoveryState"`
-	RemoteDisasterRecoveryState string `json:"remoteDisasterRecoveryState"`
-	Type                        string `json:"type"`
-	ProtectionDomainId          string `json:"protectionDomainId"`
-	RemoteProtectionDomainId    string `json:"remoteProtectionDomainId"`
-	TargetVolumeAccessMode      string `json:"targetVolumeAccessMode"`
-	FailverType                 string `json:"failoverType"`
-	FailoverState               string `json:"failoverState"`
-	ActiveLocal                 bool   `json:"activeLocal"`
-	ActiveRemote                bool   `json:"activeRemote"`
-	AbstractState               string `json:"abstractState"`
-	Error                       int    `json:"error"`
-	LocalActivityState          string `json:"localActivityState"`
-	RemoteActivityState         string `json:"remoteActivityState"`
-	InactiveReason              int    `json:"inactiveReason"`
+	ID                       string `json:"id,omitempty"`
+	Name                     string `json:"name"`
+	RpoInSeconds             int    `json:"rpoInSeconds"`
+	ProtectionDomainId       string `json:"protectionDomainId"`
+	RemoteProtectionDomainId string `json:"remoteProtectionDomainId"`
+	DestinationSystemId      string `json:"destinationSystemId"`
+
+	PeerMdmId                   string `json:"peerMdmId,omitempty"`
+	RemoteID                    string `json:"remoteId,omitempty"`
+	RemoteMdmId                 string `json:"remoteMdmId,omitempty"`
+	ReplicationDirection        string `json:"replicationDirection,omitempty"`
+	CurrConsistMode             string `json:"currConsistMode,omitempty"`
+	FreezeState                 string `json:"freezeState,omitempty"`
+	PauseMode                   string `json:"pauseMode,omitempty"`
+	LifetimeState               string `json:"lifetimeState,omitempty"`
+	SnapCreationInProgress      bool   `json:"snapCreationInProgress,omitempty"`
+	LastSnapgroupId             int    `json:"lastSnapGroupId,omitempty"`
+	Type                        string `json:"type,omitempty"`
+	DisasterRecoveryState       string `json:"disasterRecoveryState,omitempty"`
+	RemoteDisasterRecoveryState string `json:"remoteDisasterRecoveryState,omitempty"`
+	TargetVolumeAccessMode      string `json:"targetVolumeAccessMode,omitempty"`
+	FailverType                 string `json:"failoverType,omitempty"`
+	FailoverState               string `json:"failoverState,omitempty"`
+	ActiveLocal                 bool   `json:"activeLocal,omitempty"`
+	ActiveRemote                bool   `json:"activeRemote,omitempty"`
+	AbstractState               string `json:"abstractState,omitempty"`
+	Error                       int    `json:"error,omitempty"`
+	LocalActivityState          string `json:"localActivityState,omitempty"`
+	RemoteActivityState         string `json:"remoteActivityState,omitempty"`
+	InactiveReason              int    `json:"inactiveReason,omitempty"`
 }
 
 // ReplicationPair represents a pair of volumes in a replication relationship
