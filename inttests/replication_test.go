@@ -19,7 +19,6 @@
 package inttests
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -35,28 +34,30 @@ import (
 
 // Replication global variables used to set up the replication relationships
 type replication struct {
-	sourcePeerMDM            *goscaleio.PeerMDM
-	targetPeerMDM            *goscaleio.PeerMDM
-	sourceSystem             *goscaleio.System
-	targetSystem             *goscaleio.System
-	sourceSystemID           string
-	sourceProtectionDomainID string
-	sourceProtectionDomain   *goscaleio.ProtectionDomain
-	sourceStoragePool        *goscaleio.StoragePool
-	sourceVolume             *siotypes.Volume
-	targetSystemID           string
-	targetProtectionDomain   *goscaleio.ProtectionDomain
-	targetStoragePool        *goscaleio.StoragePool
-	targetVolume             *siotypes.Volume
-	rcg                      *goscaleio.ReplicationConsistencyGroup
-	rcgID                    string
-	replicationPair          *siotypes.ReplicationPair
-	snapshotGroupID          string
+	sourcePeerMDM          *goscaleio.PeerMDM
+	targetSystem           *goscaleio.System
+	sourceSystemID         string
+	sourceProtectionDomain *goscaleio.ProtectionDomain
+	sourceStoragePool      *goscaleio.StoragePool
+	sourceVolume           *siotypes.Volume
+	targetSystemID         string
+	targetProtectionDomain *goscaleio.ProtectionDomain
+	targetStoragePool      *goscaleio.StoragePool
+	targetVolume           *siotypes.Volume
+	rcg                    *goscaleio.ReplicationConsistencyGroup
+	rcgID                  string
+	replicationPair        *siotypes.ReplicationPair
+	snapshotGroupID        string
 }
 
 var rep replication
 
-const delay_s = 15
+const (
+	sourceVolume           = "GOSCALEIO_REPLICATION_SOURCE_NAME"
+	targetVolume           = "GOSCALEIO_REPLICATION_TARGET_NAME"
+	targetProtectionDomain = "GOSCALEIO_PROTECTIONDOMAIN2"
+	targetStoragePool      = "GOSCALEIO_STORAGEPOOL2"
+)
 
 // Test GetPeerMDMs
 func TestGetPeerMDMs(t *testing.T) {
@@ -70,6 +71,7 @@ func TestGetPeerMDMs(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
+
 	log.SetLevel(log.DebugLevel)
 	tgtpeers, err := C2.GetPeerMDMs()
 	assert.Nil(t, err)
@@ -80,34 +82,36 @@ func TestGetPeerMDMs(t *testing.T) {
 	}
 
 	// Test systems are validly paired
-	foundTarget := false
+	found := false
 	for i := 0; i < len(srcpeers); i++ {
 		if srcpeers[i].PeerSystemID == rep.targetSystemID {
-			foundTarget = true
 			if srcpeers[i].CouplingRC != "SUCCESS" {
 				t.Error(fmt.Printf("PeerMDM %s expected couplingRC SUCCESS but status was %s", srcpeers[i].PeerSystemID, srcpeers[i].CouplingRC))
-			} else {
-				rep.sourcePeerMDM = goscaleio.NewPeerMDM(C, srcpeers[i])
-				t.Logf("PeerMDMID %s", rep.sourcePeerMDM.PeerMDM.ID)
 			}
+
+			found = true
+			rep.sourcePeerMDM = goscaleio.NewPeerMDM(C, srcpeers[i])
+			t.Logf("PeerMDMID %s", rep.sourcePeerMDM.PeerMDM.ID)
 			break
 		}
 	}
-	if !foundTarget {
+
+	if !found {
 		t.Error("Didn't find target MDM peer")
 	}
 
-	foundSource := false
+	found = false
 	for i := 0; i < len(tgtpeers); i++ {
 		if tgtpeers[i].PeerSystemID == rep.sourceSystemID {
-			foundSource = true
 			if tgtpeers[i].CouplingRC != "SUCCESS" {
 				t.Error(fmt.Printf("PeerMDM %s expected couplingRC SUCCESS but status was %s", tgtpeers[i].PeerSystemID, tgtpeers[i].CouplingRC))
 			}
+
+			found = true
 			break
 		}
 	}
-	if !foundSource {
+	if !found {
 		t.Error("Didn't find source MDM peer")
 	}
 }
@@ -127,6 +131,7 @@ func TestGetTargetSystem(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
+
 	getTargetSystem()
 	assert.NotNil(t, rep.targetSystem)
 }
@@ -135,11 +140,12 @@ func TestGetTargetSystem(t *testing.T) {
 func TestGetProtectionDomain(t *testing.T) {
 	rep.sourceProtectionDomain = getProtectionDomain(t)
 	assert.NotNil(t, rep.sourceProtectionDomain)
+
 	t.Logf("source protction domain: %+v", rep.sourceProtectionDomain.ProtectionDomain)
 	href := "/api/instances/ProtectionDomain::" + rep.sourceProtectionDomain.ProtectionDomain.ID
-	t.Logf("get ProtectionDomain href %s", href)
 	protectionDomains, err := getSystem().GetProtectionDomain(href)
 	assert.Nil(t, err)
+
 	for _, pd := range protectionDomains {
 		t.Logf("source protection domain %+v", pd)
 	}
@@ -147,34 +153,33 @@ func TestGetProtectionDomain(t *testing.T) {
 
 // Get the Target Protection Domain
 func getTargetProtectionDomain() *goscaleio.ProtectionDomain {
-	TargetProtectionDomainName := os.Getenv("GOSCALEIO_PROTECTIONDOMAIN2")
+	targetProtectionDomainName := os.Getenv(targetProtectionDomain)
 	protectionDomains, _ := rep.targetSystem.GetProtectionDomain("")
 	for i := 0; i < len(protectionDomains); i++ {
 		fmt.Printf("target protection domain %+v", protectionDomains[i])
-		if protectionDomains[i].Name == TargetProtectionDomainName {
-			rep.targetProtectionDomain = goscaleio.NewProtectionDomainEx(C2, protectionDomains[i])
+		if protectionDomains[i].Name == targetProtectionDomainName {
+			return goscaleio.NewProtectionDomainEx(C2, protectionDomains[i])
 		}
 	}
-	return rep.targetProtectionDomain
+	return nil
 }
 
 func TestTargetProtectionDomain(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
-	getTargetProtectionDomain()
+
+	rep.targetProtectionDomain = getTargetProtectionDomain()
 	assert.NotNil(t, rep.targetProtectionDomain)
-	t.Logf("source protction domain: %+v", rep.targetProtectionDomain.ProtectionDomain)
 }
 
 // Get the Target StoragePool
 func getTargetStoragePool() *goscaleio.StoragePool {
-	TargetStoragePoolName := os.Getenv("GOSCALEIO_STORAGEPOOL2")
+	targetStoragePoolName := os.Getenv(targetStoragePool)
 	storagePools, _ := rep.targetProtectionDomain.GetStoragePool("")
 	for i := 0; i < len(storagePools); i++ {
-		if storagePools[i].Name == TargetStoragePoolName {
-			rep.targetStoragePool = goscaleio.NewStoragePoolEx(C2, storagePools[i])
-			return rep.targetStoragePool
+		if storagePools[i].Name == targetStoragePoolName {
+			return goscaleio.NewStoragePoolEx(C2, storagePools[i])
 		}
 	}
 	return nil
@@ -187,7 +192,8 @@ func TestStoragePools(t *testing.T) {
 	rep.sourceStoragePool = getStoragePool(t)
 	assert.NotNil(t, rep.sourceStoragePool)
 	t.Logf("sourceStoragePool %s", rep.sourceStoragePool.StoragePool.Name)
-	getTargetStoragePool()
+
+	rep.targetStoragePool = getTargetStoragePool()
 	assert.NotNil(t, rep.targetStoragePool)
 	t.Logf("targetStoragePool %s", rep.targetStoragePool.StoragePool.Name)
 }
@@ -197,9 +203,9 @@ func TestLocateVolumesToBeReplicated(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
-	srcName := os.Getenv("GOSCALEIO_REPLICATION_SOURCE_NAME")
+
+	srcName := os.Getenv(sourceVolume)
 	assert.NotNil(t, srcName)
-	t.Logf("looking for source %s", srcName)
 	sourceVolumes, err := rep.sourceStoragePool.GetVolume("", "", "", srcName, false)
 	if err != nil {
 		t.Log(err)
@@ -209,9 +215,8 @@ func TestLocateVolumesToBeReplicated(t *testing.T) {
 	}
 	assert.NotNil(t, rep.sourceVolume)
 
-	dstName := os.Getenv("GOSCALEIO_REPLICATION_TARGET_NAME")
+	dstName := os.Getenv(targetVolume)
 	assert.NotNil(t, dstName)
-	t.Logf("looking for target %s", dstName)
 	targetVolumes, err := rep.targetStoragePool.GetVolume("", "", "", dstName, false)
 	if err != nil {
 		t.Log(err)
@@ -221,15 +226,15 @@ func TestLocateVolumesToBeReplicated(t *testing.T) {
 	}
 	assert.NotNil(t, rep.targetVolume)
 
-	t.Logf("sourceVolume %s targetVolume %s", rep.sourceVolume.Name, rep.targetVolume.Name)
+	t.Logf("SourceVolume %s, TargetVolume %s", rep.sourceVolume.Name, rep.targetVolume.Name)
 }
 
 // Test createReplicationConsistencyGroup
 func TestCreateReplicationConsistencyGroup(t *testing.T) {
-	var err error
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
+
 	rcgPayload := &siotypes.ReplicationConsistencyGroupCreatePayload{
 		Name:                     "inttestrcg",
 		RpoInSeconds:             "60",
@@ -238,58 +243,44 @@ func TestCreateReplicationConsistencyGroup(t *testing.T) {
 		//PeerMdmId:                rep.sourcePeerMDM.PeerMDM.ID,
 		DestinationSystemId: rep.targetSystem.System.ID,
 	}
-	t.Logf("rcgPayload %+v", rcgPayload)
-	log.SetLevel(log.DebugLevel)
+
 	rcgResp, err := C.CreateReplicationConsistencyGroup(rcgPayload)
-	if err != nil {
-		t.Logf("Error creating RCG: %s", err.Error())
-	}
-	log.SetLevel(log.InfoLevel)
 	assert.Nil(t, err)
+
 	log.Infof("RCG ID: %s", rcgResp.ID)
 	rep.rcgID = rcgResp.ID
-}
 
-// TestDelayAfterRCGCreation
-func TestDelayAfterRCGCreation(t *testing.T) {
-	t.Logf("WAITING 30 SECONDS AFTER ATTEMPTING RCG CREATE")
 	time.Sleep(5 * time.Second)
 }
 
 // Add Replication Pair
 func TestAddReplicationPair(t *testing.T) {
-	t.Logf("[TestAddReplicationPair] Start")
-
-	var err error
 	if C2 == nil {
-		t.Skip("[TestAddReplicationPair] no client connection to replication target system")
+		t.Skip("no client connection to replication target system")
 	}
 
-	srcName := os.Getenv("GOSCALEIO_REPLICATION_SOURCE_NAME")
+	srcName := os.Getenv(sourceVolume)
 	assert.NotNil(t, srcName)
-	t.Logf("looking for source %s", srcName)
+	t.Logf("Source Volume %s", srcName)
 
 	localVolumeID, err := C.FindVolumeID(srcName)
-	if err != nil {
-		t.Skip("Error finding source volume")
-	}
+	assert.Nil(t, err)
+
 	t.Logf("[TestAddReplicationPair] Local Volume ID: %s", localVolumeID)
 
-	dstName := os.Getenv("GOSCALEIO_REPLICATION_TARGET_NAME")
+	dstName := os.Getenv(targetVolume)
 	assert.NotNil(t, dstName)
-	t.Logf("looking for target %s", dstName)
+	t.Logf("Target Volume %s", dstName)
 
 	remoteVolumeID, err := C2.FindVolumeID(dstName)
-	if err != nil {
-		t.Skip("Error finding target volume")
-	}
+	assert.Nil(t, err)
+
 	t.Logf("[TestAddReplicationPair] Remote Volume ID: %s", remoteVolumeID)
 
 	vol, err := C.GetVolume("", strings.TrimSpace(localVolumeID), "", "", false)
-	if err != nil {
-		t.Skip("[TestAddReplicationPair] Error retrieving volume")
-	}
-	t.Logf("looking for source %+v", vol[0])
+	assert.Nil(t, err)
+
+	t.Logf("Source Volume Content %+v", vol[0])
 
 	rpPayload := &siotypes.QueryReplicationPair{
 		Name:                          "inttestrp",
@@ -300,80 +291,48 @@ func TestAddReplicationPair(t *testing.T) {
 	}
 
 	rpResp, err := C.CreateReplicationPair(rpPayload)
-	if err != nil {
-		t.Logf("[TestAddReplicationPair] Error: %s", err.Error())
-		t.Fatal("Could not create replication pair")
-	} else {
-		t.Logf("[TestAddReplicationPair] Response: %+v", rpResp)
-		t.Logf("ReplicationPairID: %s", rpResp.ID)
-		rep.replicationPair = rpResp
-	}
+	assert.Nil(t, err)
 
-	vol, err = C.GetVolume("", strings.TrimSpace(localVolumeID), "", "", false)
-	if err != nil {
-		t.Skip("[TestAddReplicationPair] Error retrieving volume")
-	}
-	t.Logf("AFTER RP looking for source %+v", vol[0])
-
-	t.Logf("[TestAddReplicationPair] End")
+	t.Logf("ReplicationPairID: %s", rpResp.ID)
+	rep.replicationPair = rpResp
 }
 
 // Query Replication Pair
 func TestQueryReplicationPairs(t *testing.T) {
-	t.Logf("[TestQueryReplicationPairs] Start")
-
-	var err error
 	if C2 == nil {
-		t.Skip("[TestQueryReplicationPairs] no client connection to replication target system")
+		t.Skip("no client connection to replication target system")
 	}
 
 	pairs, err := C.GetReplicationPairs(rep.rcgID)
-
-	if err != nil {
-		t.Logf("[TestQueryReplicationPairs] Error: %s", err.Error())
-		return
-	}
+	assert.Nil(t, err)
 
 	for i, pair := range pairs {
 		t.Logf("%d, ReplicationPair: %+v", i, pair)
 		rep.replicationPair = pair
-		bytes, err := json.MarshalIndent(pair, "", "\t")
-		assert.Nil(t, err)
-		fmt.Printf("%s\n", string(bytes))
 	}
-
-	t.Logf("[TestQueryReplicationPairs] End")
 }
 
 // Query Replication Pair Statistics
 func TestQueryReplicationPairsStatistics(t *testing.T) {
-	t.Logf("[TestQueryReplicationPairsStatistics] Start")
-
-	// var err error
 	if C2 == nil {
-		t.Skip("[TestQueryReplicationPairsStatistics] no client connection to replication target system")
+		t.Skip("no client connection to replication target system")
 	}
-	assert.NotNil(t, rep.replicationPair)
-	assert.NotNil(t, rep.replicationPair.ID)
 
+	assert.NotNil(t, rep.replicationPair)
+
+	t.Logf("Waiting for Replication Pair %s to be complete.", rep.replicationPair.Name)
 	for i := 0; i < 30; i++ {
 		rpResp, err := C.GetReplicationPairStatistics(rep.replicationPair.ID)
-		if err != nil {
-			t.Logf("[TestQueryReplicationPairsStatistics] Error: %s", err.Error())
-			break
-		}
+		assert.Nil(t, err)
 
-		t.Logf("[TestQueryReplicationPairsStatistics] Response: %+v", rpResp)
+		t.Logf("Copied %f", rpResp.InitialCopyProgress)
 
-		vol, err := C.GetVolume("", strings.TrimSpace(rep.replicationPair.LocalVolumeID), "", "", false)
-		if err != nil {
-			t.Skip("[TestQueryReplicationPairsStatistics] Error retrieving volume")
-		}
-		t.Logf("Local Volume Ctx: %+v", vol[0])
+		group, err := C.GetReplicationConsistencyGroupById(rep.rcgID)
+		assert.Nil(t, err)
 
 		// Check if complete
-		if rpResp.InitialCopyProgress == 1 {
-			t.Logf("[TestQueryReplicationPairsStatistics] Copy Complete: %f", rpResp.InitialCopyProgress)
+		if rpResp.InitialCopyProgress == 1 && group.CurrConsistMode == "Consistent" {
+			t.Logf("Copy Complete: %f", rpResp.InitialCopyProgress)
 			break
 		}
 
@@ -386,20 +345,15 @@ func TestGetReplicationConsistencyGroups(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
+
 	rcgs, err := C.GetReplicationConsistencyGroups()
 	assert.Nil(t, err)
 	for i := 0; i < len(rcgs); i++ {
 		t.Logf("RCG: %+v\n\n", rcgs[i])
-		bytes, err := json.MarshalIndent(rcgs[i], "", "\t")
 		assert.Nil(t, err)
-		fmt.Printf("%s\n", string(bytes))
-		// t.Logf("Links: %+v\n\n", rcgs[i].Links)
+
 		parseLinks(rcgs[i].Links, t)
-		pairs, err := C.GetReplicationPairs(rcgs[i].ID)
-		assert.Nil(t, err)
-		for j := 0; j < len(pairs); j++ {
-			t.Logf("ReplicationPair: %+v", pairs[j])
-		}
+
 		if rcgs[i].Name == "inttestrcg" {
 			rcg := goscaleio.NewReplicationConsistencyGroup(C)
 			rcg.ReplicationConsistencyGroup = rcgs[i]
@@ -411,30 +365,23 @@ func TestGetReplicationConsistencyGroups(t *testing.T) {
 
 // Test CreateReplicationConsistencyGroupSnapshot
 func TestCreateReplicationConsistencyGroupSnapshot(t *testing.T) {
-	time.Sleep(5 * time.Second)
-	log.SetLevel(log.DebugLevel)
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
+
 	resp, err := C.CreateReplicationConsistencyGroupSnapshot(rep.rcgID, false)
 	assert.Nil(t, err)
-	log.SetLevel(log.InfoLevel)
-	fmt.Printf("SnapshotGroupID: %s\n", resp.SnapshotGroupID)
 	rep.snapshotGroupID = resp.SnapshotGroupID
-	// time.Sleep(30 * time.Second)
 }
 
 // Test SnapshotRetrieval
 func TestSnapshotRetrieval(t *testing.T) {
-	log.SetLevel(log.DebugLevel)
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
 
 	pairs, err := C.GetReplicationPairs(rep.rcgID)
-	if err != nil {
-		t.Skip("unable to get pairs..")
-	}
+	assert.Nil(t, err)
 
 	var vols []string
 	for _, pair := range pairs {
@@ -458,13 +405,10 @@ func TestSnapshotRetrieval(t *testing.T) {
 	}
 
 	fmt.Printf("Action Attributes Result: %+v\n", actionAttributes)
-
-	// time.Sleep(10 * time.Second)
 }
 
 // Test ExecuteFailoverOnReplicationGroup
 func TestExecuteFailoverOnReplicationGroup(t *testing.T) {
-	log.SetLevel(log.DebugLevel)
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
@@ -472,29 +416,23 @@ func TestExecuteFailoverOnReplicationGroup(t *testing.T) {
 	err := C.ExecuteFailoverOnReplicationGroup(rep.rcgID)
 	assert.Nil(t, err)
 
-	log.SetLevel(log.InfoLevel)
-
-	time.Sleep(10 * time.Second)
 }
 
 // Test ExecuteRestoreOnReplicationGroup
 func TestExecuteRestoreOnReplicationGroup(t *testing.T) {
-	log.SetLevel(log.DebugLevel)
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
 
-	err := C.ExecuteRestoreOnReplicationGroup(rep.rcgID)
+	err := ensureFailover(t)
 	assert.Nil(t, err)
 
-	log.SetLevel(log.InfoLevel)
-
-	time.Sleep(10 * time.Second)
+	err = C.ExecuteRestoreOnReplicationGroup(rep.rcgID)
+	assert.Nil(t, err)
 }
 
 // Test ExecuteSwitchoverOnReplicationGroup
 func TestExecuteSwitchoverOnReplicationGroup(t *testing.T) {
-	log.SetLevel(log.DebugLevel)
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
@@ -504,49 +442,42 @@ func TestExecuteSwitchoverOnReplicationGroup(t *testing.T) {
 
 	err = C.ExecuteSwitchoverOnReplicationGroup(rep.rcgID, false)
 	assert.Nil(t, err)
-
-	log.SetLevel(log.InfoLevel)
-
-	time.Sleep(10 * time.Second)
 }
 
 // Test ExecuteReverseOnReplicationGroup
 func TestExecuteReverseOnReplicationGroup(t *testing.T) {
-	log.SetLevel(log.DebugLevel)
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
 
-	err := C.ExecuteReverseOnReplicationGroup(rep.rcgID)
+	err := ensureFailover(t)
 	assert.Nil(t, err)
 
-	log.SetLevel(log.InfoLevel)
-
-	time.Sleep(10 * time.Second)
+	err = C.ExecuteReverseOnReplicationGroup(rep.rcgID)
+	assert.Nil(t, err)
 }
 
 // Test ExecutePauseOnReplicationGroup
 func TestExecutePauseOnReplicationGroup(t *testing.T) {
-	log.SetLevel(log.DebugLevel)
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
 
-	err := C.ExecutePauseOnReplicationGroup(rep.rcgID, siotypes.ONLY_TRACK_CHANGES)
+	err := waitForConsistency(t)
 	assert.Nil(t, err)
 
-	log.SetLevel(log.InfoLevel)
-
-	time.Sleep(10 * time.Second)
+	err = C.ExecutePauseOnReplicationGroup(rep.rcgID, siotypes.ONLY_TRACK_CHANGES)
+	assert.Nil(t, err)
 }
 
 // Test ExecuteResumeOnReplicationGroup
 func TestExecuteResumeOnReplicationGroup(t *testing.T) {
-	log.SetLevel(log.DebugLevel)
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
 
 	err := C.ExecuteResumeOnReplicationGroup(rep.rcgID)
 	assert.Nil(t, err)
-
-	log.SetLevel(log.InfoLevel)
-
-	time.Sleep(10 * time.Second)
 }
 
 // Test RemoveReplicationPair
@@ -573,34 +504,13 @@ func TestRemoveReplicationPairFromVolume(t *testing.T) {
 		assert.NotNil(t, replicationPairId)
 	}
 
-	pair, err := C.RemoveReplicationPair(replicationPairId, true)
+	_, err = C.RemoveReplicationPair(replicationPairId, true)
 	assert.Nil(t, err)
-	assert.NotNil(t, pair)
 
 	t.Logf("[TestRemoveReplicationPairFromVolume] Removed the following pair %s", rep.replicationPair.Name)
 
 	// Delay to verify on the UI.
-	time.Sleep(30 * time.Second)
-}
-
-// Test RemoveReplicationPair
-func TestRemoveReplicationPair(t *testing.T) {
-	if C2 == nil {
-		t.Skip("no client connection to replication target system")
-	}
-
-	log.SetLevel(log.DebugLevel)
-	t.Logf("[TestRemoveReplicationPair] Removing replication pair: %s", rep.replicationPair.ID)
-
-	pair, err := C.RemoveReplicationPair(rep.replicationPair.ID, true)
-	assert.Nil(t, err)
-	assert.NotNil(t, pair)
-
-	t.Logf("[TestRemoveReplicationPair] Removed the following pair: %+v", pair)
-	log.SetLevel(log.InfoLevel)
-
-	// Delay to verify on the UI.
-	time.Sleep(2 * time.Second)
+	time.Sleep(5 * time.Second)
 }
 
 // Test Freeze Replication Group
@@ -625,7 +535,9 @@ func TestRemoveReplicationConsistencyGroup(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
+
 	assert.NotNil(t, rep.rcg)
+
 	err := rep.rcg.RemoveReplicationConsistencyGroup(false)
 	assert.Nil(t, err)
 }
@@ -644,13 +556,13 @@ func parseLinks(links []*siotypes.Link, t *testing.T) {
 }
 
 func waitForConsistency(t *testing.T) error {
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 15; i++ {
 		group, err := C.GetReplicationConsistencyGroupById(rep.rcgID)
 		if err != nil {
 			continue
 		}
 
-		if group.CurrConsistMode == "Consistent" {
+		if group.CurrConsistMode == "Consistent" && group.FailoverType == "None" {
 			t.Logf("Consistency Group %s - Reached Consistency.", rep.rcgID)
 			return nil
 		}
@@ -658,4 +570,24 @@ func waitForConsistency(t *testing.T) error {
 		time.Sleep(5 * time.Second)
 	}
 	return errors.New("consistency group did not reach consistency.")
+}
+
+func ensureFailover(t *testing.T) error {
+	for i := 0; i < 30; i++ {
+		group, err := C.GetReplicationConsistencyGroupById(rep.rcgID)
+		if err != nil {
+			return errors.New("No replication consistency groups found: %")
+		}
+
+		t.Logf("[ensureFailover] - %+v", group)
+
+		if group.FailoverType != "None" && group.FailoverState == "Done" && group.DisasterRecoveryState == "Neutral" && group.RemoteDisasterRecoveryState == "Neutral" {
+			t.Logf("Consistency Group is in %s", group.FailoverType)
+			return nil
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+
+	return errors.New("unable to reach failover consistency")
 }

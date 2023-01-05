@@ -52,4 +52,3 @@ fi
 # Run the integration tests
 echo "Starting tests"
 go test -v -coverprofile=c.out -coverpkg github.com/dell/goscaleio .
-

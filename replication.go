@@ -305,3 +305,30 @@ func (c *Client) ExecuteResumeOnReplicationGroup(id string) error {
 	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
 	return err
 }
+
+func (c *Client) ExecuteSyncOnReplicationGroup(id string) (*types.SynchronizationResponse, error) {
+	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/syncNowReplicationConsistencyGroup"
+	param := types.EmptyPayload{}
+	resp := &types.SynchronizationResponse{}
+
+	defer TimeSpent("ExecuteSyncOnReplicationGroup", time.Now())
+
+	fmt.Printf("ExecuteSyncOnReplicationGroup: path: %s\n", uri)
+
+	err := c.getJSONWithRetry(http.MethodPost, uri, param, resp)
+	return resp, err
+}
+
+func (c *Client) GetSyncStateOnReplicationGroup(id string, syncKey string) error {
+	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/querySyncNowReplicationConsistencyGroup"
+	param := types.QuerySyncNowRequest{
+		SyncNowKey: syncKey,
+	}
+
+	defer TimeSpent("ExecuteSyncOnReplicationGroup", time.Now())
+
+	fmt.Printf("ExecuteSyncOnReplicationGroup: path: %s\n", uri)
+
+	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}

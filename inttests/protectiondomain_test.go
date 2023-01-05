@@ -74,10 +74,6 @@ func getAllProtectionDomains(t *testing.T) []*goscaleio.ProtectionDomain {
 		// create the PD to return
 		outPD := goscaleio.NewProtectionDomainEx(C, domain)
 		allDomains = append(allDomains, outPD)
-		log.Infof("ProtectionDomain: %+v", domain)
-		if domain.SdrSdsConnectivityInfo != nil {
-			log.Infof("SdrSdsConnectivityInfo: %+v", domain.SdrSdsConnectivityInfo)
-		}
 		// create another PD for testng purposes (via NewProtectionDomain)
 		tempPD := goscaleio.NewProtectionDomain(C)
 		tempPD.ProtectionDomain = domain
