@@ -908,3 +908,7 @@ type QueryReplicationPair struct {
 	ReplicationConsistencyGroupID string `json:"replicationConsistencyGroupId"`
 	CopyType                      string `json:"copyType"`
 }
+
+type QueryReplicationPairStatistics struct {
+	InitialCopyProgress float64 `json:"initialCopyProgress"`
+}
