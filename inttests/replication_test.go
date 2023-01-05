@@ -47,6 +47,7 @@ type replication struct {
 	targetVolume             *siotypes.Volume
 	rcg                      *goscaleio.ReplicationConsistencyGroup
 	rcgID                    string
+	rpID                     string
 }
 
 var rep replication
@@ -286,6 +287,8 @@ func TestAddReplicationPair(t *testing.T) {
 		t.Logf("[TestAddReplicationPair] Response: %+v", rpResp)
 	}
 
+	rep.rpID = rpResp.ID
+
 	t.Logf("[TestAddReplicationPair] End")
 }
 
@@ -310,8 +313,34 @@ func TestQueryReplicationPairs(t *testing.T) {
 	}
 
 	t.Logf("[TestQueryReplicationPairs] End")
+}
 
-	time.Sleep(60 * time.Second)
+// Query Replication Pair Statistics
+func TestQueryReplicationPairsStatistics(t *testing.T) {
+	t.Logf("[TestQueryReplicationPairsStatistics] Start")
+
+	// var err error
+	if C2 == nil {
+		t.Skip("[TestQueryReplicationPairsStatistics] no client connection to replication target system")
+	}
+
+	for i := 0; i < 20; i++ {
+		rpResp, err := C.GetReplicationPairStatistics(rep.rpID)
+		if err != nil {
+			t.Logf("[TestQueryReplicationPairsStatistics] Error: %s", err.Error())
+			break
+		}
+
+		t.Logf("[TestQueryReplicationPairsStatistics] Response: %+v", rpResp)
+
+		// Check if complete
+		if rpResp.InitialCopyProgress == 1 {
+			t.Logf("[TestQueryReplicationPairsStatistics] Copy Complete: %f", rpResp.InitialCopyProgress)
+			break
+		}
+
+		time.Sleep(10 * time.Second)
+	}
 }
 
 // Test GetReplicationConsistencyGroups
