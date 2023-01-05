@@ -303,6 +303,9 @@ func NewClient() (client *Client, err error) {
 		os.Getenv("GOSCALEIO_USECERTS") == "true")
 }
 
+// ClientConnectionTimeout is used for unit testing to set the connection timeout much lower
+var ClientConnectTimeout time.Duration
+
 // NewClientWithArgs returns a new client
 func NewClientWithArgs(
 	endpoint string,
@@ -335,6 +338,10 @@ func NewClientWithArgs(
 		Insecure: insecure,
 		UseCerts: useCerts,
 		ShowHTTP: showHTTP,
+	}
+
+	if ClientConnectTimeout != 0 {
+		opts.Timeout = ClientConnectTimeout
 	}
 
 	ac, err := api.New(context.Background(), endpoint, opts, debug)
