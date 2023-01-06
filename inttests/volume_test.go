@@ -686,6 +686,7 @@ func TestSetSnapshotSecurity(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// TestSetVolumeMappingAccessMode will be attemting to set the access mode on mapped sdc
 func TestSetVolumeMappingAccessMode(t *testing.T) {
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
@@ -723,7 +724,7 @@ func TestSetVolumeMappingAccessMode(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
-	// Set a new retention period for the given snapshot
+	// Set a access mode for the given snapshot
 	snap, err := getVolByID(volumes[0].ID)
 	assert.Nil(t, err)
 	sr := goscaleio.NewVolume(C)

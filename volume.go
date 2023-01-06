@@ -380,11 +380,13 @@ func (v *Volume) SetSnapshotSecurity(retentionPeriodInMin string) error {
 	return err
 }
 
+// SetVolumeMappingAccessModeParam defines type for snapshot access mode of mapped sdc for method SetVolumeMappingAccessMode
 type SetVolumeMappingAccessModeParam struct {
 	AccessMode string `json:"accessMode"`
-	SdcId      string `json:"sdcId"`
+	SdcID      string `json:"sdcId"`
 }
 
+// SetVolumeMappingAccessMode set access mode of mapped sdc on snapshot
 func (v *Volume) SetVolumeMappingAccessMode(accessmode string, sdcid string) error {
 	link, err := GetLink(v.Volume.Links, "self")
 	if err != nil {
@@ -393,7 +395,7 @@ func (v *Volume) SetVolumeMappingAccessMode(accessmode string, sdcid string) err
 	path := fmt.Sprintf("%v/action/setVolumeMappingAccessMode", link.HREF)
 	payload := SetVolumeMappingAccessModeParam{
 		AccessMode: accessmode,
-		SdcId:      sdcid,
+		SdcID:      sdcid,
 	}
 	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
 	return err
