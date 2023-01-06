@@ -379,3 +379,22 @@ func (v *Volume) SetSnapshotSecurity(retentionPeriodInMin string) error {
 	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
 	return err
 }
+
+type SetVolumeMappingAccessModeParam struct {
+	AccessMode string `json:"accessMode"`
+	SdcId      string `json:"sdcId"`
+}
+
+func (v *Volume) SetVolumeMappingAccessMode(accessmode string, sdcid string) error {
+	link, err := GetLink(v.Volume.Links, "self")
+	if err != nil {
+		return err
+	}
+	path := fmt.Sprintf("%v/action/setVolumeMappingAccessMode", link.HREF)
+	payload := SetVolumeMappingAccessModeParam{
+		AccessMode: accessmode,
+		SdcId:      sdcid,
+	}
+	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	return err
+}
