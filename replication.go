@@ -59,6 +59,21 @@ func NewReplicationConsistencyGroup(client *Client) *ReplicationConsistencyGroup
 	return rcg
 }
 
+// ReplicationPair encpsulates a types.ReplicationPair and a client.
+type ReplicationPair struct {
+	ReplicaitonPair *types.ReplicationPair
+	client          *Client
+}
+
+// NewReplicationPair creates a new ReplicationConsistencyGroup.
+func NewReplicationPair(client *Client) *ReplicationPair {
+	rcg := &ReplicationPair{
+		client:          client,
+		ReplicaitonPair: &types.ReplicationPair{},
+	}
+	return rcg
+}
+
 // GetReplicationConsistencyGroups returns a list of the ReplicationConsistencyGroups
 func (c *Client) GetReplicationConsistencyGroups() ([]*types.ReplicationConsistencyGroup, error) {
 	defer TimeSpent("GetReplicationConsistencyGroups", time.Now())
@@ -155,14 +170,10 @@ func (c *Client) CreateReplicationPair(rp *types.QueryReplicationPair) (*types.R
 }
 
 // RemoveReplicationPair removes the desired replication pair.
-func (c *Client) RemoveReplicationPair(id string, force bool) (*types.ReplicationPair, error) {
+func (rp *ReplicationPair) RemoveReplicationPair(force bool) (*types.ReplicationPair, error) {
 	defer TimeSpent("RemoveReplicationPair", time.Now())
 
-	if id == "" {
-		return nil, errors.New("replication Pair ID is required to remove it")
-	}
-
-	uri := "/api/instances/ReplicationPair::" + id + "/action/removeReplicationPair"
+	uri := "/api/instances/ReplicationPair::" + rp.ReplicaitonPair.ID + "/action/removeReplicationPair"
 	resp := &types.ReplicationPair{}
 	param := &types.RemoveReplicationPair{
 		Force: "false",
@@ -171,7 +182,7 @@ func (c *Client) RemoveReplicationPair(id string, force bool) (*types.Replicatio
 		param.Force = "true"
 	}
 
-	if err := c.getJSONWithRetry(http.MethodPost, uri, param, resp); err != nil {
+	if err := rp.client.getJSONWithRetry(http.MethodPost, uri, param, resp); err != nil {
 		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, rp, pair) returned %s", err)
 		return nil, err
 	}
@@ -179,37 +190,44 @@ func (c *Client) RemoveReplicationPair(id string, force bool) (*types.Replicatio
 	return resp, nil
 }
 
-// GetReplicationPairs returns a list of ReplicationPair objects. If a ReplicationConsistencyGroupId is specified, will be limited to pairs of that RCG.
-func (c *Client) GetReplicationPairs(RCGId string) ([]*types.ReplicationPair, error) {
+// GetReplicationPairStatistics returns the statistics of the desired ReplicaitonPair.
+func (rp *ReplicationPair) GetReplicationPairStatistics() (*types.QueryReplicationPairStatistics, error) {
+	defer TimeSpent("GetReplicationPairStatistics", time.Now())
+
+	path := "/api/instances/ReplicationPair::" + rp.ReplicaitonPair.ID + "/relationships/Statistics"
+	rpResp := &types.QueryReplicationPairStatistics{}
+
+	err := rp.client.getJSONWithRetry(http.MethodGet, path, nil, &rpResp)
+	return rpResp, err
+}
+
+// GetAllReplicationPairs returns a list all replication pairs on the system.
+func (c *Client) GetAllReplicationPairs() ([]*types.ReplicationPair, error) {
 	defer TimeSpent("GetReplicationPairs", time.Now())
 
 	path := "/api/types/ReplicationPair/instances"
-
-	if RCGId != "" {
-		path = "/api/instances/ReplicationConsistencyGroup::" + RCGId + "/relationships/ReplicationPair"
-	}
 
 	var pairs []*types.ReplicationPair
 	err := c.getJSONWithRetry(http.MethodGet, path, nil, &pairs)
 	return pairs, err
 }
 
-// GetReplicationPairStatistics returns the statistics of the desired ReplicaitonPair.
-func (c *Client) GetReplicationPairStatistics(id string) (*types.QueryReplicationPairStatistics, error) {
-	defer TimeSpent("GetReplicationPairStatistics", time.Now())
+// GetReplicationPairs returns a list of replication pairs associated to the rcg.
+func (rcg *ReplicationConsistencyGroup) GetReplicationPairs() ([]*types.ReplicationPair, error) {
+	defer TimeSpent("GetReplicationPairs", time.Now())
 
-	path := "/api/instances/ReplicationPair::" + id + "/relationships/Statistics"
-	rpResp := &types.QueryReplicationPairStatistics{}
+	path := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/relationships/ReplicationPair"
 
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &rpResp)
-	return rpResp, err
+	var pairs []*types.ReplicationPair
+	err := rcg.client.getJSONWithRetry(http.MethodGet, path, nil, &pairs)
+	return pairs, err
 }
 
 // CreateReplicationConsistencyGroupSnapshot creates a snapshot of the ReplicationConsistencyGroup on the target array.
-func (c *Client) CreateReplicationConsistencyGroupSnapshot(id string, force bool) (*types.CreateReplicationConsistencyGroupSnapshotResp, error) {
+func (rcg *ReplicationConsistencyGroup) CreateReplicationConsistencyGroupSnapshot(force bool) (*types.CreateReplicationConsistencyGroupSnapshotResp, error) {
 	defer TimeSpent("GetReplicationPairs", time.Now())
 
-	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/createReplicationConsistencyGroupSnapshots"
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/createReplicationConsistencyGroupSnapshots"
 	param := &types.CreateReplicationConsistencyGroupSnapshot{
 		Force: "false",
 	}
@@ -218,100 +236,100 @@ func (c *Client) CreateReplicationConsistencyGroupSnapshot(id string, force bool
 	}
 	resp := &types.CreateReplicationConsistencyGroupSnapshotResp{}
 
-	err := c.getJSONWithRetry(http.MethodPost, uri, param, resp)
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, resp)
 	return resp, err
 }
 
 // ExecuteFailoverOnReplicationGroup sets the ReplicationconsistencyGroup into a failover state.
-func (c *Client) ExecuteFailoverOnReplicationGroup(id string) error {
+func (rcg *ReplicationConsistencyGroup) ExecuteFailoverOnReplicationGroup() error {
 	defer TimeSpent("ExecuteFailoverOnReplicationGroup", time.Now())
 
-	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/failoverReplicationConsistencyGroup"
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/failoverReplicationConsistencyGroup"
 	param := types.EmptyPayload{}
 
-	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteSwitchoverOnReplicationGroup sets the ReplicationconsistencyGroup into a switchover state.
-func (c *Client) ExecuteSwitchoverOnReplicationGroup(id string, force bool) error {
+func (rcg *ReplicationConsistencyGroup) ExecuteSwitchoverOnReplicationGroup(force bool) error {
 	defer TimeSpent("ExecuteSwitchoverOnReplicationGroup", time.Now())
 
-	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/switchoverReplicationConsistencyGroup"
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/switchoverReplicationConsistencyGroup"
 	// API is incorrect. No params needed.
 	param := types.EmptyPayload{}
 
-	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteRestoreOnReplicationGroup restores the ReplicationConsistencyGroup from a failover/switchover state.
-func (c *Client) ExecuteRestoreOnReplicationGroup(id string) error {
+func (rcg *ReplicationConsistencyGroup) ExecuteRestoreOnReplicationGroup() error {
 	defer TimeSpent("ExecuteRestoreOnReplicationGroup", time.Now())
 
-	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/restoreReplicationConsistencyGroup"
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/restoreReplicationConsistencyGroup"
 	param := types.EmptyPayload{}
 
-	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteReverseOnReplicationGroup reverses the direction of replication from a failover/switchover state.
-func (c *Client) ExecuteReverseOnReplicationGroup(id string) error {
+func (rcg *ReplicationConsistencyGroup) ExecuteReverseOnReplicationGroup() error {
 	defer TimeSpent("ExecuteReverseOnReplicationGroup", time.Now())
 
-	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/reverseReplicationConsistencyGroup"
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/reverseReplicationConsistencyGroup"
 	param := types.EmptyPayload{}
 
-	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecutePauseOnReplicationGroup pauses the replication of the ConsistencyGroup.
-func (c *Client) ExecutePauseOnReplicationGroup(id string, mode types.PauseMode) error {
+func (rcg *ReplicationConsistencyGroup) ExecutePauseOnReplicationGroup(mode types.PauseMode) error {
 	defer TimeSpent("ExecutePauseOnReplicationGroup", time.Now())
 
-	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/pauseReplicationConsistencyGroup"
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/pauseReplicationConsistencyGroup"
 	param := types.PauseReplicationConsistencyGroup{
 		PauseMode: string(mode),
 	}
 
-	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteResumeOnReplicationGroup resumes the ConsistencyGroup when it is in a Paused state.
-func (c *Client) ExecuteResumeOnReplicationGroup(id string) error {
+func (rcg *ReplicationConsistencyGroup) ExecuteResumeOnReplicationGroup() error {
 	defer TimeSpent("ExecuteResumeOnReplicationGroup", time.Now())
 
-	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/resumeReplicationConsistencyGroup"
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/resumeReplicationConsistencyGroup"
 	param := types.EmptyPayload{}
 
-	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteSyncOnReplicationGroup forces a synce on the ConsistencyGroup.
-func (c *Client) ExecuteSyncOnReplicationGroup(id string) (*types.SynchronizationResponse, error) {
+func (rcg *ReplicationConsistencyGroup) ExecuteSyncOnReplicationGroup() (*types.SynchronizationResponse, error) {
 	defer TimeSpent("ExecuteSyncOnReplicationGroup", time.Now())
 
-	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/syncNowReplicationConsistencyGroup"
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/syncNowReplicationConsistencyGroup"
 	param := types.EmptyPayload{}
 	resp := &types.SynchronizationResponse{}
 
-	err := c.getJSONWithRetry(http.MethodPost, uri, param, resp)
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, resp)
 	return resp, err
 }
 
 // GetSyncStateOnReplicationGroup returns the sync status of the ReplicaitonConsistencyGroup.
-func (c *Client) GetSyncStateOnReplicationGroup(id string, syncKey string) error {
+func (rcg *ReplicationConsistencyGroup) GetSyncStateOnReplicationGroup(syncKey string) error {
 	defer TimeSpent("ExecuteSyncOnReplicationGroup", time.Now())
 
-	uri := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/querySyncNowReplicationConsistencyGroup"
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/querySyncNowReplicationConsistencyGroup"
 	param := types.QuerySyncNowRequest{
 		SyncNowKey: syncKey,
 	}
 
-	err := c.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
 	return err
 }

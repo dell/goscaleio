@@ -43,7 +43,7 @@ type replication struct {
 	targetVolume           *siotypes.Volume
 	rcg                    *goscaleio.ReplicationConsistencyGroup
 	rcgID                  string
-	replicationPair        *siotypes.ReplicationPair
+	pair                   *goscaleio.ReplicationPair
 	snapshotGroupID        string
 }
 
@@ -63,7 +63,6 @@ func TestGetPeerMDMs(t *testing.T) {
 
 	var sourceSystemID string
 	for i := 0; i < len(srcpeers); i++ {
-		t.Logf("Source PeerMDM: %+v", srcpeers[i])
 		sourceSystemID = srcpeers[i].SystemID
 	}
 
@@ -76,7 +75,6 @@ func TestGetPeerMDMs(t *testing.T) {
 
 	var targetSystemID string
 	for i := 0; i < len(tgtpeers); i++ {
-		t.Logf("Target PeerMDM: %+v", tgtpeers[i])
 		targetSystemID = tgtpeers[i].SystemID
 	}
 
@@ -141,14 +139,9 @@ func TestGetProtectionDomain(t *testing.T) {
 	rep.sourceProtectionDomain = getProtectionDomain(t)
 	assert.NotNil(t, rep.sourceProtectionDomain)
 
-	t.Logf("source protction domain: %+v", rep.sourceProtectionDomain.ProtectionDomain)
 	href := "/api/instances/ProtectionDomain::" + rep.sourceProtectionDomain.ProtectionDomain.ID
-	protectionDomains, err := getSystem().GetProtectionDomain(href)
+	_, err := getSystem().GetProtectionDomain(href)
 	assert.Nil(t, err)
-
-	for _, pd := range protectionDomains {
-		t.Logf("source protection domain %+v", pd)
-	}
 }
 
 // Get the Target Protection Domain
@@ -156,7 +149,6 @@ func getTargetProtectionDomain() *goscaleio.ProtectionDomain {
 	targetProtectionDomainName := os.Getenv(targetProtectionDomain)
 	protectionDomains, _ := rep.targetSystem.GetProtectionDomain("")
 	for i := 0; i < len(protectionDomains); i++ {
-		fmt.Printf("target protection domain %+v", protectionDomains[i])
 		if protectionDomains[i].Name == targetProtectionDomainName {
 			return goscaleio.NewProtectionDomainEx(C2, protectionDomains[i])
 		}
@@ -191,11 +183,9 @@ func TestStoragePools(t *testing.T) {
 	}
 	rep.sourceStoragePool = getStoragePool(t)
 	assert.NotNil(t, rep.sourceStoragePool)
-	t.Logf("sourceStoragePool %s", rep.sourceStoragePool.StoragePool.Name)
 
 	rep.targetStoragePool = getTargetStoragePool()
 	assert.NotNil(t, rep.targetStoragePool)
-	t.Logf("targetStoragePool %s", rep.targetStoragePool.StoragePool.Name)
 }
 
 // Locate the volumes to be replicated together
@@ -248,10 +238,30 @@ func TestCreateReplicationConsistencyGroup(t *testing.T) {
 	rcgResp, err := C.CreateReplicationConsistencyGroup(rcgPayload)
 	assert.Nil(t, err)
 
-	log.Infof("RCG ID: %s", rcgResp.ID)
+	log.Debugf("RCG ID: %s", rcgResp.ID)
 	rep.rcgID = rcgResp.ID
 
 	time.Sleep(5 * time.Second)
+}
+
+// Test GetReplicationConsistencyGroups
+func TestGetReplicationConsistencyGroups(t *testing.T) {
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
+
+	rcgs, err := C.GetReplicationConsistencyGroups()
+	assert.Nil(t, err)
+	for i := 0; i < len(rcgs); i++ {
+		assert.Nil(t, err)
+
+		if rcgs[i].Name == "inttestrcg" {
+			rcg := goscaleio.NewReplicationConsistencyGroup(C)
+			rcg.ReplicationConsistencyGroup = rcgs[i]
+			rep.rcg = rcg
+		}
+	}
+	assert.NotNil(t, rep.rcg)
 }
 
 // Add Replication Pair
@@ -262,7 +272,6 @@ func TestAddReplicationPair(t *testing.T) {
 
 	srcName := os.Getenv(sourceVolume)
 	assert.NotNil(t, srcName)
-	t.Logf("Source Volume %s", srcName)
 
 	localVolumeID, err := C.FindVolumeID(srcName)
 	assert.Nil(t, err)
@@ -271,17 +280,14 @@ func TestAddReplicationPair(t *testing.T) {
 
 	dstName := os.Getenv(targetVolume)
 	assert.NotNil(t, dstName)
-	t.Logf("Target Volume %s", dstName)
 
 	remoteVolumeID, err := C2.FindVolumeID(dstName)
 	assert.Nil(t, err)
 
 	t.Logf("[TestAddReplicationPair] Remote Volume ID: %s", remoteVolumeID)
 
-	vol, err := C.GetVolume("", strings.TrimSpace(localVolumeID), "", "", false)
+	_, err = C.GetVolume("", strings.TrimSpace(localVolumeID), "", "", false)
 	assert.Nil(t, err)
-
-	t.Logf("Source Volume Content %+v", vol[0])
 
 	rpPayload := &siotypes.QueryReplicationPair{
 		Name:                          "inttestrp",
@@ -295,7 +301,12 @@ func TestAddReplicationPair(t *testing.T) {
 	assert.Nil(t, err)
 
 	t.Logf("ReplicationPairID: %s", rpResp.ID)
-	rep.replicationPair = rpResp
+	replicationPair := goscaleio.NewReplicationPair(C)
+	replicationPair.ReplicaitonPair = rpResp
+	rep.pair = replicationPair
+
+	// Ensure array knows pair exists.
+	time.Sleep(5 * time.Second)
 }
 
 // Query Replication Pair
@@ -304,12 +315,13 @@ func TestQueryReplicationPairs(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	pairs, err := C.GetReplicationPairs(rep.rcgID)
+	pairs, err := rep.rcg.GetReplicationPairs()
 	assert.Nil(t, err)
 
-	for i, pair := range pairs {
-		t.Logf("%d, ReplicationPair: %+v", i, pair)
-		rep.replicationPair = pair
+	for _, pair := range pairs {
+		replicationPair := goscaleio.NewReplicationPair(C)
+		replicationPair.ReplicaitonPair = pair
+		rep.pair = replicationPair
 	}
 }
 
@@ -319,11 +331,11 @@ func TestQueryReplicationPairsStatistics(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	assert.NotNil(t, rep.replicationPair)
+	assert.NotNil(t, rep.pair)
 
-	t.Logf("Waiting for Replication Pair %s to be complete.", rep.replicationPair.Name)
+	t.Logf("Waiting for Replication Pair %s to be complete.", rep.pair.ReplicaitonPair.Name)
 	for i := 0; i < 30; i++ {
-		rpResp, err := C.GetReplicationPairStatistics(rep.replicationPair.ID)
+		rpResp, err := rep.pair.GetReplicationPairStatistics()
 		assert.Nil(t, err)
 
 		t.Logf("Copied %f", rpResp.InitialCopyProgress)
@@ -341,37 +353,15 @@ func TestQueryReplicationPairsStatistics(t *testing.T) {
 	}
 }
 
-// Test GetReplicationConsistencyGroups
-func TestGetReplicationConsistencyGroups(t *testing.T) {
-	if C2 == nil {
-		t.Skip("no client connection to replication target system")
-	}
-
-	rcgs, err := C.GetReplicationConsistencyGroups()
-	assert.Nil(t, err)
-	for i := 0; i < len(rcgs); i++ {
-		t.Logf("RCG: %+v\n\n", rcgs[i])
-		assert.Nil(t, err)
-
-		parseLinks(rcgs[i].Links, t)
-
-		if rcgs[i].Name == "inttestrcg" {
-			rcg := goscaleio.NewReplicationConsistencyGroup(C)
-			rcg.ReplicationConsistencyGroup = rcgs[i]
-			rep.rcg = rcg
-		}
-	}
-	assert.NotNil(t, rep.rcg)
-}
-
 // Test CreateReplicationConsistencyGroupSnapshot
 func TestCreateReplicationConsistencyGroupSnapshot(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
 
-	resp, err := C.CreateReplicationConsistencyGroupSnapshot(rep.rcgID, false)
+	resp, err := rep.rcg.CreateReplicationConsistencyGroupSnapshot(false)
 	assert.Nil(t, err)
+
 	rep.snapshotGroupID = resp.SnapshotGroupID
 }
 
@@ -381,12 +371,12 @@ func TestSnapshotRetrieval(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	pairs, err := C.GetReplicationPairs(rep.rcgID)
+	pairs, err := rep.rcg.GetReplicationPairs()
 	assert.Nil(t, err)
 
 	var vols []string
 	for _, pair := range pairs {
-		fmt.Printf("Remote Pair Volume: %s\n", pair.RemoteVolumeID)
+		t.Logf("Remote Pair Volume: %s\n", pair.RemoteVolumeID)
 		vols = append(vols, pair.RemoteVolumeID)
 	}
 
@@ -394,10 +384,9 @@ func TestSnapshotRetrieval(t *testing.T) {
 	for _, vol := range vols {
 		result, err := C2.GetVolume("", "", vol, "", false)
 		if err != nil {
-			fmt.Printf("Get Vols Error: %s\n", err.Error())
+			t.Errorf("Get Vols Error: %s\n", err.Error())
 		} else {
 			for _, snap := range result {
-				fmt.Printf("Get Vols Content: %+v\n", snap)
 				if rep.snapshotGroupID == snap.ConsistencyGroupID {
 					actionAttributes[snap.AncestorVolumeID] = snap.ID
 				}
@@ -405,7 +394,7 @@ func TestSnapshotRetrieval(t *testing.T) {
 		}
 	}
 
-	fmt.Printf("Action Attributes Result: %+v\n", actionAttributes)
+	t.Logf("Action Attributes Result: %+v\n", actionAttributes)
 }
 
 // Test ExecuteFailoverOnReplicationGroup
@@ -414,7 +403,7 @@ func TestExecuteFailoverOnReplicationGroup(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	err := C.ExecuteFailoverOnReplicationGroup(rep.rcgID)
+	err := rep.rcg.ExecuteFailoverOnReplicationGroup()
 	assert.Nil(t, err)
 
 }
@@ -428,7 +417,7 @@ func TestExecuteRestoreOnReplicationGroup(t *testing.T) {
 	err := ensureFailover(t)
 	assert.Nil(t, err)
 
-	err = C.ExecuteRestoreOnReplicationGroup(rep.rcgID)
+	err = rep.rcg.ExecuteRestoreOnReplicationGroup()
 	assert.Nil(t, err)
 }
 
@@ -441,7 +430,7 @@ func TestExecuteSwitchoverOnReplicationGroup(t *testing.T) {
 	err := waitForConsistency(t)
 	assert.Nil(t, err)
 
-	err = C.ExecuteSwitchoverOnReplicationGroup(rep.rcgID, false)
+	err = rep.rcg.ExecuteSwitchoverOnReplicationGroup(false)
 	assert.Nil(t, err)
 }
 
@@ -454,7 +443,7 @@ func TestExecuteReverseOnReplicationGroup(t *testing.T) {
 	err := ensureFailover(t)
 	assert.Nil(t, err)
 
-	err = C.ExecuteReverseOnReplicationGroup(rep.rcgID)
+	err = rep.rcg.ExecuteReverseOnReplicationGroup()
 	assert.Nil(t, err)
 }
 
@@ -467,7 +456,7 @@ func TestExecutePauseOnReplicationGroup(t *testing.T) {
 	err := waitForConsistency(t)
 	assert.Nil(t, err)
 
-	err = C.ExecutePauseOnReplicationGroup(rep.rcgID, siotypes.OnlyTrackChanges)
+	err = rep.rcg.ExecutePauseOnReplicationGroup(siotypes.OnlyTrackChanges)
 	assert.Nil(t, err)
 }
 
@@ -477,7 +466,7 @@ func TestExecuteResumeOnReplicationGroup(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	err := C.ExecuteResumeOnReplicationGroup(rep.rcgID)
+	err := rep.rcg.ExecuteResumeOnReplicationGroup()
 	assert.Nil(t, err)
 }
 
@@ -489,20 +478,18 @@ func TestResizeReplicationPair(t *testing.T) {
 
 	t.Logf("[TestResizeReplicationPair]  Failing over to get DR in Neutral state..")
 	TestExecuteFailoverOnReplicationGroup(t)
-	time.Sleep(30 * time.Second)
+
+	err := ensureFailover(t)
+	assert.Nil(t, err)
 
 	srcName := os.Getenv(sourceVolume)
 	assert.NotNil(t, srcName)
-	t.Logf("[TestResizeReplicationPair] Source Volume %s", srcName)
 
 	localVolumeID, err := C.FindVolumeID(srcName)
 	assert.Nil(t, err)
 
-	t.Logf("[TestResizeReplicationPair] Local Volume ID: %s", localVolumeID)
-
 	dstName := os.Getenv(targetVolume)
 	assert.NotNil(t, dstName)
-	t.Logf("[TestResizeReplicationPair]  Target Volume %s", dstName)
 
 	remoteVolumeID, err := C2.FindVolumeID(dstName)
 	assert.Nil(t, err)
@@ -546,14 +533,12 @@ func TestRemoveReplicationPairFromVolume(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	pairs, err := C.GetReplicationPairs("")
+	pairs, err := C.GetAllReplicationPairs()
 	assert.Nil(t, err)
 
 	var replicationPairID string
-	for i, pair := range pairs {
-		t.Logf("%d, ReplicationPair: %+v", i, pair)
-
-		if rep.replicationPair.LocalVolumeID == pair.LocalVolumeID {
+	for _, pair := range pairs {
+		if rep.pair.ReplicaitonPair.LocalVolumeID == pair.LocalVolumeID {
 			replicationPairID = pair.ID
 			break
 		}
@@ -564,10 +549,10 @@ func TestRemoveReplicationPairFromVolume(t *testing.T) {
 		assert.NotNil(t, replicationPairID)
 	}
 
-	_, err = C.RemoveReplicationPair(replicationPairID, true)
+	_, err = rep.pair.RemoveReplicationPair(true)
 	assert.Nil(t, err)
 
-	t.Logf("[TestRemoveReplicationPairFromVolume] Removed the following pair %s", rep.replicationPair.Name)
+	t.Logf("[TestRemoveReplicationPairFromVolume] Removed the following pair %s", rep.pair.ReplicaitonPair.Name)
 
 	// Delay to verify on the UI.
 	time.Sleep(5 * time.Second)
@@ -579,12 +564,8 @@ func TestFreezeReplcationGroup(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	t.Logf("[TestFreezeReplcationGroup] Freezing replication group: %s", rep.rcgID)
-
 	err := rep.rcg.FreezeReplicationConsistencyGroup(rep.rcgID)
 	assert.Nil(t, err)
-
-	t.Logf("[TestFreezeReplcationGroup] Froze replication pair, check UI")
 
 	// Delay to verify on the UI.
 	time.Sleep(2 * time.Second)
@@ -638,8 +619,6 @@ func ensureFailover(t *testing.T) error {
 		if err != nil {
 			return errors.New("No replication consistency groups found: %")
 		}
-
-		t.Logf("[ensureFailover] - %+v", group)
 
 		if group.FailoverType != "None" && group.FailoverState == "Done" && group.DisasterRecoveryState == "Neutral" && group.RemoteDisasterRecoveryState == "Neutral" {
 			t.Logf("Consistency Group is in %s", group.FailoverType)
