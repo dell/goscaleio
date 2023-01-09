@@ -35,13 +35,9 @@ import (
 
 // Replication global variables used to set up the replication relationships
 type replication struct {
-	sourcePeerMDM          *goscaleio.PeerMDM
 	targetSystem           *goscaleio.System
-	sourceSystemID         string
 	sourceProtectionDomain *goscaleio.ProtectionDomain
 	sourceStoragePool      *goscaleio.StoragePool
-	sourceVolume           *siotypes.Volume
-	targetSystemID         string
 	targetProtectionDomain *goscaleio.ProtectionDomain
 	targetStoragePool      *goscaleio.StoragePool
 	targetVolume           *siotypes.Volume
@@ -64,35 +60,37 @@ const (
 func TestGetPeerMDMs(t *testing.T) {
 	srcpeers, err := C.GetPeerMDMs()
 	assert.Nil(t, err)
+
+	var sourceSystemID string
 	for i := 0; i < len(srcpeers); i++ {
 		t.Logf("Source PeerMDM: %+v", srcpeers[i])
-		rep.sourceSystemID = srcpeers[i].SystemID
+		sourceSystemID = srcpeers[i].SystemID
 	}
 
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
 
-	log.SetLevel(log.DebugLevel)
 	tgtpeers, err := C2.GetPeerMDMs()
 	assert.Nil(t, err)
-	log.SetLevel(log.InfoLevel)
+
+	var targetSystemID string
 	for i := 0; i < len(tgtpeers); i++ {
 		t.Logf("Target PeerMDM: %+v", tgtpeers[i])
-		rep.targetSystemID = tgtpeers[i].SystemID
+		targetSystemID = tgtpeers[i].SystemID
 	}
 
 	// Test systems are validly paired
 	found := false
 	for i := 0; i < len(srcpeers); i++ {
-		if srcpeers[i].PeerSystemID == rep.targetSystemID {
+		if srcpeers[i].PeerSystemID == targetSystemID {
 			if srcpeers[i].CouplingRC != "SUCCESS" {
 				t.Error(fmt.Printf("PeerMDM %s expected couplingRC SUCCESS but status was %s", srcpeers[i].PeerSystemID, srcpeers[i].CouplingRC))
 			}
 
 			found = true
-			rep.sourcePeerMDM = goscaleio.NewPeerMDM(C, srcpeers[i])
-			t.Logf("PeerMDMID %s", rep.sourcePeerMDM.PeerMDM.ID)
+			peer := goscaleio.NewPeerMDM(C, srcpeers[i])
+			t.Logf("PeerMDMID %s", peer.PeerMDM.ID)
 			break
 		}
 	}
@@ -103,7 +101,7 @@ func TestGetPeerMDMs(t *testing.T) {
 
 	found = false
 	for i := 0; i < len(tgtpeers); i++ {
-		if tgtpeers[i].PeerSystemID == rep.sourceSystemID {
+		if tgtpeers[i].PeerSystemID == sourceSystemID {
 			if tgtpeers[i].CouplingRC != "SUCCESS" {
 				t.Error(fmt.Printf("PeerMDM %s expected couplingRC SUCCESS but status was %s", tgtpeers[i].PeerSystemID, tgtpeers[i].CouplingRC))
 			}
@@ -121,11 +119,12 @@ func TestGetPeerMDMs(t *testing.T) {
 func getTargetSystem() *goscaleio.System {
 	system := goscaleio.NewSystem(C2)
 	targetSystems, _ := C2.GetSystems()
+
 	if len(targetSystems) > 0 {
 		system.System = targetSystems[0]
 	}
-	rep.targetSystem = system
-	return rep.targetSystem
+
+	return system
 }
 
 func TestGetTargetSystem(t *testing.T) {
@@ -133,7 +132,7 @@ func TestGetTargetSystem(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	getTargetSystem()
+	rep.targetSystem = getTargetSystem()
 	assert.NotNil(t, rep.targetSystem)
 }
 
@@ -211,10 +210,12 @@ func TestLocateVolumesToBeReplicated(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
+
+	var sourceVolume *siotypes.Volume
 	if len(sourceVolumes) > 0 {
-		rep.sourceVolume = sourceVolumes[0]
+		sourceVolume = sourceVolumes[0]
 	}
-	assert.NotNil(t, rep.sourceVolume)
+	assert.NotNil(t, sourceVolume)
 
 	dstName := os.Getenv(targetVolume)
 	assert.NotNil(t, dstName)
@@ -227,7 +228,7 @@ func TestLocateVolumesToBeReplicated(t *testing.T) {
 	}
 	assert.NotNil(t, rep.targetVolume)
 
-	t.Logf("SourceVolume %s, TargetVolume %s", rep.sourceVolume.Name, rep.targetVolume.Name)
+	t.Logf("SourceVolume %s, TargetVolume %s", sourceVolume.Name, rep.targetVolume.Name)
 }
 
 // Test createReplicationConsistencyGroup
