@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -476,6 +477,65 @@ func TestExecuteResumeOnReplicationGroup(t *testing.T) {
 	}
 
 	err := C.ExecuteResumeOnReplicationGroup(rep.rcgID)
+	assert.Nil(t, err)
+}
+
+// Test ResizeReplicationPair
+func TestResizeReplicationPair(t *testing.T) {
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
+
+	t.Logf("[TestResizeReplicationPair]  Failing over to get DR in Neutral state..")
+	TestExecuteFailoverOnReplicationGroup(t)
+	time.Sleep(30 * time.Second)
+
+	srcName := os.Getenv(sourceVolume)
+	assert.NotNil(t, srcName)
+	t.Logf("[TestResizeReplicationPair] Source Volume %s", srcName)
+
+	localVolumeID, err := C.FindVolumeID(srcName)
+	assert.Nil(t, err)
+
+	t.Logf("[TestResizeReplicationPair] Local Volume ID: %s", localVolumeID)
+
+	dstName := os.Getenv(targetVolume)
+	assert.NotNil(t, dstName)
+	t.Logf("[TestResizeReplicationPair]  Target Volume %s", dstName)
+
+	remoteVolumeID, err := C2.FindVolumeID(dstName)
+	assert.Nil(t, err)
+
+	sourceVol, err := C.GetVolume("", strings.TrimSpace(localVolumeID), "", "", false)
+	assert.Nil(t, err)
+	assert.NotNil(t, sourceVol)
+
+	destVol, err := C2.GetVolume("", strings.TrimSpace(remoteVolumeID), "", "", false)
+	assert.Nil(t, err)
+	assert.NotNil(t, destVol)
+
+	// Resize destination volume first...
+	volume := goscaleio.NewVolume(C2)
+	volume.Volume = destVol[0]
+	existingSizeGB := volume.Volume.SizeInKb / (1024 * 1024)
+	newSize := existingSizeGB * 2
+	err = volume.SetVolumeSize(strconv.Itoa(int(newSize)))
+	assert.Nil(t, err)
+
+	// Delay to ensure that the destination syncs up...
+	time.Sleep(10 * time.Second)
+
+	volume = goscaleio.NewVolume(C)
+	volume.Volume = sourceVol[0]
+	existingSizeGB = volume.Volume.SizeInKb / (1024 * 1024)
+	newSize = existingSizeGB * 2
+	// double the szie of the volume
+	err = volume.SetVolumeSize(strconv.Itoa(int(newSize)))
+	assert.Nil(t, err)
+
+	// Restart the initial copy process?
+	TestExecuteRestoreOnReplicationGroup(t)
+	err = waitForConsistency(t)
 	assert.Nil(t, err)
 }
 
