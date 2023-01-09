@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/dell/goscaleio"
 	siotypes "github.com/dell/goscaleio/types/v1"
@@ -624,6 +625,128 @@ func TestSetVolumeAccessModeLimit(t *testing.T) {
 	err = vr.SetVolumeAccessModeLimit(invalidIdentifier)
 	assert.NotNil(t, err)
 
+	err = deleteVolume(t, volID)
+	assert.Nil(t, err)
+}
+
+// TestSetSnapshotSecurity will be attemting to set the snapshot security for a snapshot
+func TestSetSnapshotSecurity(t *testing.T) {
+	volID, err := createVolume(t, "")
+	assert.Nil(t, err)
+	newVolume, err := getVolByID(volID)
+	assert.Nil(t, err)
+
+	// now make a snapshot
+	snapshotDefs := make([]*siotypes.SnapshotDef, 0)
+	snapname := fmt.Sprintf("%s-%s", newVolume.Name, "snap2")
+
+	snapDef := &siotypes.SnapshotDef{
+		VolumeID:     volID,
+		SnapshotName: snapname,
+	}
+	snapshotDefs = append(snapshotDefs, snapDef)
+	snapParam := &siotypes.SnapshotVolumesParam{
+		SnapshotDefs: snapshotDefs,
+	}
+
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	// Create snapshot
+	snapResponse, err := system.CreateSnapshotConsistencyGroup(snapParam)
+	assert.Nil(t, err)
+	assert.NotZero(t, len(snapResponse.VolumeIDList))
+	// Get StoragePool
+	pool := getStoragePool(t)
+	volumes, err := pool.GetVolume("", volID, "", "", true)
+	assert.Nil(t, err)
+	assert.NotNil(t, volumes)
+
+	// Get Snapshot
+	volumes, err = pool.GetVolume("", snapResponse.VolumeIDList[0], "", "", true)
+	assert.Nil(t, err)
+	assert.NotNil(t, volumes)
+
+	// Set a new retention period for the given snapshot
+	snap, err := getVolByID(volumes[0].ID)
+	assert.Nil(t, err)
+	sr := goscaleio.NewVolume(C)
+	sr.Volume = snap
+	err = sr.SetSnapshotSecurity("0")
+	assert.Nil(t, err)
+	// testing invalid case
+	err = sr.SetSnapshotSecurity(invalidIdentifier)
+	assert.NotNil(t, err)
+	// Delete Snapshot and Volume
+	fmt.Println("Will wait for 60 sec so that the retention period expires and snapshot can be deleted")
+	time.Sleep(60 * time.Second)
+	err = deleteVolume(t, sr.Volume.ID)
+	assert.Nil(t, err)
+	err = deleteVolume(t, volID)
+	assert.Nil(t, err)
+}
+
+// TestSetVolumeMappingAccessMode will be attemting to set the access mode on mapped sdc
+func TestSetVolumeMappingAccessMode(t *testing.T) {
+	volID, err := createVolume(t, "")
+	assert.Nil(t, err)
+	newVolume, err := getVolByID(volID)
+	assert.Nil(t, err)
+
+	// now make a snapshot
+	snapshotDefs := make([]*siotypes.SnapshotDef, 0)
+	snapname := fmt.Sprintf("%s-%s", newVolume.Name, "snap3")
+
+	snapDef := &siotypes.SnapshotDef{
+		VolumeID:     volID,
+		SnapshotName: snapname,
+	}
+	snapshotDefs = append(snapshotDefs, snapDef)
+	snapParam := &siotypes.SnapshotVolumesParam{
+		SnapshotDefs: snapshotDefs,
+	}
+
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	// Create snapshot
+	snapResponse, err := system.CreateSnapshotConsistencyGroup(snapParam)
+	assert.Nil(t, err)
+	assert.NotZero(t, len(snapResponse.VolumeIDList))
+	// Get StoragePool
+	pool := getStoragePool(t)
+	volumes, err := pool.GetVolume("", volID, "", "", true)
+	assert.Nil(t, err)
+	assert.NotNil(t, volumes)
+
+	// Get Snapshot
+	volumes, err = pool.GetVolume("", snapResponse.VolumeIDList[0], "", "", true)
+	assert.Nil(t, err)
+	assert.NotNil(t, volumes)
+
+	// Set a access mode for the given snapshot
+	snap, err := getVolByID(volumes[0].ID)
+	assert.Nil(t, err)
+	sr := goscaleio.NewVolume(C)
+	sr.Volume = snap
+	pfmvsp := &siotypes.MapVolumeSdcParam{
+		SdcID:                 "c423b09800000003",
+		AllowMultipleMappings: "true",
+	}
+	sr.MapVolumeSdc(pfmvsp)
+	err = sr.SetVolumeMappingAccessMode("ReadWrite", "c423b09800000003")
+	assert.Nil(t, err)
+	// testing invalid case
+	err = sr.SetVolumeMappingAccessMode(invalidIdentifier, invalidIdentifier)
+	assert.NotNil(t, err)
+	// Delete Snapshot and Volume
+	sr.UnmapVolumeSdc(
+		&siotypes.UnmapVolumeSdcParam{
+			SdcID: "c423b09800000003",
+		},
+	)
+	err = deleteVolume(t, sr.Volume.ID)
+	assert.Nil(t, err)
 	err = deleteVolume(t, volID)
 	assert.Nil(t, err)
 }

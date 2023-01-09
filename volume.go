@@ -359,3 +359,44 @@ func (v *Volume) SetVolumeAccessModeLimit(mode string) error {
 	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
 	return err
 }
+
+// SetSnapshotSecurityParam defines type for snapshot retention period in min parameter for method SetSnapshotSecurity
+type SetSnapshotSecurityParam struct {
+	RetentionPeriodInMin string `json:"retentionPeriodInMin"`
+}
+
+// SetSnapshotSecurity set retention period in min on snapshot
+func (v *Volume) SetSnapshotSecurity(retentionPeriodInMin string) error {
+	link, err := GetLink(v.Volume.Links, "self")
+	if err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("%v/action/setSnapshotSecurity", link.HREF)
+	payload := SetSnapshotSecurityParam{
+		RetentionPeriodInMin: retentionPeriodInMin,
+	}
+	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	return err
+}
+
+// SetVolumeMappingAccessModeParam defines type for snapshot access mode of mapped sdc for method SetVolumeMappingAccessMode
+type SetVolumeMappingAccessModeParam struct {
+	AccessMode string `json:"accessMode"`
+	SdcID      string `json:"sdcId"`
+}
+
+// SetVolumeMappingAccessMode set access mode of mapped sdc on snapshot
+func (v *Volume) SetVolumeMappingAccessMode(accessmode string, sdcid string) error {
+	link, err := GetLink(v.Volume.Links, "self")
+	if err != nil {
+		return err
+	}
+	path := fmt.Sprintf("%v/action/setVolumeMappingAccessMode", link.HREF)
+	payload := SetVolumeMappingAccessModeParam{
+		AccessMode: accessmode,
+		SdcID:      sdcid,
+	}
+	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	return err
+}
