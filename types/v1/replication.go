@@ -1,37 +1,25 @@
 package goscaleio
 
+// PauseMode states in which the ConsistencyGroup can be set to when Paused.
 type PauseMode string
 
+// List of pause modes.
 const (
-	STOP_DATA_TRANSFER PauseMode = "StopDataTransfer"
-	ONLY_TRACK_CHANGES PauseMode = "OnlyTrackChanges"
+	StopDataTransfer PauseMode = "StopDataTransfer"
+	OnlyTrackChanges PauseMode = "OnlyTrackChanges"
 )
 
-type ActionType string
-
-const (
-	RS_ACTION_FAILOVER  ActionType = "failover"
-	RS_ACTION_REPROTECT ActionType = "reprotect"
-	RS_ACTION_RESTORE   ActionType = "restore"
-	RS_ACTION_RESUME    ActionType = "resume"
-	RS_ACTION_PAUSE     ActionType = "pause"
-	RS_ACTION_SYNC      ActionType = "sync"
-)
-
-// failover params create failover request
-type FailoverParams struct {
-	// For DR failover.
-	IsPlanned bool `json:"is_planned, omitempty"`
-}
-
+// PauseReplicationConsistencyGroup defines struct for PauseReplicationConsistencyGroup.
 type PauseReplicationConsistencyGroup struct {
 	PauseMode string `json:"pauseMode"`
 }
 
+// SynchronizationResponse defines struct for SynchronizationResponse.
 type SynchronizationResponse struct {
 	SyncNowKey string `json:"syncNowKey"`
 }
 
+// QuerySyncNowRequest defines struct for QuerySyncNowRequest.
 type QuerySyncNowRequest struct {
 	SyncNowKey string `json:"syncNowKey"`
 }

@@ -27,9 +27,11 @@ const (
 	replicationEnpoint = "GOSCALEIO_ENDPOINT2"
 )
 
-// C, C2 are global goscaleio Client instances for testing
-var C *goscaleio.Client
-var C2 *goscaleio.Client
+// Global goscaleio Client instances for testing.
+var (
+	C  *goscaleio.Client
+	C2 *goscaleio.Client
+)
 
 func initClient() {
 	err := godotenv.Load(envVarsFile)

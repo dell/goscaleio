@@ -238,10 +238,9 @@ func TestCreateReplicationConsistencyGroup(t *testing.T) {
 	rcgPayload := &siotypes.ReplicationConsistencyGroupCreatePayload{
 		Name:                     "inttestrcg",
 		RpoInSeconds:             "60",
-		ProtectionDomainId:       rep.sourceProtectionDomain.ProtectionDomain.ID,
-		RemoteProtectionDomainId: rep.targetProtectionDomain.ProtectionDomain.ID,
-		//PeerMdmId:                rep.sourcePeerMDM.PeerMDM.ID,
-		DestinationSystemId: rep.targetSystem.System.ID,
+		ProtectionDomainID:       rep.sourceProtectionDomain.ProtectionDomain.ID,
+		RemoteProtectionDomainID: rep.targetProtectionDomain.ProtectionDomain.ID,
+		DestinationSystemID:      rep.targetSystem.System.ID,
 	}
 
 	rcgResp, err := C.CreateReplicationConsistencyGroup(rcgPayload)
@@ -327,7 +326,7 @@ func TestQueryReplicationPairsStatistics(t *testing.T) {
 
 		t.Logf("Copied %f", rpResp.InitialCopyProgress)
 
-		group, err := C.GetReplicationConsistencyGroupById(rep.rcgID)
+		group, err := C.GetReplicationConsistencyGroupByID(rep.rcgID)
 		assert.Nil(t, err)
 
 		// Check if complete
@@ -466,7 +465,7 @@ func TestExecutePauseOnReplicationGroup(t *testing.T) {
 	err := waitForConsistency(t)
 	assert.Nil(t, err)
 
-	err = C.ExecutePauseOnReplicationGroup(rep.rcgID, siotypes.ONLY_TRACK_CHANGES)
+	err = C.ExecutePauseOnReplicationGroup(rep.rcgID, siotypes.OnlyTrackChanges)
 	assert.Nil(t, err)
 }
 
@@ -489,22 +488,22 @@ func TestRemoveReplicationPairFromVolume(t *testing.T) {
 	pairs, err := C.GetReplicationPairs("")
 	assert.Nil(t, err)
 
-	var replicationPairId string
+	var replicationPairID string
 	for i, pair := range pairs {
 		t.Logf("%d, ReplicationPair: %+v", i, pair)
 
 		if rep.replicationPair.LocalVolumeID == pair.LocalVolumeID {
-			replicationPairId = pair.ID
+			replicationPairID = pair.ID
 			break
 		}
 	}
 
-	if replicationPairId == "" {
+	if replicationPairID == "" {
 		t.Logf("replication pair for that volume not found")
-		assert.NotNil(t, replicationPairId)
+		assert.NotNil(t, replicationPairID)
 	}
 
-	_, err = C.RemoveReplicationPair(replicationPairId, true)
+	_, err = C.RemoveReplicationPair(replicationPairID, true)
 	assert.Nil(t, err)
 
 	t.Logf("[TestRemoveReplicationPairFromVolume] Removed the following pair %s", rep.replicationPair.Name)
@@ -557,7 +556,7 @@ func parseLinks(links []*siotypes.Link, t *testing.T) {
 
 func waitForConsistency(t *testing.T) error {
 	for i := 0; i < 15; i++ {
-		group, err := C.GetReplicationConsistencyGroupById(rep.rcgID)
+		group, err := C.GetReplicationConsistencyGroupByID(rep.rcgID)
 		if err != nil {
 			continue
 		}
@@ -569,12 +568,12 @@ func waitForConsistency(t *testing.T) error {
 
 		time.Sleep(5 * time.Second)
 	}
-	return errors.New("consistency group did not reach consistency.")
+	return errors.New("consistency group did not reach consistency")
 }
 
 func ensureFailover(t *testing.T) error {
 	for i := 0; i < 30; i++ {
-		group, err := C.GetReplicationConsistencyGroupById(rep.rcgID)
+		group, err := C.GetReplicationConsistencyGroupByID(rep.rcgID)
 		if err != nil {
 			return errors.New("No replication consistency groups found: %")
 		}
