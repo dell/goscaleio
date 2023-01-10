@@ -178,7 +178,8 @@ func (pd *ProtectionDomain) DeleteSds(id string) error {
 
 	path := fmt.Sprintf("/api/instances/Sds::%v/action/removeSds", id)
 
-	err := pd.client.getJSONWithRetry(http.MethodPost, path, nil, nil)
+	sdsParam := &types.EmptyPayload{}
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
 	if err != nil {
 		return err
 	}
