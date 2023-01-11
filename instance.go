@@ -277,8 +277,7 @@ func (c *Client) GetSnapshotPolicy(
 
 	if spid == "" {
 		return sps, nil
-	} else {
-		sps = append(sps, sp)
 	}
+	sps = append(sps, sp)
 	return sps, nil
 }
