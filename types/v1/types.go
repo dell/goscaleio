@@ -692,7 +692,7 @@ type SnapshotPolicy struct {
 	LastAutoSnapshotFailureInFirstLevel   bool    `json:"lastAutoSnapshotFailureInFirstLevel"`
 	NumOfAutoSnapshots                    int     `json:"numOfAutoSnapshots"`
 	NumOfLockedSnapshots                  int     `json:"numOfLockedSnapshots"`
-	SystemId                              string  `json:"systemId"`
+	SystemID                              string  `json:"systemId"`
 	Name                                  string  `json:"name"`
 	ID                                    string  `json:"id"`
 	Links                                 []*Link `json:"links"`
