@@ -279,6 +279,6 @@ func (c *Client) GetSnapshotPolicy(
 		return sps, nil
 	} else {
 		sps = append(sps, sp)
-		return sps, nil
 	}
+	return sps, nil
 }
