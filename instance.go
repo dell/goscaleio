@@ -204,15 +204,15 @@ func (c *Client) FindStoragePool(
 
 // SnapshotPolicy defines struct for SnapshotPolicy
 type SnapshotPolicy struct {
-	Volume *types.SnapshotPolicy
-	client *Client
+	SnapshotPolicy *types.SnapshotPolicy
+	client         *Client
 }
 
 // NewSnapshotPolicy returns new SnapshotPolicy
 func NewSnapshotPolicy(client *Client) *SnapshotPolicy {
 	return &SnapshotPolicy{
-		Volume: &types.SnapshotPolicy{},
-		client: client,
+		SnapshotPolicy: &types.SnapshotPolicy{},
+		client:         client,
 	}
 }
 
@@ -235,7 +235,7 @@ func (c *Client) FindSnapshotPolicyID(spname string) (string, error) {
 	return spID, nil
 }
 
-// GetSnapshotPolicy returns a snapshot policy
+// GetSnapshotPolicy returns a list of snapshot policy
 func (c *Client) GetSnapshotPolicy(
 	spname, spid string) ([]*types.SnapshotPolicy, error) {
 	defer TimeSpent("GetSnapshotPolicy", time.Now())
