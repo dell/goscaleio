@@ -81,35 +81,28 @@ func (pd *ProtectionDomain) CreateSds(
 	return pd.createSds(sdsParam)
 }
 
-// CreateSdsWithIPRole creates a new Sds with user-assigned roles to IPs
-func (pd *ProtectionDomain) CreateSdsWithIPRole(
-	name string, ipList []types.SdsIP) (string, error) {
-	defer TimeSpent("CreateSdsWithIPRole", time.Now())
+// CreateSdsWithParams creates a new Sds with user defined SdsParam struct
+func (pd *ProtectionDomain) CreateSdsWithParams(sdsParam *types.SdsParam) (string, error) {
+	defer TimeSpent("CreateSdsWithParams", time.Now())
 
-	sdsParam := &types.SdsParam{
-		Name:               name,
-		ProtectionDomainID: pd.ProtectionDomain.ID,
-	}
+	sdsParam.ProtectionDomainID = pd.ProtectionDomain.ID
+	ipList := sdsParam.IPList
 
 	if len(ipList) == 0 {
 		return "", fmt.Errorf("Must provide at least 1 SDS IP")
 	} else if len(ipList) == 1 {
-		if ipList[0].Role != RoleAll {
+		if ipList[0].SdsIP.Role != RoleAll {
 			return "", fmt.Errorf("The only IP assigned to an SDS must be assigned \"%s\" role", RoleAll)
 		}
-		sdsIPList := &types.SdsIPList{SdsIP: ipList[0]}
-		sdsParam.IPList = append(sdsParam.IPList, sdsIPList)
 	} else if len(ipList) >= 2 {
 		nSdsOnly, nSdcOnly := 0, 0
 		for _, i := range ipList {
-			if i.Role == RoleAll || i.Role == RoleSdcOnly {
+			if i.SdsIP.Role == RoleAll || i.SdsIP.Role == RoleSdcOnly {
 				nSdcOnly++
 			}
-			if i.Role == RoleAll || i.Role == RoleSdsOnly {
+			if i.SdsIP.Role == RoleAll || i.SdsIP.Role == RoleSdsOnly {
 				nSdsOnly++
 			}
-			sdsIPList := &types.SdsIPList{SdsIP: i}
-			sdsParam.IPList = append(sdsParam.IPList, sdsIPList)
 		}
 		if nSdsOnly < 1 {
 			return "", fmt.Errorf("At least one IP must be assigned %s or %s role", RoleSdsOnly, RoleAll)

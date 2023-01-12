@@ -124,18 +124,22 @@ func TestCreateSdsInvalid(t *testing.T) {
 }
 
 // TestCreateSdsInvalid will attempt to add an SDS, which results in failure
-func TestCreateSdsIPRoleInvalid(t *testing.T) {
+func TestCreateSdsParamsInvalid(t *testing.T) {
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 
 	// attempt to create an SDS with a number of invalid IPs
 	// this is done, in a failure mode, to prevent changing the Protection Domain used for testing
 	sdsName := "invalid"
-	sdsIPList := []types.SdsIP{
-		{IP: "0.1.1.1", Role: goscaleio.RoleAll},
-		{IP: "0.2.2.2", Role: goscaleio.RoleSdcOnly},
+	sdsIPList := []*types.SdsIPList{
+		{SdsIP: types.SdsIP{IP: "0.1.1.1", Role: goscaleio.RoleAll}},
+		{SdsIP: types.SdsIP{IP: "0.2.2.2", Role: goscaleio.RoleSdcOnly}},
 	}
-	sdsID, err := pd.CreateSdsWithIPRole(sdsName, sdsIPList)
+	sdsParam := &types.SdsParam{
+		Name:   sdsName,
+		IPList: sdsIPList,
+	}
+	sdsID, err := pd.CreateSdsWithParams(sdsParam)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", sdsID)
 
