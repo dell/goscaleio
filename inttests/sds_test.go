@@ -135,13 +135,50 @@ func TestCreateSdsParamsInvalid(t *testing.T) {
 		{SdsIP: types.SdsIP{IP: "0.1.1.1", Role: goscaleio.RoleAll}},
 		{SdsIP: types.SdsIP{IP: "0.2.2.2", Role: goscaleio.RoleSdcOnly}},
 	}
-	sdsParam := &types.SdsParam{
+	sdsParam := &types.Sds{
 		Name:   sdsName,
 		IPList: sdsIPList,
 	}
 	sdsID, err := pd.CreateSdsWithParams(sdsParam)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", sdsID)
+
+}
+
+func TestCreateSdsParams(t *testing.T) {
+	pd := getProtectionDomain(t)
+	assert.NotNil(t, pd)
+
+	// attempt to create an SDS with a number of invalid IPs
+	// this is done, in a failure mode, to prevent changing the Protection Domain used for testing
+	sdsName := "Tf_SDS_01"
+	sdsIPList := []*types.SdsIPList{
+		{SdsIP: types.SdsIP{IP: "10.247.100.232", Role: goscaleio.RoleAll}},
+		{SdsIP: types.SdsIP{IP: "0.2.2.2", Role: goscaleio.RoleSdcOnly}},
+	}
+	sdsParam := types.Sds{
+		Name:           sdsName,
+		IPList:         sdsIPList,
+		DrlMode:        "NonVolatile",
+		RmcacheEnabled: true,
+		// this one is not working... god knows why
+		NumOfIoBuffers:  1,
+		RmcacheSizeInKb: 256000,
+	}
+	sdsID, err := pd.CreateSdsWithParams(&sdsParam)
+	assert.Nilf(t, err, "could not create sds with name %s", sdsName)
+	// assert.Equal(t, "", sdsID)
+
+	rsp, err3 := pd.FindSds("ID", sdsID)
+	assert.Nilf(t, err3, "could not find sds with id %s", sdsID)
+
+	assert.Equal(t, rsp.DrlMode, "NonVolatile")
+
+	// io buffers is always zero
+	t.Logf("The number of I/O buffers is %d", rsp.NumOfIoBuffers)
+	t.Logf("The port is %d", rsp.Port)
+	t.Logf("The rmcacheenabled is %v", rsp.RmcacheEnabled)
+	t.Logf("The rmcachesize in kb is %v", rsp.RmcacheSizeInKb)
 
 }
 

@@ -19,6 +19,18 @@ import (
 )
 
 const errorWithDetails = "Error with details"
+const (
+	trueType  = "TRUE"
+	falseType = "FALSE"
+)
+
+// GetBoolType returns the true and false strings expected by the REST API
+func GetBoolType(b bool) string {
+	if b {
+		return trueType
+	}
+	return falseType
+}
 
 // ErrorMessageDetails defines contents of an error msg
 type ErrorMessageDetails struct {
@@ -373,14 +385,14 @@ type DeviceInfo struct {
 type SdsParam struct {
 	Name               string        `json:"name,omitempty"`
 	IPList             []*SdsIPList  `json:"sdsIpList"`
-	Port               int           `json:"sdsPort,omitempty"`
+	Port               string        `json:"sdsPort,omitempty"`
 	DrlMode            string        `json:"drlMode,omitempty"`
-	RmcacheEnabled     bool          `json:"rmcacheEnabled,omitempty"`
-	RmcacheSizeInKb    int           `json:"rmcacheSizeInKb,omitempty"`
+	RmcacheEnabled     string        `json:"rmcacheEnabled,omitempty"`
+	RmcacheSizeInKb    string        `json:"rmcacheSizeInKb,omitempty"`
 	RmcacheFrozen      bool          `json:"rmcacheFrozen,omitempty"`
 	ProtectionDomainID string        `json:"protectionDomainId"`
 	FaultSetID         string        `json:"faultSetId,omitempty"`
-	NumOfIoBuffers     int           `json:"numOfIoBuffers,omitempty"`
+	NumOfIoBuffers     string        `json:"numOfIoBuffers,omitempty"`
 	DeviceInfoList     []*DeviceInfo `json:"deviceInfoList,omitempty"`
 	ForceClean         bool          `json:"forceClean,omitempty"`
 	DeviceTestTimeSecs int           `json:"deviceTestTimeSecs ,omitempty"`

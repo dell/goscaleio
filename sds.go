@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"strconv"
 	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
@@ -81,11 +82,29 @@ func (pd *ProtectionDomain) CreateSds(
 	return pd.createSds(sdsParam)
 }
 
+func getNonZeroIntType(i int) string {
+	if i == 0 {
+		return ""
+	}
+	return strconv.Itoa(i)
+}
+
 // CreateSdsWithParams creates a new Sds with user defined SdsParam struct
-func (pd *ProtectionDomain) CreateSdsWithParams(sdsParam *types.SdsParam) (string, error) {
+func (pd *ProtectionDomain) CreateSdsWithParams(sds *types.Sds) (string, error) {
 	defer TimeSpent("CreateSdsWithParams", time.Now())
 
-	sdsParam.ProtectionDomainID = pd.ProtectionDomain.ID
+	sdsParam := &types.SdsParam{
+		Name:               sds.Name,
+		ProtectionDomainID: pd.ProtectionDomain.ID,
+		Port:               getNonZeroIntType(sds.Port),
+		RmcacheEnabled:     types.GetBoolType(sds.RmcacheEnabled),
+		RmcacheSizeInKb:    getNonZeroIntType(sds.RmcacheSizeInKb),
+		FaultSetID:         sds.FaultSetID,
+		NumOfIoBuffers:     getNonZeroIntType(sds.NumOfIoBuffers),
+		DrlMode:            sds.DrlMode,
+		IPList:             sds.IPList,
+	}
+
 	ipList := sdsParam.IPList
 
 	if len(ipList) == 0 {
