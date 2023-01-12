@@ -407,7 +407,7 @@ type Sds struct {
 	MaintenanceState                            string            `json:"maintenanceState,omitempty"`
 	MaintenanceType                             string            `json:"maintenanceType,omitempty"`
 	RfcacheErrorLowResources                    bool              `json:"rfcacheErrorLowResources,omitempty"`
-	RfcacheErrorApiVersionMismatch              bool              `json:"rfcacheErrorApiVersionMismatch,omitempty"`
+	RfcacheErrorAPIVersionMismatch              bool              `json:"rfcacheErrorApiVersionMismatch,omitempty"`
 	RfcacheErrorInconsistentCacheConfiguration  bool              `json:"rfcacheErrorInconsistentCacheConfiguration,omitempty"`
 	RfcacheErrorInconsistentSourceConfiguration bool              `json:"rfcacheErrorInconsistentSourceConfiguration,omitempty"`
 	RfcacheErrorInvalidDriverPath               bool              `json:"rfcacheErrorInvalidDriverPath,omitempty"`
@@ -557,7 +557,7 @@ type StoragePool struct {
 	VtreeMigrationIoPriorityAppIopsPerDeviceThreshold               int     `json:"vtreeMigrationIoPriorityAppIopsPerDeviceThreshold"`
 	VtreeMigrationIoPriorityAppBwPerDeviceThresholdInKbps           int     `json:"vtreeMigrationIoPriorityAppBwPerDeviceThresholdInKbps"`
 	VtreeMigrationIoPriorityQuietPeriodInMsec                       int     `json:"vtreeMigrationIoPriorityQuietPeriodInMsec"`
-	FglAccpId                                                       string  `json:"fglAccpId"`
+	FglAccpID                                                       string  `json:"fglAccpId"`
 	FglExtraCapacity                                                int     `json:"fglExtraCapacity"`
 	FglOverProvisioningFactor                                       int     `json:"fglOverProvisioningFactor"`
 	FglWriteAtomicitySize                                           int     `json:"fglWriteAtomicitySize"`
