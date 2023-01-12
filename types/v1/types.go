@@ -673,3 +673,32 @@ type RemoveVolumeParam struct {
 // EmptyPayload defines struct for EmptyPayload
 type EmptyPayload struct {
 }
+
+// SnapshotPolicy defines the struct for SnapshotPolicy
+type SnapshotPolicy struct {
+	SnapshotPolicyState                   string  `json:"snapshotPolicyState"`
+	AutoSnapshotCreationCadenceInMin      int     `json:"autoSnapshotCreationCadenceInMin"`
+	MaxVTreeAutoSnapshots                 int     `json:"maxVTreeAutoSnapshots"`
+	NumOfSourceVolumes                    int     `json:"numOfSourceVolumes"`
+	NumOfExpiredButLockedSnapshots        int     `json:"numOfExpiredButLockedSnapshots"`
+	NumOfCreationFailures                 int     `json:"numOfCreationFailures"`
+	NumOfRetainedSnapshotsPerLevel        []int   `json:"numOfRetainedSnapshotsPerLevel"`
+	SnapshotAccessMode                    string  `json:"snapshotAccessMode"`
+	SecureSnapshots                       bool    `json:"secureSnapshots"`
+	TimeOfLastAutoSnapshot                int     `json:"timeOfLastAutoSnapshot"`
+	NextAutoSnapshotCreationTime          int     `json:"nextAutoSnapshotCreationTime"`
+	TimeOfLastAutoSnapshotCreationFailure int     `json:"timeOfLastAutoSnapshotCreationFailure"`
+	LastAutoSnapshotCreationFailureReason string  `json:"lastAutoSnapshotCreationFailureReason"`
+	LastAutoSnapshotFailureInFirstLevel   bool    `json:"lastAutoSnapshotFailureInFirstLevel"`
+	NumOfAutoSnapshots                    int     `json:"numOfAutoSnapshots"`
+	NumOfLockedSnapshots                  int     `json:"numOfLockedSnapshots"`
+	SystemID                              string  `json:"systemId"`
+	Name                                  string  `json:"name"`
+	ID                                    string  `json:"id"`
+	Links                                 []*Link `json:"links"`
+}
+
+// SnapshotPolicyQueryIDByKeyParam defines struct for SnapshotPolicyQueryIDByKeyParam
+type SnapshotPolicyQueryIDByKeyParam struct {
+	Name string `json:"name"`
+}

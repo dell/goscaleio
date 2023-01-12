@@ -201,3 +201,83 @@ func (c *Client) FindStoragePool(
 
 	return nil, errors.New("Couldn't find storage pool")
 }
+
+// SnapshotPolicy defines struct for SnapshotPolicy
+type SnapshotPolicy struct {
+	SnapshotPolicy *types.SnapshotPolicy
+	client         *Client
+}
+
+// NewSnapshotPolicy returns new SnapshotPolicy
+func NewSnapshotPolicy(client *Client) *SnapshotPolicy {
+	return &SnapshotPolicy{
+		SnapshotPolicy: &types.SnapshotPolicy{},
+		client:         client,
+	}
+}
+
+// FindSnapshotPolicyID retruns a Snapshot Policy ID based on name
+func (c *Client) FindSnapshotPolicyID(spname string) (string, error) {
+	defer TimeSpent("FindSnapshotPolicyID", time.Now())
+
+	SnapshotPolicyQueryIDByKeyParam := &types.SnapshotPolicyQueryIDByKeyParam{
+		Name: spname,
+	}
+
+	path := fmt.Sprintf("/api/types/SnapshotPolicy/instances/action/queryIdByKey")
+
+	spID, err := c.getStringWithRetry(
+		http.MethodPost, path, SnapshotPolicyQueryIDByKeyParam)
+	if err != nil {
+		return "", err
+	}
+
+	return spID, nil
+}
+
+// GetSnapshotPolicy returns a list of snapshot policy
+func (c *Client) GetSnapshotPolicy(
+	spname, spid string) ([]*types.SnapshotPolicy, error) {
+	defer TimeSpent("GetSnapshotPolicy", time.Now())
+
+	var (
+		err  error
+		path string
+		sp   = &types.SnapshotPolicy{}
+		sps  []*types.SnapshotPolicy
+	)
+
+	if spname != "" {
+		spid, err = c.FindSnapshotPolicyID(spname)
+		if err != nil && err.Error() == "Not found" {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, fmt.Errorf("Error: problem finding snapshot policy: %s", err)
+		}
+	}
+
+	if spid != "" {
+		path = fmt.Sprintf("/api/instances/SnapshotPolicy::%s", spid)
+	} else {
+		path = "/api/types/SnapshotPolicy/instances"
+	}
+
+	if spid == "" {
+		err = c.getJSONWithRetry(
+			http.MethodGet, path, nil, &sps)
+	} else {
+		err = c.getJSONWithRetry(
+			http.MethodGet, path, nil, sp)
+
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if spid == "" {
+		return sps, nil
+	}
+	sps = append(sps, sp)
+	return sps, nil
+}
