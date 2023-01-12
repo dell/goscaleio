@@ -342,24 +342,88 @@ type SdsIPList struct {
 	SdsIP SdsIP `json:"SdsIp"`
 }
 
+// SdsWindowType defines struct for SdsWindowType
+type SdsWindowType struct {
+	Threshold            int `json:"threshold,omitempty"`
+	WindowSizeInSec      int `json:"windowSizeInSec,omitempty"`
+	LastOscillationCount int `json:"lastOscillationCount,omitempty"`
+	LastOscillationTime  int `json:"lastOscillationTime,omitempty"`
+	MaxFailuresCount     int `json:"maxFailuresCount,omitempty"`
+}
+
+// SdsWindow defines struct for SdsWindow
+type SdsWindow struct {
+	ShortWindow  SdsWindowType `json:"shortWindow,omitempty"`
+	MediumWindow SdsWindowType `json:"mediumWindow,omitempty"`
+	LongWindow   SdsWindowType `json:"longWindow,omitempty"`
+}
+
+// RaidControllers defines struct for raid controllers
+type RaidControllers struct {
+	SerialNumber    string `json:"serialNumber,omitempty"`
+	ModelName       string `json:"modelName,omitempty"`
+	VendorName      string `json:"vendorName,omitempty"`
+	FirmwareVersion string `json:"firmwareVersion,omitempty"`
+	DriverVersion   string `json:"driverVersion,omitempty"`
+	DriverName      string `json:"driverName,omitempty"`
+	PciAddress      string `json:"pciAddress,omitempty"`
+	Status          string `json:"status,omitempty"`
+	BatteryStatus   string `json:"batteryStatus,omitempty"`
+}
+
+// CertificateInfo defines struct for certificate information
+type CertificateInfo struct {
+	Subject             string `json:"subject,omitempty"`
+	Issuer              string `json:"issuer,omitempty"`
+	ValidFrom           string `json:"validFrom,omitempty"`
+	ValidTo             string `json:"validTo,omitempty"`
+	Thumbprint          string `json:"thumbprint,omitempty"`
+	ValidFromAsn1Format string `json:"validFromAsn1Format,omitempty"`
+	ValidToAsn1Format   string `json:"validToAsn1Format,omitempty"`
+}
+
 // Sds defines struct for Sds
 type Sds struct {
-	ID                           string       `json:"id"`
-	Name                         string       `json:"name,omitempty"`
-	ProtectionDomainID           string       `json:"protectionDomainId"`
-	IPList                       []*SdsIPList `json:"ipList"`
-	Port                         int          `json:"port,omitempty"`
-	SdsState                     string       `json:"sdsState"`
-	MembershipState              string       `json:"membershipState"`
-	MdmConnectionState           string       `json:"mdmConnectionState"`
-	DrlMode                      string       `json:"drlMode,omitempty"`
-	RmcacheEnabled               bool         `json:"rmcacheEnabled,omitempty"`
-	RmcacheSizeInKb              int          `json:"rmcacheSizeInKb,omitempty"`
-	RmcacheFrozen                bool         `json:"rmcacheFrozen,omitempty"`
-	IsOnVMware                   bool         `json:"isOnVmWare,omitempty"`
-	FaultSetID                   string       `json:"faultSetId,omitempty"`
-	NumOfIoBuffers               int          `json:"numOfIoBuffers,omitempty"`
-	RmcacheMemoryAllocationState string       `json:"RmcacheMemoryAllocationState,omitempty"`
+	ID                                          string            `json:"id"`
+	Name                                        string            `json:"name,omitempty"`
+	ProtectionDomainID                          string            `json:"protectionDomainId"`
+	IPList                                      []*SdsIPList      `json:"ipList"`
+	Port                                        int               `json:"port,omitempty"`
+	SdsState                                    string            `json:"sdsState"`
+	MembershipState                             string            `json:"membershipState"`
+	MdmConnectionState                          string            `json:"mdmConnectionState"`
+	DrlMode                                     string            `json:"drlMode,omitempty"`
+	RmcacheEnabled                              bool              `json:"rmcacheEnabled,omitempty"`
+	RmcacheSizeInKb                             int               `json:"rmcacheSizeInKb,omitempty"`
+	RmcacheFrozen                               bool              `json:"rmcacheFrozen,omitempty"`
+	IsOnVMware                                  bool              `json:"isOnVmWare,omitempty"`
+	FaultSetID                                  string            `json:"faultSetId,omitempty"`
+	NumOfIoBuffers                              int               `json:"numOfIoBuffers,omitempty"`
+	RmcacheMemoryAllocationState                string            `json:"RmcacheMemoryAllocationState,omitempty"`
+	PerformanceProfile                          string            `json:"perfProfile,omitempty"`
+	SoftwareVersionInfo                         string            `json:"softwareVersionInfo,omitempty"`
+	ConfiguredDrlMode                           string            `json:"configuredDrlMode,omitempty"`
+	RfcacheEnabled                              bool              `json:"rfcacheEnabled,omitempty"`
+	MaintenanceState                            string            `json:"maintenanceState,omitempty"`
+	MaintenanceType                             string            `json:"maintenanceType,omitempty"`
+	RfcacheErrorLowResources                    bool              `json:"rfcacheErrorLowResources,omitempty"`
+	RfcacheErrorApiVersionMismatch              bool              `json:"rfcacheErrorApiVersionMismatch,omitempty"`
+	RfcacheErrorInconsistentCacheConfiguration  bool              `json:"rfcacheErrorInconsistentCacheConfiguration,omitempty"`
+	RfcacheErrorInconsistentSourceConfiguration bool              `json:"rfcacheErrorInconsistentSourceConfiguration,omitempty"`
+	RfcacheErrorInvalidDriverPath               bool              `json:"rfcacheErrorInvalidDriverPath,omitempty"`
+	RfcacheErrorDeviceDoesNotExist              bool              `json:"rfcacheErrorDeviceDoesNotExist,omitempty"`
+	AuthenticationError                         string            `json:"authenticationError,omitempty"`
+	FglNumConcurrentWrites                      int               `json:"fglNumConcurrentWrites,omitempty"`
+	FglMetadataCacheState                       string            `json:"fglMetadataCacheState,omitempty"`
+	FglMetadataCacheSize                        int               `json:"fglMetadataCacheSize,omitempty"`
+	NumRestarts                                 int               `json:"numRestarts,omitempty"`
+	LastUpgradeTime                             int               `json:"lastUpgradeTime,omitempty"`
+	SdsDecoupled                                SdsWindow         `json:"sdsDecoupled,omitempty"`
+	SdsConfigurationFailure                     SdsWindow         `json:"sdsConfigurationFailure,omitempty"`
+	SdsReceiveBufferAllocationFailures          SdsWindow         `json:"sdsReceiveBufferAllocationFailures,omitempty"`
+	RaidControllers                             []RaidControllers `json:"raidControllers,omitempty"`
+	CertificateInfo                             CertificateInfo   `json:"certificateInfo,omitempty"`
+	Links                                       []*Link           `json:"links"`
 }
 
 // DeviceInfo defines struct for DeviceInfo
@@ -440,54 +504,70 @@ type DeviceResp struct {
 
 // StoragePool defines struct for PFlex StoragePool
 type StoragePool struct {
-	ProtectionDomainID                                            string  `json:"protectionDomainId"`
-	RebalanceioPriorityPolicy                                     string  `json:"rebalanceIoPriorityPolicy"`
-	RebuildioPriorityPolicy                                       string  `json:"rebuildIoPriorityPolicy"`
-	RebuildioPriorityBwLimitPerDeviceInKbps                       int     `json:"rebuildIoPriorityBwLimitPerDeviceInKbps"`
-	RebuildioPriorityNumOfConcurrentIosPerDevice                  int     `json:"rebuildIoPriorityNumOfConcurrentIosPerDevice"`
-	RebalanceioPriorityNumOfConcurrentIosPerDevice                int     `json:"rebalanceIoPriorityNumOfConcurrentIosPerDevice"`
-	RebalanceioPriorityBwLimitPerDeviceInKbps                     int     `json:"rebalanceIoPriorityBwLimitPerDeviceInKbps"`
-	RebuildioPriorityAppIopsPerDeviceThreshold                    int     `json:"rebuildIoPriorityAppIopsPerDeviceThreshold"`
-	RebalanceioPriorityAppIopsPerDeviceThreshold                  int     `json:"rebalanceIoPriorityAppIopsPerDeviceThreshold"`
-	RebuildioPriorityAppBwPerDeviceThresholdInKbps                int     `json:"rebuildIoPriorityAppBwPerDeviceThresholdInKbps"`
-	RebalanceioPriorityAppBwPerDeviceThresholdInKbps              int     `json:"rebalanceIoPriorityAppBwPerDeviceThresholdInKbps"`
-	RebuildioPriorityQuietPeriodInMsec                            int     `json:"rebuildIoPriorityQuietPeriodInMsec"`
-	RebalanceioPriorityQuietPeriodInMsec                          int     `json:"rebalanceIoPriorityQuietPeriodInMsec"`
-	ZeroPaddingEnabled                                            bool    `json:"zeroPaddingEnabled"`
-	UseRmcache                                                    bool    `json:"useRmcache"`
-	SparePercentage                                               int     `json:"sparePercentage"`
-	RmCacheWriteHandlingMode                                      string  `json:"rmcacheWriteHandlingMode"`
-	RebuildEnabled                                                bool    `json:"rebuildEnabled"`
-	RebalanceEnabled                                              bool    `json:"rebalanceEnabled"`
-	NumofParallelRebuildRebalanceJobsPerDevice                    int     `json:"numOfParallelRebuildRebalanceJobsPerDevice"`
-	Name                                                          string  `json:"name"`
-	ID                                                            string  `json:"id"`
-	Links                                                         []*Link `json:"links"`
-	BackgroundScannerBWLimitKBps                                  int     `json:"backgroundScannerBWLimitKBps"`
-	ProtectedMaintenanceModeIoPriorityNumOfConcurrentIosPerDevice int     `json:"protectedMaintenanceModeIoPriorityNumOfConcurrentIosPerDevice"`
-	DataLayout                                                    string  `json:"dataLayout"`
-	VtreeMigrationIoPriorityBwLimitPerDeviceInKbps                int     `json:"vtreeMigrationIoPriorityBwLimitPerDeviceInKbps"`
-	VtreeMigrationIoPriorityPolicy                                string  `json:"vtreeMigrationIoPriorityPolicy"`
-	AddressSpaceUsage                                             string  `json:"addressSpaceUsage"`
-	ExternalAccelerationType                                      string  `json:"externalAccelerationType"`
-	PersistentChecksumState                                       string  `json:"persistentChecksumState"`
-	UseRfcache                                                    bool    `json:"useRfcache"`
-	ChecksumEnabled                                               bool    `json:"checksumEnabled"`
-	CompressionMethod                                             string  `json:"compressionMethod"`
-	FragmentationEnabled                                          bool    `json:"fragmentationEnabled"`
-	CapacityUsageState                                            string  `json:"capacityUsageState"`
-	CapacityUsageType                                             string  `json:"capacityUsageType"`
-	AddressSpaceUsageType                                         string  `json:"addressSpaceUsageType"`
-	BgScannerCompareErrorAction                                   string  `json:"bgScannerCompareErrorAction"`
-	BgScannerReadErrorAction                                      string  `json:"bgScannerReadErrorAction"`
-	ReplicationCapacityMaxRatio                                   int     `json:"replicationCapacityMaxRatio"`
-	PersistentChecksumEnabled                                     bool    `json:"persistentChecksumEnabled"`
-	PersistentChecksumBuilderLimitKb                              int     `json:"persistentChecksumBuilderLimitKb"`
-	PersistentChecksumValidateOnRead                              bool    `json:"persistentChecksumValidateOnRead"`
-	VtreeMigrationIoPriorityNumOfConcurrentIosPerDevice           int     `json:"vtreeMigrationIoPriorityNumOfConcurrentIosPerDevice"`
-	ProtectedMaintenanceModeIoPriorityPolicy                      string  `json:"protectedMaintenanceModeIoPriorityPolicy"`
-	BackgroundScannerMode                                         string  `json:"backgroundScannerMode"`
-	MediaType                                                     string  `json:"mediaType"`
+	ProtectionDomainID                                              string  `json:"protectionDomainId"`
+	RebalanceioPriorityPolicy                                       string  `json:"rebalanceIoPriorityPolicy"`
+	RebuildioPriorityPolicy                                         string  `json:"rebuildIoPriorityPolicy"`
+	RebuildioPriorityBwLimitPerDeviceInKbps                         int     `json:"rebuildIoPriorityBwLimitPerDeviceInKbps"`
+	RebuildioPriorityNumOfConcurrentIosPerDevice                    int     `json:"rebuildIoPriorityNumOfConcurrentIosPerDevice"`
+	RebalanceioPriorityNumOfConcurrentIosPerDevice                  int     `json:"rebalanceIoPriorityNumOfConcurrentIosPerDevice"`
+	RebalanceioPriorityBwLimitPerDeviceInKbps                       int     `json:"rebalanceIoPriorityBwLimitPerDeviceInKbps"`
+	RebuildioPriorityAppIopsPerDeviceThreshold                      int     `json:"rebuildIoPriorityAppIopsPerDeviceThreshold"`
+	RebalanceioPriorityAppIopsPerDeviceThreshold                    int     `json:"rebalanceIoPriorityAppIopsPerDeviceThreshold"`
+	RebuildioPriorityAppBwPerDeviceThresholdInKbps                  int     `json:"rebuildIoPriorityAppBwPerDeviceThresholdInKbps"`
+	RebalanceioPriorityAppBwPerDeviceThresholdInKbps                int     `json:"rebalanceIoPriorityAppBwPerDeviceThresholdInKbps"`
+	RebuildioPriorityQuietPeriodInMsec                              int     `json:"rebuildIoPriorityQuietPeriodInMsec"`
+	RebalanceioPriorityQuietPeriodInMsec                            int     `json:"rebalanceIoPriorityQuietPeriodInMsec"`
+	ZeroPaddingEnabled                                              bool    `json:"zeroPaddingEnabled"`
+	UseRmcache                                                      bool    `json:"useRmcache"`
+	SparePercentage                                                 int     `json:"sparePercentage"`
+	RmCacheWriteHandlingMode                                        string  `json:"rmcacheWriteHandlingMode"`
+	RebuildEnabled                                                  bool    `json:"rebuildEnabled"`
+	RebalanceEnabled                                                bool    `json:"rebalanceEnabled"`
+	NumofParallelRebuildRebalanceJobsPerDevice                      int     `json:"numOfParallelRebuildRebalanceJobsPerDevice"`
+	Name                                                            string  `json:"name"`
+	ID                                                              string  `json:"id"`
+	Links                                                           []*Link `json:"links"`
+	BackgroundScannerBWLimitKBps                                    int     `json:"backgroundScannerBWLimitKBps"`
+	ProtectedMaintenanceModeIoPriorityNumOfConcurrentIosPerDevice   int     `json:"protectedMaintenanceModeIoPriorityNumOfConcurrentIosPerDevice"`
+	DataLayout                                                      string  `json:"dataLayout"`
+	VtreeMigrationIoPriorityBwLimitPerDeviceInKbps                  int     `json:"vtreeMigrationIoPriorityBwLimitPerDeviceInKbps"`
+	VtreeMigrationIoPriorityPolicy                                  string  `json:"vtreeMigrationIoPriorityPolicy"`
+	AddressSpaceUsage                                               string  `json:"addressSpaceUsage"`
+	ExternalAccelerationType                                        string  `json:"externalAccelerationType"`
+	PersistentChecksumState                                         string  `json:"persistentChecksumState"`
+	UseRfcache                                                      bool    `json:"useRfcache"`
+	ChecksumEnabled                                                 bool    `json:"checksumEnabled"`
+	CompressionMethod                                               string  `json:"compressionMethod"`
+	FragmentationEnabled                                            bool    `json:"fragmentationEnabled"`
+	CapacityUsageState                                              string  `json:"capacityUsageState"`
+	CapacityUsageType                                               string  `json:"capacityUsageType"`
+	AddressSpaceUsageType                                           string  `json:"addressSpaceUsageType"`
+	BgScannerCompareErrorAction                                     string  `json:"bgScannerCompareErrorAction"`
+	BgScannerReadErrorAction                                        string  `json:"bgScannerReadErrorAction"`
+	ReplicationCapacityMaxRatio                                     int     `json:"replicationCapacityMaxRatio"`
+	PersistentChecksumEnabled                                       bool    `json:"persistentChecksumEnabled"`
+	PersistentChecksumBuilderLimitKb                                int     `json:"persistentChecksumBuilderLimitKb"`
+	PersistentChecksumValidateOnRead                                bool    `json:"persistentChecksumValidateOnRead"`
+	VtreeMigrationIoPriorityNumOfConcurrentIosPerDevice             int     `json:"vtreeMigrationIoPriorityNumOfConcurrentIosPerDevice"`
+	ProtectedMaintenanceModeIoPriorityPolicy                        string  `json:"protectedMaintenanceModeIoPriorityPolicy"`
+	BackgroundScannerMode                                           string  `json:"backgroundScannerMode"`
+	MediaType                                                       string  `json:"mediaType"`
+	CapacityAlertHighThreshold                                      int     `json:"capacityAlertHighThreshold"`
+	CapacityAlertCriticalThreshold                                  int     `json:"capacityAlertCriticalThreshold"`
+	VtreeMigrationIoPriorityAppIopsPerDeviceThreshold               int     `json:"vtreeMigrationIoPriorityAppIopsPerDeviceThreshold"`
+	VtreeMigrationIoPriorityAppBwPerDeviceThresholdInKbps           int     `json:"vtreeMigrationIoPriorityAppBwPerDeviceThresholdInKbps"`
+	VtreeMigrationIoPriorityQuietPeriodInMsec                       int     `json:"vtreeMigrationIoPriorityQuietPeriodInMsec"`
+	FglAccpId                                                       string  `json:"fglAccpId"`
+	FglExtraCapacity                                                int     `json:"fglExtraCapacity"`
+	FglOverProvisioningFactor                                       int     `json:"fglOverProvisioningFactor"`
+	FglWriteAtomicitySize                                           int     `json:"fglWriteAtomicitySize"`
+	FglNvdimmWriteCacheSizeInMb                                     int     `json:"fglNvdimmWriteCacheSizeInMb"`
+	FglNvdimmMetadataAmortizationX100                               int     `json:"fglNvdimmMetadataAmortizationX100"`
+	FglPerfProfile                                                  string  `json:"fglPerfProfile"`
+	ProtectedMaintenanceModeIoPriorityBwLimitPerDeviceInKbps        int     `json:"protectedMaintenanceModeIoPriorityBwLimitPerDeviceInKbps"`
+	ProtectedMaintenanceModeIoPriorityAppIopsPerDeviceThreshold     int     `json:"protectedMaintenanceModeIoPriorityAppIopsPerDeviceThreshold"`
+	ProtectedMaintenanceModeIoPriorityAppBwPerDeviceThresholdInKbps int     `json:"protectedMaintenanceModeIoPriorityAppBwPerDeviceThresholdInKbps"`
+	ProtectedMaintenanceModeIoPriorityQuietPeriodInMsec             int     `json:"protectedMaintenanceModeIoPriorityQuietPeriodInMsec"`
 }
 
 // StoragePoolParam defines struct for StoragePoolParam
