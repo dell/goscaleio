@@ -112,6 +112,27 @@ func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	return nil, errors.New("Couldn't find SDC")
 }
 
+func (s *System) ApproveSdcByGuid(sdcGuid string) (*types.ApproveSdcByGuidResponse, error) {
+	defer TimeSpent("ApproveSdcByGuid", time.Now())
+
+	path := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", s.System.ID)
+
+	var body types.ApproveSdcParam = types.ApproveSdcParam{
+		SdcGuid: sdcGuid,
+	}
+
+	var resp types.ApproveSdcByGuidResponse
+
+	err := s.client.getJSONWithRetry(http.MethodPost, path, body, resp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, err
+
+}
+
 // GetStatistics returns a Sdc statistcs
 func (sdc *Sdc) GetStatistics() (*types.SdcStatistics, error) {
 	defer TimeSpent("GetStatistics", time.Now())
