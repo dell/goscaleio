@@ -102,26 +102,28 @@ func (pd *ProtectionDomain) CreateSdsWithParams(sds *types.Sds) (string, error) 
 		FaultSetID:         sds.FaultSetID,
 		NumOfIoBuffers:     getNonZeroIntType(sds.NumOfIoBuffers),
 		DrlMode:            sds.DrlMode,
-		IPList:             sds.IPList,
+		IPList:             make([]*types.SdsIPList, 0),
 	}
 
-	ipList := sdsParam.IPList
+	ipList := sds.IPList
 
 	if len(ipList) == 0 {
 		return "", fmt.Errorf("Must provide at least 1 SDS IP")
 	} else if len(ipList) == 1 {
-		if ipList[0].SdsIP.Role != RoleAll {
+		if ipList[0].Role != RoleAll {
 			return "", fmt.Errorf("The only IP assigned to an SDS must be assigned \"%s\" role", RoleAll)
 		}
+		sdsParam.IPList = append(sdsParam.IPList, &types.SdsIPList{SdsIP: *ipList[0]})
 	} else if len(ipList) >= 2 {
 		nSdsOnly, nSdcOnly := 0, 0
-		for _, i := range ipList {
-			if i.SdsIP.Role == RoleAll || i.SdsIP.Role == RoleSdcOnly {
+		for i, ip := range ipList {
+			if ip.Role == RoleAll || ip.Role == RoleSdcOnly {
 				nSdcOnly++
 			}
-			if i.SdsIP.Role == RoleAll || i.SdsIP.Role == RoleSdsOnly {
+			if ip.Role == RoleAll || ip.Role == RoleSdsOnly {
 				nSdsOnly++
 			}
+			sdsParam.IPList = append(sdsParam.IPList, &types.SdsIPList{SdsIP: *ipList[i]})
 		}
 		if nSdsOnly < 1 {
 			return "", fmt.Errorf("At least one IP must be assigned %s or %s role", RoleSdsOnly, RoleAll)

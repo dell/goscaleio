@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/dell/goscaleio"
@@ -131,9 +132,9 @@ func TestCreateSdsParamsInvalid(t *testing.T) {
 	// attempt to create an SDS with a number of invalid IPs
 	// this is done, in a failure mode, to prevent changing the Protection Domain used for testing
 	sdsName := "invalid"
-	sdsIPList := []*types.SdsIPList{
-		{SdsIP: types.SdsIP{IP: "0.1.1.1", Role: goscaleio.RoleAll}},
-		{SdsIP: types.SdsIP{IP: "0.2.2.2", Role: goscaleio.RoleSdcOnly}},
+	sdsIPList := []*types.SdsIP{
+		{IP: "0.1.1.1", Role: goscaleio.RoleAll},
+		{IP: "0.2.2.2", Role: goscaleio.RoleSdcOnly},
 	}
 	sdsParam := &types.Sds{
 		Name:   sdsName,
@@ -151,10 +152,10 @@ func TestCreateSdsParams(t *testing.T) {
 
 	// attempt to create an SDS with a number of invalid IPs
 	// this is done, in a failure mode, to prevent changing the Protection Domain used for testing
-	sdsName := "Tf_SDS_01"
-	sdsIPList := []*types.SdsIPList{
-		{SdsIP: types.SdsIP{IP: "10.247.100.232", Role: goscaleio.RoleAll}},
-		{SdsIP: types.SdsIP{IP: "0.2.2.2", Role: goscaleio.RoleSdcOnly}},
+	sdsName := "Tf_SDS_rounak"
+	sdsIPList := []*types.SdsIP{
+		{IP: "10.247.100.232", Role: goscaleio.RoleAll},
+		{IP: "0.2.2.2", Role: goscaleio.RoleSdcOnly},
 	}
 	sdsParam := types.Sds{
 		Name:           sdsName,
@@ -179,7 +180,16 @@ func TestCreateSdsParams(t *testing.T) {
 	t.Logf("The port is %d", rsp.Port)
 	t.Logf("The rmcacheenabled is %v", rsp.RmcacheEnabled)
 	t.Logf("The rmcachesize in kb is %v", rsp.RmcacheSizeInKb)
+	t.Logf("The ip list is %v", strSds(rsp.IPList))
 
+}
+
+func strSds(ips []*types.SdsIP) string {
+	ret := ""
+	for _, ip := range ips {
+		ret += fmt.Sprintf("{IP: %s, role: %s},", ip.IP, ip.Role)
+	}
+	return ret
 }
 
 // TestDeleteSds will attempt to delete an SDS, which results in faliure

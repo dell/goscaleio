@@ -356,22 +356,22 @@ type SdsIPList struct {
 
 // Sds defines struct for Sds
 type Sds struct {
-	ID                           string       `json:"id"`
-	Name                         string       `json:"name,omitempty"`
-	ProtectionDomainID           string       `json:"protectionDomainId"`
-	IPList                       []*SdsIPList `json:"ipList"`
-	Port                         int          `json:"port,omitempty"`
-	SdsState                     string       `json:"sdsState"`
-	MembershipState              string       `json:"membershipState"`
-	MdmConnectionState           string       `json:"mdmConnectionState"`
-	DrlMode                      string       `json:"drlMode,omitempty"`
-	RmcacheEnabled               bool         `json:"rmcacheEnabled,omitempty"`
-	RmcacheSizeInKb              int          `json:"rmcacheSizeInKb,omitempty"`
-	RmcacheFrozen                bool         `json:"rmcacheFrozen,omitempty"`
-	IsOnVMware                   bool         `json:"isOnVmWare,omitempty"`
-	FaultSetID                   string       `json:"faultSetId,omitempty"`
-	NumOfIoBuffers               int          `json:"numOfIoBuffers,omitempty"`
-	RmcacheMemoryAllocationState string       `json:"RmcacheMemoryAllocationState,omitempty"`
+	ID                           string   `json:"id"`
+	Name                         string   `json:"name,omitempty"`
+	ProtectionDomainID           string   `json:"protectionDomainId"`
+	IPList                       []*SdsIP `json:"ipList"`
+	Port                         int      `json:"port,omitempty"`
+	SdsState                     string   `json:"sdsState"`
+	MembershipState              string   `json:"membershipState"`
+	MdmConnectionState           string   `json:"mdmConnectionState"`
+	DrlMode                      string   `json:"drlMode,omitempty"`
+	RmcacheEnabled               bool     `json:"rmcacheEnabled,omitempty"`
+	RmcacheSizeInKb              int      `json:"rmcacheSizeInKb,omitempty"`
+	RmcacheFrozen                bool     `json:"rmcacheFrozen,omitempty"`
+	IsOnVMware                   bool     `json:"isOnVmWare,omitempty"`
+	FaultSetID                   string   `json:"faultSetId,omitempty"`
+	NumOfIoBuffers               int      `json:"numOfIoBuffers,omitempty"`
+	RmcacheMemoryAllocationState string   `json:"RmcacheMemoryAllocationState,omitempty"`
 }
 
 // DeviceInfo defines struct for DeviceInfo
