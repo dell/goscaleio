@@ -182,6 +182,10 @@ func TestCreateSdsParams(t *testing.T) {
 	t.Logf("The rmcachesize in kb is %v", rsp.RmcacheSizeInKb)
 	t.Logf("The ip list is %v", strSds(rsp.IPList))
 
+	sds := goscaleio.NewSdsEx(pd.GetClient(), rsp)
+	err4 := sds.AddSdSIP("0.2.2.3", goscaleio.RoleSdsOnly)
+	assert.NoErrorf(t, err4, "Error received for adding IP:%s Role:%s", "0.2.2.3", goscaleio.RoleSdsOnly)
+
 }
 
 func strSds(ips []*types.SdsIP) string {

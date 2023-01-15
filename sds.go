@@ -201,6 +201,23 @@ func (pd *ProtectionDomain) DeleteSds(id string) error {
 	return nil
 }
 
+// AddSdSIP adds a new IP with specified Role in SDS
+func (sds *Sds) AddSdSIP(ip, role string) error {
+	defer TimeSpent("AddSDSIPRole", time.Now())
+
+	path := fmt.Sprintf("/api/instances/Sds::%v/action/addSdsIp", sds.Sds.ID)
+
+	err := sds.client.getJSONWithRetry(http.MethodPost, path, map[string]string{
+		"ip":   ip,
+		"role": role,
+	}, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // SetSDSIPRole sets IP and Role of SDS
 func (pd *ProtectionDomain) SetSDSIPRole(id, ip, role string) error {
 	defer TimeSpent("SetSDSIPRole", time.Now())

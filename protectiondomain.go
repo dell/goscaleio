@@ -43,6 +43,11 @@ func NewProtectionDomainEx(client *Client, pd *types.ProtectionDomain) *Protecti
 	}
 }
 
+// GetClient is a getter method for the protection domain client
+func (pd *ProtectionDomain) GetClient() *Client {
+	return pd.client
+}
+
 // CreateProtectionDomain creates a ProtectionDomain
 func (s *System) CreateProtectionDomain(name string) (string, error) {
 	defer TimeSpent("CreateProtectionDomain", time.Now())
