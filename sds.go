@@ -368,8 +368,8 @@ func (pd *ProtectionDomain) SetSdsPerformanceProfileHigh(id string, high bool) e
 	defer TimeSpent("SetSdsRmCacheSize", time.Now())
 
 	perfProfiles := map[bool]string{
-		true:  "HighPerformance",
-		false: "Compact",
+		true:  types.PerformanceProfileHigh,
+		false: types.PerformanceProfileCompact,
 	}
 	perfProfileParam := &map[string]string{
 		"perfProfile": perfProfiles[high],

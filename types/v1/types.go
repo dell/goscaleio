@@ -446,8 +446,10 @@ type DeviceInfo struct {
 }
 
 const (
-	SdsDrlModeVolatile    = "Volatile"
-	SdsDrlModeNonVolatile = "NonVolatile"
+	SdsDrlModeVolatile        = "Volatile"
+	SdsDrlModeNonVolatile     = "NonVolatile"
+	PerformanceProfileHigh    = "HighPerformance"
+	PerformanceProfileCompact = "Compact"
 )
 
 // SdsParam defines struct for SdsParam
