@@ -100,9 +100,10 @@ func (pd *ProtectionDomain) CreateSdsWithParams(sds *types.Sds) (string, error) 
 		RmcacheEnabled:     types.GetBoolType(sds.RmcacheEnabled),
 		RmcacheSizeInKb:    getNonZeroIntType(sds.RmcacheSizeInKb),
 		FaultSetID:         sds.FaultSetID,
-		NumOfIoBuffers:     getNonZeroIntType(sds.NumOfIoBuffers),
-		DrlMode:            sds.DrlMode,
-		IPList:             make([]*types.SdsIPList, 0),
+		// TODO: NumOfIoBuffers is not working yet
+		NumOfIoBuffers: getNonZeroIntType(sds.NumOfIoBuffers),
+		DrlMode:        sds.DrlMode,
+		IPList:         make([]*types.SdsIPList, 0),
 	}
 
 	ipList := sds.IPList
