@@ -237,7 +237,7 @@ func (pd *ProtectionDomain) SetSDSIPRole(id, ip, role string) error {
 	return nil
 }
 
-// RemoveSDSIP sets IP and Role of SDS
+// RemoveSDSIP removes IP from SDS
 func (pd *ProtectionDomain) RemoveSDSIP(id, ip string) error {
 	defer TimeSpent("RemoveSDSIP", time.Now())
 
@@ -273,17 +273,89 @@ func (pd *ProtectionDomain) SetSdsName(id, name string) error {
 	return nil
 }
 
-// SetSdsPort sets sds name
-func (pd *ProtectionDomain) SetSdsPort(id, port string) error {
+// SetSdsPort sets sds port
+func (pd *ProtectionDomain) SetSdsPort(id string, port int) error {
 	defer TimeSpent("SetSdsPort", time.Now())
 
-	sdsParam := &types.SdsPort{
-		SdsPort: port,
+	sdsParam := &map[string]string{
+		"sdsPort": strconv.Itoa(port),
 	}
 
 	path := fmt.Sprintf("/api/instances/Sds::%v/action/setSdsPort", id)
 
 	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SetSdsDrlMode sets sds DRL Mode (Volatile or NonVolatile)
+func (pd *ProtectionDomain) SetSdsDrlMode(id, drlMode string) error {
+	defer TimeSpent("SetSdsDrlMode", time.Now())
+
+	sdsParam := &map[string]string{
+		"drlMode": drlMode,
+	}
+
+	path := fmt.Sprintf("/api/instances/Sds::%s/action/setDrlMode", id)
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SetSdsRfCache enables or disables Rf Cache
+func (pd *ProtectionDomain) SetSdsRfCache(id string, enable bool) error {
+	defer TimeSpent("SetSdsRfCache", time.Now())
+	rfcachePaths := map[bool]string{
+		true:  "/api/instances/Sds::%s/action/enableRfcache",
+		false: "/api/instances/Sds::%s/action/disableRfcache",
+	}
+	path := fmt.Sprintf(rfcachePaths[enable], id)
+	sdsParam := &types.EmptyPayload{}
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SetSdsRmCache enables or disables Read Ram Cache
+func (pd *ProtectionDomain) SetSdsRmCache(id string, enable bool) error {
+	defer TimeSpent("SetSdsRmCache", time.Now())
+
+	rmCacheParam := &map[string]string{
+		"rmcacheEnabled": types.GetBoolType(enable),
+	}
+
+	path := fmt.Sprintf("/api/instances/Sds::%s/action/setSdsRmcacheEnabled", id)
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, rmCacheParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SetSdsRmCacheSize sets size of Read Ram Cache in MB
+func (pd *ProtectionDomain) SetSdsRmCacheSize(id string, size int) error {
+	defer TimeSpent("SetSdsRmCacheSize", time.Now())
+
+	rmCacheSizeParam := &map[string]string{
+		"rmcacheSizeInMB": strconv.Itoa(size),
+	}
+
+	path := fmt.Sprintf("/api/instances/Sds::%s/action/setSdsRmcacheSize", id)
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, rmCacheSizeParam, nil)
 	if err != nil {
 		return err
 	}

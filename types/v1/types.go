@@ -445,6 +445,11 @@ type DeviceInfo struct {
 	DeviceName    string `json:"deviceName,omitempty"`
 }
 
+const (
+	SdsDrlModeVolatile    = "Volatile"
+	SdsDrlModeNonVolatile = "NonVolatile"
+)
+
 // SdsParam defines struct for SdsParam
 type SdsParam struct {
 	Name               string        `json:"name,omitempty"`

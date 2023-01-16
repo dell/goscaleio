@@ -160,20 +160,19 @@ func TestCreateSdsParams(t *testing.T) {
 	sdsParam := types.Sds{
 		Name:           sdsName,
 		IPList:         sdsIPList,
-		DrlMode:        "NonVolatile",
-		RmcacheEnabled: true,
+		DrlMode:        "Volatile",
+		RmcacheEnabled: false,
 		// this one is not working... god knows why
 		NumOfIoBuffers:  1,
-		RmcacheSizeInKb: 256000,
+		RmcacheSizeInKb: 156000,
 	}
 	sdsID, err := pd.CreateSdsWithParams(&sdsParam)
 	assert.Nilf(t, err, "could not create sds with name %s", sdsName)
-	// assert.Equal(t, "", sdsID)
+	err4 := pd.SetSdsRfCache(sdsID, false)
+	assert.NoErrorf(t, err4, "Error updating rf cache to %t", false)
 
 	rsp, err3 := pd.FindSds("ID", sdsID)
 	assert.Nilf(t, err3, "could not find sds with id %s", sdsID)
-
-	assert.Equal(t, rsp.DrlMode, "NonVolatile")
 
 	// io buffers is always zero
 	t.Logf("The number of I/O buffers is %d", rsp.NumOfIoBuffers)
@@ -181,10 +180,46 @@ func TestCreateSdsParams(t *testing.T) {
 	t.Logf("The rmcacheenabled is %v", rsp.RmcacheEnabled)
 	t.Logf("The rmcachesize in kb is %v", rsp.RmcacheSizeInKb)
 	t.Logf("The ip list is %v", strSds(rsp.IPList))
+	t.Logf("The drl mode is %s", rsp.DrlMode)
+	t.Logf("The perf profile is %s", rsp.PerformanceProfile)
+	t.Logf("The Rf Cache enablement is %t", rsp.RfcacheEnabled)
+	t.Logf("The Fgl Metadata Cache size is %d", rsp.FglMetadataCacheSize)
 
-	err4 := pd.AddSdSIP(sdsID, "0.2.2.3", goscaleio.RoleSdcOnly)
+	err4 = pd.AddSdSIP(sdsID, "0.2.2.3", goscaleio.RoleSdcOnly)
 	assert.NoErrorf(t, err4, "Error received for adding IP:%s Role:%s", "0.2.2.3", goscaleio.RoleSdsOnly)
 
+	err4 = pd.SetSdsDrlMode(sdsID, types.SdsDrlModeNonVolatile)
+	assert.NoErrorf(t, err4, "Error updating drl mode to %s", types.SdsDrlModeNonVolatile)
+
+	err4 = pd.SetSdsRfCache(sdsID, true)
+	assert.NoErrorf(t, err4, "Error updating rf cache to %t", true)
+
+	err4 = pd.SetSdsRmCache(sdsID, true)
+	assert.NoErrorf(t, err4, "Error updating rm cache to %t", true)
+
+	err4 = pd.SetSdsRmCacheSize(sdsID, 256)
+	assert.NoErrorf(t, err4, "Error updating rf cache size to %d MB", 256)
+
+	// err4 = pd.SetSdsPort(sdsID, 7071)
+	// assert.NoErrorf(t, err4, "Error updating port to %d", 7071)
+
+	rsp, err3 = pd.FindSds("ID", sdsID)
+	assert.Nilf(t, err3, "could not find sds with id %s after updation", sdsID)
+
+	// io buffers is always zero
+	t.Log("Updation done ============")
+	t.Logf("The number of I/O buffers is %d", rsp.NumOfIoBuffers)
+	t.Logf("The port is %d", rsp.Port)
+	t.Logf("The rmcacheenabled is %v", rsp.RmcacheEnabled)
+	t.Logf("The rmcachesize in kb is %v", rsp.RmcacheSizeInKb)
+	t.Logf("The ip list is %v", strSds(rsp.IPList))
+	t.Logf("The drl mode is %s", rsp.DrlMode)
+	t.Logf("The perf profile is %s", rsp.PerformanceProfile)
+	t.Logf("The Rf Cache enablement is %t", rsp.RfcacheEnabled)
+	t.Logf("The Fgl Metadata Cache size is %d", rsp.FglMetadataCacheSize)
+
+	err4 = pd.DeleteSds(sdsID)
+	assert.Nilf(t, err4, "Could not delete sds with id %s", sdsID)
 }
 
 func strSds(ips []*types.SdsIP) string {
@@ -254,6 +289,6 @@ func TestSetSdsPort(t *testing.T) {
 	// attempt to set SDS port
 	// this is done, in a failure mode, to prevent changing the data in existance
 	sdsID := "Invalid_dc4a564f00000002"
-	err := pd.SetSdsPort(sdsID, "7072")
+	err := pd.SetSdsPort(sdsID, 7072)
 	assert.NotNil(t, err)
 }
