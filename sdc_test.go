@@ -117,3 +117,37 @@ func Test_FindVolumes(t *testing.T) {
 		})
 	}
 }
+
+func TestRenameSdc(t *testing.T) {
+	type testCase struct {
+		sdcID string
+		name  string
+		//want
+	}
+	cases := []testCase{
+		{"0035ar2dcv6h788jj", "worker-node-2345"},
+		{"e7001ar2dcv6h45kk", " "},
+	}
+
+	//mock a powerflex endpoint
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	}))
+	defer svr.Close()
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(ts *testing.T) {
+			client, err := NewClientWithArgs(svr.URL, "", true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			//calling RenameSdc with mock value
+			err = client.RenameSdc(tc.sdcID, tc.name)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+
+}
