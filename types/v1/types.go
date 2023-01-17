@@ -445,6 +445,7 @@ type DeviceInfo struct {
 	DeviceName    string `json:"deviceName,omitempty"`
 }
 
+// Constants representing states of SDS
 const (
 	SdsDrlModeVolatile        = "Volatile"
 	SdsDrlModeNonVolatile     = "NonVolatile"
