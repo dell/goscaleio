@@ -200,8 +200,8 @@ func TestCreateSdsParams(t *testing.T) {
 	err4 = pd.SetSdsRmCacheSize(sdsID, 256)
 	assert.NoErrorf(t, err4, "Error updating rf cache size to %d MB", 256)
 
-	err4 = pd.SetSdsPerformanceProfileHigh(sdsID, false)
-	assert.NoErrorf(t, err4, "Error updating perfprof to %t", false)
+	err4 = pd.SetSdsPerformanceProfile(sdsID, types.PerformanceProfileCompact)
+	assert.NoErrorf(t, err4, "Error updating perfprof to %t", types.PerformanceProfileCompact)
 
 	// err4 = pd.SetSdsPort(sdsID, 7071)
 	// assert.NoErrorf(t, err4, "Error updating port to %d", 7071)

@@ -363,16 +363,12 @@ func (pd *ProtectionDomain) SetSdsRmCacheSize(id string, size int) error {
 	return nil
 }
 
-// SetSdsPerformanceProfileHigh sets the SDS Performance Profile
-func (pd *ProtectionDomain) SetSdsPerformanceProfileHigh(id string, high bool) error {
+// SetSdsPerformanceProfile sets the SDS Performance Profile
+func (pd *ProtectionDomain) SetSdsPerformanceProfile(id, perfProf string) error {
 	defer TimeSpent("SetSdsRmCacheSize", time.Now())
 
-	perfProfiles := map[bool]string{
-		true:  types.PerformanceProfileHigh,
-		false: types.PerformanceProfileCompact,
-	}
 	perfProfileParam := &map[string]string{
-		"perfProfile": perfProfiles[high],
+		"perfProfile": perfProf,
 	}
 
 	path := fmt.Sprintf("/api/instances/Sds::%s/action/setSdsPerformanceParameters", id)
