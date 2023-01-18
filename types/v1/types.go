@@ -19,6 +19,18 @@ import (
 )
 
 const errorWithDetails = "Error with details"
+const (
+	trueType  = "TRUE"
+	falseType = "FALSE"
+)
+
+// GetBoolType returns the true and false strings expected by the REST API
+func GetBoolType(b bool) string {
+	if b {
+		return trueType
+	}
+	return falseType
+}
 
 // ErrorMessageDetails defines contents of an error msg
 type ErrorMessageDetails struct {
@@ -387,7 +399,7 @@ type Sds struct {
 	ID                                          string            `json:"id"`
 	Name                                        string            `json:"name,omitempty"`
 	ProtectionDomainID                          string            `json:"protectionDomainId"`
-	IPList                                      []*SdsIPList      `json:"ipList"`
+	IPList                                      []*SdsIP          `json:"ipList"`
 	Port                                        int               `json:"port,omitempty"`
 	SdsState                                    string            `json:"sdsState"`
 	MembershipState                             string            `json:"membershipState"`
@@ -433,18 +445,26 @@ type DeviceInfo struct {
 	DeviceName    string `json:"deviceName,omitempty"`
 }
 
+// Constants representing states of SDS
+const (
+	SdsDrlModeVolatile        = "Volatile"
+	SdsDrlModeNonVolatile     = "NonVolatile"
+	PerformanceProfileHigh    = "HighPerformance"
+	PerformanceProfileCompact = "Compact"
+)
+
 // SdsParam defines struct for SdsParam
 type SdsParam struct {
 	Name               string        `json:"name,omitempty"`
 	IPList             []*SdsIPList  `json:"sdsIpList"`
-	Port               int           `json:"sdsPort,omitempty"`
+	Port               string        `json:"sdsPort,omitempty"`
 	DrlMode            string        `json:"drlMode,omitempty"`
-	RmcacheEnabled     bool          `json:"rmcacheEnabled,omitempty"`
-	RmcacheSizeInKb    int           `json:"rmcacheSizeInKb,omitempty"`
+	RmcacheEnabled     string        `json:"rmcacheEnabled,omitempty"`
+	RmcacheSizeInKb    string        `json:"rmcacheSizeInKb,omitempty"`
 	RmcacheFrozen      bool          `json:"rmcacheFrozen,omitempty"`
 	ProtectionDomainID string        `json:"protectionDomainId"`
 	FaultSetID         string        `json:"faultSetId,omitempty"`
-	NumOfIoBuffers     int           `json:"numOfIoBuffers,omitempty"`
+	NumOfIoBuffers     string        `json:"numOfIoBuffers,omitempty"`
 	DeviceInfoList     []*DeviceInfo `json:"deviceInfoList,omitempty"`
 	ForceClean         bool          `json:"forceClean,omitempty"`
 	DeviceTestTimeSecs int           `json:"deviceTestTimeSecs ,omitempty"`

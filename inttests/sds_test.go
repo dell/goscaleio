@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/dell/goscaleio"
@@ -124,21 +125,33 @@ func TestCreateSdsInvalid(t *testing.T) {
 }
 
 // TestCreateSdsInvalid will attempt to add an SDS, which results in failure
-func TestCreateSdsIPRoleInvalid(t *testing.T) {
+func TestCreateSdsParamsInvalid(t *testing.T) {
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 
 	// attempt to create an SDS with a number of invalid IPs
 	// this is done, in a failure mode, to prevent changing the Protection Domain used for testing
 	sdsName := "invalid"
-	sdsIPList := []types.SdsIP{
+	sdsIPList := []*types.SdsIP{
 		{IP: "0.1.1.1", Role: goscaleio.RoleAll},
 		{IP: "0.2.2.2", Role: goscaleio.RoleSdcOnly},
 	}
-	sdsID, err := pd.CreateSdsWithIPRole(sdsName, sdsIPList)
+	sdsParam := &types.Sds{
+		Name:   sdsName,
+		IPList: sdsIPList,
+	}
+	sdsID, err := pd.CreateSdsWithParams(sdsParam)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", sdsID)
 
+}
+
+func strSds(ips []*types.SdsIP) string {
+	ret := ""
+	for _, ip := range ips {
+		ret += fmt.Sprintf("{IP: %s, role: %s},", ip.IP, ip.Role)
+	}
+	return ret
 }
 
 // TestDeleteSds will attempt to delete an SDS, which results in faliure
@@ -200,6 +213,6 @@ func TestSetSdsPort(t *testing.T) {
 	// attempt to set SDS port
 	// this is done, in a failure mode, to prevent changing the data in existance
 	sdsID := "Invalid_dc4a564f00000002"
-	err := pd.SetSdsPort(sdsID, "7072")
+	err := pd.SetSdsPort(sdsID, 7072)
 	assert.NotNil(t, err)
 }

@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"strconv"
 	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
@@ -81,15 +82,29 @@ func (pd *ProtectionDomain) CreateSds(
 	return pd.createSds(sdsParam)
 }
 
-// CreateSdsWithIPRole creates a new Sds with user-assigned roles to IPs
-func (pd *ProtectionDomain) CreateSdsWithIPRole(
-	name string, ipList []types.SdsIP) (string, error) {
-	defer TimeSpent("CreateSdsWithIPRole", time.Now())
+func getNonZeroIntType(i int) string {
+	if i == 0 {
+		return ""
+	}
+	return strconv.Itoa(i)
+}
+
+// CreateSdsWithParams creates a new Sds with user defined SdsParam struct
+func (pd *ProtectionDomain) CreateSdsWithParams(sds *types.Sds) (string, error) {
+	defer TimeSpent("CreateSdsWithParams", time.Now())
 
 	sdsParam := &types.SdsParam{
-		Name:               name,
+		Name:               sds.Name,
 		ProtectionDomainID: pd.ProtectionDomain.ID,
+		Port:               getNonZeroIntType(sds.Port),
+		RmcacheEnabled:     types.GetBoolType(sds.RmcacheEnabled),
+		RmcacheSizeInKb:    getNonZeroIntType(sds.RmcacheSizeInKb),
+		DrlMode:            sds.DrlMode,
+		IPList:             make([]*types.SdsIPList, 0),
+		// TODO: Add support for FaultSetID and NumOfIoBuffers
 	}
+
+	ipList := sds.IPList
 
 	if len(ipList) == 0 {
 		return "", fmt.Errorf("Must provide at least 1 SDS IP")
@@ -97,19 +112,17 @@ func (pd *ProtectionDomain) CreateSdsWithIPRole(
 		if ipList[0].Role != RoleAll {
 			return "", fmt.Errorf("The only IP assigned to an SDS must be assigned \"%s\" role", RoleAll)
 		}
-		sdsIPList := &types.SdsIPList{SdsIP: ipList[0]}
-		sdsParam.IPList = append(sdsParam.IPList, sdsIPList)
+		sdsParam.IPList = append(sdsParam.IPList, &types.SdsIPList{SdsIP: *ipList[0]})
 	} else if len(ipList) >= 2 {
 		nSdsOnly, nSdcOnly := 0, 0
-		for _, i := range ipList {
-			if i.Role == RoleAll || i.Role == RoleSdcOnly {
+		for i, ip := range ipList {
+			if ip.Role == RoleAll || ip.Role == RoleSdcOnly {
 				nSdcOnly++
 			}
-			if i.Role == RoleAll || i.Role == RoleSdsOnly {
+			if ip.Role == RoleAll || ip.Role == RoleSdsOnly {
 				nSdsOnly++
 			}
-			sdsIPList := &types.SdsIPList{SdsIP: i}
-			sdsParam.IPList = append(sdsParam.IPList, sdsIPList)
+			sdsParam.IPList = append(sdsParam.IPList, &types.SdsIPList{SdsIP: *ipList[i]})
 		}
 		if nSdsOnly < 1 {
 			return "", fmt.Errorf("At least one IP must be assigned %s or %s role", RoleSdsOnly, RoleAll)
@@ -187,6 +200,23 @@ func (pd *ProtectionDomain) DeleteSds(id string) error {
 	return nil
 }
 
+// AddSdSIP adds a new IP with specified Role in SDS
+func (pd *ProtectionDomain) AddSdSIP(id, ip, role string) error {
+	defer TimeSpent("AddSDSIPRole", time.Now())
+
+	path := fmt.Sprintf("/api/instances/Sds::%v/action/addSdsIp", id)
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, map[string]string{
+		"ip":   ip,
+		"role": role,
+	}, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // SetSDSIPRole sets IP and Role of SDS
 func (pd *ProtectionDomain) SetSDSIPRole(id, ip, role string) error {
 	defer TimeSpent("SetSDSIPRole", time.Now())
@@ -206,7 +236,7 @@ func (pd *ProtectionDomain) SetSDSIPRole(id, ip, role string) error {
 	return nil
 }
 
-// RemoveSDSIP sets IP and Role of SDS
+// RemoveSDSIP removes IP from SDS
 func (pd *ProtectionDomain) RemoveSDSIP(id, ip string) error {
 	defer TimeSpent("RemoveSDSIP", time.Now())
 
@@ -242,17 +272,107 @@ func (pd *ProtectionDomain) SetSdsName(id, name string) error {
 	return nil
 }
 
-// SetSdsPort sets sds name
-func (pd *ProtectionDomain) SetSdsPort(id, port string) error {
+// SetSdsPort sets sds port
+func (pd *ProtectionDomain) SetSdsPort(id string, port int) error {
 	defer TimeSpent("SetSdsPort", time.Now())
 
-	sdsParam := &types.SdsPort{
-		SdsPort: port,
+	sdsParam := &map[string]string{
+		"sdsPort": strconv.Itoa(port),
 	}
 
 	path := fmt.Sprintf("/api/instances/Sds::%v/action/setSdsPort", id)
 
 	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SetSdsDrlMode sets sds DRL Mode (Volatile or NonVolatile)
+func (pd *ProtectionDomain) SetSdsDrlMode(id, drlMode string) error {
+	defer TimeSpent("SetSdsDrlMode", time.Now())
+
+	sdsParam := &map[string]string{
+		"drlMode": drlMode,
+	}
+
+	path := fmt.Sprintf("/api/instances/Sds::%s/action/setDrlMode", id)
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SetSdsRfCache enables or disables Rf Cache
+func (pd *ProtectionDomain) SetSdsRfCache(id string, enable bool) error {
+	defer TimeSpent("SetSdsRfCache", time.Now())
+	rfcachePaths := map[bool]string{
+		true:  "/api/instances/Sds::%s/action/enableRfcache",
+		false: "/api/instances/Sds::%s/action/disableRfcache",
+	}
+	path := fmt.Sprintf(rfcachePaths[enable], id)
+	sdsParam := &types.EmptyPayload{}
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SetSdsRmCache enables or disables Read Ram Cache
+func (pd *ProtectionDomain) SetSdsRmCache(id string, enable bool) error {
+	defer TimeSpent("SetSdsRmCache", time.Now())
+
+	rmCacheParam := &map[string]string{
+		"rmcacheEnabled": types.GetBoolType(enable),
+	}
+
+	path := fmt.Sprintf("/api/instances/Sds::%s/action/setSdsRmcacheEnabled", id)
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, rmCacheParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SetSdsRmCacheSize sets size of Read Ram Cache in MB
+func (pd *ProtectionDomain) SetSdsRmCacheSize(id string, size int) error {
+	defer TimeSpent("SetSdsRmCacheSize", time.Now())
+
+	rmCacheSizeParam := &map[string]string{
+		"rmcacheSizeInMB": strconv.Itoa(size),
+	}
+
+	path := fmt.Sprintf("/api/instances/Sds::%s/action/setSdsRmcacheSize", id)
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, rmCacheSizeParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// SetSdsPerformanceProfile sets the SDS Performance Profile
+func (pd *ProtectionDomain) SetSdsPerformanceProfile(id, perfProf string) error {
+	defer TimeSpent("SetSdsRmCacheSize", time.Now())
+
+	perfProfileParam := &map[string]string{
+		"perfProfile": perfProf,
+	}
+
+	path := fmt.Sprintf("/api/instances/Sds::%s/action/setSdsPerformanceParameters", id)
+
+	err := pd.client.getJSONWithRetry(http.MethodPost, path, perfProfileParam, nil)
 	if err != nil {
 		return err
 	}
