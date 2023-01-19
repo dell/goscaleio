@@ -678,6 +678,7 @@ type VolumeParam struct {
 	VolumeType         string    `json:"volumeType,omitempty"`
 	VolumeSizeInKb     string    `json:"volumeSizeInKb,omitempty"`
 	Name               string    `json:"name,omitempty"`
+	CompressionMethod  string    `json:"compressionMethod,omitempty"`
 	once               sync.Once // creates the metadata value once.
 	metadata           http.Header
 }
