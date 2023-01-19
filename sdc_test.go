@@ -14,6 +14,7 @@ package goscaleio
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -116,4 +117,62 @@ func Test_FindVolumes(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRenameSdc(t *testing.T) {
+	type testCase struct {
+		sdcID    string
+		name     string
+		expected error
+	}
+	cases := []testCase{
+		{
+			"c4270bf500000053",
+			"worker-node-2345",
+			nil,
+		},
+		{
+			"c4270bf500000053",
+			"",
+			errors.New("Request message is not valid: The following parameter(s) must be part of the request body: sdcName"),
+		},
+		{
+			"c4270bf500000053",
+			" ",
+			errors.New("The given name contains invalid characters. Use alphanumeric and punctuation characters only. Spaces are not allowed"),
+		},
+		{
+			"worker-node-2",
+			"c4270bf500000053",
+			errors.New("id (worker-node-2) must be a hexadecimal number (unsigned long)"),
+		},
+	}
+
+	//mock a powerflex endpoint
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	}))
+	defer svr.Close()
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(ts *testing.T) {
+			client, err := NewClientWithArgs(svr.URL, "", true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			//calling RenameSdc with mock value
+			err = client.RenameSdc(tc.sdcID, tc.name)
+			if err != nil {
+				if tc.expected == nil {
+					t.Errorf("Renaming sdc did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
+				} else {
+					if err.Error() != tc.expected.Error() {
+						t.Errorf("Renaming sdc did not work as expected, \n\tgot: %s \n\twant: %s", err, tc.expected)
+					}
+				}
+			}
+		})
+	}
+
 }
