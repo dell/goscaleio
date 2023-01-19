@@ -773,8 +773,9 @@ func TestSetCompressionMethod(t *testing.T) {
 	assert.Nil(t, err)
 	vr := goscaleio.NewVolume(C)
 	vr.Volume = vol
-	err = vr.SetCompressionMethod("Normal")
-	assert.Nil(t, err)
+	// set compression method will only get pass for snapshot with fine granularity
+	err = vr.SetCompressionMethod("None")
+	assert.NotNil(t,err)
 	// testing invalid case
 	err = vr.SetCompressionMethod(invalidIdentifier)
 	assert.NotNil(t, err)

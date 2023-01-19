@@ -196,7 +196,10 @@ func (sp *StoragePool) CreateVolume(
 
 	volume.StoragePoolID = sp.StoragePool.ID
 	volume.ProtectionDomainID = sp.StoragePool.ProtectionDomainID
-
+	// platform fails silently for compression method "None".
+	if (sp.StoragePool.DataLayout != "FineGranularity") && (volume.CompressionMethod != ""){
+		return nil, fmt.Errorf("compression may only be set on volumes with Fine Granularity layout. This storage pool has %s layout",sp.StoragePool.DataLayout)
+	}  	
 	volumeResp := &types.VolumeResp{}
 	err := sp.client.getJSONWithRetry(
 		http.MethodPost, path, volume, volumeResp)
@@ -403,7 +406,7 @@ func (v *Volume) SetVolumeMappingAccessMode(accessmode string, sdcid string) err
 
 // SetVolumeUseRmCacheParam defines type for Volume RM cache use for method SetVolumeUseRmCache
 type SetVolumeUseRmCacheParam struct {
-	UseRmCache bool `json:"useRmcache"`
+	UseRmCache string `json:"useRmcache"`
 }
 
 // SetVolumeUseRmCache set volume rm cahce use
@@ -414,7 +417,7 @@ func (v *Volume) SetVolumeUseRmCache(useRmCache bool) error {
 	}
 	path := fmt.Sprintf("%v/action/setVolumeUseRmcache", link.HREF)
 	payload := SetVolumeUseRmCacheParam{
-		UseRmCache: useRmCache,
+		UseRmCache: types.GetBoolType(useRmCache),
 	}
 	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
 	return err
