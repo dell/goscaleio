@@ -204,12 +204,12 @@ func TestCreateDeleteStoragePool(t *testing.T) {
 	poolName := fmt.Sprintf("%s-%s", testPrefix, "StoragePool")
 
 	// create the pool
-	poolID, err := domain.CreateStoragePool(poolName, "")
+	poolID, err := domain.CreateStoragePool(poolName, "", nil)
 	assert.Nil(t, err)
 	assert.NotNil(t, poolID)
 
 	// try to create a pool that exists
-	poolID, err = domain.CreateStoragePool(poolName, "")
+	poolID, err = domain.CreateStoragePool(poolName, "", nil)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", poolID)
 

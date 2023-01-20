@@ -43,7 +43,7 @@ func NewStoragePoolEx(client *Client, pool *types.StoragePool) *StoragePool {
 }
 
 // CreateStoragePool creates a storage pool
-func (pd *ProtectionDomain) CreateStoragePool(name string, mediaType string) (string, error) {
+func (pd *ProtectionDomain) CreateStoragePool(name string, mediaType string, optionalPayload map[string]interface{}) (string, error) {
 
 	if mediaType == "" {
 		mediaType = "HDD"
@@ -52,6 +52,14 @@ func (pd *ProtectionDomain) CreateStoragePool(name string, mediaType string) (st
 		Name:               name,
 		ProtectionDomainID: pd.ProtectionDomain.ID,
 		MediaType:          mediaType,
+	}
+
+	if use_rmcache, ok := optionalPayload["use_rmcache"].(string); ok {
+		storagePoolParam.UseRmcache = use_rmcache
+	}
+
+	if use_rfcache, ok := optionalPayload["use_rfcache"].(string); ok {
+		storagePoolParam.UseRfcache = use_rfcache
 	}
 
 	path := fmt.Sprintf("/api/types/StoragePool/instances")
