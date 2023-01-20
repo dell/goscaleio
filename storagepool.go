@@ -54,12 +54,12 @@ func (pd *ProtectionDomain) CreateStoragePool(name string, mediaType string, opt
 		MediaType:          mediaType,
 	}
 
-	if use_rmcache, ok := optionalPayload["use_rmcache"].(string); ok {
-		storagePoolParam.UseRmcache = use_rmcache
+	if useRmcache, ok := optionalPayload["use_rmcache"].(string); ok {
+		storagePoolParam.UseRmcache = useRmcache
 	}
 
-	if use_rfcache, ok := optionalPayload["use_rfcache"].(string); ok {
-		storagePoolParam.UseRfcache = use_rfcache
+	if useRfcache, ok := optionalPayload["use_rfcache"].(string); ok {
+		storagePoolParam.UseRfcache = useRfcache
 	}
 
 	path := fmt.Sprintf("/api/types/StoragePool/instances")
