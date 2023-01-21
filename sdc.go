@@ -125,7 +125,7 @@ func (s *System) ApproveSdcByGuid(sdcGuid string) (*types.ApproveSdcByGuidRespon
 			SdcGuid: sdcGuid,
 		}
 
-		err := s.client.getJSONWithRetry(http.MethodPost, path, body, resp)
+		err := s.client.getJSONWithRetry(http.MethodPost, path, body, &resp)
 
 		if err != nil {
 			return nil, err
