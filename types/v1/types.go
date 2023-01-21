@@ -90,6 +90,7 @@ type System struct {
 	MdmManagementIPList                   []string `json:"mdmManagementIPList"`
 	DefaultIsVolumeObfuscated             bool     `json:"defaultIsVolumeObfuscated"`
 	RestrictedSdcModeEnabled              bool     `json:"restrictedSdcModeEnabled"`
+	RestrictedSdcMode                     string   `json:"restrictedSdcMode"`
 	Swid                                  string   `json:"swid"`
 	DaysInstalled                         int      `json:"daysInstalled"`
 	MaxCapacityInGb                       string   `json:"maxCapacityInGb"`

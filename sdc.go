@@ -115,18 +115,22 @@ func (s *System) FindSdc(field, value string) (*Sdc, error) {
 func (s *System) ApproveSdcByGuid(sdcGuid string) (*types.ApproveSdcByGuidResponse, error) {
 	defer TimeSpent("ApproveSdcByGuid", time.Now())
 
-	path := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", s.System.ID)
-
-	var body types.ApproveSdcParam = types.ApproveSdcParam{
-		SdcGuid: sdcGuid,
-	}
-
 	var resp types.ApproveSdcByGuidResponse
+	var err error
 
-	err := s.client.getJSONWithRetry(http.MethodPost, path, body, resp)
+	if s.System.RestrictedSdcModeEnabled && s.System.RestrictedSdcMode == "Guid" {
+		path := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", s.System.ID)
 
-	if err != nil {
-		return nil, err
+		var body types.ApproveSdcParam = types.ApproveSdcParam{
+			SdcGuid: sdcGuid,
+		}
+
+		err := s.client.getJSONWithRetry(http.MethodPost, path, body, resp)
+
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
 	return &resp, err
