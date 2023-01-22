@@ -118,7 +118,7 @@ func Test_GetVolumeStatistics(t *testing.T) {
 			ts, vol, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", 1200, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", true, false)
 			if err != nil {
 				t.Fatal(err)
 			}

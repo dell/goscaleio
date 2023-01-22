@@ -296,15 +296,9 @@ func (c *Client) GetToken() string {
 
 // NewClient returns a new client
 func NewClient() (client *Client, err error) {
-	timeout, err := strconv.Atoi(os.Getenv("GOSCALEIO_HTTP_TIMEOUT"))
-	if err != nil {
-		panic(err)
-	}
-
 	return NewClientWithArgs(
 		os.Getenv("GOSCALEIO_ENDPOINT"),
 		os.Getenv("GOSCALEIO_VERSION"),
-		int64(timeout),
 		os.Getenv("GOSCALEIO_INSECURE") == "true",
 		os.Getenv("GOSCALEIO_USECERTS") == "true")
 }
@@ -313,7 +307,6 @@ func NewClient() (client *Client, err error) {
 func NewClientWithArgs(
 	endpoint string,
 	version string,
-	timeout int64,
 	insecure,
 	useCerts bool) (client *Client, err error) {
 
@@ -342,7 +335,6 @@ func NewClientWithArgs(
 		Insecure: insecure,
 		UseCerts: useCerts,
 		ShowHTTP: showHTTP,
-		Timeout:  time.Duration(timeout),
 	}
 
 	ac, err := api.New(context.Background(), endpoint, opts, debug)
