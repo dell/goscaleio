@@ -105,7 +105,7 @@ func Test_FindVolumes(t *testing.T) {
 			ts, sdc, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", true, false)
+			client, err := NewClientWithArgs(ts.URL, "", 1200, true, false)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -156,7 +156,7 @@ func TestRenameSdc(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(ts *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", true, false)
+			client, err := NewClientWithArgs(svr.URL, "", 120, true, false)
 			if err != nil {
 				t.Fatal(err)
 			}
