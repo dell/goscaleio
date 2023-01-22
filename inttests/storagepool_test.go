@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/dell/goscaleio"
+	types "github.com/dell/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -203,13 +204,18 @@ func TestCreateDeleteStoragePool(t *testing.T) {
 
 	poolName := fmt.Sprintf("%s-%s", testPrefix, "StoragePool")
 
+	sp := &types.StoragePoolParam{
+		Name:      poolName,
+		MediaType: "HDD",
+	}
+
 	// create the pool
-	poolID, err := domain.CreateStoragePool(poolName, "", nil)
+	poolID, err := domain.CreateStoragePool(sp)
 	assert.Nil(t, err)
 	assert.NotNil(t, poolID)
 
 	// try to create a pool that exists
-	poolID, err = domain.CreateStoragePool(poolName, "", nil)
+	poolID, err = domain.CreateStoragePool(sp)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", poolID)
 
