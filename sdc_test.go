@@ -176,3 +176,137 @@ func TestRenameSdc(t *testing.T) {
 	}
 
 }
+
+func TestApproveSdc(t *testing.T) {
+	type checkFn func(*testing.T, *types.ApproveSdcByGuidResponse, error)
+	check := func(fns ...checkFn) []checkFn { return fns }
+
+	hasNoError := func(t *testing.T, resp *types.ApproveSdcByGuidResponse, err error) {
+		if err != nil {
+			t.Fatalf("expected no error")
+		}
+	}
+
+	hasError := func(t *testing.T, resp *types.ApproveSdcByGuidResponse, err error) {
+		if err == nil {
+			t.Fatalf("expected error")
+		}
+	}
+
+	checkResp := func(sdcId string) func(t *testing.T, resp *types.ApproveSdcByGuidResponse, err error) {
+		return func(t *testing.T, resp *types.ApproveSdcByGuidResponse, err error) {
+			assert.Equal(t, sdcId, resp.SdcId)
+		}
+	}
+
+	tests := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
+		"success": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+			systemId := "0000aaabbbccc1111"
+			href := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", systemId)
+			system := types.System{
+				ID:                       systemId,
+				RestrictedSdcModeEnabled: true,
+				RestrictedSdcMode:        "Guid",
+			}
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodPost, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				resp := types.ApproveSdcByGuidResponse{
+					SdcId: "aab12340000000x",
+				}
+
+				respData, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				fmt.Fprintln(w, string(respData))
+			}))
+			return ts, &system, check(hasNoError, checkResp("aab12340000000x"))
+		},
+		"Already Approved err": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+			systemId := "0000aaabbbccc1111"
+			href := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", systemId)
+			system := types.System{
+				ID:                       systemId,
+				RestrictedSdcModeEnabled: true,
+				RestrictedSdcMode:        "Guid",
+			}
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodPost, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				http.Error(w, "The SDC is already approved.", http.StatusInternalServerError)
+
+			}))
+			return ts, &system, check(hasError)
+
+		},
+		"Invalid guid err": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+			systemId := "0000aaabbbccc1111"
+			href := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", systemId)
+			system := types.System{
+				ID:                       systemId,
+				RestrictedSdcModeEnabled: true,
+				RestrictedSdcMode:        "Guid",
+			}
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodPost, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				http.Error(w, "The given GUID is invalid. Please specify GUID in the following format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", http.StatusInternalServerError)
+
+			}))
+			return ts, &system, check(hasError)
+
+		},
+	}
+
+	var testCaseGuids = map[string]string{
+		"success":              "1aaabd94-9acd-11ed-a8fc-0242ac120002",
+		"Already Approved err": "1aaabd94-9acd-11ed-a8fc-0242ac120002",
+		"Invalid guid err":     "invald_guid",
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			ts, system, checkFns := tc(t)
+			defer ts.Close()
+
+			client, err := NewClientWithArgs(ts.URL, "", true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+				System: system,
+			}
+
+			resp, err := s.ApproveSdcByGuid(testCaseGuids[name])
+			for _, checkFn := range checkFns {
+				checkFn(t, resp, err)
+			}
+
+		})
+	}
+
+}
