@@ -117,24 +117,28 @@ func (s *System) ApproveSdcByGUID(sdcGUID string) (*types.ApproveSdcByGUIDRespon
 	defer TimeSpent("ApproveSdcByGUID", time.Now())
 
 	var resp types.ApproveSdcByGUIDResponse
-	var err error
 
-	if s.System.RestrictedSdcModeEnabled && s.System.RestrictedSdcMode == "Guid" {
-		path := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", s.System.ID)
+	if s.System.RestrictedSdcModeEnabled {
+		if s.System.RestrictedSdcMode == "Guid" {
+			path := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", s.System.ID)
 
-		var body types.ApproveSdcParam = types.ApproveSdcParam{
-			SdcGUID: sdcGUID,
-		}
+			var body types.ApproveSdcParam = types.ApproveSdcParam{
+				SdcGUID: sdcGUID,
+			}
 
-		err := s.client.getJSONWithRetry(http.MethodPost, path, body, &resp)
+			err := s.client.getJSONWithRetry(http.MethodPost, path, body, &resp)
 
-		if err != nil {
-			return nil, err
+			if err != nil {
+				return nil, err
+			}
+
+			return &resp, nil
+
 		}
 
 	}
 
-	return &resp, err
+	return nil, nil
 
 }
 
