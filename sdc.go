@@ -112,17 +112,18 @@ func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	return nil, errors.New("Couldn't find SDC")
 }
 
-func (s *System) ApproveSdcByGuid(sdcGuid string) (*types.ApproveSdcByGuidResponse, error) {
-	defer TimeSpent("ApproveSdcByGuid", time.Now())
+// ApproveSdcByGuid approves the Sdc When the Powerflex Array is operating in Guid RestrictedSdcMode.
+func (s *System) ApproveSdcByGUID(sdcGUID string) (*types.ApproveSdcByGUIDResponse, error) {
+	defer TimeSpent("ApproveSdcByGUID", time.Now())
 
-	var resp types.ApproveSdcByGuidResponse
+	var resp types.ApproveSdcByGUIDResponse
 	var err error
 
 	if s.System.RestrictedSdcModeEnabled && s.System.RestrictedSdcMode == "Guid" {
 		path := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", s.System.ID)
 
 		var body types.ApproveSdcParam = types.ApproveSdcParam{
-			SdcGuid: sdcGuid,
+			SdcGUID: sdcGUID,
 		}
 
 		err := s.client.getJSONWithRetry(http.MethodPost, path, body, &resp)

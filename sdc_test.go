@@ -178,33 +178,33 @@ func TestRenameSdc(t *testing.T) {
 }
 
 func TestApproveSdc(t *testing.T) {
-	type checkFn func(*testing.T, *types.ApproveSdcByGuidResponse, error)
+	type checkFn func(*testing.T, *types.ApproveSdcByGUIDResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.ApproveSdcByGuidResponse, err error) {
+	hasNoError := func(t *testing.T, resp *types.ApproveSdcByGUIDResponse, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.ApproveSdcByGuidResponse, err error) {
+	hasError := func(t *testing.T, resp *types.ApproveSdcByGUIDResponse, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
-	checkResp := func(sdcId string) func(t *testing.T, resp *types.ApproveSdcByGuidResponse, err error) {
-		return func(t *testing.T, resp *types.ApproveSdcByGuidResponse, err error) {
-			assert.Equal(t, sdcId, resp.SdcId)
+	checkResp := func(sdcId string) func(t *testing.T, resp *types.ApproveSdcByGUIDResponse, err error) {
+		return func(t *testing.T, resp *types.ApproveSdcByGUIDResponse, err error) {
+			assert.Equal(t, sdcId, resp.SdcID)
 		}
 	}
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
-			systemId := "0000aaabbbccc1111"
-			href := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", systemId)
+			systemID := "0000aaabbbccc1111"
+			href := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", systemID)
 			system := types.System{
-				ID:                       systemId,
+				ID:                       systemID,
 				RestrictedSdcModeEnabled: true,
 				RestrictedSdcMode:        "Guid",
 			}
@@ -218,8 +218,8 @@ func TestApproveSdc(t *testing.T) {
 					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
 				}
 
-				resp := types.ApproveSdcByGuidResponse{
-					SdcId: "aab12340000000x",
+				resp := types.ApproveSdcByGUIDResponse{
+					SdcID: "aab12340000000x",
 				}
 
 				respData, err := json.Marshal(resp)
@@ -231,10 +231,10 @@ func TestApproveSdc(t *testing.T) {
 			return ts, &system, check(hasNoError, checkResp("aab12340000000x"))
 		},
 		"Already Approved err": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
-			systemId := "0000aaabbbccc1111"
-			href := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", systemId)
+			systemID := "0000aaabbbccc1111"
+			href := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", systemID)
 			system := types.System{
-				ID:                       systemId,
+				ID:                       systemID,
 				RestrictedSdcModeEnabled: true,
 				RestrictedSdcMode:        "Guid",
 			}
@@ -255,10 +255,10 @@ func TestApproveSdc(t *testing.T) {
 
 		},
 		"Invalid guid err": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
-			systemId := "0000aaabbbccc1111"
-			href := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", systemId)
+			systemID := "0000aaabbbccc1111"
+			href := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", systemID)
 			system := types.System{
-				ID:                       systemId,
+				ID:                       systemID,
 				RestrictedSdcModeEnabled: true,
 				RestrictedSdcMode:        "Guid",
 			}
@@ -301,7 +301,7 @@ func TestApproveSdc(t *testing.T) {
 				System: system,
 			}
 
-			resp, err := s.ApproveSdcByGuid(testCaseGuids[name])
+			resp, err := s.ApproveSdcByGUID(testCaseGuids[name])
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}

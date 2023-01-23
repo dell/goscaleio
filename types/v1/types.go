@@ -326,12 +326,14 @@ type ChangeSdcNameParam struct {
 	SdcName string `json:"sdcName"`
 }
 
+// ApproveSdcParam defines struct for ApproveSdcParam
 type ApproveSdcParam struct {
-	SdcGuid string `json:"sdcGuid"`
+	SdcGUID string `json:"sdcGuid"`
 }
 
-type ApproveSdcByGuidResponse struct {
-	SdcId string `json:"id"`
+// ApproveSdcByGUIDResponse defines struct for ApproveSdcByGUIDResponse
+type ApproveSdcByGUIDResponse struct {
+	SdcID string `json:"id"`
 }
 
 // ProtectionDomainResp defines struct for ProtectionDomainResp
