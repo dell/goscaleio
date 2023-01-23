@@ -598,7 +598,8 @@ type StoragePoolParam struct {
 	RebalanceEnabled         bool   `json:"rebalanceEnabled,omitempty"`
 	ProtectionDomainID       string `json:"protectionDomainId"`
 	ZeroPaddingEnabled       bool   `json:"zeroPaddingEnabled,omitempty"`
-	UseRmcache               bool   `json:"useRmcache,omitempty"`
+	UseRmcache               string `json:"useRmcache,omitempty"`
+	UseRfcache               string `json:"useRfcache,omitempty"`
 	RmcacheWriteHandlingMode string `json:"rmcacheWriteHandlingMode,omitempty"`
 	MediaType                string `json:"mediaType,omitempty"`
 }
