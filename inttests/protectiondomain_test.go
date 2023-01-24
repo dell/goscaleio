@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/dell/goscaleio"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -61,9 +62,11 @@ func getAllProtectionDomains(t *testing.T) []*goscaleio.ProtectionDomain {
 	system := getSystem()
 	assert.NotNil(t, system)
 
+	log.SetLevel(log.DebugLevel)
 	pd, err := system.GetProtectionDomain("")
 	assert.Nil(t, err)
 	assert.NotZero(t, len(pd))
+	log.SetLevel(log.InfoLevel)
 
 	var allDomains []*goscaleio.ProtectionDomain
 
