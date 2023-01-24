@@ -90,6 +90,7 @@ type System struct {
 	MdmManagementIPList                   []string `json:"mdmManagementIPList"`
 	DefaultIsVolumeObfuscated             bool     `json:"defaultIsVolumeObfuscated"`
 	RestrictedSdcModeEnabled              bool     `json:"restrictedSdcModeEnabled"`
+	RestrictedSdcMode                     string   `json:"restrictedSdcMode"`
 	Swid                                  string   `json:"swid"`
 	DaysInstalled                         int      `json:"daysInstalled"`
 	MaxCapacityInGb                       string   `json:"maxCapacityInGb"`
@@ -323,6 +324,16 @@ type ProtectionDomainParam struct {
 // ChangeSdcNameParam defines struct for passing parameters to changeSDCname endpoint
 type ChangeSdcNameParam struct {
 	SdcName string `json:"sdcName"`
+}
+
+// ApproveSdcParam defines struct for ApproveSdcParam
+type ApproveSdcParam struct {
+	SdcGUID string `json:"sdcGuid"`
+}
+
+// ApproveSdcByGUIDResponse defines struct for ApproveSdcByGUIDResponse
+type ApproveSdcByGUIDResponse struct {
+	SdcID string `json:"id"`
 }
 
 // ProtectionDomainResp defines struct for ProtectionDomainResp
