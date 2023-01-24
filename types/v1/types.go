@@ -90,6 +90,7 @@ type System struct {
 	MdmManagementIPList                   []string `json:"mdmManagementIPList"`
 	DefaultIsVolumeObfuscated             bool     `json:"defaultIsVolumeObfuscated"`
 	RestrictedSdcModeEnabled              bool     `json:"restrictedSdcModeEnabled"`
+	RestrictedSdcMode                     string   `json:"restrictedSdcMode"`
 	Swid                                  string   `json:"swid"`
 	DaysInstalled                         int      `json:"daysInstalled"`
 	MaxCapacityInGb                       string   `json:"maxCapacityInGb"`
@@ -323,6 +324,16 @@ type ProtectionDomainParam struct {
 // ChangeSdcNameParam defines struct for passing parameters to changeSDCname endpoint
 type ChangeSdcNameParam struct {
 	SdcName string `json:"sdcName"`
+}
+
+// ApproveSdcParam defines struct for ApproveSdcParam
+type ApproveSdcParam struct {
+	SdcGUID string `json:"sdcGuid"`
+}
+
+// ApproveSdcByGUIDResponse defines struct for ApproveSdcByGUIDResponse
+type ApproveSdcByGUIDResponse struct {
+	SdcID string `json:"id"`
 }
 
 // ProtectionDomainResp defines struct for ProtectionDomainResp
@@ -598,7 +609,8 @@ type StoragePoolParam struct {
 	RebalanceEnabled         bool   `json:"rebalanceEnabled,omitempty"`
 	ProtectionDomainID       string `json:"protectionDomainId"`
 	ZeroPaddingEnabled       bool   `json:"zeroPaddingEnabled,omitempty"`
-	UseRmcache               bool   `json:"useRmcache,omitempty"`
+	UseRmcache               string `json:"useRmcache,omitempty"`
+	UseRfcache               string `json:"useRfcache,omitempty"`
 	RmcacheWriteHandlingMode string `json:"rmcacheWriteHandlingMode,omitempty"`
 	MediaType                string `json:"mediaType,omitempty"`
 }
@@ -735,6 +747,11 @@ type SetMappedSdcLimitsParam struct {
 	SdcID                string `json:"sdcId,omitempty"`
 	BandwidthLimitInKbps string `json:"bandwidthLimitInKbps,omitempty"`
 	IopsLimit            string `json:"iopsLimit,omitempty"`
+}
+
+// RenameSdcParam defines struct for RenameSdc
+type RenameSdcParam struct {
+	SdcName string `json:"sdcName,omitempty"`
 }
 
 // SnapshotDef defines struct for SnapshotDef

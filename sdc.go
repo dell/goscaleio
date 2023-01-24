@@ -112,6 +112,28 @@ func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	return nil, errors.New("Couldn't find SDC")
 }
 
+// ApproveSdcByGUID approves the Sdc When the Powerflex Array is operating in Guid RestrictedSdcMode.
+func (s *System) ApproveSdcByGUID(sdcGUID string) (*types.ApproveSdcByGUIDResponse, error) {
+	defer TimeSpent("ApproveSdcByGUID", time.Now())
+
+	var resp types.ApproveSdcByGUIDResponse
+
+	path := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", s.System.ID)
+
+	var body types.ApproveSdcParam = types.ApproveSdcParam{
+		SdcGUID: sdcGUID,
+	}
+
+	err := s.client.getJSONWithRetry(http.MethodPost, path, body, &resp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+
+}
+
 // GetStatistics returns a Sdc statistcs
 func (sdc *Sdc) GetStatistics() (*types.SdcStatistics, error) {
 	defer TimeSpent("GetStatistics", time.Now())
@@ -236,5 +258,21 @@ func (v *Volume) SetMappedSdcLimits(
 		return err
 	}
 
+	return nil
+}
+
+// RenameSdc renames the sdc with given name
+func (c *Client) RenameSdc(sdcID, name string) error {
+	path := fmt.Sprintf("/api/instances/Sdc::%s/action/setSdcName", sdcID)
+
+	renameSdcParam := &types.RenameSdcParam{
+		SdcName: name,
+	}
+
+	err := c.getJSONWithRetry(
+		http.MethodPost, path, renameSdcParam, nil)
+	if err != nil {
+		return err
+	}
 	return nil
 }
