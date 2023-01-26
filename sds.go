@@ -185,6 +185,19 @@ func (pd *ProtectionDomain) FindSds(
 	return nil, errors.New("Couldn't find SDS")
 }
 
+// GetSdsById returns a Sds by ID
+func (pd *ProtectionDomain) GetSdsById(id string) (types.Sds, error) {
+	defer TimeSpent("GetSdsById", time.Now())
+
+	path := fmt.Sprintf("/api/instances/Sds::%s", id)
+
+	var sds types.Sds
+	err := pd.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &sds)
+
+	return sds, err
+}
+
 // DeleteSds deletes a Sds against Id
 func (pd *ProtectionDomain) DeleteSds(id string) error {
 	defer TimeSpent("DeleteSds", time.Now())
