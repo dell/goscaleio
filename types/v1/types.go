@@ -90,6 +90,7 @@ type System struct {
 	MdmManagementIPList                   []string `json:"mdmManagementIPList"`
 	DefaultIsVolumeObfuscated             bool     `json:"defaultIsVolumeObfuscated"`
 	RestrictedSdcModeEnabled              bool     `json:"restrictedSdcModeEnabled"`
+	RestrictedSdcMode                     string   `json:"restrictedSdcMode"`
 	Swid                                  string   `json:"swid"`
 	DaysInstalled                         int      `json:"daysInstalled"`
 	MaxCapacityInGb                       string   `json:"maxCapacityInGb"`
@@ -323,6 +324,16 @@ type ProtectionDomainParam struct {
 // ChangeSdcNameParam defines struct for passing parameters to changeSDCname endpoint
 type ChangeSdcNameParam struct {
 	SdcName string `json:"sdcName"`
+}
+
+// ApproveSdcParam defines struct for ApproveSdcParam
+type ApproveSdcParam struct {
+	SdcGUID string `json:"sdcGuid"`
+}
+
+// ApproveSdcByGUIDResponse defines struct for ApproveSdcByGUIDResponse
+type ApproveSdcByGUIDResponse struct {
+	SdcID string `json:"id"`
 }
 
 // ProtectionDomainResp defines struct for ProtectionDomainResp
@@ -598,7 +609,8 @@ type StoragePoolParam struct {
 	RebalanceEnabled         bool   `json:"rebalanceEnabled,omitempty"`
 	ProtectionDomainID       string `json:"protectionDomainId"`
 	ZeroPaddingEnabled       bool   `json:"zeroPaddingEnabled,omitempty"`
-	UseRmcache               bool   `json:"useRmcache,omitempty"`
+	UseRmcache               string `json:"useRmcache,omitempty"`
+	UseRfcache               string `json:"useRfcache,omitempty"`
 	RmcacheWriteHandlingMode string `json:"rmcacheWriteHandlingMode,omitempty"`
 	MediaType                string `json:"mediaType,omitempty"`
 }
@@ -736,6 +748,11 @@ type SetMappedSdcLimitsParam struct {
 	IopsLimit            string `json:"iopsLimit,omitempty"`
 }
 
+// RenameSdcParam defines struct for RenameSdc
+type RenameSdcParam struct {
+	SdcName string `json:"sdcName,omitempty"`
+}
+
 // SnapshotDef defines struct for SnapshotDef
 type SnapshotDef struct {
 	VolumeID     string `json:"volumeId,omitempty"`
@@ -801,4 +818,124 @@ type SnapshotPolicy struct {
 // SnapshotPolicyQueryIDByKeyParam defines struct for SnapshotPolicyQueryIDByKeyParam
 type SnapshotPolicyQueryIDByKeyParam struct {
 	Name string `json:"name"`
+}
+
+// PeerMDM defines a replication peer system.
+type PeerMDM struct {
+	ID                  string `json:"id"`
+	Name                string `json:"name"`
+	Port                int    `json:"port"`
+	PeerSystemID        string `json:"peerSystemId"`
+	SystemID            string `json:"systemId"`
+	SoftwareVersionInfo string `json:"softwareVersionInfo"`
+	MembershipState     string `json:"membershipState"`
+	PerfProfile         string `json:"perfProfile"`
+	NetworkType         string `json:"networkType"`
+	CouplingRC          string `json:"couplingRC"`
+}
+
+// ReplicationConsistencyGroup (RCG) has information about a replication session
+type ReplicationConsistencyGroup struct {
+	ID                       string `json:"id,omitempty"`
+	Name                     string `json:"name"`
+	RpoInSeconds             int    `json:"rpoInSeconds"`
+	ProtectionDomainID       string `json:"protectionDomainId"`
+	RemoteProtectionDomainID string `json:"remoteProtectionDomainId"`
+	DestinationSystemID      string `json:"destinationSystemId,omitempty"`
+	PeerMdmID                string `json:"peerMdmId,omitempty"`
+
+	RemoteID                    string `json:"remoteId,omitempty"`
+	RemoteMdmID                 string `json:"remoteMdmId,omitempty"`
+	ReplicationDirection        string `json:"replicationDirection,omitempty"`
+	CurrConsistMode             string `json:"currConsistMode,omitempty"`
+	FreezeState                 string `json:"freezeState,omitempty"`
+	PauseMode                   string `json:"pauseMode,omitempty"`
+	LifetimeState               string `json:"lifetimeState,omitempty"`
+	SnapCreationInProgress      bool   `json:"snapCreationInProgress,omitempty"`
+	LastSnapGroupID             string `json:"lastSnapGroupId,omitempty"`
+	Type                        string `json:"type,omitempty"`
+	DisasterRecoveryState       string `json:"disasterRecoveryState,omitempty"`
+	RemoteDisasterRecoveryState string `json:"remoteDisasterRecoveryState,omitempty"`
+	TargetVolumeAccessMode      string `json:"targetVolumeAccessMode,omitempty"`
+	FailoverType                string `json:"failoverType,omitempty"`
+	FailoverState               string `json:"failoverState,omitempty"`
+	ActiveLocal                 bool   `json:"activeLocal,omitempty"`
+	ActiveRemote                bool   `json:"activeRemote,omitempty"`
+	AbstractState               string `json:"abstractState,omitempty"`
+	Error                       int    `json:"error,omitempty"`
+	LocalActivityState          string `json:"localActivityState,omitempty"`
+	RemoteActivityState         string `json:"remoteActivityState,omitempty"`
+	InactiveReason              int    `json:"inactiveReason,omitempty"`
+
+	Links []*Link `json:"links"`
+}
+
+// ReplicationConsistencyGroupCreatePayload works around a problem where the RpoInSeconds must be enclosed
+// in quotes when creating an RCG, but is treated as an integer when it is returned.
+// This is a bug in the PowerFlex REST implementation.
+// This information was obtained from Bubis, Zeev <Zeev.Bubis@dell.com>.
+type ReplicationConsistencyGroupCreatePayload struct {
+	Name                     string `json:"name"`
+	RpoInSeconds             string `json:"rpoInSeconds"` // note this field different
+	ProtectionDomainID       string `json:"protectionDomainId"`
+	RemoteProtectionDomainID string `json:"remoteProtectionDomainId"`
+	DestinationSystemID      string `json:"destinationSystemId,omitempty"`
+	PeerMdmID                string `json:"peerMdmId,omitempty"`
+}
+
+// ReplicationConsistencyGroupResp response from adding ReplicationConsistencyGroup.
+type ReplicationConsistencyGroupResp struct {
+	ID string `json:"id"`
+}
+
+// RemoveReplicationConsistencyGroupParam defines struct for RemoveReplicationConsistencyGroupParam.
+type RemoveReplicationConsistencyGroupParam struct {
+	ForceIgnoreConsistency string `json:"forceIgnoreConsistency,omitempty"`
+}
+
+// ReplicationPair represents a pair of volumes in a replication relationship.
+type ReplicationPair struct {
+	ID                                 string `json:"id"`
+	Name                               string `json:"name"`
+	RemoteID                           string `json:"remoteId"`
+	UserRequestedPauseTransmitInitCopy bool   `json:"userRequestedPauseTransmitInitCopy"`
+	RemoteCapacityInMB                 int    `json:"remoteCapacityInMB"`
+	LocalVolumeID                      string `json:"localVolumeId"`
+	RemoteVolumeID                     string `json:"remoteVolumeId"`
+	RemoteVolumeName                   string `json:"remoteVolumeName"`
+	ReplicationConsistencyGroupID      string `json:"replicationConsistencyGroupId"`
+	CopyType                           string `json:"copyType"`
+	LifetimeState                      string `json:"lifetimeState"`
+	PeerSystemName                     string `json:"peerSystemName"`
+	InitialCopyState                   string `json:"initialCopyState"`
+	InitialCopyPriority                int    `json:"initialCopyPriority"`
+}
+
+// RemoveReplicationPair defines struct for RemoveReplicationPair
+type RemoveReplicationPair struct {
+	Force string `json:"force,omitempty"`
+}
+
+// CreateReplicationConsistencyGroupSnapshot defines struct for CreateReplicationConsistencyGroupSnapshot.
+type CreateReplicationConsistencyGroupSnapshot struct {
+	Force string `json:"force,omitempty"`
+}
+
+// CreateReplicationConsistencyGroupSnapshotResp defines struct for CreateReplicationConsistencyGroupSnapshotResp.
+type CreateReplicationConsistencyGroupSnapshotResp struct {
+	SnapshotGroupID string `json:"snapshotGroupId"`
+}
+
+// QueryReplicationPair used for querying replication pair.
+type QueryReplicationPair struct {
+	Name                          string `json:"name"`
+	SourceVolumeID                string `json:"sourceVolumeId"`
+	DestinationVolumeID           string `json:"destinationVolumeId"`
+	ReplicationConsistencyGroupID string `json:"replicationConsistencyGroupId"`
+	CopyType                      string `json:"copyType"`
+}
+
+// QueryReplicationPairStatistics used for querying the statistics of a replication pair.
+type QueryReplicationPairStatistics struct {
+	InitialCopyProgress float64 `json:"initialCopyProgress"`
 }

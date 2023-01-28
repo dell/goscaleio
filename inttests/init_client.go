@@ -21,10 +21,17 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const envVarsFile = "GOSCALEIO_TEST.env"
+const (
+	envVarsFile        = "GOSCALEIO_TEST.env"
+	mainEndpoint       = "GOSCALEIO_ENDPOINT"
+	replicationEnpoint = "GOSCALEIO_ENDPOINT2"
+)
 
-// C is global goscaleio Client instance for testing
-var C *goscaleio.Client
+// Global goscaleio Client instances for testing.
+var (
+	C  *goscaleio.Client
+	C2 *goscaleio.Client
+)
 
 func initClient() {
 	err := godotenv.Load(envVarsFile)
@@ -39,7 +46,7 @@ func initClient() {
 
 	if C.GetToken() == "" {
 		_, err := C.Authenticate(&goscaleio.ConfigConnect{
-			Endpoint: os.Getenv("GOSCALEIO_ENDPOINT"),
+			Endpoint: os.Getenv(mainEndpoint),
 			Username: os.Getenv("GOSCALEIO_USERNAME"),
 			Password: os.Getenv("GOSCALEIO_PASSWORD"),
 		})
@@ -49,6 +56,39 @@ func initClient() {
 	}
 }
 
+// initClient2 initializes a second client for replication testing. Its use is optional.
+// returns true if second client initialized
+func initClient2() bool {
+	var err error
+	endpoint2 := os.Getenv(replicationEnpoint)
+	if endpoint2 == "" {
+		return false
+	}
+
+	C2, err = goscaleio.NewClientWithArgs(
+		os.Getenv(replicationEnpoint),
+		os.Getenv("GOSCALEIO_VERSION"),
+		os.Getenv("GOSCALEIO_INSECURE") == "true",
+		os.Getenv("GOSCALEIO_USECERTS") == "true")
+
+	if err != nil {
+		panic(err)
+	}
+
+	if C2.GetToken() == "" {
+		_, err := C2.Authenticate(&goscaleio.ConfigConnect{
+			Endpoint: os.Getenv(replicationEnpoint),
+			Username: os.Getenv("GOSCALEIO_USERNAME2"),
+			Password: os.Getenv("GOSCALEIO_PASSWORD2"),
+		})
+		if err != nil {
+			panic(fmt.Errorf("unable to login to VxFlexOS Gateway: %s", err.Error()))
+		}
+	}
+	return true
+}
+
 func init() {
 	initClient()
+	initClient2()
 }

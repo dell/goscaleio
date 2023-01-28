@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/dell/goscaleio"
@@ -55,6 +56,7 @@ func TestGetSingleSystemID(t *testing.T) {
 func TestGetSingleSystemByIDInvalid(t *testing.T) {
 	// then try to get the first one returned, explicitly
 	system, err := C.FindSystem(invalidIdentifier, "", "")
+	fmt.Printf("system %v err %s\n", system, err)
 	assert.NotNil(t, err)
 	assert.Nil(t, system)
 }

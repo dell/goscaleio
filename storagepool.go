@@ -43,27 +43,16 @@ func NewStoragePoolEx(client *Client, pool *types.StoragePool) *StoragePool {
 }
 
 // CreateStoragePool creates a storage pool
-func (pd *ProtectionDomain) CreateStoragePool(name string, mediaType string) (string, error) {
-
-	if mediaType == "" {
-		mediaType = "HDD"
-	}
-	storagePoolParam := &types.StoragePoolParam{
-		Name:               name,
-		ProtectionDomainID: pd.ProtectionDomain.ID,
-		MediaType:          mediaType,
-	}
-
+func (pd *ProtectionDomain) CreateStoragePool(sp *types.StoragePoolParam) (string, error) {
 	path := fmt.Sprintf("/api/types/StoragePool/instances")
-
-	sp := types.StoragePoolResp{}
+	sp.ProtectionDomainID = pd.ProtectionDomain.ID
+	spResponse := types.StoragePoolResp{}
 	err := pd.client.getJSONWithRetry(
-		http.MethodPost, path, storagePoolParam, &sp)
+		http.MethodPost, path, sp, &spResponse)
 	if err != nil {
 		return "", err
 	}
-
-	return sp.ID, nil
+	return spResponse.ID, nil
 }
 
 // ModifyStoragePoolName Modifies Storagepool Name

@@ -33,7 +33,7 @@ const (
 	// IOCTLDevice is the default device to send queries to
 	IOCTLDevice = "/dev/scini"
 	mockGUID    = "9E56672F-2F4B-4A42-BFF4-88B6846FBFDA"
-	mockSystem  = "000000000001"
+	mockSystem  = "14dbbf5617523654"
 )
 
 var (

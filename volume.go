@@ -27,7 +27,7 @@ import (
 )
 
 // FSDevDirectoryPrefix is for unit testing on Windows - dev is not in the same place
-var FSDevDirectoryPrefix string = ""
+var FSDevDirectoryPrefix string
 
 // SdcMappedVolume defines struct for SdcMappedVolume
 type SdcMappedVolume struct {
@@ -398,5 +398,17 @@ func (v *Volume) SetVolumeMappingAccessMode(accessmode string, sdcid string) err
 		SdcID:      sdcid,
 	}
 	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	return err
+}
+
+// UnmarkForReplication Depricated Message (3.6)
+func (v *Volume) UnmarkForReplication() error {
+
+	path := fmt.Sprintf("/api/instances/Volume::%s/action/unmarkForReplication", v.Volume.ID)
+
+	payload := &types.EmptyPayload{}
+
+	err := v.client.getJSONWithRetry(
+		http.MethodPost, path, payload, nil)
 	return err
 }
