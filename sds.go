@@ -200,14 +200,14 @@ func (pd *ProtectionDomain) FindSds(
 	return nil, errors.New("Couldn't find SDS")
 }
 
-// GetSdsById returns a Sds by ID
-func (s *System) GetSdsById(id string) (types.Sds, error) {
-	defer TimeSpent("GetSdsById", time.Now())
+// GetSdsByID returns a Sds by ID
+func (sys *System) GetSdsByID(id string) (types.Sds, error) {
+	defer TimeSpent("GetSdsByID", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sds::%s", id)
 
 	var sds types.Sds
-	err := s.client.getJSONWithRetry(
+	err := sys.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &sds)
 
 	return sds, err
