@@ -147,6 +147,7 @@ func TestCreateSdsParamsInvalid(t *testing.T) {
 
 }
 
+// TestCompareSdsIDApi checks if all fields for the SDS are same for fetching by ID and Protection Domain
 func TestCompareSdsIDApi(t *testing.T) {
 	// get protection domain
 	pd := getProtectionDomain(t)
@@ -158,16 +159,17 @@ func TestCompareSdsIDApi(t *testing.T) {
 
 	// get all sds under the pd
 	sdss, err := pd.GetSds()
-	assert.Nilf(t, err, "could not get all sds")
+	assert.Nilf(t, err, "Could not get all sds")
 
 	for _, sds := range sdss {
 		// for every sds in the list, check that fetch by ID returns identical struct
-		sdsa, err := system.GetSdsById(sds.ID)
+		sdsa, err := system.GetSdsByID(sds.ID)
 		assert.Nilf(t, err, "Could not get sds by ID %s", sds.ID)
 		assert.Equalf(t, true, reflect.DeepEqual(sds, sdsa), "Two forms of sds are not equal for id %s", sds.ID)
 	}
 }
 
+// TestCompareSdsAllApi checks if all fields for the SDS are same for fetching by ID and System
 func TestCompareSdsAllApi(t *testing.T) {
 	// get system
 	system := getSystem()
@@ -175,11 +177,11 @@ func TestCompareSdsAllApi(t *testing.T) {
 
 	// get all sds
 	sdss, err := system.GetAllSds()
-	assert.Nilf(t, err, "could not get all sds")
+	assert.Nilf(t, err, "Could not get all sds")
 
 	for _, sds := range sdss {
 		// for every sds in the list, check that fetch by ID returns identical struct
-		sdsa, err := system.GetSdsById(sds.ID)
+		sdsa, err := system.GetSdsByID(sds.ID)
 		assert.Nilf(t, err, "Could not get sds by ID %s", sds.ID)
 		assert.Equalf(t, true, reflect.DeepEqual(sds, sdsa), "Two forms of sds are not equal for id %s", sds.ID)
 	}
