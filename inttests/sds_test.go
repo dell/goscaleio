@@ -168,6 +168,23 @@ func TestCompareSdsIDApi(t *testing.T) {
 	}
 }
 
+func TestCompareSdsAllApi(t *testing.T) {
+	// get system
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	// get all sds
+	sdss, err := system.GetAllSds()
+	assert.Nilf(t, err, "could not get all sds")
+
+	for _, sds := range sdss {
+		// for every sds in the list, check that fetch by ID returns identical struct
+		sdsa, err := system.GetSdsById(sds.ID)
+		assert.Nilf(t, err, "Could not get sds by ID %s", sds.ID)
+		assert.Equalf(t, true, reflect.DeepEqual(sds, sdsa), "Two forms of sds are not equal for id %s", sds.ID)
+	}
+}
+
 func strSds(ips []*types.SdsIP) string {
 	ret := ""
 	for _, ip := range ips {
