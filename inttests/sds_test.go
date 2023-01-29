@@ -14,6 +14,7 @@ package inttests
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/dell/goscaleio"
@@ -150,11 +151,15 @@ func TestCreateSdsParams(t *testing.T) {
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 
+	// get system
+	system := getSystem()
+	assert.NotNil(t, system)
+
 	// attempt to create an SDS with a number of invalid IPs
 	// this is done, in a failure mode, to prevent changing the Protection Domain used for testing
 	sdsName := "Tf_SDS_rounak"
 	sdsIPList := []*types.SdsIP{
-		{IP: "10.247.100.232", Role: goscaleio.RoleAll},
+		{IP: "10.247.100.231", Role: goscaleio.RoleAll},
 		{IP: "0.2.2.2", Role: goscaleio.RoleSdcOnly},
 	}
 	sdsParam := types.Sds{
@@ -173,6 +178,10 @@ func TestCreateSdsParams(t *testing.T) {
 
 	rsp, err3 := pd.FindSds("ID", sdsID)
 	assert.Nilf(t, err3, "could not find sds with id %s", sdsID)
+
+	sdsa, err5 := system.GetSdsByID(sdsID)
+	assert.Nilf(t, err5, "Could not get sds by ID %s from ID API", sdsID)
+	assert.Equalf(t, true, reflect.DeepEqual(*rsp, sdsa), "Two forms of sds are not equal.\nID: %+v \n API: %+v", sdsa, rsp)
 
 	// io buffers is always zero
 	t.Logf("The number of I/O buffers is %d", rsp.NumOfIoBuffers)
@@ -209,6 +218,10 @@ func TestCreateSdsParams(t *testing.T) {
 	rsp, err3 = pd.FindSds("ID", sdsID)
 	assert.Nilf(t, err3, "could not find sds with id %s after updation", sdsID)
 
+	sdsa, err5 = system.GetSdsByID(sdsID)
+	assert.Nilf(t, err5, "Could not get sds by ID %s from ID API", sdsID)
+	assert.Equalf(t, true, reflect.DeepEqual(*rsp, sdsa), "Two forms of sds are not equal.\nID: %+v \n API: %+v", sdsa, rsp)
+
 	// io buffers is always zero
 	t.Log("Updation done ============")
 	t.Logf("The number of I/O buffers is %d", rsp.NumOfIoBuffers)
@@ -223,6 +236,46 @@ func TestCreateSdsParams(t *testing.T) {
 
 	err4 = pd.DeleteSds(sdsID)
 	assert.Nilf(t, err4, "Could not delete sds with id %s", sdsID)
+}
+
+// TestCompareSdsIDApi checks if all fields for the SDS are same for fetching by ID and Protection Domain
+func TestCompareSdsIDApi(t *testing.T) {
+	// get protection domain
+	pd := getProtectionDomain(t)
+	assert.NotNil(t, pd)
+
+	// get system
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	// get all sds under the pd
+	sdss, err := pd.GetSds()
+	assert.Nilf(t, err, "Could not get all sds")
+
+	for _, sds := range sdss {
+		// for every sds in the list, check that fetch by ID returns identical struct
+		sdsa, err := system.GetSdsByID(sds.ID)
+		assert.Nilf(t, err, "Could not get sds by ID %s", sds.ID)
+		assert.Equalf(t, true, reflect.DeepEqual(sds, sdsa), "Two forms of sds are not equal for id %s", sds.ID)
+	}
+}
+
+// TestCompareSdsAllApi checks if all fields for the SDS are same for fetching by ID and System
+func TestCompareSdsAllApi(t *testing.T) {
+	// get system
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	// get all sds
+	sdss, err := system.GetAllSds()
+	assert.Nilf(t, err, "Could not get all sds")
+
+	for _, sds := range sdss {
+		// for every sds in the list, check that fetch by ID returns identical struct
+		sdsa, err := system.GetSdsByID(sds.ID)
+		assert.Nilf(t, err, "Could not get sds by ID %s", sds.ID)
+		assert.Equalf(t, true, reflect.DeepEqual(sds, sdsa), "Two forms of sds are not equal for id %s", sds.ID)
+	}
 }
 
 func strSds(ips []*types.SdsIP) string {
