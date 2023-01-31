@@ -775,7 +775,7 @@ func TestSetCompressionMethod(t *testing.T) {
 	vr.Volume = vol
 	// set compression method will only get pass for snapshot with fine granularity
 	err = vr.SetCompressionMethod("None")
-	assert.NotNil(t,err)
+	assert.NotNil(t, err)
 	// testing invalid case
 	err = vr.SetCompressionMethod(invalidIdentifier)
 	assert.NotNil(t, err)

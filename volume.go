@@ -195,7 +195,7 @@ func (sp *StoragePool) CreateVolume(
 	path := "/api/types/Volume/instances"
 
 	volume.StoragePoolID = sp.StoragePool.ID
-	volume.ProtectionDomainID = sp.StoragePool.ProtectionDomainID 	
+	volume.ProtectionDomainID = sp.StoragePool.ProtectionDomainID
 	volumeResp := &types.VolumeResp{}
 	err := sp.client.getJSONWithRetry(
 		http.MethodPost, path, volume, volumeResp)
@@ -399,7 +399,6 @@ func (v *Volume) SetVolumeMappingAccessMode(accessmode string, sdcid string) err
 	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
 	return err
 }
-
 
 // SetVolumeUseRmCacheParam defines type for Volume RM cache use for method SetVolumeUseRmCache
 type SetVolumeUseRmCacheParam struct {
