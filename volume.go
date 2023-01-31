@@ -195,11 +195,7 @@ func (sp *StoragePool) CreateVolume(
 	path := "/api/types/Volume/instances"
 
 	volume.StoragePoolID = sp.StoragePool.ID
-	volume.ProtectionDomainID = sp.StoragePool.ProtectionDomainID
-	// platform fails silently for compression method "None".
-	if (sp.StoragePool.DataLayout != "FineGranularity") && (volume.CompressionMethod != ""){
-		return nil, fmt.Errorf("compression may only be set on volumes with Fine Granularity layout. This storage pool has %s layout",sp.StoragePool.DataLayout)
-	}  	
+	volume.ProtectionDomainID = sp.StoragePool.ProtectionDomainID 	
 	volumeResp := &types.VolumeResp{}
 	err := sp.client.getJSONWithRetry(
 		http.MethodPost, path, volume, volumeResp)
