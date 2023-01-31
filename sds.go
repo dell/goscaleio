@@ -148,7 +148,7 @@ func (pd *ProtectionDomain) createSds(sdsParam *types.SdsParam) (string, error) 
 	return sds.ID, nil
 }
 
-// GetSds returns a Sds
+// GetSds returns all Sds on the protection domain
 func (pd *ProtectionDomain) GetSds() ([]types.Sds, error) {
 	defer TimeSpent("GetSds", time.Now())
 	path := fmt.Sprintf("/api/instances/ProtectionDomain::%v/relationships/Sds",
@@ -156,6 +156,21 @@ func (pd *ProtectionDomain) GetSds() ([]types.Sds, error) {
 
 	var sdss []types.Sds
 	err := pd.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &sdss)
+	if err != nil {
+		return nil, err
+	}
+
+	return sdss, nil
+}
+
+// GetAllSds returns all SDS on the system
+func (sys *System) GetAllSds() ([]types.Sds, error) {
+	defer TimeSpent("GetSds", time.Now())
+	path := "/api/types/Sds/instances"
+
+	var sdss []types.Sds
+	err := sys.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &sdss)
 	if err != nil {
 		return nil, err
@@ -183,6 +198,19 @@ func (pd *ProtectionDomain) FindSds(
 	}
 
 	return nil, errors.New("Couldn't find SDS")
+}
+
+// GetSdsByID returns a Sds by ID
+func (sys *System) GetSdsByID(id string) (types.Sds, error) {
+	defer TimeSpent("GetSdsByID", time.Now())
+
+	path := fmt.Sprintf("/api/instances/Sds::%s", id)
+
+	var sds types.Sds
+	err := sys.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &sds)
+
+	return sds, err
 }
 
 // DeleteSds deletes a Sds against Id
