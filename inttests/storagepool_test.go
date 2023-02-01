@@ -289,3 +289,45 @@ func TestModifyRmCache(t *testing.T) {
 	err := domain.ModifyRMCache("true")
 	assert.Nil(t, err)
 }
+
+// TestGetAllStoragePoolsApi gets all storage pools available on system
+func TestGetAllStoragePoolsApi(t *testing.T) {
+	// get system
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	// get all storagepools on the system
+	storagepools, err := system.GetAllStoragePools()
+	assert.Nil(t, err)
+	assert.NotNil(t, storagepools)
+}
+
+// TestGetStoragePoolByIDApi gets storage pool by ID
+func TestGetStoragePoolByIDApi(t *testing.T) {
+	name := getStoragePoolName(t)
+	assert.NotNil(t, name)
+
+	// get system
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	// Find by name
+	pool, err := C.FindStoragePool("", name, "", "")
+	assert.Nil(t, err)
+	assert.NotNil(t, pool)
+
+	// Find by ID
+	pool1, err := system.GetStoragePoolByID(pool.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, pool1)
+
+	// Find with invalid identifier
+	pool, err = C.FindStoragePool("", invalidIdentifier, "", "")
+	assert.NotNil(t, err)
+	assert.Nil(t, pool)
+
+	// Find by ID
+	pool1, err = system.GetStoragePoolByID(invalidIdentifier)
+	assert.NotNil(t, err)
+	assert.Nil(t, pool1)
+}

@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
@@ -257,4 +258,35 @@ func (sp *StoragePool) GetSDSStoragePool() ([]types.Sds, error) {
 	}
 
 	return sds, nil
+}
+
+// GetStoragePoolByID returns a Storagepool by ID
+func (sys *System) GetStoragePoolByID(id string) (*types.StoragePool, error) {
+	defer TimeSpent("GetStoragePoolByID", time.Now())
+
+	path := fmt.Sprintf("/api/instances/StoragePool::%s", id)
+
+	var storagepool *types.StoragePool
+	err := sys.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &storagepool)
+	if err != nil {
+		return nil, err
+	}
+
+	return storagepool, err
+}
+
+// GetAllStoragePools returns all Storage pools on the system
+func (sys *System) GetAllStoragePools() ([]types.StoragePool, error) {
+	defer TimeSpent("GetStoragepool", time.Now())
+	path := "/api/types/StoragePool/instances"
+
+	var storagepools []types.StoragePool
+	err := sys.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &storagepools)
+	if err != nil {
+		return nil, err
+	}
+
+	return storagepools, nil
 }
