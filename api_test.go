@@ -246,7 +246,7 @@ func Test_getJSONWithRetry(t *testing.T) {
 			}
 		}))
 		defer ts.Close()
-		c, err := NewClientWithArgs(ts.URL, "3.5", 1200, true, false)
+		c, err := NewClientWithArgs(ts.URL, "3.5", 9223372036854775807, true, false)
 		if err != nil {
 			t.Fatal(err)
 		}
