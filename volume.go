@@ -196,7 +196,6 @@ func (sp *StoragePool) CreateVolume(
 
 	volume.StoragePoolID = sp.StoragePool.ID
 	volume.ProtectionDomainID = sp.StoragePool.ProtectionDomainID
-
 	volumeResp := &types.VolumeResp{}
 	err := sp.client.getJSONWithRetry(
 		http.MethodPost, path, volume, volumeResp)
@@ -401,6 +400,44 @@ func (v *Volume) SetVolumeMappingAccessMode(accessmode string, sdcid string) err
 	return err
 }
 
+// SetVolumeUseRmCacheParam defines type for Volume RM cache use for method SetVolumeUseRmCache
+type SetVolumeUseRmCacheParam struct {
+	UseRmCache string `json:"useRmcache"`
+}
+
+// SetVolumeUseRmCache set volume rm cahce use
+func (v *Volume) SetVolumeUseRmCache(useRmCache bool) error {
+	link, err := GetLink(v.Volume.Links, "self")
+	if err != nil {
+		return err
+	}
+	path := fmt.Sprintf("%v/action/setVolumeUseRmcache", link.HREF)
+	payload := SetVolumeUseRmCacheParam{
+		UseRmCache: types.GetBoolType(useRmCache),
+	}
+	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	return err
+}
+
+// SetCompressionMethodParam defines type for compression method for method SetCompressionMethod
+type SetCompressionMethodParam struct {
+	CompressionMethod string `json:"compressionMethod"`
+}
+
+// SetCompressionMethod set the volume compression method.
+func (v *Volume) SetCompressionMethod(compressionMethod string) error {
+	link, err := GetLink(v.Volume.Links, "self")
+	if err != nil {
+		return err
+	}
+	path := fmt.Sprintf("%v/action/modifyCompressionMethod", link.HREF)
+	payload := SetCompressionMethodParam{
+		CompressionMethod: compressionMethod,
+	}
+	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	return err
+}
+
 // UnmarkForReplication Depricated Message (3.6)
 func (v *Volume) UnmarkForReplication() error {
 
@@ -410,5 +447,6 @@ func (v *Volume) UnmarkForReplication() error {
 
 	err := v.client.getJSONWithRetry(
 		http.MethodPost, path, payload, nil)
+
 	return err
 }

@@ -750,3 +750,35 @@ func TestSetVolumeMappingAccessMode(t *testing.T) {
 	err = deleteVolume(t, volID)
 	assert.Nil(t, err)
 }
+
+// Testing TestSetVolumeUseRmCache will be attempting set use rm cache
+func TestSetVolumeUseRmCache(t *testing.T) {
+	volID, err := createVolume(t, "")
+	assert.Nil(t, err)
+	vol, err := getVolByID(volID)
+	assert.Nil(t, err)
+	vr := goscaleio.NewVolume(C)
+	vr.Volume = vol
+	err = vr.SetVolumeUseRmCache(true)
+	assert.Nil(t, err)
+	err = deleteVolume(t, volID)
+	assert.Nil(t, err)
+}
+
+// Testing TestSetCompressionMethod will be attempting set compression method
+func TestSetCompressionMethod(t *testing.T) {
+	volID, err := createVolume(t, "")
+	assert.Nil(t, err)
+	vol, err := getVolByID(volID)
+	assert.Nil(t, err)
+	vr := goscaleio.NewVolume(C)
+	vr.Volume = vol
+	// set compression method will only get pass for snapshot with fine granularity
+	err = vr.SetCompressionMethod("None")
+	assert.NotNil(t, err)
+	// testing invalid case
+	err = vr.SetCompressionMethod(invalidIdentifier)
+	assert.NotNil(t, err)
+	err = deleteVolume(t, volID)
+	assert.Nil(t, err)
+}
