@@ -341,6 +341,7 @@ func NewClientWithArgs(
 		Insecure: insecure,
 		UseCerts: useCerts,
 		ShowHTTP: showHTTP,
+		Timeout:  time.Duration(timeout),
 	}
 
 	if ClientConnectTimeout != 0 {
