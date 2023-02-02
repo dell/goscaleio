@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -105,7 +106,7 @@ func Test_FindVolumes(t *testing.T) {
 			ts, sdc, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", 1200, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -156,7 +157,7 @@ func TestRenameSdc(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(ts *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", 120, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
 			}
