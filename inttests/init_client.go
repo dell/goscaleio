@@ -15,6 +15,7 @@ package inttests
 import (
 	"fmt"
 	"log"
+	"math"
 	"os"
 
 	"github.com/dell/goscaleio"
@@ -68,6 +69,7 @@ func initClient2() bool {
 	C2, err = goscaleio.NewClientWithArgs(
 		os.Getenv(replicationEnpoint),
 		os.Getenv("GOSCALEIO_VERSION"),
+		math.MaxInt64,
 		os.Getenv("GOSCALEIO_INSECURE") == "true",
 		os.Getenv("GOSCALEIO_USECERTS") == "true")
 

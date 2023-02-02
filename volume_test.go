@@ -15,6 +15,7 @@ package goscaleio
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -118,7 +119,7 @@ func Test_GetVolumeStatistics(t *testing.T) {
 			ts, vol, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
 			}
