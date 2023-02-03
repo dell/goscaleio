@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"os"
 	"regexp"
@@ -299,6 +300,7 @@ func NewClient() (client *Client, err error) {
 	return NewClientWithArgs(
 		os.Getenv("GOSCALEIO_ENDPOINT"),
 		os.Getenv("GOSCALEIO_VERSION"),
+		math.MaxInt64,
 		os.Getenv("GOSCALEIO_INSECURE") == "true",
 		os.Getenv("GOSCALEIO_USECERTS") == "true")
 }
@@ -310,6 +312,7 @@ var ClientConnectTimeout time.Duration
 func NewClientWithArgs(
 	endpoint string,
 	version string,
+	timeout int64,
 	insecure,
 	useCerts bool) (client *Client, err error) {
 
@@ -338,6 +341,7 @@ func NewClientWithArgs(
 		Insecure: insecure,
 		UseCerts: useCerts,
 		ShowHTTP: showHTTP,
+		Timeout:  time.Duration(timeout) * time.Second,
 	}
 
 	if ClientConnectTimeout != 0 {

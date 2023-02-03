@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -246,7 +247,7 @@ func Test_getJSONWithRetry(t *testing.T) {
 			}
 		}))
 		defer ts.Close()
-		c, err := NewClientWithArgs(ts.URL, "3.5", true, false)
+		c, err := NewClientWithArgs(ts.URL, "3.5", math.MaxInt64, true, false)
 		if err != nil {
 			t.Fatal(err)
 		}
