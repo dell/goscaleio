@@ -353,6 +353,7 @@ func TestMapQueryUnmapVolume(t *testing.T) {
 		SdcID:                 chosenSDC.Sdc.ID,
 		AllowMultipleMappings: "FALSE",
 		AllSdcs:               "",
+		AccessMode:            "ReadOnly",
 	}
 	volume.MapVolumeSdc(mapVolumeSdcParam)
 
