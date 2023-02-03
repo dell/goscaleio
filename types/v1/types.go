@@ -733,6 +733,7 @@ type MapVolumeSdcParam struct {
 	SdcID                 string `json:"sdcId,omitempty"`
 	AllowMultipleMappings string `json:"allowMultipleMappings,omitempty"`
 	AllSdcs               string `json:"allSdcs,omitempty"`
+	AccessMode 			  string `json:"accessMode,omitempty"`
 }
 
 // UnmapVolumeSdcParam defines struct for UnmapVolumeSdcParam
