@@ -255,7 +255,12 @@ func (c *client) DoWithHeaders(
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			c.doLog(log.WithError(err).Error, "")
+		}
+	}()
 
 	// parse the response
 	switch {
@@ -319,7 +324,13 @@ func (c *client) DoAndGetResponseBody(
 	// marshal the message body (assumes json format)
 	if r, ok := body.(io.ReadCloser); ok {
 		req, err = http.NewRequest(method, u.String(), r)
-		defer r.Close()
+
+		defer func() {
+			if err := r.Close(); err != nil {
+				c.doLog(log.WithError(err).Error, "")
+			}
+		}()
+
 		if v, ok := headers[HeaderKeyContentType]; ok {
 			req.Header.Set(HeaderKeyContentType, v)
 		} else {

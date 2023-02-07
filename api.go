@@ -79,7 +79,12 @@ func (c *Client) getVersion() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			doLog(log.WithError(err).Error, "")
+		}
+	}()
 
 	// parse the response
 	switch {
@@ -143,7 +148,12 @@ func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
 		doLog(log.WithError(err).Error, "")
 		return Cluster{}, err
 	}
-	defer resp.Body.Close()
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			doLog(log.WithError(err).Error, "")
+		}
+	}()
 
 	// parse the response
 	switch {
@@ -238,7 +248,11 @@ func (c *Client) getStringWithRetry(
 	addMetaData(headers, body)
 
 	checkResponse := func(resp *http.Response) (string, bool, error) {
-		defer resp.Body.Close()
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				doLog(log.WithError(err).Error, "")
+			}
+		}()
 
 		// parse the response
 		switch {
