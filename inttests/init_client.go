@@ -67,7 +67,7 @@ func initClient2() bool {
 	}
 
 	C2, err = goscaleio.NewClientWithArgs(
-		os.Getenv(replicationEnpoint),
+		endpoint2,
 		os.Getenv("GOSCALEIO_VERSION"),
 		math.MaxInt64,
 		os.Getenv("GOSCALEIO_INSECURE") == "true",

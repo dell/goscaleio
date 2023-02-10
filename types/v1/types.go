@@ -824,16 +824,17 @@ type SnapshotPolicyQueryIDByKeyParam struct {
 
 // PeerMDM defines a replication peer system.
 type PeerMDM struct {
-	ID                  string `json:"id"`
-	Name                string `json:"name"`
-	Port                int    `json:"port"`
-	PeerSystemID        string `json:"peerSystemId"`
-	SystemID            string `json:"systemId"`
-	SoftwareVersionInfo string `json:"softwareVersionInfo"`
-	MembershipState     string `json:"membershipState"`
-	PerfProfile         string `json:"perfProfile"`
-	NetworkType         string `json:"networkType"`
-	CouplingRC          string `json:"couplingRC"`
+	ID                  string     `json:"id"`
+	Name                string     `json:"name"`
+	Port                int        `json:"port"`
+	PeerSystemID        string     `json:"peerSystemId"`
+	SystemID            string     `json:"systemId"`
+	SoftwareVersionInfo string     `json:"softwareVersionInfo"`
+	MembershipState     string     `json:"membershipState"`
+	PerfProfile         string     `json:"perfProfile"`
+	NetworkType         string     `json:"networkType"`
+	CouplingRC          string     `json:"couplingRC"`
+	IPList              []*PeerMDM `json:"ipList"`
 }
 
 // ReplicationConsistencyGroup (RCG) has information about a replication session
@@ -920,7 +921,7 @@ type RemoveReplicationPair struct {
 
 // CreateReplicationConsistencyGroupSnapshot defines struct for CreateReplicationConsistencyGroupSnapshot.
 type CreateReplicationConsistencyGroupSnapshot struct {
-	Force string `json:"force,omitempty"`
+	Force bool `json:"force,omitempty"`
 }
 
 // CreateReplicationConsistencyGroupSnapshotResp defines struct for CreateReplicationConsistencyGroupSnapshotResp.

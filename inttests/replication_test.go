@@ -75,6 +75,7 @@ func TestGetPeerMDMs(t *testing.T) {
 
 	var targetSystemID string
 	for i := 0; i < len(tgtpeers); i++ {
+		fmt.Printf("Peer %d, %+v", i, tgtpeers[i])
 		targetSystemID = tgtpeers[i].SystemID
 	}
 
@@ -131,6 +132,7 @@ func TestGetTargetSystem(t *testing.T) {
 	}
 
 	rep.targetSystem = getTargetSystem()
+	fmt.Printf("Target: %+v", rep.targetSystem.System)
 	assert.NotNil(t, rep.targetSystem)
 }
 
@@ -362,6 +364,7 @@ func TestCreateReplicationConsistencyGroupSnapshot(t *testing.T) {
 	resp, err := rep.rcg.CreateReplicationConsistencyGroupSnapshot(false)
 	assert.Nil(t, err)
 
+	t.Logf("Consistency Group Snapshot ID: %s", resp.SnapshotGroupID)
 	rep.snapshotGroupID = resp.SnapshotGroupID
 }
 
@@ -456,7 +459,7 @@ func TestExecutePauseOnReplicationGroup(t *testing.T) {
 	err := waitForConsistency(t)
 	assert.Nil(t, err)
 
-	err = rep.rcg.ExecutePauseOnReplicationGroup(siotypes.OnlyTrackChanges)
+	err = rep.rcg.ExecutePauseOnReplicationGroup()
 	assert.Nil(t, err)
 }
 
@@ -622,6 +625,7 @@ func ensureFailover(t *testing.T) error {
 
 		if group.FailoverType != "None" && group.FailoverState == "Done" && group.DisasterRecoveryState == "Neutral" && group.RemoteDisasterRecoveryState == "Neutral" {
 			t.Logf("Consistency Group is in %s", group.FailoverType)
+			time.Sleep(1 * time.Second)
 			return nil
 		}
 

@@ -229,11 +229,9 @@ func (rcg *ReplicationConsistencyGroup) CreateReplicationConsistencyGroupSnapsho
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/createReplicationConsistencyGroupSnapshots"
 	param := &types.CreateReplicationConsistencyGroupSnapshot{
-		Force: "false",
+		Force: force,
 	}
-	if force {
-		param.Force = "true"
-	}
+
 	resp := &types.CreateReplicationConsistencyGroupSnapshotResp{}
 
 	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, resp)
@@ -286,12 +284,12 @@ func (rcg *ReplicationConsistencyGroup) ExecuteReverseOnReplicationGroup() error
 }
 
 // ExecutePauseOnReplicationGroup pauses the replication of the ConsistencyGroup.
-func (rcg *ReplicationConsistencyGroup) ExecutePauseOnReplicationGroup(mode types.PauseMode) error {
+func (rcg *ReplicationConsistencyGroup) ExecutePauseOnReplicationGroup() error {
 	defer TimeSpent("ExecutePauseOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/pauseReplicationConsistencyGroup"
 	param := types.PauseReplicationConsistencyGroup{
-		PauseMode: string(mode),
+		PauseMode: string(types.StopDataTransfer),
 	}
 
 	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
