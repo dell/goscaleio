@@ -53,6 +53,12 @@ type Client struct {
 	api           api.Client
 }
 
+// Client defines struct for Client
+type GatewayClient struct {
+	gatewayConnect *GatewayConnect
+	api           api.Client
+}
+
 // Cluster defines struct for Cluster
 type Cluster struct {
 }
@@ -61,6 +67,13 @@ type Cluster struct {
 type ConfigConnect struct {
 	Endpoint string
 	Version  string
+	Username string
+	Password string
+}
+
+// ConfigConnect defines struct for ConfigConnect
+type GatewayConnect struct {
+	Endpoint string
 	Username string
 	Password string
 }
@@ -176,6 +189,49 @@ func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
 			return Cluster{}, errors.New("error getting version of ScaleIO")
 		}
 	}
+
+	return Cluster{}, nil
+}
+
+
+// Authenticate controls authentication to client
+func (c *GatewayClient) GatewayAuthenticate(gatewayConnect *GatewayConnect) (Cluster, error) {
+
+	c.gatewayConnect = gatewayConnect
+
+	c.api.SetToken("")
+
+	headers := make(map[string]string, 1)
+	headers["Authorization"] = "Basic " + basicAuth(
+		gatewayConnect.Username, gatewayConnect.Password)
+
+	resp, err := c.api.DoAndGetResponseBody(
+		context.Background(), http.MethodGet, "/api/gatewayLogin", headers, nil)
+	if err != nil {
+		doLog(log.WithError(err).Error, "")
+		return Cluster{}, err
+	}
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			doLog(log.WithError(err).Error, "")
+		}
+	}()
+
+	// parse the response
+	switch {
+	case resp == nil:
+		return Cluster{}, errNilReponse
+	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
+		return Cluster{}, c.api.ParseJSONError(resp)
+	}
+
+	token, err := extractString(resp)
+	if err != nil {
+		return Cluster{}, nil
+	}
+
+	c.api.SetToken(token)
 
 	return Cluster{}, nil
 }
