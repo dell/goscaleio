@@ -27,9 +27,11 @@ import (
 	"strings"
 	"sync"
 	"time"
-
+	"crypto/tls"
+	"io"
+	"mime/multipart"
 	log "github.com/sirupsen/logrus"
-
+	"path/filepath"
 	"github.com/dell/goscaleio/api"
 	types "github.com/dell/goscaleio/types/v1"
 )
@@ -54,10 +56,10 @@ type Client struct {
 }
 
 // Client defines struct for Client
-type GatewayClient struct {
-	gatewayConnect *GatewayConnect
-	api           api.Client
-}
+// type GatewayClient struct {
+// 	gatewayConnect *GatewayConnect
+// 	api           api.Client
+// }
 
 // Cluster defines struct for Cluster
 type Cluster struct {
@@ -72,11 +74,11 @@ type ConfigConnect struct {
 }
 
 // ConfigConnect defines struct for ConfigConnect
-type GatewayConnect struct {
-	Endpoint string
-	Username string
-	Password string
-}
+// type GatewayConnect struct {
+// 	Endpoint string
+// 	Username string
+// 	Password string
+// }
 
 // ClientPersistent defines struct for ClientPersistent
 type ClientPersistent struct {
@@ -194,47 +196,235 @@ func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
 }
 
 
-// Authenticate controls authentication to client
-func (c *GatewayClient) GatewayAuthenticate(gatewayConnect *GatewayConnect) (Cluster, error) {
 
-	c.gatewayConnect = gatewayConnect
+func (c *Client) AuthenticateGateway(configConnect *ConfigConnect) (Cluster, error) {
+	c.configConnect = configConnect
 
-	c.api.SetToken("")
+	// headers2 := make(map[string]string, 1)
+	
+	// headers2["Authorization"] = "Basic " + basicAuth(
+	// 	configConnect.Username, configConnect.Password)
 
-	headers := make(map[string]string, 1)
-	headers["Authorization"] = "Basic " + basicAuth(
-		gatewayConnect.Username, gatewayConnect.Password)
+	// resp, err := c.api.DoAndGetResponseBody(
+	// 	context.Background(), http.MethodGet, "/im/types/ProcessPhase/instances/", headers2, nil)
+	// if err != nil {
+	// 	doLog(log.WithError(err).Error, "")
+	// 	return Cluster{}, err
+	// }
+	// defer func() {
+	// 	if err := resp.Body.Close(); err != nil {
+	// 		doLog(log.WithError(err).Error, "")
+	// 	}
+	// }()
 
-	resp, err := c.api.DoAndGetResponseBody(
-		context.Background(), http.MethodGet, "/api/gatewayLogin", headers, nil)
-	if err != nil {
-		doLog(log.WithError(err).Error, "")
-		return Cluster{}, err
+	// //parse the response
+	// switch {
+	// case resp == nil:
+	// 	return Cluster{}, errNilReponse
+	// case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
+	// 	return Cluster{}, c.api.ParseJSONError(resp)
+	// }
+
+	// a, err := extractString(resp)
+	// fmt.Println(a)
+	// if err != nil {
+	// 	return Cluster{}, nil
+	// }
+	//fmt.Println(resp2)
+	// filePath := "Give the filepath"
+	// file, err1 := os.Open(filePath)
+	// if err1 != nil {
+	// 	fmt.Println("Error opening file: ", err1)
+	// }
+	// defer file.Close()
+	// //fileInfo, _ := file.Stat()
+	// //contentType := mime.TypeByExtension(fileInfo.Name())
+	// //fmt.Println(contentType, "is the content type")
+	// body := &bytes.Buffer{}
+	// writer := multipart.NewWriter(body)
+	
+	// part, err2 := writer.CreateFormFile("files", filepath.Base(filePath))
+	// if err2 != nil {
+	// 	fmt.Println("Error creating form file: ", err2)
+	// }
+	// _, err3 := io.Copy(part, file)
+	// // fdata, _ := os.ReadFile(filePath)
+	// // _, err = part.Write(fdata)
+	// if err3 != nil {
+	// 	fmt.Println("Error copying file: ", err3)
+	// }
+	// err4 := writer.Close()
+	// if err4 != nil {
+	// 	fmt.Println("Error closing writer: ", err4)
+	// }
+	
+	// req, err5 := http.NewRequest("POST", "https://endpoint/im/types/installationPackages/instances/actions/uploadPackages", body)
+    // if err5 != nil {
+    //     fmt.Println("new Request failed")
+    // }
+    // req.Header.Set("Content-Type", writer.FormDataContentType())
+	// req.Header.Set("Authorization" , "Basic " + base64.StdEncoding.EncodeToString([]byte(configConnect.Username + ":" + configConnect.Password)))
+	// fmt.Println(body)
+    // client := &http.Client{}
+	// client.Transport = &http.Transport{
+	// 	/* #nosec G402 */
+	// 	TLSClientConfig: &tls.Config{
+	// 		InsecureSkipVerify: true,
+	// 	},
+	// }
+    // resp4, err6 := client.Do(req)
+	// b, _ := extractString(resp4)
+	// fmt.Println(b)
+    // // if err != nil {
+    // //     fmt.Println("Do Request failed")
+	// // 	fmt.Println(err.Error())
+	// // 	return Cluster{} , nil
+    // // }
+	// // fmt.Println(res.Status)
+    // // defer res.Body.Close()
+	// if err6 != nil {
+	// 	log.Fatal(err6)
+	// } else {
+	// 	body := &bytes.Buffer{}
+	// 	_, err7 := body.ReadFrom(resp4.Body)
+	// 	if err7 != nil {
+	// 		log.Fatal(err7)
+	// 	}
+	// 	resp4.Body.Close()
+	// 	fmt.Println(resp4.StatusCode)
+	// }
+
+	filePath2 := "Give the file path"
+	file2, err8 := os.Open(filePath2)
+	if err8 != nil {
+		fmt.Println("Error opening file: ", err8)
 	}
-
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			doLog(log.WithError(err).Error, "")
+	defer file2.Close()
+	//fileInfo, _ := file.Stat()
+	//contentType := mime.TypeByExtension(fileInfo.Name())
+	//fmt.Println(contentType, "is the content type")
+	body2 := &bytes.Buffer{}
+	writer2 := multipart.NewWriter(body2)
+	
+	part2, err9 := writer2.CreateFormFile("file", filepath.Base(filePath2))
+	if err9 != nil {
+		fmt.Println("Error creating form file: ", err9)
+	}
+	_, err10 := io.Copy(part2, file2)
+	// fdata, _ := os.ReadFile(filePath)
+	// _, err = part.Write(fdata)
+	if err10 != nil {
+		fmt.Println("Error copying file: ", err10)
+	}
+	err11 := writer2.Close()
+	if err11 != nil {
+		fmt.Println("Error closing writer: ", err11)
+	}
+	
+	req2, err12 := http.NewRequest("POST", "https://endpoint/im/types/Configuration/instances/actions/parseFromCSV", body2)
+    if err12 != nil {
+        fmt.Println("new Request failed")
+    }
+    req2.Header.Set("Content-Type", writer2.FormDataContentType())
+	req2.Header.Set("Authorization" , "Basic " + base64.StdEncoding.EncodeToString([]byte(configConnect.Username + ":" + configConnect.Password)))
+	fmt.Println(body2)
+    client2 := &http.Client{}
+	client2.Transport = &http.Transport{
+		/* #nosec G402 */
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+    resp5, err13 := client2.Do(req2)
+	d, _ := extractString(resp5)
+	fmt.Println(d)
+    // if err != nil {
+    //     fmt.Println("Do Request failed")
+	// 	fmt.Println(err.Error())
+	// 	return Cluster{} , nil
+    // }
+	// fmt.Println(res.Status)
+    // defer res.Body.Close()
+	if err13 != nil {
+		log.Fatal(err13)
+	} else {
+		body3 := &bytes.Buffer{}
+		_, err14 := body3.ReadFrom(resp5.Body)
+		if err14 != nil {
+			log.Fatal(err14)
 		}
-	}()
-
-	// parse the response
-	switch {
-	case resp == nil:
-		return Cluster{}, errNilReponse
-	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
-		return Cluster{}, c.api.ParseJSONError(resp)
+		resp5.Body.Close()
+		fmt.Println(resp5.StatusCode)
 	}
 
-	token, err := extractString(resp)
-	if err != nil {
-		return Cluster{}, nil
-	}
 
-	c.api.SetToken(token)
+    // cnt, err := io.ReadAll(res.Body)
+    // if err != nil {
+    //     return []byte{}, err
+    // }
 
+
+
+	//headers2["Content-Type"] = writer.FormDataContentType()
+	
+	// resp3, err := c.api.DoAndGetResponseBody(
+	// 	context.Background(), http.MethodPost, "/im/types/installationPackages/instances/actions/uploadPackages/", headers2, body)
+	// resp4, err := extractString(resp3)
+	// fmt.Println(resp4)
+	// if err != nil {
+	// 	return Cluster{}, nil
+	// }
+	// fmt.Println("Status:", resp3.Status)
+	// fmt.Println("Body:", resp3.Body)
 	return Cluster{}, nil
 }
+
+
+
+// Authenticate controls authentication to client
+// func (c *GatewayClient) GatewayAuthenticate(gatewayConnect *GatewayConnect) (Cluster, error) {
+
+// 	c.gatewayConnect = gatewayConnect
+
+// 	c.api.SetToken("")
+
+// 	headers := make(map[string]string, 1)
+// 	headers["Authorization"] = "Basic " + basicAuth(
+// 		gatewayConnect.Username, gatewayConnect.Password)
+
+// 	resp, err := c.api.DoAndGetResponseBody(
+// 		context.Background(), http.MethodGet, "/api/gatewayLogin", headers, nil)
+// 	if err != nil {
+// 		doLog(log.WithError(err).Error, "")
+// 		return Cluster{}, err
+// 	}
+// 	cookie := resp.Cookies()
+// 	fmt.Println("Anika")
+// 	fmt.Println(cookie)
+// 	defer func() {
+// 		if err := resp.Body.Close(); err != nil {
+// 			doLog(log.WithError(err).Error, "")
+// 		}
+// 	}()
+
+// 	// parse the response
+// 	switch {
+// 	case resp == nil:
+// 		return Cluster{}, errNilReponse
+// 	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
+// 		return Cluster{}, c.api.ParseJSONError(resp)
+// 	}
+
+// 	token, err := extractString(resp)
+// 	if err != nil {
+// 		return Cluster{}, nil
+// 	}
+
+// 	c.api.SetToken(token)
+
+// 	//fmt.Println(token)
+// 	return Cluster{}, nil
+// }
 
 func basicAuth(username, password string) string {
 	auth := username + ":" + password
@@ -375,8 +565,73 @@ func NewClient() (client *Client, err error) {
 		os.Getenv("GOSCALEIO_USECERTS") == "true")
 }
 
+// NewClient returns a new client
+// func NewGatewayClient() (gatewayClient *GatewayClient, err error) {
+// 	return NewGatewayClientWithArgs(
+// 		os.Getenv("GOSCALEIO_ENDPOINT"),
+// 		os.Getenv("GOSCALEIO_VERSION"),
+// 		math.MaxInt64,
+// 		os.Getenv("GOSCALEIO_INSECURE") == "true",
+// 		os.Getenv("GOSCALEIO_USECERTS") == "true")
+// }
+
 // ClientConnectTimeout is used for unit testing to set the connection timeout much lower
 var ClientConnectTimeout time.Duration
+
+// func NewGatewayClientWithArgs(
+// 	endpoint string,
+// 	version string,
+// 	timeout int64,
+// 	insecure,
+// 	useCerts bool) (gatewayClient *GatewayClient, err error) {
+
+// 	if showHTTP {
+// 		debug = true
+// 	}
+
+// 	fields := map[string]interface{}{
+// 		"endpoint": endpoint,
+// 		"insecure": insecure,
+// 		"useCerts": useCerts,
+// 		"version":  version,
+// 		"debug":    debug,
+// 		"showHTTP": showHTTP,
+// 	}
+
+// 	doLog(log.WithFields(fields).Debug, "goscaleio client init")
+
+// 	if endpoint == "" {
+// 		doLog(log.WithFields(fields).Error, "endpoint is required")
+// 		return nil,
+// 			withFields(fields, "endpoint is required")
+// 	}
+
+// 	opts := api.ClientOptions{
+// 		Insecure: insecure,
+// 		UseCerts: useCerts,
+// 		ShowHTTP: showHTTP,
+// 		Timeout:  time.Duration(timeout) * time.Second,
+// 	}
+
+// 	if ClientConnectTimeout != 0 {
+// 		opts.Timeout = ClientConnectTimeout
+// 	}
+
+// 	ac, err := api.New(context.Background(), endpoint, opts, debug)
+// 	if err != nil {
+// 		doLog(log.WithError(err).Error, "Unable to create HTTP client")
+// 		return nil, err
+// 	}
+
+// 	gatewayClient = &GatewayClient{
+// 		api: ac,
+// 		gatewayConnect: &GatewayConnect{
+// 		},
+// 	}
+
+// 	return gatewayClient, nil
+// }
+
 
 // NewClientWithArgs returns a new client
 func NewClientWithArgs(
