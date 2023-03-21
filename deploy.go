@@ -3,6 +3,7 @@ package goscaleio
 import (
 	"bytes"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -11,8 +12,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"path/filepath"
-	"crypto/x509"
+	path "path/filepath"
 )
 
 var (
@@ -29,7 +29,7 @@ type gatewayclient struct {
 
 // NewGateway returns a new gateway client.
 func NewGateway(
-	host string, username, password string, insecure,useCerts bool) (GatewayClient, error) {
+	host string, username, password string, insecure, useCerts bool) (GatewayClient, error) {
 
 	if host == "" {
 		return nil, errNewClient
@@ -77,7 +77,7 @@ type GatewayClient interface {
 }
 
 func (gc *gatewayclient) UploadPackages(filePath string) error {
-	file, err1 := os.Open(filePath)
+	file, err1 := os.Open(path.Clean(filePath))
 	if err1 != nil {
 		return err1
 	}
@@ -85,7 +85,7 @@ func (gc *gatewayclient) UploadPackages(filePath string) error {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	part, err2 := writer.CreateFormFile("files", filepath.Base(filePath))
+	part, err2 := writer.CreateFormFile("files", path.Base(filePath))
 	if err2 != nil {
 		return err2
 	}
@@ -113,7 +113,7 @@ func (gc *gatewayclient) UploadPackages(filePath string) error {
 }
 
 func (gc *gatewayclient) ParseCSV(filePath string) error {
-	file, err1 := os.Open(filePath)
+	file, err1 := os.Open(path.Clean(filePath))
 	if err1 != nil {
 		return err1
 	}
@@ -121,7 +121,7 @@ func (gc *gatewayclient) ParseCSV(filePath string) error {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	part, err2 := writer.CreateFormFile("file", filepath.Base(filePath))
+	part, err2 := writer.CreateFormFile("file", path.Base(filePath))
 	if err2 != nil {
 		return err2
 	}
@@ -152,7 +152,10 @@ func (gc *gatewayclient) ParseCSV(filePath string) error {
 }
 
 func (gc *gatewayclient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) error {
-	mapData := jsonToMap(jsonStr)
+	mapData, err := jsonToMap(jsonStr)
+	if err != nil {
+		return err
+	}
 	mapData["mdmPassword"] = mdmPassword
 	mapData["mdmUser"] = mdmUsername
 	mapData["liaPassword"] = liaPassword
@@ -171,8 +174,11 @@ func (gc *gatewayclient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	return nil
 }
 
-func jsonToMap(jsonStr string) map[string]interface{} {
+func jsonToMap(jsonStr string) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
-	json.Unmarshal([]byte(jsonStr), &result)
-	return result
+	err := json.Unmarshal([]byte(jsonStr), &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
