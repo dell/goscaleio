@@ -12,10 +12,12 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"crypto/x509"
 )
 
 var (
-	errNewClient2 = errors.New("missing endpoint")
+	errNewClient = errors.New("missing endpoint")
+	errSysCerts  = errors.New("Unable to initialize cert pool from system")
 )
 
 type gatewayclient struct {
@@ -27,10 +29,10 @@ type gatewayclient struct {
 
 // NewGateway returns a new gateway client.
 func NewGateway(
-	host string, username, password string) (GatewayClient, error) {
+	host string, username, password string, insecure,useCerts bool) (GatewayClient, error) {
 
 	if host == "" {
-		return nil, errNewClient2
+		return nil, errNewClient
 	}
 
 	gc := &gatewayclient{
@@ -38,6 +40,30 @@ func NewGateway(
 		host:     host,
 		username: username,
 		password: password,
+	}
+
+	if insecure {
+		gc.http.Transport = &http.Transport{
+			/* #nosec G402 */
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+	}
+
+	if !insecure || useCerts {
+		pool, err := x509.SystemCertPool()
+		if err != nil {
+			return nil, errSysCerts
+		}
+
+		gc.http.Transport = &http.Transport{
+			/* #nosec G402 */
+			TLSClientConfig: &tls.Config{
+				RootCAs:            pool,
+				InsecureSkipVerify: insecure,
+			},
+		}
 	}
 
 	return gc, nil
@@ -78,12 +104,7 @@ func (gc *gatewayclient) UploadPackages(filePath string) error {
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
-	client := &http.Client{}
-	client.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: false,
-		},
-	}
+	client := gc.http
 	_, err6 := client.Do(req)
 	if err6 != nil {
 		return err6
@@ -120,12 +141,7 @@ func (gc *gatewayclient) ParseCSV(filePath string) error {
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	fmt.Println(body)
-	client := &http.Client{}
-	client.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: false,
-		},
-	}
+	client := gc.http
 	_, err6 := client.Do(req)
 	if err6 != nil {
 		return err6
@@ -147,12 +163,7 @@ func (gc *gatewayclient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	}
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	client.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: false,
-		},
-	}
+	client := gc.http
 	_, err2 := client.Do(req)
 	if err2 != nil {
 		return err2
