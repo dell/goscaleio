@@ -25,6 +25,7 @@ type gatewayclient struct {
 	password string
 }
 
+// NewGateway returns a new gateway client.
 func NewGateway(
 	host string, username, password string) (GatewayClient, error) {
 
@@ -42,6 +43,7 @@ func NewGateway(
 	return gc, nil
 }
 
+// GatewayClient is an  inetface which has all the functionalities for the gateway.
 type GatewayClient interface {
 	UploadPackages(fliePath string) error
 	ParseCSV(filePath string) error
@@ -79,7 +81,7 @@ func (gc *gatewayclient) UploadPackages(filePath string) error {
 	client := &http.Client{}
 	client.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: false,
 		},
 	}
 	_, err6 := client.Do(req)
@@ -121,7 +123,7 @@ func (gc *gatewayclient) ParseCSV(filePath string) error {
 	client := &http.Client{}
 	client.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: false,
 		},
 	}
 	_, err6 := client.Do(req)
@@ -138,8 +140,8 @@ func (gc *gatewayclient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	mapData["mdmPassword"] = mdmPassword
 	mapData["mdmUser"] = mdmUsername
 	mapData["liaPassword"] = liaPassword
-	finalJson, _ := json.Marshal(mapData)
-	req, err1 := http.NewRequest("POST", gc.host+"/im/types/Configuration/actions/install", bytes.NewBuffer(finalJson))
+	finalJSON, _ := json.Marshal(mapData)
+	req, err1 := http.NewRequest("POST", gc.host+"/im/types/Configuration/actions/install", bytes.NewBuffer(finalJSON))
 	if err1 != nil {
 		return err1
 	}
@@ -148,7 +150,7 @@ func (gc *gatewayclient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	client := &http.Client{}
 	client.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: false,
 		},
 	}
 	_, err2 := client.Do(req)
