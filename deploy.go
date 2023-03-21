@@ -81,7 +81,12 @@ func (gc *gatewayclient) UploadPackages(filePath string) error {
 	if err1 != nil {
 		return err1
 	}
-	defer file.Close()
+	defer func() error {
+		if err := file.Close(); err != nil {
+			return err
+		}
+		return nil
+	}()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -117,7 +122,12 @@ func (gc *gatewayclient) ParseCSV(filePath string) error {
 	if err1 != nil {
 		return err1
 	}
-	defer file.Close()
+	defer func() error {
+		if err := file.Close(); err != nil {
+			return err
+		}
+		return nil
+	}()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
