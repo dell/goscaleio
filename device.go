@@ -106,3 +106,22 @@ func (sp *StoragePool) FindDevice(
 
 	return nil, errors.New("Couldn't find DEV")
 }
+
+// GetDevice returns a device using Device ID
+func (device *Device) GetDevice() (*types.Device, error) {
+
+	defer TimeSpent("GetDevice", time.Now())
+
+	path := fmt.Sprintf(
+		"/api/instances/Device::%v",
+		device.Device.ID)
+
+	var deviceResult types.Device
+	err := device.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &deviceResult)
+	if err != nil {
+		return nil, err
+	}
+
+	return &deviceResult, nil
+}

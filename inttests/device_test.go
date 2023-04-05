@@ -109,3 +109,17 @@ func TestAddDeviceInvalid(t *testing.T) {
 	assert.Equal(t, "", deviceID)
 
 }
+
+func TestGetDeviceByDeviceID(t *testing.T) {
+
+	d := goscaleio.NewDevice(C)
+	d.Device.ID = "c7fc68a200000000"
+
+	device, _ := d.GetDevice()
+	assert.NotNil(t, device)
+	assert.NotNil(t, device.SdsID)
+	assert.NotNil(t, device.StoragePoolID)
+	if device == nil {
+		return
+	}
+}

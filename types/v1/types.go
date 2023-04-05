@@ -503,18 +503,77 @@ type SdsPort struct {
 	SdsPort string `json:"sdsPort"`
 }
 
-// Device defines struct for Device
 type Device struct {
-	ID                     string `json:"id,omitempty"`
-	Name                   string `json:"name,omitempty"`
-	DeviceCurrentPathname  string `json:"deviceCurrentPathname"`
-	DeviceOriginalPathname string `json:"deviceOriginalPathname,omitempty"`
-	DeviceState            string `json:"deviceState,omitempty"`
-	ErrorState             string `json:"errorState,omitempty"`
-	CapacityLimitInKb      int    `json:"capacityLimitInKb,omitempty"`
-	MaxCapacityInKb        int    `json:"maxCapacityInKb,omitempty"`
-	StoragePoolID          string `json:"storagePoolId"`
-	SdsID                  string `json:"sdsId"`
+	FglNvdimmMetadataAmortizationX100 int                `json:"fglNvdimmMetadataAmortizationX100,omitempty"`
+	LogicalSectorSizeInBytes          int                `json:"logicalSectorSizeInBytes,omitempty"`
+	FglNvdimmWriteCacheSize           int                `json:"fglNvdimmWriteCacheSize,omitempty"`
+	AccelerationPoolID                string             `json:"accelerationPoolId,omitempty"`
+	RfcacheProps                      *RfcacheProps      `json:"rfcacheProps,omitempty"`
+	SdsID                             string             `json:"sdsId"`
+	StoragePoolID                     string             `json:"storagePoolId"`
+	CapacityLimitInKb                 int                `json:"capacityLimitInKb,omitempty"`
+	ErrorState                        string             `json:"errorState,omitempty"`
+	Capacity                          int                `json:"capacity,omitempty"`
+	DeviceType                        string             `json:"deviceType,omitempty"`
+	PersistentChecksumState           string             `json:"persistentChecksumState,omitempty"`
+	DeviceState                       string             `json:"deviceState,omitempty"`
+	LedSetting                        string             `json:"ledSetting,omitempty"`
+	MaxCapacityInKb                   int                `json:"maxCapacityInKb,omitempty"`
+	SpSdsID                           string             `json:"spSdsId,omitempty"`
+	LongSuccessfulIos                 *SdsWindow         `json:"longSuccessfulIos,omitempty"`
+	AggregatedState                   string             `json:"aggregatedState,omitempty"`
+	TemperatureState                  string             `json:"temperatureState,omitempty"`
+	SsdEndOfLifeState                 string             `json:"ssdEndOfLifeState,omitempty"`
+	ModelName                         string             `json:"modelName,omitempty"`
+	VendorName                        string             `json:"vendorName,omitempty"`
+	RaidControllerSerialNumber        string             `json:"raidControllerSerialNumber,omitempty"`
+	FirmwareVersion                   string             `json:"firmwareVersion,omitempty"`
+	CacheLookAheadActive              bool               `json:"cacheLookAheadActive,omitempty"`
+	WriteCacheActive                  bool               `json:"writeCacheActive,omitempty"`
+	AtaSecurityActive                 bool               `json:"ataSecurityActive,omitempty"`
+	PhysicalSectorSizeInBytes         int                `json:"physicalSectorSizeInBytes,omitempty"`
+	MediaFailing                      bool               `json:"mediaFailing,omitempty"`
+	SlotNumber                        string             `json:"slotNumber,omitempty"`
+	ExternalAccelerationType          string             `json:"externalAccelerationType,omitempty"`
+	AutoDetectMediaType               string             `json:"autoDetectMediaType,omitempty"`
+	StorageProps                      *StorageProps      `json:"storageProps,omitempty"`
+	AccelerationProps                 *AccelerationProps `json:"accelerationProps,omitempty"`
+	DeviceCurrentPathName             string             `json:"deviceCurrentPathName"`
+	DeviceOriginalPathName            string             `json:"deviceOriginalPathName,omitempty"`
+	RfcacheErrorDeviceDoesNotExist    bool               `json:"rfcacheErrorDeviceDoesNotExist,omitempty"`
+	MediaType                         string             `json:"mediaType,omitempty"`
+	SerialNumber                      string             `json:"serialNumber,omitempty"`
+	Name                              string             `json:"name,omitempty"`
+	ID                                string             `json:"id,omitempty"`
+	Links                             []*Link            `json:"links"`
+}
+
+type AccelerationProps struct {
+	AccUsedCapacityInKb string `json:"accUsedCapacityInKb,omitempty"`
+}
+
+type RfcacheProps struct {
+	DeviceUUID                     string `json:"deviceUuid,omitempty"`
+	RfcacheErrorStuckIO            bool   `json:"rfcacheErrorStuckIo,omitempty"`
+	RfcacheErrorHeavyLoadCacheSkip bool   `json:"rfcacheErrorHeavyLoadCacheSkip,omitempty"`
+	RfcacheErrorCardIoError        bool   `json:"rfcacheErrorCardIoError,omitempty"`
+}
+
+type StorageProps struct {
+	FglAccDeviceID                   string `json:"fglAccDeviceId,omitempty"`
+	FglNvdimmSizeMb                  int    `json:"fglNvdimmSizeMb,omitempty"`
+	DestFglNvdimmSizeMb              int    `json:"destFglNvdimmSizeMb,omitempty"`
+	DestFglAccDeviceID               string `json:"destFglAccDeviceId,omitempty"`
+	ChecksumMode                     string `json:"checksumMode,omitempty"`
+	DestChecksumMode                 string `json:"destChecksumMode,omitempty"`
+	ChecksumAccDeviceId              string `json:"checksumAccDeviceId,omitempty"`
+	DestChecksumAccDeviceId          string `json:"destChecksumAccDeviceId,omitempty"`
+	ChecksumSizeMb                   int    `json:"checksumSizeMb,omitempty"`
+	IsChecksumFullyCalculated        bool   `json:"isChecksumFullyCalculated,omitempty"`
+	ChecksumChangelogAccDeviceId     string `json:"checksumChangelogAccDeviceId,omitempty"`
+	DestChecksumChangelogAccDeviceId string `json:"destChecksumChangelogAccDeviceId,omitempty"`
+	ChecksumChangelogSizeMb          int    `json:"checksumChangelogSizeMb,omitempty"`
+	DestChecksumChangelogSizeMb      int    `json:"destChecksumChangelogSizeMb,omitempty"`
 }
 
 // DeviceParam defines struct for DeviceParam
