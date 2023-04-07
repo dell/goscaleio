@@ -61,6 +61,7 @@ func (s *System) GetSdc() ([]types.Sdc, error) {
 		s.System.ID)
 
 	var sdcs []types.Sdc
+	fmt.Printf("sdccccc")
 	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &sdcs)
 	if err != nil {
