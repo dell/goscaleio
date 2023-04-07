@@ -102,6 +102,31 @@ type System struct {
 	Links                                 []*Link  `json:"links"`
 }
 
+type NFSExport struct {
+	// Unique id of the NFS Export
+	ID string `json:"id,omitempty"`
+	// Unique identifier of the file system on which the NFS Export was created
+	FileSystemID string `json:"file_system_id,omitempty"`
+	// NFS Export name
+	Name string `json:"name,omitempty"`
+	// NFS Export description
+	Description string `json:"description,omitempty"`
+	// Default access level for all hosts that can access the Export
+	// [ No_Access, Read_Only, Read_Write, Root, Read_Only_Root ]
+	DefaultAccess string `json:"default_access,omitempty"`
+	// Local path to a location within the file system.
+	// With NFS, each export must have a unique local path.
+	Path string `json:"path,omitempty"`
+	// Read-Write hostsread_write_root_hosts
+	ReadWriteHosts []string `json:"read_write_hosts,omitempty"`
+	// Read-Only hosts
+	ReadOnlyHosts []string `json:"read_only_hosts,omitempty"`
+	// Read-Write, allow Root hosts
+	ReadWriteRootHosts []string `json:"read_write_root_hosts,omitempty"`
+	// Read-Only, allow Roots hosts
+	ReadOnlyRootHosts []string `json:"read_only_root_hosts,omitempty"`
+}
+
 // Link defines struct of Link
 type Link struct {
 	Rel  string `json:"rel"`
