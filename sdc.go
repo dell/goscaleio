@@ -41,7 +41,7 @@ func NewSdc(client *Client, sdc *types.Sdc) *Sdc {
 func (s *System) GetNfsExport() ([]*types.NFSExport, error) {
 	defer TimeSpent("GetNfsExport", time.Now())
 
-	path := fmt.Sprintf("rest/v1/nfs-exports")
+	path := fmt.Sprintf("https://10.225.109.54/rest/v1/nfs-exports")
 
 	var nfsList []*types.NFSExport
 	err := s.client.getJSONWithRetry(
