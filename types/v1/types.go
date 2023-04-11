@@ -503,6 +503,7 @@ type SdsPort struct {
 	SdsPort string `json:"sdsPort"`
 }
 
+// Device defines struct of Device for Pflex Array
 type Device struct {
 	FglNvdimmMetadataAmortizationX100 int                     `json:"fglNvdimmMetadataAmortizationX100,omitempty"`
 	LogicalSectorSizeInBytes          int                     `json:"logicalSectorSizeInBytes,omitempty"`
@@ -564,10 +565,12 @@ type DeviceWindowType struct {
 	MaxFailuresCount     int `json:"maxFailuresCount,omitempty"`
 }
 
+// AccelerationPropsParams defines struct for Device
 type AccelerationPropsParams struct {
 	AccUsedCapacityInKb string `json:"accUsedCapacityInKb,omitempty"`
 }
 
+// RfcachePropsParams defines struct for Device
 type RfcachePropsParams struct {
 	DeviceUUID                     string `json:"deviceUuid,omitempty"`
 	RfcacheErrorStuckIO            bool   `json:"rfcacheErrorStuckIo,omitempty"`
@@ -575,6 +578,7 @@ type RfcachePropsParams struct {
 	RfcacheErrorCardIoError        bool   `json:"rfcacheErrorCardIoError,omitempty"`
 }
 
+// StoragePropsParams defines struct for Device
 type StoragePropsParams struct {
 	FglAccDeviceID                   string `json:"fglAccDeviceId,omitempty"`
 	FglNvdimmSizeMb                  int    `json:"fglNvdimmSizeMb,omitempty"`
@@ -582,12 +586,12 @@ type StoragePropsParams struct {
 	DestFglAccDeviceID               string `json:"destFglAccDeviceId,omitempty"`
 	ChecksumMode                     string `json:"checksumMode,omitempty"`
 	DestChecksumMode                 string `json:"destChecksumMode,omitempty"`
-	ChecksumAccDeviceId              string `json:"checksumAccDeviceId,omitempty"`
-	DestChecksumAccDeviceId          string `json:"destChecksumAccDeviceId,omitempty"`
+	ChecksumAccDeviceID              string `json:"checksumAccDeviceId,omitempty"`
+	DestChecksumAccDeviceID          string `json:"destChecksumAccDeviceId,omitempty"`
 	ChecksumSizeMb                   int    `json:"checksumSizeMb,omitempty"`
 	IsChecksumFullyCalculated        bool   `json:"isChecksumFullyCalculated,omitempty"`
-	ChecksumChangelogAccDeviceId     string `json:"checksumChangelogAccDeviceId,omitempty"`
-	DestChecksumChangelogAccDeviceId string `json:"destChecksumChangelogAccDeviceId,omitempty"`
+	ChecksumChangelogAccDeviceID     string `json:"checksumChangelogAccDeviceId,omitempty"`
+	DestChecksumChangelogAccDeviceID string `json:"destChecksumChangelogAccDeviceId,omitempty"`
 	ChecksumChangelogSizeMb          int    `json:"checksumChangelogSizeMb,omitempty"`
 	DestChecksumChangelogSizeMb      int    `json:"destChecksumChangelogSizeMb,omitempty"`
 }
