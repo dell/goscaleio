@@ -11,6 +11,7 @@ import (
 func (c *Client) GetNfsExport() ([]*types.NFSExport, error) {
 	defer TimeSpent("GetNfsExport", time.Now())
 
+	fmt.Printf("nfsssss")
 	path := fmt.Sprintf("rest/v1/nfs-exports?select=*")
 
 	var nfsList []*types.NFSExport
