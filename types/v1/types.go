@@ -504,62 +504,78 @@ type SdsPort struct {
 }
 
 type Device struct {
-	FglNvdimmMetadataAmortizationX100 int                `json:"fglNvdimmMetadataAmortizationX100,omitempty"`
-	LogicalSectorSizeInBytes          int                `json:"logicalSectorSizeInBytes,omitempty"`
-	FglNvdimmWriteCacheSize           int                `json:"fglNvdimmWriteCacheSize,omitempty"`
-	AccelerationPoolID                string             `json:"accelerationPoolId,omitempty"`
-	RfcacheProps                      *RfcacheProps      `json:"rfcacheProps,omitempty"`
-	SdsID                             string             `json:"sdsId"`
-	StoragePoolID                     string             `json:"storagePoolId"`
-	CapacityLimitInKb                 int                `json:"capacityLimitInKb,omitempty"`
-	ErrorState                        string             `json:"errorState,omitempty"`
-	Capacity                          int                `json:"capacity,omitempty"`
-	DeviceType                        string             `json:"deviceType,omitempty"`
-	PersistentChecksumState           string             `json:"persistentChecksumState,omitempty"`
-	DeviceState                       string             `json:"deviceState,omitempty"`
-	LedSetting                        string             `json:"ledSetting,omitempty"`
-	MaxCapacityInKb                   int                `json:"maxCapacityInKb,omitempty"`
-	SpSdsID                           string             `json:"spSdsId,omitempty"`
-	LongSuccessfulIos                 *SdsWindow         `json:"longSuccessfulIos,omitempty"`
-	AggregatedState                   string             `json:"aggregatedState,omitempty"`
-	TemperatureState                  string             `json:"temperatureState,omitempty"`
-	SsdEndOfLifeState                 string             `json:"ssdEndOfLifeState,omitempty"`
-	ModelName                         string             `json:"modelName,omitempty"`
-	VendorName                        string             `json:"vendorName,omitempty"`
-	RaidControllerSerialNumber        string             `json:"raidControllerSerialNumber,omitempty"`
-	FirmwareVersion                   string             `json:"firmwareVersion,omitempty"`
-	CacheLookAheadActive              bool               `json:"cacheLookAheadActive,omitempty"`
-	WriteCacheActive                  bool               `json:"writeCacheActive,omitempty"`
-	AtaSecurityActive                 bool               `json:"ataSecurityActive,omitempty"`
-	PhysicalSectorSizeInBytes         int                `json:"physicalSectorSizeInBytes,omitempty"`
-	MediaFailing                      bool               `json:"mediaFailing,omitempty"`
-	SlotNumber                        string             `json:"slotNumber,omitempty"`
-	ExternalAccelerationType          string             `json:"externalAccelerationType,omitempty"`
-	AutoDetectMediaType               string             `json:"autoDetectMediaType,omitempty"`
-	StorageProps                      *StorageProps      `json:"storageProps,omitempty"`
-	AccelerationProps                 *AccelerationProps `json:"accelerationProps,omitempty"`
-	DeviceCurrentPathName             string             `json:"deviceCurrentPathName"`
-	DeviceOriginalPathName            string             `json:"deviceOriginalPathName,omitempty"`
-	RfcacheErrorDeviceDoesNotExist    bool               `json:"rfcacheErrorDeviceDoesNotExist,omitempty"`
-	MediaType                         string             `json:"mediaType,omitempty"`
-	SerialNumber                      string             `json:"serialNumber,omitempty"`
-	Name                              string             `json:"name,omitempty"`
-	ID                                string             `json:"id,omitempty"`
-	Links                             []*Link            `json:"links"`
+	FglNvdimmMetadataAmortizationX100 int                     `json:"fglNvdimmMetadataAmortizationX100,omitempty"`
+	LogicalSectorSizeInBytes          int                     `json:"logicalSectorSizeInBytes,omitempty"`
+	FglNvdimmWriteCacheSize           int                     `json:"fglNvdimmWriteCacheSize,omitempty"`
+	AccelerationPoolID                string                  `json:"accelerationPoolId,omitempty"`
+	RfcacheProps                      RfcachePropsParams      `json:"rfcacheProps,omitempty"`
+	SdsID                             string                  `json:"sdsId"`
+	StoragePoolID                     string                  `json:"storagePoolId"`
+	CapacityLimitInKb                 int                     `json:"capacityLimitInKb,omitempty"`
+	ErrorState                        string                  `json:"errorState,omitempty"`
+	Capacity                          int                     `json:"capacity,omitempty"`
+	DeviceType                        string                  `json:"deviceType,omitempty"`
+	PersistentChecksumState           string                  `json:"persistentChecksumState,omitempty"`
+	DeviceState                       string                  `json:"deviceState,omitempty"`
+	LedSetting                        string                  `json:"ledSetting,omitempty"`
+	MaxCapacityInKb                   int                     `json:"maxCapacityInKb,omitempty"`
+	SpSdsID                           string                  `json:"spSdsId,omitempty"`
+	LongSuccessfulIos                 LongSuccessfulIosParams `json:"longSuccessfulIos,omitempty"`
+	AggregatedState                   string                  `json:"aggregatedState,omitempty"`
+	TemperatureState                  string                  `json:"temperatureState,omitempty"`
+	SsdEndOfLifeState                 string                  `json:"ssdEndOfLifeState,omitempty"`
+	ModelName                         string                  `json:"modelName,omitempty"`
+	VendorName                        string                  `json:"vendorName,omitempty"`
+	RaidControllerSerialNumber        string                  `json:"raidControllerSerialNumber,omitempty"`
+	FirmwareVersion                   string                  `json:"firmwareVersion,omitempty"`
+	CacheLookAheadActive              bool                    `json:"cacheLookAheadActive,omitempty"`
+	WriteCacheActive                  bool                    `json:"writeCacheActive,omitempty"`
+	AtaSecurityActive                 bool                    `json:"ataSecurityActive,omitempty"`
+	PhysicalSectorSizeInBytes         int                     `json:"physicalSectorSizeInBytes,omitempty"`
+	MediaFailing                      bool                    `json:"mediaFailing,omitempty"`
+	SlotNumber                        string                  `json:"slotNumber,omitempty"`
+	ExternalAccelerationType          string                  `json:"externalAccelerationType,omitempty"`
+	AutoDetectMediaType               string                  `json:"autoDetectMediaType,omitempty"`
+	StorageProps                      StoragePropsParams      `json:"storageProps,omitempty"`
+	AccelerationProps                 AccelerationPropsParams `json:"accelerationProps,omitempty"`
+	DeviceCurrentPathName             string                  `json:"deviceCurrentPathName"`
+	DeviceOriginalPathName            string                  `json:"deviceOriginalPathName,omitempty"`
+	RfcacheErrorDeviceDoesNotExist    bool                    `json:"rfcacheErrorDeviceDoesNotExist,omitempty"`
+	MediaType                         string                  `json:"mediaType,omitempty"`
+	SerialNumber                      string                  `json:"serialNumber,omitempty"`
+	Name                              string                  `json:"name,omitempty"`
+	ID                                string                  `json:"id,omitempty"`
+	Links                             []*Link                 `json:"links"`
 }
 
-type AccelerationProps struct {
+// LongSuccessfulIosParams defines struct for Device
+type LongSuccessfulIosParams struct {
+	ShortWindow  DeviceWindowType `json:"shortWindow,omitempty"`
+	MediumWindow DeviceWindowType `json:"mediumWindow,omitempty"`
+	LongWindow   DeviceWindowType `json:"longWindow,omitempty"`
+}
+
+// DeviceWindowType defines struct for LongSuccessfulIosParams
+type DeviceWindowType struct {
+	Threshold            int `json:"threshold,omitempty"`
+	WindowSizeInSec      int `json:"windowSizeInSec,omitempty"`
+	LastOscillationCount int `json:"lastOscillationCount,omitempty"`
+	LastOscillationTime  int `json:"lastOscillationTime,omitempty"`
+	MaxFailuresCount     int `json:"maxFailuresCount,omitempty"`
+}
+
+type AccelerationPropsParams struct {
 	AccUsedCapacityInKb string `json:"accUsedCapacityInKb,omitempty"`
 }
 
-type RfcacheProps struct {
+type RfcachePropsParams struct {
 	DeviceUUID                     string `json:"deviceUuid,omitempty"`
 	RfcacheErrorStuckIO            bool   `json:"rfcacheErrorStuckIo,omitempty"`
 	RfcacheErrorHeavyLoadCacheSkip bool   `json:"rfcacheErrorHeavyLoadCacheSkip,omitempty"`
 	RfcacheErrorCardIoError        bool   `json:"rfcacheErrorCardIoError,omitempty"`
 }
 
-type StorageProps struct {
+type StoragePropsParams struct {
 	FglAccDeviceID                   string `json:"fglAccDeviceId,omitempty"`
 	FglNvdimmSizeMb                  int    `json:"fglNvdimmSizeMb,omitempty"`
 	DestFglNvdimmSizeMb              int    `json:"destFglNvdimmSizeMb,omitempty"`

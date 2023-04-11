@@ -44,6 +44,31 @@ func getAllDevices(t *testing.T) []*goscaleio.Device {
 
 }
 
+// getAllDevices will return all Device instances
+func getAllSdsDevices(t *testing.T) []*goscaleio.Device {
+	sds := getAllSds(t)[0]
+	assert.NotNil(t, sds)
+	if sds == nil {
+		return nil
+	}
+
+	var allDevice []*goscaleio.Device
+	devices, err := sds.GetDevice()
+	assert.Nil(t, err)
+	assert.NotZero(t, len(devices))
+	for _, d := range devices {
+		// create a device to return to the caller
+		outDevice := goscaleio.NewDeviceEx(C, &d)
+		allDevice = append(allDevice, outDevice)
+		// create a device via NewDevice for testing purposes
+		tempDevice := goscaleio.NewDevice(C)
+		tempDevice.Device = &d
+		assert.Equal(t, outDevice.Device.ID, tempDevice.Device.ID)
+	}
+	return allDevice
+
+}
+
 // TestGetDevices will return all Device instances
 func TestGetDevices(t *testing.T) {
 	getAllDevices(t)
@@ -122,4 +147,54 @@ func TestGetDeviceByDeviceID(t *testing.T) {
 	if device == nil {
 		return
 	}
+}
+
+// TestGetDeviceByAttribute gets a single specific Device by attribute
+func TestGetDeviceBySdsAttribute(t *testing.T) {
+	sds := getAllSds(t)[0]
+	assert.NotNil(t, sds)
+	if sds == nil {
+		return
+	}
+
+	devices := getAllSdsDevices(t)
+	assert.NotNil(t, devices)
+	assert.NotZero(t, len(devices))
+	if devices == nil {
+		return
+	}
+
+	found, err := sds.FindDevice("Name", devices[0].Device.Name)
+	assert.Nil(t, err)
+	assert.NotNil(t, found)
+	assert.Equal(t, devices[0].Device.Name, found.Name)
+
+	found, err = sds.FindDevice("ID", devices[0].Device.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, found)
+	assert.Equal(t, devices[0].Device.ID, found.ID)
+}
+
+// TestGetDeviceByAttributeInvalid fails to get a single specific Device by attribute
+func TestGetDeviceBySdsAttributeInvalid(t *testing.T) {
+	sds := getAllSds(t)[0]
+	assert.NotNil(t, sds)
+	if sds == nil {
+		return
+	}
+
+	devices := getAllSdsDevices(t)
+	assert.NotNil(t, devices)
+	assert.NotZero(t, len(devices))
+	if devices == nil {
+		return
+	}
+
+	found, err := sds.FindDevice("Name", invalidIdentifier)
+	assert.NotNil(t, err)
+	assert.Nil(t, found)
+
+	found, err = sds.FindDevice("ID", invalidIdentifier)
+	assert.NotNil(t, err)
+	assert.Nil(t, found)
 }
