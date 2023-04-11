@@ -8,13 +8,13 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
-func (c *Client) GetNfsExport() ([]*types.NFSExport, error) {
+func (c *Client) GetNfsExport() ([]types.NFSExport, error) {
 	defer TimeSpent("GetNfsExport", time.Now())
 
 	fmt.Printf("nfsssss")
 	path := fmt.Sprintf("rest/v1/nfs-exports?select=*")
 
-	var nfsList []*types.NFSExport
+	var nfsList []types.NFSExport
 	err := c.getJSONWithRetry(
 		http.MethodGet, path, nil, &nfsList)
 	if err != nil {
