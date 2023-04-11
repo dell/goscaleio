@@ -18,7 +18,7 @@ func (c *Client) GetNfsExport() ([]types.NFSExport, error) {
 	err := c.getJSONWithRetry(
 		http.MethodGet, path, nil, &nfsList)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("error1:", err)
 		return nil, err
 	}
 
