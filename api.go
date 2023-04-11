@@ -189,6 +189,7 @@ func (c *Client) getJSONWithRetry(
 	method, uri string,
 	body, resp interface{}) error {
 
+	fmt.Println("with retry")
 	headers := make(map[string]string, 2)
 	headers[api.HeaderKeyAccept] = accHeader
 	headers[api.HeaderKeyContentType] = conHeader
