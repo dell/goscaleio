@@ -12,7 +12,7 @@ func (c *Client) GetNfsExport() (nfsList []types.NFSExport, err error) {
 	defer TimeSpent("GetNfsExport", time.Now())
 
 	fmt.Printf("nfsssss")
-	path := fmt.Sprintf("/rest/v1/nfs-exports?select=*")
+	path := fmt.Sprintf("https://10.225.109.54/rest/v1/nfs-exports/?select=*")
 
 	err = c.getJSONWithRetry(
 		http.MethodGet, path, nil, &nfsList)
