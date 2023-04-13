@@ -127,6 +127,21 @@ type NFSExport struct {
 	ReadOnlyRootHosts []string `json:"read_only_root_hosts,omitempty"`
 }
 
+type CreateResponse struct {
+	// Unique identifier of the new instance created.
+	ID string `json:"id,omitempty"`
+}
+
+type NFSExportCreate struct {
+	// NFS Export name
+	Name string `json:"name"`
+	// NFS Export description
+	// Unique identifier of the file system on which the NFS Export was created
+	FileSystemID string `json:"file_system_id"`
+	// Local path to a location within the file system.
+	Path string `json:"path"`
+}
+
 // Link defines struct of Link
 type Link struct {
 	Rel  string `json:"rel"`
