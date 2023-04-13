@@ -23,6 +23,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -61,7 +62,7 @@ type Client interface {
 		ctx context.Context,
 		method, path string,
 		headers map[string]string,
-		body, resp interface{}) error
+		body, resp interface{}, version string) error
 
 	// DoandGetREsponseBody sends an HTTP reqeust to the API and returns
 	// the raw response body
@@ -69,7 +70,7 @@ type Client interface {
 		ctx context.Context,
 		method, path string,
 		headers map[string]string,
-		body interface{}) (*http.Response, error)
+		body interface{}, version string) (*http.Response, error)
 
 	// Get sends an HTTP request using the GET method to the API.
 	Get(
@@ -195,7 +196,7 @@ func (c *client) Get(
 	resp interface{}) error {
 
 	return c.DoWithHeaders(
-		ctx, http.MethodGet, path, headers, nil, resp)
+		ctx, http.MethodGet, path, headers, nil, resp, "")
 }
 
 func (c *client) Post(
@@ -205,7 +206,7 @@ func (c *client) Post(
 	body, resp interface{}) error {
 
 	return c.DoWithHeaders(
-		ctx, http.MethodPost, path, headers, body, resp)
+		ctx, http.MethodPost, path, headers, body, resp, "")
 }
 
 func (c *client) Put(
@@ -215,7 +216,7 @@ func (c *client) Put(
 	body, resp interface{}) error {
 
 	return c.DoWithHeaders(
-		ctx, http.MethodPut, path, headers, body, resp)
+		ctx, http.MethodPut, path, headers, body, resp, "")
 }
 
 func (c *client) Delete(
@@ -225,7 +226,7 @@ func (c *client) Delete(
 	resp interface{}) error {
 
 	return c.DoWithHeaders(
-		ctx, http.MethodDelete, path, headers, nil, resp)
+		ctx, http.MethodDelete, path, headers, nil, resp, "")
 }
 
 func (c *client) Do(
@@ -233,7 +234,7 @@ func (c *client) Do(
 	method, path string,
 	body, resp interface{}) error {
 
-	return c.DoWithHeaders(ctx, method, path, nil, body, resp)
+	return c.DoWithHeaders(ctx, method, path, nil, body, resp, "")
 }
 
 func beginsWithSlash(s string) bool {
@@ -248,10 +249,10 @@ func (c *client) DoWithHeaders(
 	ctx context.Context,
 	method, uri string,
 	headers map[string]string,
-	body, resp interface{}) error {
+	body, resp interface{}, version string) error {
 
 	res, err := c.DoAndGetResponseBody(
-		ctx, method, uri, headers, body)
+		ctx, method, uri, headers, body, version)
 	if err != nil {
 		return err
 	}
@@ -288,7 +289,7 @@ func (c *client) DoAndGetResponseBody(
 	ctx context.Context,
 	method, uri string,
 	headers map[string]string,
-	body interface{}) (*http.Response, error) {
+	body interface{}, version string) (*http.Response, error) {
 
 	var (
 		err                error
@@ -371,9 +372,29 @@ func (c *client) DoAndGetResponseBody(
 		req.Header.Add(header, value)
 	}
 
-	// set the auth token
-	if c.token != "" {
-		req.SetBasicAuth("", c.token)
+	if version != "" {
+		ver, err := strconv.ParseFloat(version, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		// set the auth token
+		if c.token != "" {
+			// use Bearer Authentication if the powerflex array
+			// version >= 4.0
+			if ver >= 4.0 {
+				bearer := "Bearer " + c.token
+				req.Header.Set("Authorization", bearer)
+			} else {
+				req.SetBasicAuth("", c.token)
+			}
+
+		}
+
+	} else {
+		if c.token != "" {
+			req.SetBasicAuth("", c.token)
+		}
 	}
 
 	if c.showHTTP {

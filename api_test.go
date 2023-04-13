@@ -81,7 +81,7 @@ func TestClientVersion(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ver, err := client.getVersion()
+	ver, err := client.GetVersion()
 	if err != nil {
 		t.Fatal(err)
 	}
