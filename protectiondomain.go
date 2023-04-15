@@ -63,6 +63,22 @@ func (s *System) CreateProtectionDomain(name string) (string, error) {
 	return pd.ID, nil
 }
 
+// GetProtectionDomainEx fetches a ProtectionDomain by ID
+func (s *System) GetProtectionDomainEx(id string) (*ProtectionDomain, error) {
+	defer TimeSpent("GetProtectionDomainEx", time.Now())
+
+	path := fmt.Sprintf("/api/instances/ProtectionDomain::%s", id)
+
+	pdResp := types.ProtectionDomain{}
+	err := s.client.getJSONWithRetry(
+		http.MethodGet, path, &types.EmptyPayload{}, &pdResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewProtectionDomainEx(s.client, &pdResp), nil
+}
+
 // DeleteProtectionDomain will delete a protection domain
 func (s *System) DeleteProtectionDomain(name string) error {
 	// get the protection domain
@@ -81,6 +97,26 @@ func (s *System) DeleteProtectionDomain(name string) error {
 	path := fmt.Sprintf("%v/action/removeProtectionDomain", link.HREF)
 
 	err = s.client.getJSONWithRetry(
+		http.MethodPost, path, protectionDomainParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Delete (ProtectionDomain) will delete a protection domain
+func (pd *ProtectionDomain) Delete() error {
+	link, err := GetLink(pd.ProtectionDomain.Links, "self")
+	if err != nil {
+		return err
+	}
+
+	protectionDomainParam := &types.EmptyPayload{}
+
+	path := fmt.Sprintf("%v/action/removeProtectionDomain", link.HREF)
+
+	err = pd.client.getJSONWithRetry(
 		http.MethodPost, path, protectionDomainParam, nil)
 	if err != nil {
 		return err
@@ -143,3 +179,122 @@ func (s *System) FindProtectionDomain(
 
 	return nil, errors.New("Couldn't find protection domain")
 }
+
+func (s *System) FindProtectionDomainByID(id string) (*types.ProtectionDomain, error) {
+	defer TimeSpent("FindProtectionDomainByID", time.Now())
+
+	href := fmt.Sprintf("/api/instances/ProtectionDomain::%s", id)
+	pds, err := s.GetProtectionDomain(href)
+	if err != nil {
+		return nil, fmt.Errorf("error getting protection domain by id: %s", err)
+	}
+	if len(pds) == 0 {
+		return nil, fmt.Errorf("no protection domain found having id=%s", id)
+	}
+	return pds[0], nil
+}
+
+func (s *System) FindProtectionDomainByName(name string) (*types.ProtectionDomain, error) {
+	defer TimeSpent("FindProtectionDomainByName", time.Now())
+
+	var id string
+	path := "/api/types/ProtectionDomain/instances/action/queryIdByKey"
+	body := map[string]string{
+		"name": name,
+	}
+	err := s.client.getJSONWithRetry(http.MethodPost, path, body, &id)
+	if err != nil {
+		return nil, fmt.Errorf("error getting protection domain by name: %s", err)
+	}
+	return s.FindProtectionDomainByID(id)
+}
+
+func (pd *ProtectionDomain) SetName(name string) error {
+	path := "/api/instances/ProtectionDomain::%s/action/setProtectionDomainName"
+	nameParam := types.ProtectionDomainParam{
+		Name: name,
+	}
+	return pd.setParam(path, nameParam)
+}
+
+func (pd *ProtectionDomain) Refresh() error {
+	defer TimeSpent("Refresh Protection Domain", time.Now())
+
+	path := fmt.Sprintf("/api/instances/ProtectionDomain::%s", pd.ProtectionDomain.ID)
+
+	pdResp := types.ProtectionDomain{}
+	err := pd.client.getJSONWithRetry(
+		http.MethodGet, path, &types.EmptyPayload{}, &pdResp)
+	if err != nil {
+		return err
+	}
+	pd.ProtectionDomain = &pdResp
+	return nil
+}
+
+func (pd *ProtectionDomain) SetRfcacheParams(params types.PDRfCacheParams) error {
+	p, err := params.ToMap()
+	if err != nil {
+		return err
+	}
+	path := "/api/instances/ProtectionDomain::%s/action/setRfcacheParameters"
+	return pd.setParam(path, p)
+}
+
+func (pd *ProtectionDomain) SetSdsNetworkLimits(params types.SdsNetworkLimitParams) error {
+	path := "/api/instances/ProtectionDomain::%s/action/setSdsNetworkLimits"
+	p, err := params.ToMap()
+	if err != nil {
+		return err
+	}
+	return pd.setParam(path, p)
+}
+
+func (pd *ProtectionDomain) setParam(path string, param interface{}) error {
+	link := fmt.Sprintf(path, pd.ProtectionDomain.ID)
+	return pd.client.getJSONWithRetry(http.MethodPost, link, param, nil)
+}
+
+// Activate Protection domain
+func (pd *ProtectionDomain) Activate(forceActivate bool) error {
+	path := "/api/instances/ProtectionDomain::%s/action/activateProtectionDomain"
+	return pd.setParam(path, map[string]string{
+		"forceActivate": types.GetBoolType(forceActivate),
+	})
+}
+
+// Inactivate Protection domain
+func (pd *ProtectionDomain) InActivate(forceShutDown bool) error {
+	path := "/api/instances/ProtectionDomain::%s/action/inactivateProtectionDomain"
+	return pd.setParam(path, map[string]string{
+		"forceShutdown": types.GetBoolType(forceShutDown),
+	})
+}
+
+// Enable SDS Rfcache for entire Protection Domain
+func (pd *ProtectionDomain) EnableRfcache() error {
+	path := "/api/instances/ProtectionDomain::%s/action/enableSdsRfcache"
+	return pd.setParam(path, &types.EmptyPayload{})
+}
+
+// Disable SDS Rfcache for entire Protection Domain
+func (pd *ProtectionDomain) DisableRfcache() error {
+	path := "/api/instances/ProtectionDomain::%s/action/disableSdsRfcache"
+	return pd.setParam(path, &types.EmptyPayload{})
+}
+
+// // Set Read RAM Cache Size for all SDS in Protection Domain
+// // No read parameter
+// func (pd *ProtectionDomain) SetRmCacheSize() error {
+// 	path := "/api/instances/ProtectionDomain::%s/action/setSdsRmcacheSize"
+// 	return pd.setParam(path, &types.EmptyPayload{})
+// }
+
+// // Enable / Disable Read RAM Cache for all SDS in Protection Domain
+// // No read parameter
+// func (pd *ProtectionDomain) SetRmCache(enable bool) error {
+// 	path := "/api/instances/ProtectionDomain::%s/action/setSdsRmcacheEnabled"
+// 	return pd.setParam(path, map[string]string{
+// 		"rmcacheEnabled": types.GetBoolType(enable),
+// 	})
+// }

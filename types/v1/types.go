@@ -279,7 +279,7 @@ type ProtectionDomain struct {
 	SdrSdsConnectivityInfo      PDConnInfo `json:"sdrSdsConnectivityInfo"`
 	ReplicationCapacityMaxRatio *int       `json:"replicationCapacityMaxRatio"`
 
-	// Network throttling params
+	// SDS Network throttling params
 	RebuildNetworkThrottlingInKbps                   int  `json:"rebuildNetworkThrottlingInKbps"`
 	RebalanceNetworkThrottlingInKbps                 int  `json:"rebalanceNetworkThrottlingInKbps"`
 	OverallIoNetworkThrottlingInKbps                 int  `json:"overallIoNetworkThrottlingInKbps"`
