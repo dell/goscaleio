@@ -222,7 +222,11 @@ func testRfCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
 	assert.Nil(t, err)
 
 	p := types.PDRCModeRead
-	err = pd.SetRfcacheParams(types.PDRfCacheParams{p, 16, 64})
+	err = pd.SetRfcacheParams(types.PDRfCacheParams{
+		RfCacheOperationalMode: p,
+		RfCachePageSizeKb:      16,
+		RfCacheMaxIoSizeKb:     64,
+	})
 	assert.Nil(t, err)
 	err = pd.Refresh()
 	assert.Nil(t, err)
@@ -233,7 +237,7 @@ func testRfCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
 
 	err = pd.EnableRfcache()
 	assert.Nil(t, err)
-	err = pd.SetRfcacheParams(types.PDRfCacheParams{"", 4, 0})
+	err = pd.SetRfcacheParams(types.PDRfCacheParams{RfCachePageSizeKb: 4, RfCacheMaxIoSizeKb: 0})
 	assert.Nil(t, err)
 	err = pd.Refresh()
 	assert.Nil(t, err)
@@ -242,7 +246,7 @@ func testRfCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
 	assert.Equal(t, pd.ProtectionDomain.RfCachePageSizeKb, 4)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheMaxIoSizeKb, 64)
 
-	err = pd.SetRfcacheParams(types.PDRfCacheParams{"", 16, 32})
+	err = pd.SetRfcacheParams(types.PDRfCacheParams{RfCachePageSizeKb: 16, RfCacheMaxIoSizeKb: 32})
 	assert.Nil(t, err)
 	err = pd.Refresh()
 	assert.Nil(t, err)
@@ -255,7 +259,11 @@ func testRfCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
 func testNwLimitsProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
 	oldPd := *pd.ProtectionDomain
 	a, b, c := 10*1024, 16*1024, 0
-	err := pd.SetSdsNetworkLimits(types.SdsNetworkLimitParams{nil, nil, &a, &b, &c})
+	err := pd.SetSdsNetworkLimits(types.SdsNetworkLimitParams{
+		VTreeMigrationNetworkThrottlingInKbps:           &a,
+		ProtectedMaintenanceModeNetworkThrottlingInKbps: &b,
+		OverallIoNetworkThrottlingInKbps:                &c,
+	})
 	assert.Nil(t, err)
 	err = pd.Refresh()
 	assert.Nil(t, err)
@@ -266,7 +274,12 @@ func testNwLimitsProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) 
 	assert.Equal(t, pd.ProtectionDomain.OverallIoNetworkThrottlingInKbps, c)
 
 	a1, c1 := 64*1024, 100*1024
-	err = pd.SetSdsNetworkLimits(types.SdsNetworkLimitParams{&a1, &a1, &a1, nil, &c1})
+	err = pd.SetSdsNetworkLimits(types.SdsNetworkLimitParams{
+		RebuildNetworkThrottlingInKbps:        &a1,
+		RebalanceNetworkThrottlingInKbps:      &a1,
+		VTreeMigrationNetworkThrottlingInKbps: &a1,
+		OverallIoNetworkThrottlingInKbps:      &c1,
+	})
 	assert.Nil(t, err)
 	err = pd.Refresh()
 	assert.Nil(t, err)
