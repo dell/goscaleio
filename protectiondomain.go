@@ -180,6 +180,7 @@ func (s *System) FindProtectionDomain(
 	return nil, errors.New("Couldn't find protection domain")
 }
 
+// FindProtectionDomainByID returns the ProtectionDomain having a particular ID
 func (s *System) FindProtectionDomainByID(id string) (*types.ProtectionDomain, error) {
 	defer TimeSpent("FindProtectionDomainByID", time.Now())
 
@@ -194,6 +195,7 @@ func (s *System) FindProtectionDomainByID(id string) (*types.ProtectionDomain, e
 	return pds[0], nil
 }
 
+// FindProtectionDomainByName returns the ProtectionDomain having a particular name
 func (s *System) FindProtectionDomainByName(name string) (*types.ProtectionDomain, error) {
 	defer TimeSpent("FindProtectionDomainByName", time.Now())
 
@@ -209,6 +211,7 @@ func (s *System) FindProtectionDomainByName(name string) (*types.ProtectionDomai
 	return s.FindProtectionDomainByID(id)
 }
 
+// SetName sets the name of the pd
 func (pd *ProtectionDomain) SetName(name string) error {
 	path := "/api/instances/ProtectionDomain::%s/action/setProtectionDomainName"
 	nameParam := types.ProtectionDomainParam{
@@ -217,6 +220,7 @@ func (pd *ProtectionDomain) SetName(name string) error {
 	return pd.setParam(path, nameParam)
 }
 
+// Refresh reads and stores current values of the pd
 func (pd *ProtectionDomain) Refresh() error {
 	defer TimeSpent("Refresh Protection Domain", time.Now())
 
@@ -232,30 +236,24 @@ func (pd *ProtectionDomain) Refresh() error {
 	return nil
 }
 
+// SetRfcacheParams sets the Read Flash Cache params of the pd
 func (pd *ProtectionDomain) SetRfcacheParams(params types.PDRfCacheParams) error {
-	p, err := params.ToMap()
-	if err != nil {
-		return err
-	}
 	path := "/api/instances/ProtectionDomain::%s/action/setRfcacheParameters"
-	return pd.setParam(path, p)
+	return pd.setParam(path, params)
 }
 
+// SetSdsNetworkLimits sets IOPS limits on all SDS under the pd
 func (pd *ProtectionDomain) SetSdsNetworkLimits(params types.SdsNetworkLimitParams) error {
 	path := "/api/instances/ProtectionDomain::%s/action/setSdsNetworkLimits"
-	p, err := params.ToMap()
-	if err != nil {
-		return err
-	}
-	return pd.setParam(path, p)
+	return pd.setParam(path, params)
 }
 
-func (pd *ProtectionDomain) setParam(path string, param interface{}) error {
+func (pd *ProtectionDomain) setParam(path string, param any) error {
 	link := fmt.Sprintf(path, pd.ProtectionDomain.ID)
 	return pd.client.getJSONWithRetry(http.MethodPost, link, param, nil)
 }
 
-// Activate Protection domain
+// Activate activates the Protection domain
 func (pd *ProtectionDomain) Activate(forceActivate bool) error {
 	path := "/api/instances/ProtectionDomain::%s/action/activateProtectionDomain"
 	return pd.setParam(path, map[string]string{
@@ -263,7 +261,7 @@ func (pd *ProtectionDomain) Activate(forceActivate bool) error {
 	})
 }
 
-// Inactivate Protection domain
+// InActivate disables the Protection domain
 func (pd *ProtectionDomain) InActivate(forceShutDown bool) error {
 	path := "/api/instances/ProtectionDomain::%s/action/inactivateProtectionDomain"
 	return pd.setParam(path, map[string]string{
@@ -271,13 +269,13 @@ func (pd *ProtectionDomain) InActivate(forceShutDown bool) error {
 	})
 }
 
-// Enable SDS Rfcache for entire Protection Domain
+// EnableRfcache enables SDS Read Flash cache for entire Protection Domain
 func (pd *ProtectionDomain) EnableRfcache() error {
 	path := "/api/instances/ProtectionDomain::%s/action/enableSdsRfcache"
 	return pd.setParam(path, &types.EmptyPayload{})
 }
 
-// Disable SDS Rfcache for entire Protection Domain
+// DisableRfcache disables SDS Read Flash cache for entire Protection Domain
 func (pd *ProtectionDomain) DisableRfcache() error {
 	path := "/api/instances/ProtectionDomain::%s/action/disableSdsRfcache"
 	return pd.setParam(path, &types.EmptyPayload{})

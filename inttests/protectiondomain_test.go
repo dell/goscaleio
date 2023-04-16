@@ -253,14 +253,14 @@ func testRfCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
 }
 
 func testNwLimitsProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
-	old_pd := *pd.ProtectionDomain
+	oldPd := *pd.ProtectionDomain
 	a, b, c := 10*1024, 16*1024, 0
 	err := pd.SetSdsNetworkLimits(types.SdsNetworkLimitParams{nil, nil, &a, &b, &c})
 	assert.Nil(t, err)
 	err = pd.Refresh()
 	assert.Nil(t, err)
-	assert.Equal(t, pd.ProtectionDomain.RebuildNetworkThrottlingInKbps, old_pd.RebuildNetworkThrottlingInKbps)
-	assert.Equal(t, pd.ProtectionDomain.RebalanceNetworkThrottlingInKbps, old_pd.RebalanceNetworkThrottlingInKbps)
+	assert.Equal(t, pd.ProtectionDomain.RebuildNetworkThrottlingInKbps, oldPd.RebuildNetworkThrottlingInKbps)
+	assert.Equal(t, pd.ProtectionDomain.RebalanceNetworkThrottlingInKbps, oldPd.RebalanceNetworkThrottlingInKbps)
 	assert.Equal(t, pd.ProtectionDomain.VTreeMigrationNetworkThrottlingInKbps, a)
 	assert.Equal(t, pd.ProtectionDomain.ProtectedMaintenanceModeNetworkThrottlingInKbps, b)
 	assert.Equal(t, pd.ProtectionDomain.OverallIoNetworkThrottlingInKbps, c)
