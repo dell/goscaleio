@@ -276,3 +276,65 @@ func testNwLimitsProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) 
 	assert.Equal(t, pd.ProtectionDomain.ProtectedMaintenanceModeNetworkThrottlingInKbps, b)
 	assert.Equal(t, pd.ProtectionDomain.OverallIoNetworkThrottlingInKbps, c1)
 }
+
+func TestPdRmCache(t *testing.T) {
+	system := getSystem()
+	assert.NotNil(t, system)
+	pdType, err := system.FindProtectionDomainByName("domain1")
+	assert.Nil(t, err)
+	assert.NotNil(t, pdType)
+
+	pd, err2 := system.GetProtectionDomainEx(pdType.ID)
+	assert.Nil(t, err2)
+	assert.NotNil(t, pd)
+
+	sdsList := getAllSds(t)
+	assert.NotNil(t, sdsList)
+
+	for _, sds := range sdsList {
+		t.Logf("%s> Before: RmcacheEanbled: %t", sds.Sds.ID, sds.Sds.RmcacheEnabled)
+	}
+
+	pd.SetRmCache(false)
+	// time.Sleep(2 * time.Second)
+	pd.SetSdsRmCache(sdsList[0].Sds.ID, true)
+
+	sdsList = getAllSds(t)
+	assert.NotNil(t, sdsList)
+	for _, sds := range sdsList {
+		t.Logf("%s> After 1: RmcacheEanbled: %t", sds.Sds.ID, sds.Sds.RmcacheEnabled)
+	}
+	pd.SetRmCache(true)
+}
+
+func TestPdRfCache(t *testing.T) {
+	system := getSystem()
+	assert.NotNil(t, system)
+	pdType, err := system.FindProtectionDomainByName("domain1")
+	assert.Nil(t, err)
+	assert.NotNil(t, pdType)
+
+	pd, err2 := system.GetProtectionDomainEx(pdType.ID)
+	assert.Nil(t, err2)
+	assert.NotNil(t, pd)
+
+	sdsList := getAllSds(t)
+	assert.NotNil(t, sdsList)
+
+	for _, sds := range sdsList {
+		t.Logf("%s> Before: RfcacheEanbled: %t", sds.Sds.ID, sds.Sds.RfcacheEnabled)
+	}
+
+	pd.DisableRfcache()
+	// pd.EnableRfcache()
+	// time.Sleep(2 * time.Second)
+	pd.SetSdsRfCache(sdsList[0].Sds.ID, false)
+
+	sdsList = getAllSds(t)
+	assert.NotNil(t, sdsList)
+	for _, sds := range sdsList {
+		t.Logf("%s> After 1: RfcacheEanbled: %t", sds.Sds.ID, sds.Sds.RfcacheEnabled)
+	}
+	// pd.DisableRfcache()
+	pd.EnableRfcache()
+}
