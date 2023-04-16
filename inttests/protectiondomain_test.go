@@ -292,7 +292,7 @@ func TestPdRmCache(t *testing.T) {
 	assert.NotNil(t, sdsList)
 
 	for _, sds := range sdsList {
-		t.Logf("%s> Before: RmcacheEanbled: %t", sds.Sds.ID, sds.Sds.RmcacheEnabled)
+		t.Logf("%s> Before: RmcacheEnabled: %t", sds.Sds.ID, sds.Sds.RmcacheEnabled)
 	}
 
 	pd.SetRmCache(false)
@@ -302,7 +302,7 @@ func TestPdRmCache(t *testing.T) {
 	sdsList = getAllSds(t)
 	assert.NotNil(t, sdsList)
 	for _, sds := range sdsList {
-		t.Logf("%s> After 1: RmcacheEanbled: %t", sds.Sds.ID, sds.Sds.RmcacheEnabled)
+		t.Logf("%s> After 1: RmcacheEnabled: %t", sds.Sds.ID, sds.Sds.RmcacheEnabled)
 	}
 	pd.SetRmCache(true)
 }
