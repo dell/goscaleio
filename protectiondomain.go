@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
@@ -279,4 +280,24 @@ func (pd *ProtectionDomain) EnableRfcache() error {
 func (pd *ProtectionDomain) DisableRfcache() error {
 	path := "/api/instances/ProtectionDomain::%s/action/disableSdsRfcache"
 	return pd.setParam(path, &types.EmptyPayload{})
+}
+
+// DisableFGLMcache disables SDS Read Flash cache for entire Protection Domain
+func (pd *ProtectionDomain) DisableFGLMcache() error {
+	path := "/api/instances/ProtectionDomain::%s/action/disableFglMetadataCache"
+	return pd.setParam(path, &types.EmptyPayload{})
+}
+
+// EnableFGLMcache disables SDS Read Flash cache for entire Protection Domain
+func (pd *ProtectionDomain) EnableFGLMcache() error {
+	path := "/api/instances/ProtectionDomain::%s/action/enableFglMetadataCache"
+	return pd.setParam(path, &types.EmptyPayload{})
+}
+
+// SetDefaultFGLMcacheSize disables SDS Read Flash cache for entire Protection Domain
+func (pd *ProtectionDomain) SetDefaultFGLMcacheSize(cacheSizeInMB int) error {
+	path := "/api/instances/ProtectionDomain::%s/action/setDefaultFglMetadataCacheSize"
+	return pd.setParam(path, map[string]string{
+		"cacheSizeInMB": strconv.Itoa(cacheSizeInMB),
+	})
 }

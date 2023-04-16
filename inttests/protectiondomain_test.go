@@ -205,6 +205,8 @@ func TestCRUDProtectionDomain(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, pd.ProtectionDomain.ProtectionDomainState, "Active")
 
+	testFGLMCacheProtectionDomain(t, pd)
+
 	// check that finding pd by name yields same struct as refreshing
 	pdByName, err3 := system.FindProtectionDomainByName(newName)
 	assert.Nil(t, err3)
@@ -213,6 +215,23 @@ func TestCRUDProtectionDomain(t *testing.T) {
 	// delete pd
 	err = pd.Delete()
 	assert.Nil(t, err)
+}
+
+func testFGLMCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
+	err := pd.DisableFGLMcache()
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, pd.ProtectionDomain.FglMetadataCacheEnabled, false)
+
+	err = pd.SetDefaultFGLMcacheSize(1024)
+	assert.Nil(t, err)
+	err = pd.EnableFGLMcache()
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, pd.ProtectionDomain.FglMetadataCacheEnabled, true)
+	assert.Equal(t, pd.ProtectionDomain.FglDefaultMetadataCacheSize, 1024)
 }
 
 func testRfCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
