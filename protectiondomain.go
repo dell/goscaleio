@@ -280,19 +280,3 @@ func (pd *ProtectionDomain) DisableRfcache() error {
 	path := "/api/instances/ProtectionDomain::%s/action/disableSdsRfcache"
 	return pd.setParam(path, &types.EmptyPayload{})
 }
-
-// // Set Read RAM Cache Size for all SDS in Protection Domain
-// // No read parameter
-// func (pd *ProtectionDomain) SetRmCacheSize() error {
-// 	path := "/api/instances/ProtectionDomain::%s/action/setSdsRmcacheSize"
-// 	return pd.setParam(path, &types.EmptyPayload{})
-// }
-
-// // Enable / Disable Read RAM Cache for all SDS in Protection Domain
-// // No read parameter
-// func (pd *ProtectionDomain) SetRmCache(enable bool) error {
-// 	path := "/api/instances/ProtectionDomain::%s/action/setSdsRmcacheEnabled"
-// 	return pd.setParam(path, map[string]string{
-// 		"rmcacheEnabled": types.GetBoolType(enable),
-// 	})
-// }
