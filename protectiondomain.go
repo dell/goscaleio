@@ -64,7 +64,7 @@ func (s *System) CreateProtectionDomain(name string) (string, error) {
 	return pd.ID, nil
 }
 
-// GetProtectionDomainEx fetches a ProtectionDomain by ID
+// GetProtectionDomainEx fetches a ProtectionDomain by ID with embedded client
 func (s *System) GetProtectionDomainEx(id string) (*ProtectionDomain, error) {
 	defer TimeSpent("GetProtectionDomainEx", time.Now())
 	pdResp, err := s.FindProtectionDomainByID(id)
