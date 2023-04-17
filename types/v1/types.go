@@ -1021,3 +1021,56 @@ type QueryReplicationPair struct {
 type QueryReplicationPairStatistics struct {
 	InitialCopyProgress float64 `json:"initialCopyProgress"`
 }
+
+type NFSExportDefaultAccessEnum string
+
+const (
+	No_Access      NFSExportDefaultAccessEnum = "No_Access"
+	Read_Only      NFSExportDefaultAccessEnum = "Read_Only"
+	Read_Write     NFSExportDefaultAccessEnum = "Read_Write"
+	Root           NFSExportDefaultAccessEnum = "Root"
+	Read_Only_Root NFSExportDefaultAccessEnum = "Read_Only_Root "
+)
+
+type NFSExport struct {
+	ID                 string                     `json:"id,omitempty"`
+	FileSystemID       string                     `json:"file_system_id,omitempty"`
+	Name               string                     `json:"name,omitempty"`
+	Description        string                     `json:"description,omitempty"`
+	DefaultAccess      NFSExportDefaultAccessEnum `json:"default_access,omitempty"`
+	Path               string                     `json:"path,omitempty"`
+	ReadWriteHosts     []string                   `json:"read_write_hosts,omitempty"`
+	ReadOnlyHosts      []string                   `json:"read_only_hosts,omitempty"`
+	ReadWriteRootHosts []string                   `json:"read_write_root_hosts,omitempty"`
+	ReadOnlyRootHosts  []string                   `json:"read_only_root_hosts,omitempty"`
+}
+
+type CreateResponse struct {
+	ID string `json:"id,omitempty"`
+}
+
+type NFSExportCreate struct {
+	Name         string `json:"name"`
+	FileSystemID string `json:"file_system_id"`
+	Path         string `json:"path"`
+}
+
+type NFSExportModify struct {
+	Description              string   `json:"description,omitempty"`
+	DefaultAccess            string   `json:"default_access,omitempty"`
+	NoAccessHosts            []string `json:"no_access_hosts"`
+	AddNoAccessHosts         []string `json:"add_no_access_hosts"`
+	RemoveNoAccessHosts      []string `json:"remove_no_access_hosts"`
+	ReadOnlyHosts            []string `json:"read_only_hosts"`
+	AddReadOnlyHosts         []string `json:"add_read_only_hosts"`
+	RemoveReadOnlyHosts      []string `json:"remove_read_only_hosts"`
+	ReadOnlyRootHosts        []string `json:"read_only_root_hosts"`
+	AddReadOnlyRootHosts     []string `json:"add_read_only_root_hosts"`
+	RemoveReadOnlyRootHosts  []string `json:"remove_read_only_root_hosts"`
+	ReadWriteHosts           []string `json:"read_write_hosts"`
+	AddReadWriteHosts        []string `json:"add_read_write_hosts"`
+	RemoveReadWriteHosts     []string `json:"remove_read_write_hosts"`
+	ReadWriteRootHosts       []string `json:"read_write_root_hosts"`
+	AddReadWriteRootHosts    []string `json:"add_read_write_root_hosts"`
+	RemoveReadWriteRootHosts []string `json:"remove_read_write_root_hosts"`
+}
