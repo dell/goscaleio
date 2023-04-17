@@ -44,7 +44,6 @@ func (s *System) GetAllFileSystems() ([]types.FileSystem, error) {
 	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &fs)
 	if err != nil {
-		fmt.Println("err", err)
 		return nil, err
 	}
 
@@ -60,7 +59,6 @@ func (s *System) GetFileSystemByID(id string) (*types.FileSystem, error) {
 	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &fs)
 	if err != nil {
-		fmt.Println("err", err)
 		return nil, err
 	}
 
@@ -94,7 +92,6 @@ func (s *System) CreateFileSystem(fs *types.FsCreate) (string, error) {
 	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, fs, &fsResponse)
 	if err != nil {
-		fmt.Println("err", err)
 		return " ", err
 	}
 
@@ -102,15 +99,19 @@ func (s *System) CreateFileSystem(fs *types.FsCreate) (string, error) {
 }
 
 // DeleteFileSystem deletes a file system
-func (s *System) DeleteFileSystem(id string) error {
+func (s *System) DeleteFileSystem(name string) error {
 	defer TimeSpent("DeleteFileSystem", time.Now())
 
-	path := fmt.Sprintf("/rest/v1/file-systems/%v", id)
+	fs, err := s.GetFileSystemByName(name)
+	if err != nil {
+		return err
+	}
 
-	err := s.client.getJSONWithRetry(
+	path := fmt.Sprintf("/rest/v1/file-systems/%v", fs.ID)
+
+	err = s.client.getJSONWithRetry(
 		http.MethodDelete, path, nil, nil)
 	if err != nil {
-		fmt.Println("err", err)
 		return err
 	}
 
