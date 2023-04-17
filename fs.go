@@ -30,14 +30,14 @@ type FileSystem struct {
 // NewFileSystem returns a new file system
 func NewFileSystem(client *Client, fs *types.FileSystem) *FileSystem {
 	return &FileSystem{
-		FileSystem:		fs,
-		client: 		client,
+		FileSystem: fs,
+		client:     client,
 	}
 }
 
-// GetFileSystem returns a file system
-func (s *System) GetFileSystem() ([]types.FileSystem, error) {
-	defer TimeSpent("GetFileSystem", time.Now())
+// GetAllFileSystems returns a file system
+func (s *System) GetAllFileSystems() ([]types.FileSystem, error) {
+	defer TimeSpent("GetAllFileSystems", time.Now())
 
 	path := fmt.Sprintf("/rest/v1/file-systems?select=*")
 	var fs []types.FileSystem
@@ -71,7 +71,7 @@ func (s *System) GetFileSystemByID(id string) (*types.FileSystem, error) {
 func (s *System) GetFileSystemByName(name string) (*types.FileSystem, error) {
 	defer TimeSpent("GetFileSystemByID", time.Now())
 
-	filesystems, err := s.GetFileSystem()
+	filesystems, err := s.GetAllFileSystems()
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (s *System) GetFileSystemByName(name string) (*types.FileSystem, error) {
 }
 
 // CreateFileSystem creates a file system
-func (s *System) CreateFileSystem(fs *types.FsCreate) (string, error){
+func (s *System) CreateFileSystem(fs *types.FsCreate) (string, error) {
 	defer TimeSpent("CreateFileSystem", time.Now())
 
 	path := fmt.Sprintf("/rest/v1/file-systems")
@@ -102,7 +102,7 @@ func (s *System) CreateFileSystem(fs *types.FsCreate) (string, error){
 }
 
 // DeleteFileSystem deletes a file system
-func (s *System) DeleteFileSystem(id string) (error){
+func (s *System) DeleteFileSystem(id string) error {
 	defer TimeSpent("DeleteFileSystem", time.Now())
 
 	path := fmt.Sprintf("/rest/v1/file-systems/%v", id)
@@ -116,5 +116,3 @@ func (s *System) DeleteFileSystem(id string) (error){
 
 	return nil
 }
-
-

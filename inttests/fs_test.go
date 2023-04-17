@@ -19,8 +19,8 @@ import (
 
 	"github.com/dell/goscaleio"
 	//log "github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	types "github.com/dell/goscaleio/types/v1"
+	"github.com/stretchr/testify/assert"
 )
 
 // getFileSystemName returns GOSCALEIO_FILESYSTEM, if set
@@ -39,25 +39,6 @@ func getFileSystemName(t *testing.T) string {
 	fmt.Printf("filesystems[0].Name: %v", filesystems[0].Name)
 	return filesystems[0].Name
 }
-
-//// getFileSystemById returns the file system details returned by getFileSystemByName
-//func getFileSystemById(t *testing.T) *goscaleio.ProtectionDomain {
-//	system := getSystem()
-//	assert.NotNil(t, system)
-//
-//	name := getFileSystemName(t)
-//	assert.NotEqual(t, name, "")
-//	fs, err := system.GetFileSystemByName(name)
-//	assert.Nil(t, err)
-//	assert.NotNil(t, fs)
-//	if fs == nil {
-//		return nil
-//	}
-//
-//	outFS := goscaleio.NewFileSystem(C, &fs)
-//	outFS.FileSystem = fs
-//	return outFS
-//}
 
 // getAllFileSystems will return all file system instances
 func getAllFileSystems(t *testing.T) []*goscaleio.FileSystem {
@@ -144,7 +125,7 @@ func TestCreateDeleteFileSystem(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	fsName := fmt.Sprintf("%s-%s",  "tweeFS", testPrefix)
+	fsName := fmt.Sprintf("%s-%s", "tweeFS", testPrefix)
 
 	// get storage pool ID
 	//var spName string
@@ -177,10 +158,10 @@ func TestCreateDeleteFileSystem(t *testing.T) {
 	//fmt.Printf("nasServerName :%v\n",nasServer.ID)
 
 	fs := &types.FsCreate{
-		Name:      		fsName,
-		SizeTotal: 		16106127360,
-		StoragePoolID:	spID,
-		NasServerID:	"64132f37-d33e-9d4a-89ba-d625520a4779",
+		Name:          fsName,
+		SizeTotal:     16106127360,
+		StoragePoolID: spID,
+		NasServerID:   "64132f37-d33e-9d4a-89ba-d625520a4779",
 	}
 
 	// create the file system
