@@ -287,36 +287,36 @@ func TestStoragePoolAdditionalFunctionality(t *testing.T) {
 	assert.Nil(t, err)
 	pool, _ := domain.FindStoragePool(poolID, "", "")
 	//check the value
-	assert.Equal(t, pool.ZeroPaddingEnabled,false)
+	assert.Equal(t, pool.ZeroPaddingEnabled, false)
 
 	// Now enable the padding
 	err = domain.EnableOrDisableZeroPadding(poolID, "true")
 	assert.Nil(t, err)
 	pool, _ = domain.FindStoragePool(poolID, "", "")
 	//check the value
-	assert.Equal(t, pool.ZeroPaddingEnabled,true)
+	assert.Equal(t, pool.ZeroPaddingEnabled, true)
 
 	//Modify Replication Journal Capacity to make it 36
 	err = domain.SetReplicationJournalCapacity(poolID, "36")
 	assert.Nil(t, err)
 	pool, _ = domain.FindStoragePool(poolID, "", "")
 	//check the value
-	assert.Equal(t, pool.ReplicationCapacityMaxRatio,36)
+	assert.Equal(t, pool.ReplicationCapacityMaxRatio, 36)
 
 	//Again Modify Replication Journal Capacity to make it 0 else storage pool can't be deleted
 	err = domain.SetReplicationJournalCapacity(poolID, "0")
 	assert.Nil(t, err)
 	pool, _ = domain.FindStoragePool(poolID, "", "")
 	//again check the value
-	assert.Equal(t, pool.ReplicationCapacityMaxRatio,0)
+	assert.Equal(t, pool.ReplicationCapacityMaxRatio, 0)
 
 	//set the capacity threshold for the storage pool
 	err = domain.SetCapacityAlertThreshold(poolID, "77", "87")
 	assert.Nil(t, err)
 	pool, _ = domain.FindStoragePool(poolID, "", "")
 	//check the value
-	assert.Equal(t, pool.CapacityAlertHighThreshold,77)
-	assert.Equal(t, pool.CapacityAlertCriticalThreshold,87)
+	assert.Equal(t, pool.CapacityAlertHighThreshold, 77)
+	assert.Equal(t, pool.CapacityAlertCriticalThreshold, 87)
 
 	//Set the protected maintenance mode
 	protectedMaintenanceModeParam := &types.ProtectedMaintenanceModeParam{
@@ -327,22 +327,22 @@ func TestStoragePoolAdditionalFunctionality(t *testing.T) {
 	assert.Nil(t, err)
 	pool, _ = domain.FindStoragePool(poolID, "", "")
 	//check the value
-	assert.Equal(t, pool.ProtectedMaintenanceModeIoPriorityPolicy,"favorAppIos")
-	assert.Equal(t, pool.ProtectedMaintenanceModeIoPriorityNumOfConcurrentIosPerDevice,18)
+	assert.Equal(t, pool.ProtectedMaintenanceModeIoPriorityPolicy, "favorAppIos")
+	assert.Equal(t, pool.ProtectedMaintenanceModeIoPriorityNumOfConcurrentIosPerDevice, 18)
 
 	//set rebalance enablement value
 	err = domain.SetRebalanceEnabled(poolID, "true")
 	assert.Nil(t, err)
 	pool, _ = domain.FindStoragePool(poolID, "", "")
 	//check the value
-	assert.Equal(t, pool.RebalanceEnabled,true)
+	assert.Equal(t, pool.RebalanceEnabled, true)
 
 	//Again set rebalance enablement value
 	err = domain.SetRebalanceEnabled(poolID, "false")
 	assert.Nil(t, err)
 	pool, _ = domain.FindStoragePool(poolID, "", "")
 	//check the value
-	assert.Equal(t, pool.RebalanceEnabled,false)
+	assert.Equal(t, pool.RebalanceEnabled, false)
 
 	//set the rebalance IO priority policy for the storage pool
 	protectedMaintenanceModeParam = &types.ProtectedMaintenanceModeParam{
@@ -353,8 +353,8 @@ func TestStoragePoolAdditionalFunctionality(t *testing.T) {
 	assert.Nil(t, err)
 	//check the value
 	pool, _ = domain.FindStoragePool(poolID, "", "")
-	assert.Equal(t, pool.RebalanceioPriorityPolicy,"limitNumOfConcurrentIos")
-	assert.Equal(t, pool.RebalanceioPriorityNumOfConcurrentIosPerDevice,13)
+	assert.Equal(t, pool.RebalanceioPriorityPolicy, "limitNumOfConcurrentIos")
+	assert.Equal(t, pool.RebalanceioPriorityNumOfConcurrentIosPerDevice, 13)
 	assert.Nil(t, err)
 
 	//Set vtree migration IO priority policy
@@ -367,37 +367,37 @@ func TestStoragePoolAdditionalFunctionality(t *testing.T) {
 	assert.Nil(t, err)
 	//check the value
 	pool, _ = domain.FindStoragePool(poolID, "", "")
-	assert.Equal(t, pool.VtreeMigrationIoPriorityPolicy,"favorAppIos")
-	assert.Equal(t, pool.VtreeMigrationIoPriorityNumOfConcurrentIosPerDevice,12)
-	assert.Equal(t, pool.VtreeMigrationIoPriorityBwLimitPerDeviceInKbps,1030)
+	assert.Equal(t, pool.VtreeMigrationIoPriorityPolicy, "favorAppIos")
+	assert.Equal(t, pool.VtreeMigrationIoPriorityNumOfConcurrentIosPerDevice, 12)
+	assert.Equal(t, pool.VtreeMigrationIoPriorityBwLimitPerDeviceInKbps, 1030)
 
-	//set the spare percentage 
+	//set the spare percentage
 	err = domain.SetSparePercentage(poolID, "67")
 	assert.Nil(t, err)
 	//check the value
 	pool, _ = domain.FindStoragePool(poolID, "", "")
-	assert.Equal(t, pool.SparePercentage,67)
+	assert.Equal(t, pool.SparePercentage, 67)
 
 	//set the Rmcache write handling mode
 	err = domain.SetRMcacheWriteHandlingMode(poolID, "Cached")
 	assert.Nil(t, err)
 	//check the value
 	pool, _ = domain.FindStoragePool(poolID, "", "")
-	assert.Equal(t, pool.RmCacheWriteHandlingMode,"Cached")
+	assert.Equal(t, pool.RmCacheWriteHandlingMode, "Cached")
 
 	//set the rebuild enablemenent value
 	err = domain.SetRebuildEnabled(poolID, "false")
 	assert.Nil(t, err)
 	//check the value
 	pool, _ = domain.FindStoragePool(poolID, "", "")
-	assert.Equal(t, pool.RebuildEnabled,false)
+	assert.Equal(t, pool.RebuildEnabled, false)
 
 	// set the number of parallel rebuild rebalance jobs per device
 	err = domain.SetRebuildRebalanceParallelismParam(poolID, "9")
 	assert.Nil(t, err)
 	//check the value
 	pool, _ = domain.FindStoragePool(poolID, "", "")
-	assert.Equal(t, pool.NumofParallelRebuildRebalanceJobsPerDevice,9)
+	assert.Equal(t, pool.NumofParallelRebuildRebalanceJobsPerDevice, 9)
 
 	//enable fragmentation
 	err = domain.EnableFragmentation(poolID)
