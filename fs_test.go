@@ -24,8 +24,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
-
 func TestGetFileSystemByID(t *testing.T) {
 	type checkFn func(*testing.T, *types.FileSystem, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
@@ -63,8 +61,8 @@ func TestGetFileSystemByID(t *testing.T) {
 				}
 
 				resp := types.FileSystem{
-						ID:		"64366a19-54e8-1544-f3d7-2a50fb1ccff3",
-						Name:	"fs-test-1",
+					ID:   "64366a19-54e8-1544-f3d7-2a50fb1ccff3",
+					Name: "fs-test-1",
 				}
 
 				respData, err := json.Marshal(resp)
@@ -159,12 +157,12 @@ func TestGetFileSystemByName(t *testing.T) {
 
 				resp := []types.FileSystem{
 					{
-						ID:		"64366a19-54e8-1544-f3d7-2a50fb1ccff3",
-						Name:	"fs-test-1",
+						ID:   "64366a19-54e8-1544-f3d7-2a50fb1ccff3",
+						Name: "fs-test-1",
 					},
 					{
-						ID:		"6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
-						Name:	"fs-test-2",
+						ID:   "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
+						Name: "fs-test-2",
 					},
 				}
 
@@ -190,12 +188,12 @@ func TestGetFileSystemByName(t *testing.T) {
 
 				resp := []types.FileSystem{
 					{
-						ID:		"64366a19-54e8-1544-f3d7-2a50fb1ccff3",
-						Name:	"fs-test-1",
+						ID:   "64366a19-54e8-1544-f3d7-2a50fb1ccff3",
+						Name: "fs-test-1",
 					},
 					{
-						ID:		"6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
-						Name:	"fs-test-2",
+						ID:   "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
+						Name: "fs-test-2",
 					},
 				}
 
