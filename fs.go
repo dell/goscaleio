@@ -67,7 +67,7 @@ func (s *System) GetFileSystemByID(id string) (*types.FileSystem, error) {
 
 // GetFileSystemByName returns a file system by Name
 func (s *System) GetFileSystemByName(name string) (*types.FileSystem, error) {
-	defer TimeSpent("GetFileSystemByID", time.Now())
+	defer TimeSpent("GetFileSystemByName", time.Now())
 
 	filesystems, err := s.GetAllFileSystems()
 	if err != nil {
@@ -80,11 +80,11 @@ func (s *System) GetFileSystemByName(name string) (*types.FileSystem, error) {
 		}
 	}
 
-	return nil, errors.New("Couldn't find storage pool")
+	return nil, errors.New("Couldn't find file system")
 }
 
 // CreateFileSystem creates a file system
-func (s *System) CreateFileSystem(fs *types.FsCreate) (string, error) {
+func (s *System) CreateFileSystem(fs *types.FsCreate) (*types.FileSystemResp, error) {
 	defer TimeSpent("CreateFileSystem", time.Now())
 
 	path := fmt.Sprintf("/rest/v1/file-systems")
@@ -92,10 +92,10 @@ func (s *System) CreateFileSystem(fs *types.FsCreate) (string, error) {
 	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, fs, &fsResponse)
 	if err != nil {
-		return " ", err
+		return nil, err
 	}
 
-	return fsResponse.ID, nil
+	return &fsResponse, nil
 }
 
 // DeleteFileSystem deletes a file system
@@ -103,6 +103,7 @@ func (s *System) DeleteFileSystem(name string) error {
 	defer TimeSpent("DeleteFileSystem", time.Now())
 
 	fs, err := s.GetFileSystemByName(name)
+	fmt.Printf("fs ....... %v\n", fs)
 	if err != nil {
 		return err
 	}

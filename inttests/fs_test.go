@@ -125,7 +125,7 @@ func TestCreateDeleteFileSystem(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	fsName := fmt.Sprintf("%s-%s", "tweeFS", testPrefix)
+	fsName := fmt.Sprintf("%s-%s", "FS", testPrefix)
 
 	// get protection domain
 	pd := getProtectionDomain(t)
@@ -157,14 +157,15 @@ func TestCreateDeleteFileSystem(t *testing.T) {
 	}
 
 	// create the file system
-	fsID, err := system.CreateFileSystem(fs)
+	filesystem, err := system.CreateFileSystem(fs)
+	fsID := filesystem.ID
 	assert.Nil(t, err)
 	assert.NotNil(t, fsID)
 
 	// try to create a file system that exists
-	fsID, err = system.CreateFileSystem(fs)
+	filesystem, err = system.CreateFileSystem(fs)
 	assert.NotNil(t, err)
-	assert.Equal(t, " ", fsID)
+	assert.Nil(t, err)
 
 	// delete the file system
 	err = system.DeleteFileSystem(fsName)
