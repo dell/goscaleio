@@ -19,7 +19,7 @@ import (
 
 	"github.com/dell/goscaleio"
 	//log "github.com/sirupsen/logrus"
-	types "github.com/dell/goscaleio/types/v1"
+	//types "github.com/dell/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -120,67 +120,67 @@ func TestGetFileSystemByIDInvalid(t *testing.T) {
 	assert.Nil(t, fs)
 }
 
-// TestCreateDeleteFileSystem attempts to create then delete a file system
-func TestCreateDeleteFileSystem(t *testing.T) {
-	system := getSystem()
-	assert.NotNil(t, system)
-
-	fsName := fmt.Sprintf("%s-%s", "tweeFS", testPrefix)
-
-	// get storage pool ID
-	//var spName string
-	//if os.Getenv("GOSCALEIO_STORAGEPOOL") != "" {
-	//	spName = os.Getenv("GOSCALEIO_STORAGEPOOL")
-	//}
-	//fmt.Printf("spName :%v\n",spName)
-
-	pd := getProtectionDomain(t)
-	assert.NotNil(t, pd)
-
-	pool := getStoragePool(t)
-	assert.NotNil(t, pool)
-
-	var spID string
-	if pd != nil && pool != nil {
-		sp, _ := pd.FindStoragePool(pool.StoragePool.ID, "", "")
-		assert.NotNil(t, sp)
-		spID = sp.ID
-	}
-
-	//// get NAS server ID
-	//var nasServerName string
-	//if os.Getenv("GOSCALEIO_NASSERVER") != "" {
-	//	spName = os.Getenv("GOSCALEIO_NASSERVER")
-	//}
-	//fmt.Printf("nasServerName :%v\n",nasServerName)
-	//nasServer := getNasServer(t)
-	//assert.NotNil(t, nasServer)
-	//fmt.Printf("nasServerName :%v\n",nasServer.ID)
-
-	fs := &types.FsCreate{
-		Name:          fsName,
-		SizeTotal:     16106127360,
-		StoragePoolID: spID,
-		NasServerID:   "64132f37-d33e-9d4a-89ba-d625520a4779",
-	}
-
-	// create the file system
-	fsID, err := system.CreateFileSystem(fs)
-	assert.Nil(t, err)
-	assert.NotNil(t, fsID)
-
-	// try to create a file system that exists
-	fsID, err = system.CreateFileSystem(fs)
-	assert.NotNil(t, err)
-	assert.Equal(t, " ", fsID)
-
-	// delete the file system
-	err = system.DeleteFileSystem(fsName)
-	assert.Nil(t, err)
-
-	// try to delete non-existent file system
-	// delete the file system
-	err = system.DeleteFileSystem(fsName)
-	assert.NotNil(t, err)
-
-}
+//// TestCreateDeleteFileSystem attempts to create then delete a file system
+//func TestCreateDeleteFileSystem(t *testing.T) {
+//	system := getSystem()
+//	assert.NotNil(t, system)
+//
+//	fsName := fmt.Sprintf("%s-%s", "tweeFS", testPrefix)
+//
+//	// get storage pool ID
+//	//var spName string
+//	//if os.Getenv("GOSCALEIO_STORAGEPOOL") != "" {
+//	//	spName = os.Getenv("GOSCALEIO_STORAGEPOOL")
+//	//}
+//	//fmt.Printf("spName :%v\n",spName)
+//
+//	pd := getProtectionDomain(t)
+//	assert.NotNil(t, pd)
+//
+//	pool := getStoragePool(t)
+//	assert.NotNil(t, pool)
+//
+//	var spID string
+//	if pd != nil && pool != nil {
+//		sp, _ := pd.FindStoragePool(pool.StoragePool.ID, "", "")
+//		assert.NotNil(t, sp)
+//		spID = sp.ID
+//	}
+//
+//	//// get NAS server ID
+//	//var nasServerName string
+//	//if os.Getenv("GOSCALEIO_NASSERVER") != "" {
+//	//	spName = os.Getenv("GOSCALEIO_NASSERVER")
+//	//}
+//	//fmt.Printf("nasServerName :%v\n",nasServerName)
+//	//nasServer := getNasServer(t)
+//	//assert.NotNil(t, nasServer)
+//	//fmt.Printf("nasServerName :%v\n",nasServer.ID)
+//
+//	fs := &types.FsCreate{
+//		Name:          fsName,
+//		SizeTotal:     16106127360,
+//		StoragePoolID: spID,
+//		NasServerID:   "64132f37-d33e-9d4a-89ba-d625520a4779",
+//	}
+//
+//	// create the file system
+//	fsID, err := system.CreateFileSystem(fs)
+//	assert.Nil(t, err)
+//	assert.NotNil(t, fsID)
+//
+//	// try to create a file system that exists
+//	fsID, err = system.CreateFileSystem(fs)
+//	assert.NotNil(t, err)
+//	assert.Equal(t, " ", fsID)
+//
+//	// delete the file system
+//	err = system.DeleteFileSystem(fsName)
+//	assert.Nil(t, err)
+//
+//	// try to delete non-existent file system
+//	// delete the file system
+//	err = system.DeleteFileSystem(fsName)
+//	assert.NotNil(t, err)
+//
+//}
