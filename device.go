@@ -146,16 +146,16 @@ func (sds *Sds) FindDevice(
 }
 
 // GetDevice returns a device using Device ID
-func (device *Device) GetDevice() (*types.Device, error) {
+func (system *System) GetDevice(id string) (*types.Device, error) {
 
 	defer TimeSpent("GetDevice", time.Now())
 
 	path := fmt.Sprintf(
 		"/api/instances/Device::%v",
-		device.Device.ID)
+		id)
 
 	var deviceResult types.Device
-	err := device.client.getJSONWithRetry(
+	err := system.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &deviceResult)
 	if err != nil {
 		return nil, err

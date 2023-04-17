@@ -71,7 +71,7 @@ func (e Error) Error() string {
 // 	Link []*types.Link `xml:"Link"`
 // }
 
-// System defines struct of PFlex array
+// System defines struct of PowerFlex array
 type System struct {
 	MdmMode                               string   `json:"mdmMode"`
 	MdmClusterState                       string   `json:"mdmClusterState"`
@@ -115,7 +115,7 @@ type BWC struct {
 	NumSeconds      int `json:"numSeconds"`
 }
 
-// Statistics defines struct of Statistics for Pflex Array
+// Statistics defines struct of Statistics for PowerFlex Array
 type Statistics struct {
 	PrimaryReadFromDevBwc                    BWC `json:"primaryReadFromDevBwc"`
 	NumOfStoragePools                        int `json:"numOfStoragePools"`
@@ -197,7 +197,7 @@ type Statistics struct {
 	VolumeAddressSpaceInKb                   int `json:"volumeAddressSpaceInKb"`
 }
 
-// SdcStatistics defines struct of Statistics for PFlex SDC
+// SdcStatistics defines struct of Statistics for PowerFlex SDC
 type SdcStatistics struct {
 	UserDataReadBwc         BWC      `json:"userDataReadBwc"`
 	UserDataWriteBwc        BWC      `json:"userDataWriteBwc"`
@@ -209,7 +209,7 @@ type SdcStatistics struct {
 	NumOfMappedVolumes      int      `json:"numOfMappedVolumes"`
 }
 
-// VolumeStatistics defines struct of Statistics for PFlex volume
+// VolumeStatistics defines struct of Statistics for PowerFlex volume
 type VolumeStatistics struct {
 	UserDataReadBwc         BWC      `json:"userDataReadBwc"`
 	UserDataWriteBwc        BWC      `json:"userDataWriteBwc"`
@@ -221,7 +221,7 @@ type VolumeStatistics struct {
 	NumOfMappedSdcs         int      `json:"numOfMappedSdcs"`
 }
 
-// User defines struct of User for PFlex array
+// User defines struct of User for PowerFlex array
 type User struct {
 	SystemID              string  `json:"systemId"`
 	UserRole              string  `json:"userRole"`
@@ -273,7 +273,7 @@ type PDConnInfo struct {
 	DisconnectedServerIP   *string `json:"disconnectedServerIp"`
 }
 
-// ProtectionDomain defines struct for PFlex ProtectionDomain
+// ProtectionDomain defines struct for PowerFlex ProtectionDomain
 type ProtectionDomain struct {
 	SystemID                    string     `json:"systemId"`
 	SdrSdsConnectivityInfo      PDConnInfo `json:"sdrSdsConnectivityInfo"`
@@ -341,7 +341,7 @@ type ProtectionDomainResp struct {
 	ID string `json:"id"`
 }
 
-// Sdc defines struct for PFlex Sdc
+// Sdc defines struct for PowerFlex Sdc
 type Sdc struct {
 	SystemID           string  `json:"systemId"`
 	SdcApproved        bool    `json:"sdcApproved"`
@@ -503,7 +503,7 @@ type SdsPort struct {
 	SdsPort string `json:"sdsPort"`
 }
 
-// Device defines struct of Device for Pflex Array
+// Device defines struct of Device for PowerFlex Array
 type Device struct {
 	FglNvdimmMetadataAmortizationX100 int                     `json:"fglNvdimmMetadataAmortizationX100,omitempty"`
 	LogicalSectorSizeInBytes          int                     `json:"logicalSectorSizeInBytes,omitempty"`
@@ -612,7 +612,7 @@ type DeviceResp struct {
 	ID string `json:"id"`
 }
 
-// StoragePool defines struct for PFlex StoragePool
+// StoragePool defines struct for PowerFlex StoragePool
 type StoragePool struct {
 	ProtectionDomainID                                              string  `json:"protectionDomainId"`
 	RebalanceioPriorityPolicy                                       string  `json:"rebalanceIoPriorityPolicy"`
