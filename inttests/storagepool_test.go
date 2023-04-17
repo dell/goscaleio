@@ -264,6 +264,126 @@ func TestEnableRFCache(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// Modify TestEnableOrDisableZeroPadEnabled
+func TestEnableOrDisableZeroPadEnabled(t *testing.T) {
+	domain := getProtectionDomain(t)
+
+	assert.NotNil(t, domain)
+	err := domain.EnableOrDisableZeroPadding("c98e4e1500000001", "false")
+	assert.Nil(t, err)
+}
+
+// Modify Replication Journal Capacity
+func TestSetReplicationJournalCapacity(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+	err := domain.SetReplicationJournalCapacity("c98e4e1500000001", "36")
+	assert.Nil(t, err)
+}
+
+// Modify Capacity Alert Threshold
+func TestSetCapacityAlertThreshold(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+	err := domain.SetCapacityAlertThreshold("c98e4e1500000001", "77", "87")
+	assert.Nil(t, err)
+}
+
+// Modify Protected Maintenance Mode Io Priority Policy
+func TestSetProtectedMaintenanceModeIoPriorityPolicy(t *testing.T) {
+	domain := getProtectionDomain(t)
+	protectedMaintenanceModeParam := &types.ProtectedMaintenanceModeParam{
+		Policy:                      "favorAppIos",
+		NumOfConcurrentIosPerDevice: "18",
+	}
+	assert.NotNil(t, domain)
+	err := domain.SetProtectedMaintenanceModeIoPriorityPolicy("c98e4e1500000001", protectedMaintenanceModeParam)
+	assert.Nil(t, err)
+}
+
+// Modify Rebalance Enabled
+func TestSetRebalanceEnabled(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+	err := domain.SetRebalanceEnabled("c98e4e1500000001", "true")
+	assert.Nil(t, err)
+}
+
+// Modify Rebalance Io Priority Policy
+func TestSetRebalanceIoPriorityPolicy(t *testing.T) {
+	domain := getProtectionDomain(t)
+	protectedMaintenanceModeParam := &types.ProtectedMaintenanceModeParam{
+		Policy:                      "favorAppIos",
+		NumOfConcurrentIosPerDevice: "12",
+		BwLimitPerDeviceInKbps:      "1030",
+	}
+	assert.NotNil(t, domain)
+	err := domain.SetRebalanceIoPriorityPolicy("c98e4e1500000001", protectedMaintenanceModeParam)
+	assert.Nil(t, err)
+}
+
+// Modify VTree Migration IO Priority Policy
+func TestSetVTreeMigrationIOPriorityPolicy(t *testing.T) {
+	domain := getProtectionDomain(t)
+	protectedMaintenanceModeParam := &types.ProtectedMaintenanceModeParam{
+		Policy:                      "favorAppIos",
+		NumOfConcurrentIosPerDevice: "12",
+		BwLimitPerDeviceInKbps:      "1030",
+	}
+	assert.NotNil(t, domain)
+	err := domain.SetVTreeMigrationIOPriorityPolicy("c98e4e1500000001", protectedMaintenanceModeParam)
+	assert.Nil(t, err)
+}
+
+// Modify Spare Percentage
+func TestSetSparePercentage(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+	err := domain.SetSparePercentage("c98e4e1500000001", "38")
+	assert.Nil(t, err)
+}
+
+// Modify RMcache Write Handling Mode
+func TestSetRMcacheWriteHandlingMode(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+	err := domain.SetRMcacheWriteHandlingMode("c98e4e1500000001", "Cached")
+	assert.Nil(t, err)
+}
+
+// Modify Rebuild Enabled
+func TestSetRebuildEnabled(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+	err := domain.SetRebuildEnabled("c98e4e1500000001", "false")
+	assert.Nil(t, err)
+}
+
+// Modify Rebuild Rebalance Parallelism
+func TestSetRebuildRebalanceParallelismParam(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+	err := domain.SetRebuildRebalanceParallelismParam("c98e4e1500000001", "9")
+	assert.Nil(t, err)
+}
+
+// Modify Enable Fragmentation
+func TestEnableFragmentation(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+
+	err := domain.EnableFragmentation("c98e4e1500000001")
+	assert.Nil(t, err)
+}
+
+// Modify Disble Fragmentation
+func TestDisbleFragmentation(t *testing.T) {
+	domain := getProtectionDomain(t)
+	assert.NotNil(t, domain)
+	err := domain.DisableFragmentation("c98e4e1500000001")
+	assert.Nil(t, err)
+}
+
 // Modify TestDisableRFCache
 func TestDisableRFCache(t *testing.T) {
 	domain := getProtectionDomain(t)

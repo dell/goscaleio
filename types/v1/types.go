@@ -634,6 +634,48 @@ type StoragePoolUseRmCache struct {
 type StoragePoolUseRfCache struct {
 }
 
+type StoragePoolZeroPadEnabled struct {
+	ZeroPadEnabled string `json:"zeroPadEnabled"`
+}
+
+type ReplicationJournalCapacityParam struct {
+	ReplicationJournalCapacityMaxRatio string `json:"replicationJournalCapacityMaxRatio"`
+}
+
+type CapacityAlertThresholdParam struct {
+	CapacityAlertHighThresholdPercent     string `json:"capacityAlertHighThresholdPercent"`
+	CapacityAlertCriticalThresholdPercent string `json:"capacityAlertCriticalThresholdPercent"`
+}
+
+type ProtectedMaintenanceModeParam struct {
+	Policy                      string `json:"policy"`
+	NumOfConcurrentIosPerDevice string `json:"numOfConcurrentIosPerDevice,omitempty"`
+	BwLimitPerDeviceInKbps      string `json:"bwLimitPerDeviceInKbps,omitempty"`
+}
+
+type RebalanceEnabledParam struct {
+	RebalanceEnabled string `json:"rebalanceEnabled"`
+}
+
+type SparePercentageParam struct {
+	SparePercentage string `json:"sparePercentage"`
+}
+
+type RmcacheWriteHandlingModeParam struct {
+	RmcacheWriteHandlingMode string `json:"rmcacheWriteHandlingMode"`
+}
+
+type RebuildEnabledParam struct {
+	RebuildEnabled string `json:"rebuildEnabled"`
+}
+
+type RebuildRebalanceParallelismParam struct {
+	Limit string `json:"limit"`
+}
+
+type FragmentationParam struct {
+}
+
 // StoragePoolResp defines struct for StoragePoolResp
 type StoragePoolResp struct {
 	ID string `json:"id"`
