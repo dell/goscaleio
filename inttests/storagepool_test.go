@@ -252,7 +252,23 @@ func TestModifyStoragePoolName(t *testing.T) {
 func TestStoragePoolMediaType(t *testing.T) {
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
-	_, err := domain.ModifyStoragePoolMedia("b9b0be6600000004", "SSD")
+
+	poolName := fmt.Sprintf("%s-%s", testPrefix, "StoragePool")
+
+	sp := &types.StoragePoolParam{
+		Name:      poolName,
+		MediaType: "HDD",
+	}
+
+	// create the storage pool
+	poolID, err := domain.CreateStoragePool(sp)
+	assert.Nil(t, err)
+	assert.NotNil(t, poolID)
+	_, err = domain.ModifyStoragePoolMedia(poolID, "SSD")
+	assert.Nil(t, err)
+
+	//delete the pool
+	err = domain.DeleteStoragePool(poolName)
 	assert.Nil(t, err)
 }
 
@@ -260,7 +276,22 @@ func TestStoragePoolMediaType(t *testing.T) {
 func TestEnableRFCache(t *testing.T) {
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
-	_, err := domain.EnableRFCache("b9b0be6400000003")
+
+	poolName := fmt.Sprintf("%s-%s", testPrefix, "StoragePool")
+
+	sp := &types.StoragePoolParam{
+		Name:      poolName,
+		MediaType: "HDD",
+	}
+
+	// create the storage pool
+	poolID, err := domain.CreateStoragePool(sp)
+	assert.Nil(t, err)
+	assert.NotNil(t, poolID)
+	_, err = domain.EnableRFCache(poolID)
+	assert.Nil(t, err)
+	//delete the pool
+	err = domain.DeleteStoragePool(poolName)
 	assert.Nil(t, err)
 }
 
@@ -416,7 +447,22 @@ func TestStoragePoolAdditionalFunctionality(t *testing.T) {
 func TestDisableRFCache(t *testing.T) {
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
-	_, err := domain.DisableRFCache("b9b0be6400000003")
+
+	poolName := fmt.Sprintf("%s-%s", testPrefix, "StoragePool")
+
+	sp := &types.StoragePoolParam{
+		Name:      poolName,
+		MediaType: "HDD",
+	}
+
+	// create the storage pool
+	poolID, err := domain.CreateStoragePool(sp)
+	assert.Nil(t, err)
+	assert.NotNil(t, poolID)
+	_, err = domain.DisableRFCache(poolID)
+	assert.Nil(t, err)
+	//delete the pool
+	err = domain.DeleteStoragePool(poolName)
 	assert.Nil(t, err)
 }
 
