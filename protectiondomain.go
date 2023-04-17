@@ -67,17 +67,11 @@ func (s *System) CreateProtectionDomain(name string) (string, error) {
 // GetProtectionDomainEx fetches a ProtectionDomain by ID
 func (s *System) GetProtectionDomainEx(id string) (*ProtectionDomain, error) {
 	defer TimeSpent("GetProtectionDomainEx", time.Now())
-
-	path := fmt.Sprintf("/api/instances/ProtectionDomain::%s", id)
-
-	pdResp := types.ProtectionDomain{}
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, &types.EmptyPayload{}, &pdResp)
+	pdResp, err := s.FindProtectionDomainByID(id)
 	if err != nil {
 		return nil, err
 	}
-
-	return NewProtectionDomainEx(s.client, &pdResp), nil
+	return NewProtectionDomainEx(s.client, pdResp), nil
 }
 
 // DeleteProtectionDomain will delete a protection domain
@@ -282,19 +276,19 @@ func (pd *ProtectionDomain) DisableRfcache() error {
 	return pd.setParam(path, &types.EmptyPayload{})
 }
 
-// DisableFGLMcache disables SDS Read Flash cache for entire Protection Domain
+// DisableFGLMcache disables Fine Granularity Metadata cache for the Protection Domain
 func (pd *ProtectionDomain) DisableFGLMcache() error {
 	path := "/api/instances/ProtectionDomain::%s/action/disableFglMetadataCache"
 	return pd.setParam(path, &types.EmptyPayload{})
 }
 
-// EnableFGLMcache disables SDS Read Flash cache for entire Protection Domain
+// EnableFGLMcache enables Fine Granularity Metadata cache for the Protection Domain
 func (pd *ProtectionDomain) EnableFGLMcache() error {
 	path := "/api/instances/ProtectionDomain::%s/action/enableFglMetadataCache"
 	return pd.setParam(path, &types.EmptyPayload{})
 }
 
-// SetDefaultFGLMcacheSize disables SDS Read Flash cache for entire Protection Domain
+// SetDefaultFGLMcacheSize sets the default FGL Metadata for all SDSs under the Protection Domain
 func (pd *ProtectionDomain) SetDefaultFGLMcacheSize(cacheSizeInMB int) error {
 	path := "/api/instances/ProtectionDomain::%s/action/setDefaultFglMetadataCacheSize"
 	return pd.setParam(path, map[string]string{
