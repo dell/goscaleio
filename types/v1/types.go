@@ -71,7 +71,7 @@ func (e Error) Error() string {
 // 	Link []*types.Link `xml:"Link"`
 // }
 
-// System defines struct of PFlex array
+// System defines struct of PowerFlex array
 type System struct {
 	MdmMode                               string   `json:"mdmMode"`
 	MdmClusterState                       string   `json:"mdmClusterState"`
@@ -115,7 +115,7 @@ type BWC struct {
 	NumSeconds      int `json:"numSeconds"`
 }
 
-// Statistics defines struct of Statistics for Pflex Array
+// Statistics defines struct of Statistics for PowerFlex Array
 type Statistics struct {
 	PrimaryReadFromDevBwc                    BWC `json:"primaryReadFromDevBwc"`
 	NumOfStoragePools                        int `json:"numOfStoragePools"`
@@ -197,7 +197,7 @@ type Statistics struct {
 	VolumeAddressSpaceInKb                   int `json:"volumeAddressSpaceInKb"`
 }
 
-// SdcStatistics defines struct of Statistics for PFlex SDC
+// SdcStatistics defines struct of Statistics for PowerFlex SDC
 type SdcStatistics struct {
 	UserDataReadBwc         BWC      `json:"userDataReadBwc"`
 	UserDataWriteBwc        BWC      `json:"userDataWriteBwc"`
@@ -209,7 +209,7 @@ type SdcStatistics struct {
 	NumOfMappedVolumes      int      `json:"numOfMappedVolumes"`
 }
 
-// VolumeStatistics defines struct of Statistics for PFlex volume
+// VolumeStatistics defines struct of Statistics for PowerFlex volume
 type VolumeStatistics struct {
 	UserDataReadBwc         BWC      `json:"userDataReadBwc"`
 	UserDataWriteBwc        BWC      `json:"userDataWriteBwc"`
@@ -221,7 +221,7 @@ type VolumeStatistics struct {
 	NumOfMappedSdcs         int      `json:"numOfMappedSdcs"`
 }
 
-// User defines struct of User for PFlex array
+// User defines struct of User for PowerFlex array
 type User struct {
 	SystemID              string  `json:"systemId"`
 	UserRole              string  `json:"userRole"`
@@ -273,7 +273,7 @@ type PDConnInfo struct {
 	DisconnectedServerIP   *string `json:"disconnectedServerIp"`
 }
 
-// ProtectionDomain defines struct for PFlex ProtectionDomain
+// ProtectionDomain defines struct for PowerFlex ProtectionDomain
 type ProtectionDomain struct {
 	SystemID                    string     `json:"systemId"`
 	SdrSdsConnectivityInfo      PDConnInfo `json:"sdrSdsConnectivityInfo"`
@@ -341,7 +341,7 @@ type ProtectionDomainResp struct {
 	ID string `json:"id"`
 }
 
-// Sdc defines struct for PFlex Sdc
+// Sdc defines struct for PowerFlex Sdc
 type Sdc struct {
 	SystemID           string  `json:"systemId"`
 	SdcApproved        bool    `json:"sdcApproved"`
@@ -503,18 +503,97 @@ type SdsPort struct {
 	SdsPort string `json:"sdsPort"`
 }
 
-// Device defines struct for Device
+// Device defines struct of Device for PowerFlex Array
 type Device struct {
-	ID                     string `json:"id,omitempty"`
-	Name                   string `json:"name,omitempty"`
-	DeviceCurrentPathname  string `json:"deviceCurrentPathname"`
-	DeviceOriginalPathname string `json:"deviceOriginalPathname,omitempty"`
-	DeviceState            string `json:"deviceState,omitempty"`
-	ErrorState             string `json:"errorState,omitempty"`
-	CapacityLimitInKb      int    `json:"capacityLimitInKb,omitempty"`
-	MaxCapacityInKb        int    `json:"maxCapacityInKb,omitempty"`
-	StoragePoolID          string `json:"storagePoolId"`
-	SdsID                  string `json:"sdsId"`
+	FglNvdimmMetadataAmortizationX100 int                     `json:"fglNvdimmMetadataAmortizationX100,omitempty"`
+	LogicalSectorSizeInBytes          int                     `json:"logicalSectorSizeInBytes,omitempty"`
+	FglNvdimmWriteCacheSize           int                     `json:"fglNvdimmWriteCacheSize,omitempty"`
+	AccelerationPoolID                string                  `json:"accelerationPoolId,omitempty"`
+	RfcacheProps                      RfcachePropsParams      `json:"rfcacheProps,omitempty"`
+	SdsID                             string                  `json:"sdsId"`
+	StoragePoolID                     string                  `json:"storagePoolId"`
+	CapacityLimitInKb                 int                     `json:"capacityLimitInKb,omitempty"`
+	ErrorState                        string                  `json:"errorState,omitempty"`
+	Capacity                          int                     `json:"capacity,omitempty"`
+	DeviceType                        string                  `json:"deviceType,omitempty"`
+	PersistentChecksumState           string                  `json:"persistentChecksumState,omitempty"`
+	DeviceState                       string                  `json:"deviceState,omitempty"`
+	LedSetting                        string                  `json:"ledSetting,omitempty"`
+	MaxCapacityInKb                   int                     `json:"maxCapacityInKb,omitempty"`
+	SpSdsID                           string                  `json:"spSdsId,omitempty"`
+	LongSuccessfulIos                 LongSuccessfulIosParams `json:"longSuccessfulIos,omitempty"`
+	AggregatedState                   string                  `json:"aggregatedState,omitempty"`
+	TemperatureState                  string                  `json:"temperatureState,omitempty"`
+	SsdEndOfLifeState                 string                  `json:"ssdEndOfLifeState,omitempty"`
+	ModelName                         string                  `json:"modelName,omitempty"`
+	VendorName                        string                  `json:"vendorName,omitempty"`
+	RaidControllerSerialNumber        string                  `json:"raidControllerSerialNumber,omitempty"`
+	FirmwareVersion                   string                  `json:"firmwareVersion,omitempty"`
+	CacheLookAheadActive              bool                    `json:"cacheLookAheadActive,omitempty"`
+	WriteCacheActive                  bool                    `json:"writeCacheActive,omitempty"`
+	AtaSecurityActive                 bool                    `json:"ataSecurityActive,omitempty"`
+	PhysicalSectorSizeInBytes         int                     `json:"physicalSectorSizeInBytes,omitempty"`
+	MediaFailing                      bool                    `json:"mediaFailing,omitempty"`
+	SlotNumber                        string                  `json:"slotNumber,omitempty"`
+	ExternalAccelerationType          string                  `json:"externalAccelerationType,omitempty"`
+	AutoDetectMediaType               string                  `json:"autoDetectMediaType,omitempty"`
+	StorageProps                      StoragePropsParams      `json:"storageProps,omitempty"`
+	AccelerationProps                 AccelerationPropsParams `json:"accelerationProps,omitempty"`
+	DeviceCurrentPathName             string                  `json:"deviceCurrentPathName"`
+	DeviceOriginalPathName            string                  `json:"deviceOriginalPathName,omitempty"`
+	RfcacheErrorDeviceDoesNotExist    bool                    `json:"rfcacheErrorDeviceDoesNotExist,omitempty"`
+	MediaType                         string                  `json:"mediaType,omitempty"`
+	SerialNumber                      string                  `json:"serialNumber,omitempty"`
+	Name                              string                  `json:"name,omitempty"`
+	ID                                string                  `json:"id,omitempty"`
+	Links                             []*Link                 `json:"links"`
+}
+
+// LongSuccessfulIosParams defines struct for Device
+type LongSuccessfulIosParams struct {
+	ShortWindow  DeviceWindowType `json:"shortWindow,omitempty"`
+	MediumWindow DeviceWindowType `json:"mediumWindow,omitempty"`
+	LongWindow   DeviceWindowType `json:"longWindow,omitempty"`
+}
+
+// DeviceWindowType defines struct for LongSuccessfulIosParams
+type DeviceWindowType struct {
+	Threshold            int `json:"threshold,omitempty"`
+	WindowSizeInSec      int `json:"windowSizeInSec,omitempty"`
+	LastOscillationCount int `json:"lastOscillationCount,omitempty"`
+	LastOscillationTime  int `json:"lastOscillationTime,omitempty"`
+	MaxFailuresCount     int `json:"maxFailuresCount,omitempty"`
+}
+
+// AccelerationPropsParams defines struct for Device
+type AccelerationPropsParams struct {
+	AccUsedCapacityInKb string `json:"accUsedCapacityInKb,omitempty"`
+}
+
+// RfcachePropsParams defines struct for Device
+type RfcachePropsParams struct {
+	DeviceUUID                     string `json:"deviceUuid,omitempty"`
+	RfcacheErrorStuckIO            bool   `json:"rfcacheErrorStuckIo,omitempty"`
+	RfcacheErrorHeavyLoadCacheSkip bool   `json:"rfcacheErrorHeavyLoadCacheSkip,omitempty"`
+	RfcacheErrorCardIoError        bool   `json:"rfcacheErrorCardIoError,omitempty"`
+}
+
+// StoragePropsParams defines struct for Device
+type StoragePropsParams struct {
+	FglAccDeviceID                   string `json:"fglAccDeviceId,omitempty"`
+	FglNvdimmSizeMb                  int    `json:"fglNvdimmSizeMb,omitempty"`
+	DestFglNvdimmSizeMb              int    `json:"destFglNvdimmSizeMb,omitempty"`
+	DestFglAccDeviceID               string `json:"destFglAccDeviceId,omitempty"`
+	ChecksumMode                     string `json:"checksumMode,omitempty"`
+	DestChecksumMode                 string `json:"destChecksumMode,omitempty"`
+	ChecksumAccDeviceID              string `json:"checksumAccDeviceId,omitempty"`
+	DestChecksumAccDeviceID          string `json:"destChecksumAccDeviceId,omitempty"`
+	ChecksumSizeMb                   int    `json:"checksumSizeMb,omitempty"`
+	IsChecksumFullyCalculated        bool   `json:"isChecksumFullyCalculated,omitempty"`
+	ChecksumChangelogAccDeviceID     string `json:"checksumChangelogAccDeviceId,omitempty"`
+	DestChecksumChangelogAccDeviceID string `json:"destChecksumChangelogAccDeviceId,omitempty"`
+	ChecksumChangelogSizeMb          int    `json:"checksumChangelogSizeMb,omitempty"`
+	DestChecksumChangelogSizeMb      int    `json:"destChecksumChangelogSizeMb,omitempty"`
 }
 
 // DeviceParam defines struct for DeviceParam
@@ -533,7 +612,7 @@ type DeviceResp struct {
 	ID string `json:"id"`
 }
 
-// StoragePool defines struct for PFlex StoragePool
+// StoragePool defines struct for PowerFlex StoragePool
 type StoragePool struct {
 	ProtectionDomainID                                              string  `json:"protectionDomainId"`
 	RebalanceioPriorityPolicy                                       string  `json:"rebalanceIoPriorityPolicy"`
