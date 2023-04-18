@@ -1021,3 +1021,69 @@ type QueryReplicationPair struct {
 type QueryReplicationPairStatistics struct {
 	InitialCopyProgress float64 `json:"initialCopyProgress"`
 }
+
+// NASServerOperationalStatusEnum NAS lifecycle state.
+type NASServerOperationalStatusEnum string
+
+// operational status of NAS
+const (
+	Stopped  NASServerOperationalStatusEnum = "Stopped"
+	Starting NASServerOperationalStatusEnum = "Starting"
+	Started  NASServerOperationalStatusEnum = "Started"
+	Stopping NASServerOperationalStatusEnum = "Stopping"
+	Failover NASServerOperationalStatusEnum = "Failover"
+	Degraded NASServerOperationalStatusEnum = "Degraded"
+	Unknown  NASServerOperationalStatusEnum = "Unknown"
+)
+
+// NFSServerInstance in NAS server
+type NFSServerInstance struct {
+	// Unique identifier for NFS server
+	ID string `json:"id"`
+	// IsNFSv4Enabled is set to true if nfsv4 is enabled on NAS server
+	IsNFSv4Enabled bool `json:"is_nfsv4_enabled,omitempty"`
+}
+
+// NAS defines struct for NAS.
+type NAS struct {
+	ID                              string                         `json:"id,omitempty"`
+	Description                     string                         `json:"description,omitempty"`
+	Name                            string                         `json:"name,omitempty"`
+	ProtectionDomainID              string                         `json:"protection_domain_id,omitempty"`
+	StoragePoolID                   string                         `json:"storage_pool_id,omitempty"`
+	PrimaryNodeID                   string                         `json:"primary_node_id,omitempty"`
+	BackUpNodeID                    string                         `json:"backup_node_id,omitempty"`
+	OperationalStatus               NASServerOperationalStatusEnum `json:"operational_status,omitempty"`
+	CurrentPreferredIPv4InterfaceID string                         `json:"current_preferred_IPv4_interface_id"`
+	NfsServers                      []NFSServerInstance            `json:"nfs_servers"`
+	CurrentNodeID                   string                         `json:"current_node_id,omitempty"`
+	DefaultUnixUser                 string                         `json:"default_unix_user,omitempty"`
+	DefaultWindowsUser              string                         `json:"default_windows_user,omitempty"`
+	CurrentUnixDirectoryService     string                         `json:"current_unix_directory_service,omitempty"`
+	IsUsernameTranslationEnabled    bool                           `json:"is_username_translation_enabled,omitempty"`
+	IsAutoUserMappingEnabled        bool                           `json:"is_auto_user_mapping_enabled,omitempty"`
+	ProductionIPv4InterfaceID       string                         `json:"production_IPv4_interface_id,omitempty"`
+	ProductionIPv6InterfaceID       string                         `json:"production_IPv6_interface_id,omitempty"`
+	BackupIPv4InterfaceID           string                         `json:"backup_IPv4_interface_id,omitempty"`
+	BackupIPv6InterfaceID           string                         `json:"backup_IPv6_interface_id,omitempty"`
+	CurrentPreferredIPv6InterfaceID string                         `json:"current_preferred_IPv6_interface_id,omitempty"`
+	OperationalStatusl10n           string                         `json:"operational_status_l10n,omitempty"`
+	CurrentUnixDirectoryServicel10n string                         `json:"current_unix_directory_service_l10n,omitempty"`
+}
+
+// CreateNASResponse defines the struct for CreateNASResponse
+type CreateNASResponse struct {
+	ID string `json:"id"`
+}
+
+// CreateNASParam defines the struct for CreateNASParam
+type CreateNASParam struct {
+	Name                         string `json:"name"`
+	ProtectionDomainID           string `json:"protection_domain_id"`
+	Description                  string `json:"description,omitempty"`
+	CurrentUnixDirectoryService  string `json:"current_unix_directory_service,omitempty"`
+	DefaultUnixUser              string `json:"default_unix_user,omitempty"`
+	DefaultWindowsUser           string `json:"default_windows_user,omitempty"`
+	IsUsernameTranslationEnabled bool   `json:"is_username_translation_enabled,omitempty"`
+	IsAutoUserMappingEnabled     bool   `json:"is_auto_user_mapping_enabled,omitempty"`
+}
