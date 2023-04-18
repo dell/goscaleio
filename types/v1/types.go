@@ -1087,3 +1087,67 @@ type CreateNASParam struct {
 	IsUsernameTranslationEnabled bool   `json:"is_username_translation_enabled,omitempty"`
 	IsAutoUserMappingEnabled     bool   `json:"is_auto_user_mapping_enabled,omitempty"`
 }
+
+// FileSystem defines struct for PowerFlex FileSystem
+type FileSystem struct {
+	ID                         string `json:"id"`
+	Name                       string `json:"name"`
+	Description                string `json:"description"`
+	StoragePoolID              string `json:"storage_pool_id"`
+	NasServerID                string `json:"nas_server_id"`
+	ParentID                   string `json:"parent_id"`
+	StorageWwn                 string `json:"storage_wwn"`
+	ExportFsID                 string `json:"export_fsid"`
+	Type                       string `json:"type"`
+	SizeTotal                  int    `json:"size_total"`
+	SizeUsed                   int    `json:"size_used"`
+	IsReadOnly                 bool   `json:"is_read_only"`
+	ProtectionPolicyID         string `json:"protection_policy_id"`
+	AccessPolicy               string `json:"access_policy"`
+	LockingPolicy              string `json:"locking_policy"`
+	FolderRenamePolicy         string `json:"folder_rename_policy"`
+	IsSmbSyncWritesEnabled     bool   `json:"is_smb_sync_writes_enabled"`
+	IsSmbOpLocksEnabled        bool   `json:"is_smb_op_locks_enabled"`
+	IsSmbNoNotifyEnabled       bool   `json:"is_smb_no_notify_enabled"`
+	IsSmbNotifyOnAccessEnabled bool   `json:"is_smb_notify_on_access_enabled"`
+	IsSmbNotifyOnWriteEnabled  bool   `json:"is_smb_notify_on_write_enabled"`
+	SmbNotifyOnChangeDirDepth  int    `json:"smb_notify_on_change_dir_depth"`
+	IsAsyncMTimeEnabled        bool   `json:"is_async_MTime_enabled"`
+	IsFlrEnabled               bool   `json:"is_flr_enabled"`
+	IsQuotaEnabled             bool   `json:"is_quota_enabled"`
+	GracePeriod                int    `json:"grace_period"`
+	DefaultHardLimit           int    `json:"default_hard_limit"`
+	DefaultSoftLimit           int    `json:"default_soft_limit"`
+	CreationTimestamp          string `json:"creation_timestamp"`
+	ExpirationTimestamp        string `json:"expiration_timestamp"`
+	LastRefreshTimestamp       string `json:"last_refresh_timestamp"`
+	LastWritableTimestamp      string `json:"last_writable_timestamp"`
+	IsModified                 bool   `json:"is_modified"`
+	AccessType                 string `json:"access_type"`
+	CreatorType                string `json:"creator_type"`
+}
+
+// FsCreate defines struct for creating a PowerFlex FileSystem
+type FsCreate struct {
+	Name                       string `json:"name"`
+	Description                string `json:"description,omitempty"`
+	SizeTotal                  int    `json:"size_total"`
+	StoragePoolID              string `json:"storage_pool_id"`
+	NasServerID                string `json:"nas_server_id"`
+	IsReadOnly                 bool   `json:"is_read_only,omitempty"`
+	AccessPolicy               string `json:"access_policy,omitempty"`
+	LockingPolicy              string `json:"locking_policy,omitempty"`
+	FolderRenamePolicy         string `json:"folder_rename_policy,omitempty"`
+	IsSmbSyncWritesEnabled     bool   `json:"is_smb_sync_writes_enabled,omitempty"`
+	IsSmbNoNotifyEnabled       bool   `json:"is_smb_no_notify_enabled,omitempty"`
+	IsSmbOpLocksEnabled        bool   `json:"is_smb_op_locks_enabled,omitempty"`
+	IsSmbNotifyOnAccessEnabled bool   `json:"is_smb_notify_on_access_enabled,omitempty"`
+	IsSmbNotifyOnWriteEnabled  bool   `json:"is_smb_notify_on_write_enabled,omitempty"`
+	SmbNotifyOnChangeDirDepth  int    `json:"smb_notify_on_change_dir_depth,omitempty"`
+	IsAsyncMTimeEnabled        bool   `json:"is_async_MTime_enabled,omitempty"`
+}
+
+// FileSystemResp defines struct for FileSystemResp
+type FileSystemResp struct {
+	ID string `json:"id"`
+}
