@@ -17,9 +17,6 @@ import (
 	"os"
 	"testing"
 
-	//log "github.com/sirupsen/logrus"
-	//types "github.com/dell/goscaleio/types/v1"
-
 	"github.com/stretchr/testify/assert"
 )
 
