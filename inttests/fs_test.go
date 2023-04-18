@@ -165,7 +165,6 @@ func TestCreateDeleteFileSystem(t *testing.T) {
 	// try to create a file system that exists
 	filesystem, err = system.CreateFileSystem(fs)
 	assert.NotNil(t, err)
-	assert.Nil(t, err)
 
 	// delete the file system
 	err = system.DeleteFileSystem(fsName)
