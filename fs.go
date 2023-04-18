@@ -103,7 +103,6 @@ func (s *System) DeleteFileSystem(name string) error {
 	defer TimeSpent("DeleteFileSystem", time.Now())
 
 	fs, err := s.GetFileSystemByName(name)
-	fmt.Printf("fs ....... %v\n", fs)
 	if err != nil {
 		return err
 	}
