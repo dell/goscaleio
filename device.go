@@ -68,7 +68,7 @@ func (sp *StoragePool) AttachDevice(
 	return dev.ID, nil
 }
 
-// GetDevice returns a device
+// GetDevice returns a device based on Storage Pool ID
 func (sp *StoragePool) GetDevice() ([]types.Device, error) {
 	defer TimeSpent("GetDevice", time.Now())
 
@@ -104,5 +104,62 @@ func (sp *StoragePool) FindDevice(
 		}
 	}
 
-	return nil, errors.New("Couldn't find DEV")
+	return nil, errors.New("couldn't find device")
+}
+
+// GetDevice returns a devices based on SDS ID
+func (sds *Sds) GetDevice() ([]types.Device, error) {
+	defer TimeSpent("GetSDSDevice", time.Now())
+
+	path := fmt.Sprintf(
+		"/api/instances/Sds::%v/relationships/Device",
+		sds.Sds.ID)
+
+	var devices []types.Device
+	err := sds.client.getJSONWithRetry(http.MethodGet, path, nil, &devices)
+	if err != nil {
+		return nil, err
+	}
+
+	return devices, nil
+}
+
+// FindDevice returns a Device
+func (sds *Sds) FindDevice(
+	field, value string) (*types.Device, error) {
+	defer TimeSpent("FindDevice", time.Now())
+
+	devices, err := sds.GetDevice()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, device := range devices {
+		valueOf := reflect.ValueOf(device)
+		switch {
+		case reflect.Indirect(valueOf).FieldByName(field).String() == value:
+			return &device, nil
+		}
+	}
+
+	return nil, errors.New("couldn't find device")
+}
+
+// GetDevice returns a device using Device ID
+func (system *System) GetDevice(id string) (*types.Device, error) {
+
+	defer TimeSpent("GetDevice", time.Now())
+
+	path := fmt.Sprintf(
+		"/api/instances/Device::%v",
+		id)
+
+	var deviceResult types.Device
+	err := system.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &deviceResult)
+	if err != nil {
+		return nil, err
+	}
+
+	return &deviceResult, nil
 }
