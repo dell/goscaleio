@@ -46,7 +46,6 @@ func (c *Client) CreateNFSExport(createParams *types.NFSExportCreate) (respnfs *
 	}
 
 	return respnfs, nil
-
 }
 
 // GetNFSExportById returns NFS Export properties by ID

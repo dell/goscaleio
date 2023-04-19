@@ -1207,13 +1207,14 @@ type FileSystemResp struct {
 type NFSExportDefaultAccessEnum string
 
 const (
-	No_Access      NFSExportDefaultAccessEnum = "No_Access"
-	Read_Only      NFSExportDefaultAccessEnum = "Read_Only"
-	Read_Write     NFSExportDefaultAccessEnum = "Read_Write"
-	Root           NFSExportDefaultAccessEnum = "Root"
-	Read_Only_Root NFSExportDefaultAccessEnum = "Read_Only_Root "
+	NoAccess     NFSExportDefaultAccessEnum = "No_Access"
+	ReadOnly     NFSExportDefaultAccessEnum = "Read_Only"
+	ReadWrite    NFSExportDefaultAccessEnum = "Read_Write"
+	Root         NFSExportDefaultAccessEnum = "Root"
+	ReadOnlyRoot NFSExportDefaultAccessEnum = "Read_Only_Root "
 )
 
+// NFSExport defines the struct for NFSExport
 type NFSExport struct {
 	ID                 string                     `json:"id,omitempty"`
 	FileSystemID       string                     `json:"file_system_id,omitempty"`
@@ -1227,16 +1228,19 @@ type NFSExport struct {
 	ReadOnlyRootHosts  []string                   `json:"read_only_root_hosts,omitempty"`
 }
 
+// CreateResponse defines struct for response
 type CreateResponse struct {
 	ID string `json:"id,omitempty"`
 }
 
+// NFSExportCreate defines struct for Create NFS Export
 type NFSExportCreate struct {
 	Name         string `json:"name"`
 	FileSystemID string `json:"file_system_id"`
 	Path         string `json:"path"`
 }
 
+// NFSExportModify defines struct for Modify NFS Export
 type NFSExportModify struct {
 	Description              string   `json:"description,omitempty"`
 	DefaultAccess            string   `json:"default_access,omitempty"`

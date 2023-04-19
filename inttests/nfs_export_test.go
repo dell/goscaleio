@@ -13,7 +13,6 @@
 package inttests
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -31,28 +30,10 @@ func GetNFSExportbyName(t *testing.T) string {
 	if nfsexport == nil {
 		return ""
 	}
-	fmt.Printf("filesystems[0].Name: %v", nfsexport[0].Name)
 	return nfsexport[0].Name
 }
 
-// func TestGetFileSystemByName(t *testing.T) {
-// 	system := getSystem()
-// 	assert.NotNil(t, system)
-
-// 	fsName := getFileSystemName(t)
-// 	assert.NotZero(t, len(fsName))
-
-// 	if len(fsName) > 0 {
-// 		fs, err := system.GetFileSystemByName(fsName)
-// 		assert.Nil(t, err)
-// 		assert.Equal(t, fsName, fs.Name)
-// 	}
-// }
-
 func TestNFSExportByName(t *testing.T) {
-	// system := getSystem()
-	// assert.NotNil(t, system)
-
 	fsName := GetNFSExportbyName(t)
 	assert.NotZero(t, len(fsName))
 
@@ -95,7 +76,7 @@ func TestCreateModifyDeleteNFSExport(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	nfsName := fmt.Sprintf("%s-%s", "NFS", testPrefix+randString(8))
+	nfsName := "NFS" + testPrefix + randString(8)
 	nfsmodify := "NFS export modify testing"
 	var filesystemname string
 	if os.Getenv("GOSCALEIO_FILESYSTEM_NFSEXPORT") != "" {
@@ -107,13 +88,14 @@ func TestCreateModifyDeleteNFSExport(t *testing.T) {
 		FileSystemID: filesystem.ID,
 		Path:         "/" + filesystemname,
 	}
-	// create the file system
+
+	//create nfs export
 	nfs, err := C.CreateNFSExport(nfsexport)
 	fsID := nfs.ID
 	assert.Nil(t, err)
 	assert.NotNil(t, fsID)
 
-	// try to create a file system that exists
+	// try to create existing nfs export
 	nfs, err = C.CreateNFSExport(nfsexport)
 	assert.NotNil(t, err)
 
@@ -124,7 +106,7 @@ func TestCreateModifyDeleteNFSExport(t *testing.T) {
 	}
 	err = C.ModifyNFSExport(nfsexportmodify, fsID)
 
-	//delete the file system
+	//delete the NFS export
 	err = C.DeleteNFSExport(fsID)
 	assert.Nil(t, err)
 
