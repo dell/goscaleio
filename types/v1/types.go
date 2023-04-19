@@ -713,6 +713,58 @@ type StoragePoolUseRmCache struct {
 type StoragePoolUseRfCache struct {
 }
 
+// StoragePoolZeroPadEnabled defines struct for zero Pad Enablement
+type StoragePoolZeroPadEnabled struct {
+	ZeroPadEnabled string `json:"zeroPadEnabled"`
+}
+
+// ReplicationJournalCapacityParam defines struct for Replication Journal Capacity
+type ReplicationJournalCapacityParam struct {
+	ReplicationJournalCapacityMaxRatio string `json:"replicationJournalCapacityMaxRatio"`
+}
+
+// CapacityAlertThresholdParam defines struct for Capacity Alert Threshold
+type CapacityAlertThresholdParam struct {
+	CapacityAlertHighThresholdPercent     string `json:"capacityAlertHighThresholdPercent"`
+	CapacityAlertCriticalThresholdPercent string `json:"capacityAlertCriticalThresholdPercent"`
+}
+
+// ProtectedMaintenanceModeParam defines struct for Protected Maintenance Mode
+type ProtectedMaintenanceModeParam struct {
+	Policy                      string `json:"policy"`
+	NumOfConcurrentIosPerDevice string `json:"numOfConcurrentIosPerDevice,omitempty"`
+	BwLimitPerDeviceInKbps      string `json:"bwLimitPerDeviceInKbps,omitempty"`
+}
+
+// RebalanceEnabledParam defines struct for Rebalance Enablement
+type RebalanceEnabledParam struct {
+	RebalanceEnabled string `json:"rebalanceEnabled"`
+}
+
+// SparePercentageParam defines struct for Spare Percentage
+type SparePercentageParam struct {
+	SparePercentage string `json:"sparePercentage"`
+}
+
+// RmcacheWriteHandlingModeParam defines struct for Rmcache Write Handling Mode
+type RmcacheWriteHandlingModeParam struct {
+	RmcacheWriteHandlingMode string `json:"rmcacheWriteHandlingMode"`
+}
+
+// RebuildEnabledParam defines struct for Rebuild Enablement
+type RebuildEnabledParam struct {
+	RebuildEnabled string `json:"rebuildEnabled"`
+}
+
+// RebuildRebalanceParallelismParam defines struct for Rebuild Rebalance Parallelism
+type RebuildRebalanceParallelismParam struct {
+	Limit string `json:"limit"`
+}
+
+// FragmentationParam defines struct for fragmentation
+type FragmentationParam struct {
+}
+
 // StoragePoolResp defines struct for StoragePoolResp
 type StoragePoolResp struct {
 	ID string `json:"id"`
