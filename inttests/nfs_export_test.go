@@ -66,7 +66,7 @@ func TestNFSExportByNameInvalid(t *testing.T) {
 }
 
 func TestNFSExportByIDInvalid(t *testing.T) {
-	fs, err := C.GetNFSExportById(invalidIdentifier)
+	fs, err := C.GetNFSExportByID(invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, fs)
 }
