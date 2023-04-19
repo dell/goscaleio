@@ -21,7 +21,7 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
-// NGetNFSExport lists NFS Exports.
+// GetNFSExport lists NFS Exports.
 func (c *Client) GetNFSExport() (nfsList []types.NFSExport, err error) {
 	defer TimeSpent("GetNfsExport", time.Now())
 	path := fmt.Sprintf("/rest/v1/nfs-exports?select=*")
