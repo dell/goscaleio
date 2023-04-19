@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/dell/goscaleio"
+	types "github.com/dell/goscaleio/types/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
@@ -164,4 +165,146 @@ func TestCreateDeleteProtectionDomain(t *testing.T) {
 	err = system.DeleteProtectionDomain(domainName)
 	assert.NotNil(t, err)
 
+}
+
+func TestCRUDProtectionDomain(t *testing.T) {
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	domainName := fmt.Sprintf("%s-%s", testPrefix, "Domain")
+
+	// create the pd
+	domainID, err := system.CreateProtectionDomain(domainName)
+	assert.Nil(t, err)
+	assert.NotNil(t, domainID)
+
+	pd, err2 := system.GetProtectionDomainEx(domainID)
+	assert.Nil(t, err2)
+
+	// change name of pd
+	newName := fmt.Sprintf("%s2-%s", testPrefix, "Domain")
+	err = pd.SetName(newName)
+	assert.Nil(t, err)
+
+	// inactivate pd
+	err = pd.InActivate(false)
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, pd.ProtectionDomain.Name, newName)
+	assert.Equal(t, pd.ProtectionDomain.ProtectionDomainState, "Inactive")
+
+	testRfCacheProtectionDomain(t, pd)
+
+	testNwLimitsProtectionDomain(t, pd)
+
+	// activate pd
+	err = pd.Activate(true)
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, pd.ProtectionDomain.ProtectionDomainState, "Active")
+
+	testFGLMCacheProtectionDomain(t, pd)
+
+	// check that finding pd by name yields same struct as refreshing
+	pdByName, err3 := system.FindProtectionDomainByName(newName)
+	assert.Nil(t, err3)
+	assert.Equal(t, pd.ProtectionDomain, pdByName)
+
+	// delete pd
+	err = pd.Delete()
+	assert.Nil(t, err)
+}
+
+func testFGLMCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
+	err := pd.DisableFGLMcache()
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, pd.ProtectionDomain.FglMetadataCacheEnabled, false)
+
+	err = pd.SetDefaultFGLMcacheSize(1024)
+	assert.Nil(t, err)
+	err = pd.EnableFGLMcache()
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, pd.ProtectionDomain.FglMetadataCacheEnabled, true)
+	assert.Equal(t, pd.ProtectionDomain.FglDefaultMetadataCacheSize, 1024)
+}
+
+func testRfCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
+	err := pd.DisableRfcache()
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+
+	p := types.PDRCModeRead
+	err = pd.SetRfcacheParams(types.PDRfCacheParams{
+		RfCacheOperationalMode: p,
+		RfCachePageSizeKb:      16,
+		RfCacheMaxIoSizeKb:     64,
+	})
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, pd.ProtectionDomain.RfCacheEnabled, false)
+	assert.Equal(t, pd.ProtectionDomain.RfCacheOperationalMode, p)
+	assert.Equal(t, pd.ProtectionDomain.RfCachePageSizeKb, 16)
+	assert.Equal(t, pd.ProtectionDomain.RfCacheMaxIoSizeKb, 64)
+
+	err = pd.EnableRfcache()
+	assert.Nil(t, err)
+	err = pd.SetRfcacheParams(types.PDRfCacheParams{RfCachePageSizeKb: 4, RfCacheMaxIoSizeKb: 0})
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, pd.ProtectionDomain.RfCacheEnabled, true)
+	assert.Equal(t, pd.ProtectionDomain.RfCacheOperationalMode, p)
+	assert.Equal(t, pd.ProtectionDomain.RfCachePageSizeKb, 4)
+	assert.Equal(t, pd.ProtectionDomain.RfCacheMaxIoSizeKb, 64)
+
+	err = pd.SetRfcacheParams(types.PDRfCacheParams{RfCachePageSizeKb: 16, RfCacheMaxIoSizeKb: 32})
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, pd.ProtectionDomain.RfCacheEnabled, true)
+	assert.Equal(t, pd.ProtectionDomain.RfCacheOperationalMode, p)
+	assert.Equal(t, pd.ProtectionDomain.RfCachePageSizeKb, 16)
+	assert.Equal(t, pd.ProtectionDomain.RfCacheMaxIoSizeKb, 32)
+}
+
+func testNwLimitsProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
+	oldPd := *pd.ProtectionDomain
+	a, b, c := 10*1024, 16*1024, 0
+	err := pd.SetSdsNetworkLimits(types.SdsNetworkLimitParams{
+		VTreeMigrationNetworkThrottlingInKbps:           &a,
+		ProtectedMaintenanceModeNetworkThrottlingInKbps: &b,
+		OverallIoNetworkThrottlingInKbps:                &c,
+	})
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, pd.ProtectionDomain.RebuildNetworkThrottlingInKbps, oldPd.RebuildNetworkThrottlingInKbps)
+	assert.Equal(t, pd.ProtectionDomain.RebalanceNetworkThrottlingInKbps, oldPd.RebalanceNetworkThrottlingInKbps)
+	assert.Equal(t, pd.ProtectionDomain.VTreeMigrationNetworkThrottlingInKbps, a)
+	assert.Equal(t, pd.ProtectionDomain.ProtectedMaintenanceModeNetworkThrottlingInKbps, b)
+	assert.Equal(t, pd.ProtectionDomain.OverallIoNetworkThrottlingInKbps, c)
+
+	a1, c1 := 64*1024, 100*1024
+	err = pd.SetSdsNetworkLimits(types.SdsNetworkLimitParams{
+		RebuildNetworkThrottlingInKbps:        &a1,
+		RebalanceNetworkThrottlingInKbps:      &a1,
+		VTreeMigrationNetworkThrottlingInKbps: &a1,
+		OverallIoNetworkThrottlingInKbps:      &c1,
+	})
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, pd.ProtectionDomain.RebuildNetworkThrottlingInKbps, a1)
+	assert.Equal(t, pd.ProtectionDomain.RebalanceNetworkThrottlingInKbps, a1)
+	assert.Equal(t, pd.ProtectionDomain.VTreeMigrationNetworkThrottlingInKbps, a1)
+	assert.Equal(t, pd.ProtectionDomain.ProtectedMaintenanceModeNetworkThrottlingInKbps, b)
+	assert.Equal(t, pd.ProtectionDomain.OverallIoNetworkThrottlingInKbps, c1)
 }
