@@ -1204,7 +1204,7 @@ type FileSystemResp struct {
 	ID string `json:"id"`
 }
 
-// NFSExportDefaultAccessEnum
+// NFSExportDefaultAccessEnum defines default access
 type NFSExportDefaultAccessEnum string
 
 // Default access const

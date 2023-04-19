@@ -45,7 +45,6 @@ func TestNFSExportByName(t *testing.T) {
 }
 
 func TestNFSExportByID(t *testing.T) {
-
 	nfsName := GetNFSExportbyName(t)
 	assert.NotZero(t, len(nfsName))
 
@@ -54,7 +53,7 @@ func TestNFSExportByID(t *testing.T) {
 	assert.Equal(t, nfsName, nfs.Name)
 
 	if nfs != nil {
-		fs, err := C.GetNFSExportById(nfs.ID)
+		fs, err := C.GetNFSExportByID(nfs.ID)
 		assert.Nil(t, err)
 		assert.Equal(t, nfs.ID, fs.ID)
 	}

@@ -344,7 +344,7 @@ func TestGetNFSExportById(t *testing.T) {
 				client: client,
 			}
 
-			resp, err := s.client.GetNFSExportById(testCaseFSIds[id])
+			resp, err := s.client.GetNFSExportByID(testCaseFSIds[id])
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}

@@ -48,7 +48,7 @@ func (c *Client) CreateNFSExport(createParams *types.NFSExportCreate) (respnfs *
 	return respnfs, nil
 }
 
-// GetNFSExportById returns NFS Export properties by ID
+// GetNFSExportByID returns NFS Export properties by ID
 func (c *Client) GetNFSExportByID(id string) (respnfs *types.NFSExport, err error) {
 	defer TimeSpent("GetNfsExport", time.Now())
 	path := fmt.Sprintf("/rest/v1/nfs-exports/%s?select=*", id)
