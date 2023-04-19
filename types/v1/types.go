@@ -1204,8 +1204,10 @@ type FileSystemResp struct {
 	ID string `json:"id"`
 }
 
+// NFSExportDefaultAccessEnum
 type NFSExportDefaultAccessEnum string
 
+// Default access const
 const (
 	NoAccess     NFSExportDefaultAccessEnum = "No_Access"
 	ReadOnly     NFSExportDefaultAccessEnum = "Read_Only"
