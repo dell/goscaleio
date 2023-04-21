@@ -1203,3 +1203,70 @@ type FsCreate struct {
 type FileSystemResp struct {
 	ID string `json:"id"`
 }
+
+// NFSExportDefaultAccessEnum defines default access
+type NFSExportDefaultAccessEnum string
+
+// Default access const
+const (
+	NoAccess     NFSExportDefaultAccessEnum = "No_Access"
+	ReadOnly     NFSExportDefaultAccessEnum = "Read_Only"
+	ReadWrite    NFSExportDefaultAccessEnum = "Read_Write"
+	Root         NFSExportDefaultAccessEnum = "Root"
+	ReadOnlyRoot NFSExportDefaultAccessEnum = "Read_Only_Root "
+)
+
+// NFSExport defines the struct for NFSExport
+type NFSExport struct {
+	ID                 string                     `json:"id,omitempty"`
+	FileSystemID       string                     `json:"file_system_id,omitempty"`
+	Name               string                     `json:"name,omitempty"`
+	Description        string                     `json:"description,omitempty"`
+	DefaultAccess      NFSExportDefaultAccessEnum `json:"default_access,omitempty"`
+	Path               string                     `json:"path,omitempty"`
+	ReadWriteHosts     []string                   `json:"read_write_hosts,omitempty"`
+	ReadOnlyHosts      []string                   `json:"read_only_hosts,omitempty"`
+	ReadWriteRootHosts []string                   `json:"read_write_root_hosts,omitempty"`
+	ReadOnlyRootHosts  []string                   `json:"read_only_root_hosts,omitempty"`
+}
+
+// NFSExportCreateResponse defines struct for response
+type NFSExportCreateResponse struct {
+	ID string `json:"id"`
+}
+
+// NFSExportCreate defines struct for Create NFS Export
+type NFSExportCreate struct {
+	Name               string   `json:"name"`
+	FileSystemID       string   `json:"file_system_id"`
+	Path               string   `json:"path"`
+	NoAccessHosts      []string `json:"no_access_hosts,omitempty"`
+	ReadOnlyHosts      []string `json:"read_only_hosts,omitempty"`
+	ReadWriteHosts     []string `json:"read_write_hosts,omitempty"`
+	ReadOnlyRootHosts  []string `json:"read_only_root_hosts,omitempty"`
+	ReadWriteRootHosts []string `json:"read_write_root_hosts,omitempty"`
+	AnonymousUID       int      `json:"anonymous_UID,omitempty"`
+	AnonymousGID       int      `json:"anonymous_GID,omiempty"`
+	IsNoSUID           bool     `json:"is_no_SUID,omitempty"`
+}
+
+// NFSExportModify defines struct for Modify NFS Export
+type NFSExportModify struct {
+	Description              string   `json:"description,omitempty"`
+	DefaultAccess            string   `json:"default_access,omitempty"`
+	NoAccessHosts            []string `json:"no_access_hosts,omitempty"`
+	AddNoAccessHosts         []string `json:"add_no_access_hosts,omitempty"`
+	RemoveNoAccessHosts      []string `json:"remove_no_access_hosts,omitempty"`
+	ReadOnlyHosts            []string `json:"read_only_hosts,omitempty"`
+	AddReadOnlyHosts         []string `json:"add_read_only_hosts,omitempty"`
+	RemoveReadOnlyHosts      []string `json:"remove_read_only_hosts,omitempty"`
+	ReadOnlyRootHosts        []string `json:"read_only_root_hosts,omitempty"`
+	AddReadOnlyRootHosts     []string `json:"add_read_only_root_hosts,omitempty"`
+	RemoveReadOnlyRootHosts  []string `json:"remove_read_only_root_hosts,omitempty"`
+	ReadWriteHosts           []string `json:"read_write_hosts,omitempty"`
+	AddReadWriteHosts        []string `json:"add_read_write_hosts,omitempty"`
+	RemoveReadWriteHosts     []string `json:"remove_read_write_hosts,omitempty"`
+	ReadWriteRootHosts       []string `json:"read_write_root_hosts,omitempty"`
+	AddReadWriteRootHosts    []string `json:"add_read_write_root_hosts,omitempty"`
+	RemoveReadWriteRootHosts []string `json:"remove_read_write_root_hosts,omitempty"`
+}
