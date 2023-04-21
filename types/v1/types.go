@@ -1230,7 +1230,7 @@ type NFSExport struct {
 	ReadOnlyRootHosts  []string                   `json:"read_only_root_hosts,omitempty"`
 }
 
-// CreateResponse defines struct for response
+// NFSExportCreateResponse defines struct for response
 type NFSExportCreateResponse struct {
 	ID string `json:"id"`
 }
