@@ -166,23 +166,23 @@ func TestDeleteNFSExport(t *testing.T) {
 }
 
 func TestCreateNFSExport(t *testing.T) {
-	type checkFn func(*testing.T, *types.CreateResponse, error)
+	type checkFn func(*testing.T, *types.NFSExportCreateResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.CreateResponse, err error) {
+	hasNoError := func(t *testing.T, resp *types.NFSExportCreateResponse, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.CreateResponse, err error) {
+	hasError := func(t *testing.T, resp *types.NFSExportCreateResponse, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
-	checkResp := func(nfsId string) func(t *testing.T, resp *types.CreateResponse, err error) {
-		return func(t *testing.T, resp *types.CreateResponse, err error) {
+	checkResp := func(nfsId string) func(t *testing.T, resp *types.NFSExportCreateResponse, err error) {
+		return func(t *testing.T, resp *types.NFSExportCreateResponse, err error) {
 			assert.Equal(t, nfsId, resp.ID)
 		}
 	}
@@ -201,7 +201,7 @@ func TestCreateNFSExport(t *testing.T) {
 					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
 				}
 
-				resp := types.CreateResponse{
+				resp := types.NFSExportCreateResponse{
 					ID: "64385158-97a1-bb86-4fd9-2a50fb1ccff3",
 				}
 

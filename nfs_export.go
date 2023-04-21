@@ -36,7 +36,7 @@ func (c *Client) GetNFSExport() (nfsList []types.NFSExport, err error) {
 }
 
 // CreateNFSExport create an NFS Export for a File System.
-func (c *Client) CreateNFSExport(createParams *types.NFSExportCreate) (respnfs *types.CreateResponse, err error) {
+func (c *Client) CreateNFSExport(createParams *types.NFSExportCreate) (respnfs *types.NFSExportCreateResponse, err error) {
 	path := fmt.Sprintf("/rest/v1/nfs-exports")
 
 	var body *types.NFSExportCreate = createParams
