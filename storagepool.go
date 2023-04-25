@@ -270,11 +270,11 @@ func (pd *ProtectionDomain) SetRebuildRebalanceParallelismParam(ID string, limit
 	return nil
 }
 
-// EnableFragmentation enables fragmentation
+// Fragmentation enables or disables fragmentation
 func (pd *ProtectionDomain) Fragmentation(ID string, value bool) error {
 	payload := &types.FragmentationParam{}
 	if value {
-		
+
 		path := fmt.Sprintf("/api/instances/StoragePool::%v/action/enableFragmentation", ID)
 		err := pd.client.getJSONWithRetry(
 			http.MethodPost, path, payload, nil)
