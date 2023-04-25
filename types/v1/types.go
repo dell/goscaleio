@@ -683,11 +683,11 @@ type StoragePool struct {
 // StoragePoolParam defines struct for StoragePoolParam
 type StoragePoolParam struct {
 	Name                     string `json:"name"`
-	SparePercentage          int    `json:"sparePercentage,omitempty"`
+	SparePercentage          string `json:"sparePercentage,omitempty"`
 	RebuildEnabled           bool   `json:"rebuildEnabled,omitempty"`
 	RebalanceEnabled         bool   `json:"rebalanceEnabled,omitempty"`
 	ProtectionDomainID       string `json:"protectionDomainId"`
-	ZeroPaddingEnabled       bool   `json:"zeroPaddingEnabled,omitempty"`
+	ZeroPaddingEnabled       string `json:"zeroPaddingEnabled,omitempty"`
 	UseRmcache               string `json:"useRmcache,omitempty"`
 	UseRfcache               string `json:"useRfcache,omitempty"`
 	RmcacheWriteHandlingMode string `json:"rmcacheWriteHandlingMode,omitempty"`
@@ -725,8 +725,8 @@ type ReplicationJournalCapacityParam struct {
 
 // CapacityAlertThresholdParam defines struct for Capacity Alert Threshold
 type CapacityAlertThresholdParam struct {
-	CapacityAlertHighThresholdPercent     string `json:"capacityAlertHighThresholdPercent"`
-	CapacityAlertCriticalThresholdPercent string `json:"capacityAlertCriticalThresholdPercent"`
+	CapacityAlertHighThresholdPercent     string `json:"capacityAlertHighThresholdPercent,omitempty"`
+	CapacityAlertCriticalThresholdPercent string `json:"capacityAlertCriticalThresholdPercent,omitempty"`
 }
 
 // ProtectedMaintenanceModeParam defines struct for Protected Maintenance Mode

@@ -157,12 +157,7 @@ func (pd *ProtectionDomain) SetReplicationJournalCapacity(ID string, replication
 	return nil
 }
 
-// SetCapacityAlertThreshold Sets capacity alert threshold - high and critical
-func (pd *ProtectionDomain) SetCapacityAlertThreshold(ID string, highValue string, criticalValue string) error {
-	capacityAlertThreshold := &types.CapacityAlertThresholdParam{
-		CapacityAlertHighThresholdPercent:     highValue,
-		CapacityAlertCriticalThresholdPercent: criticalValue,
-	}
+func (pd *ProtectionDomain) SetCapacityAlertThreshold(ID string, capacityAlertThreshold *types.CapacityAlertThresholdParam) error {
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setCapacityAlertThresholds", ID)
 	err := pd.client.getJSONWithRetry(
 		http.MethodPost, path, capacityAlertThreshold, nil)
@@ -276,26 +271,25 @@ func (pd *ProtectionDomain) SetRebuildRebalanceParallelismParam(ID string, limit
 }
 
 // EnableFragmentation enables fragmentation
-func (pd *ProtectionDomain) EnableFragmentation(ID string) error {
+func (pd *ProtectionDomain) Fragmentation(ID string, value bool) error {
 	payload := &types.FragmentationParam{}
-	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/enableFragmentation", ID)
-	err := pd.client.getJSONWithRetry(
-		http.MethodPost, path, payload, nil)
-	if err != nil {
-		return err
+	if value {
+		
+		path := fmt.Sprintf("/api/instances/StoragePool::%v/action/enableFragmentation", ID)
+		err := pd.client.getJSONWithRetry(
+			http.MethodPost, path, payload, nil)
+		if err != nil {
+			return err
+		}
+	} else {
+		path := fmt.Sprintf("/api/instances/StoragePool::%v/action/disableFragmentation", ID)
+		err := pd.client.getJSONWithRetry(
+			http.MethodPost, path, payload, nil)
+		if err != nil {
+			return err
+		}
 	}
-	return nil
-}
 
-// DisableFragmentation disables fragmentation
-func (pd *ProtectionDomain) DisableFragmentation(ID string) error {
-	payload := &types.FragmentationParam{}
-	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/disableFragmentation", ID)
-	err := pd.client.getJSONWithRetry(
-		http.MethodPost, path, payload, nil)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
