@@ -157,6 +157,7 @@ func (pd *ProtectionDomain) SetReplicationJournalCapacity(ID string, replication
 	return nil
 }
 
+// SetCapacityAlertThreshold Sets high or critical capacity alert threshold
 func (pd *ProtectionDomain) SetCapacityAlertThreshold(ID string, capacityAlertThreshold *types.CapacityAlertThresholdParam) error {
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setCapacityAlertThresholds", ID)
 	err := pd.client.getJSONWithRetry(
