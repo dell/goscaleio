@@ -342,12 +342,14 @@ func TestStoragePoolAdditionalFunctionality(t *testing.T) {
 	assert.Equal(t, pool.ReplicationCapacityMaxRatio, 0)
 
 	//set the capacity threshold for the storage pool
-	err = domain.SetCapacityAlertThreshold(poolID, "77", "87")
+	capacityAlertThreshold := &types.CapacityAlertThresholdParam{
+		CapacityAlertHighThresholdPercent: "68",
+	}
+	err = domain.SetCapacityAlertThreshold(poolID, capacityAlertThreshold)
 	assert.Nil(t, err)
 	pool, _ = domain.FindStoragePool(poolID, "", "")
 	//check the value
-	assert.Equal(t, pool.CapacityAlertHighThreshold, 77)
-	assert.Equal(t, pool.CapacityAlertCriticalThreshold, 87)
+	assert.Equal(t, pool.CapacityAlertHighThreshold, 68)
 
 	//Set the protected maintenance mode
 	protectedMaintenanceModeParam := &types.ProtectedMaintenanceModeParam{
@@ -431,12 +433,16 @@ func TestStoragePoolAdditionalFunctionality(t *testing.T) {
 	assert.Equal(t, pool.NumofParallelRebuildRebalanceJobsPerDevice, 9)
 
 	//enable fragmentation
-	err = domain.EnableFragmentation(poolID)
+	err = domain.Fragmentation(poolID, true)
 	assert.Nil(t, err)
+	pool, _ = domain.FindStoragePool(poolID, "", "")
+	assert.Equal(t, pool.FragmentationEnabled, true)
 
 	//disable fragmentation
-	err = domain.DisableFragmentation(poolID)
+	err = domain.Fragmentation(poolID, false)
 	assert.Nil(t, err)
+	pool, _ = domain.FindStoragePool(poolID, "", "")
+	assert.Equal(t, pool.FragmentationEnabled, false)
 
 	// finally after all the operations, now delete the pool
 	err = domain.DeleteStoragePool(poolName)
