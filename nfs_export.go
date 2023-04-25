@@ -79,6 +79,44 @@ func (c *Client) GetNFSExportByName(name string) (*types.NFSExport, error) {
 	return nil, errors.New("Couldn't find file system")
 }
 
+// GetNFSExportByIDName returns nfs export by ID or name
+func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NFSExport, err error) {
+	defer TimeSpent("GetNfsExport", time.Now())
+	if id != "" {
+		path := fmt.Sprintf("/rest/v1/nfs-exports/%s?select=*", id)
+
+		err = c.getJSONWithRetry(
+			http.MethodGet, path, nil, &respnfs)
+		if err != nil {
+			fmt.Println("id is wrong")
+			return nil, err
+		}
+		return respnfs, nil
+
+	}
+	if name != "" {
+		nfsList, err := c.GetNFSExport()
+		if err != nil {
+			return nil, err
+		}
+
+		for _, nfs := range nfsList {
+			if nfs.Name == name {
+				return &nfs, nil
+			}
+		}
+
+		return nil, errors.New("Couldn't find nfs1")
+
+	}
+	if id == "" && name == "" {
+		return nil, errors.New("id and name cannot be empty")
+
+	}
+	return nil, errors.New("couldn't find nfs export")
+
+}
+
 // DeleteNFSExport deletes the NFS export
 func (c *Client) DeleteNFSExport(id string) error {
 	defer TimeSpent("DeleteNFSExport", time.Now())

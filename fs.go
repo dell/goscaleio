@@ -83,6 +83,47 @@ func (s *System) GetFileSystemByName(name string) (*types.FileSystem, error) {
 	return nil, errors.New("Couldn't find file system")
 }
 
+// GetFileSystemByIDName returns filesystems by name or id
+func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSystem, error) {
+	defer TimeSpent("GetFileSystemByID", time.Now())
+
+	if id != "" {
+
+		path := fmt.Sprintf("/rest/v1/file-systems/%v?select=*", id)
+		var fs types.FileSystem
+		err := s.client.getJSONWithRetry(
+			http.MethodGet, path, nil, &fs)
+		if err != nil {
+			return nil, err
+		}
+
+		return &fs, nil
+
+	}
+
+	if name != "" {
+		filesystems, err := s.GetAllFileSystems()
+		if err != nil {
+			return nil, err
+		}
+
+		for _, fs := range filesystems {
+			if fs.Name == name {
+				return &fs, nil
+			}
+		}
+
+		return nil, errors.New("couldn't find file system")
+
+	}
+
+	if id == "" && name == "" {
+		return nil, errors.New("id and name both cannot be empty")
+	}
+
+	return nil, errors.New("couldn't find file system")
+}
+
 // CreateFileSystem creates a file system
 func (s *System) CreateFileSystem(fs *types.FsCreate) (*types.FileSystemResp, error) {
 	defer TimeSpent("CreateFileSystem", time.Now())
