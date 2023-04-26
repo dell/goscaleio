@@ -227,7 +227,7 @@ func TestDeviceMediaType(t *testing.T) {
 	assert.NotNil(t, pool)
 
 	// create a StoragePool instance
-	sp_instance := goscaleio.NewStoragePoolEx(C, pool)
+	spInstance := goscaleio.NewStoragePoolEx(C, pool)
 
 	sdsID := getSdsID()
 	assert.NotEqual(t, sdsID, "")
@@ -238,11 +238,11 @@ func TestDeviceMediaType(t *testing.T) {
 		MediaType:             "HDD",
 	}
 
-	deviceID, err := sp_instance.AttachDevice(dev)
+	deviceID, err := spInstance.AttachDevice(dev)
 	assert.Nil(t, err)
 	assert.NotNil(t, deviceID)
 
-	err = sp_instance.SetDeviceMediaType(deviceID, "SSD")
+	err = spInstance.SetDeviceMediaType(deviceID, "SSD")
 	assert.Nil(t, err)
 
 	system := getSystem()
@@ -251,7 +251,7 @@ func TestDeviceMediaType(t *testing.T) {
 	assert.Equal(t, device.MediaType, "SSD")
 
 	// Remove the device
-	err = sp_instance.RemoveDevice(deviceID)
+	err = spInstance.RemoveDevice(deviceID)
 	assert.Nil(t, err)
 
 	// Delete the pool
