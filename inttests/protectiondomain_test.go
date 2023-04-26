@@ -265,6 +265,15 @@ func testRfCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
 	assert.Equal(t, pd.ProtectionDomain.RfCachePageSizeKb, 4)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheMaxIoSizeKb, 64)
 
+	err = pd.SetRfcacheParams(types.PDRfCacheParams{RfCachePageSizeKb: 8, RfCacheMaxIoSizeKb: 32})
+	assert.Nil(t, err)
+	err = pd.Refresh()
+	assert.Nil(t, err)
+	assert.Equal(t, pd.ProtectionDomain.RfCacheEnabled, true)
+	assert.Equal(t, pd.ProtectionDomain.RfCacheOperationalMode, p)
+	assert.Equal(t, pd.ProtectionDomain.RfCachePageSizeKb, 8)
+	assert.Equal(t, pd.ProtectionDomain.RfCacheMaxIoSizeKb, 32)
+
 	err = pd.SetRfcacheParams(types.PDRfCacheParams{RfCachePageSizeKb: 16, RfCacheMaxIoSizeKb: 32})
 	assert.Nil(t, err)
 	err = pd.Refresh()
