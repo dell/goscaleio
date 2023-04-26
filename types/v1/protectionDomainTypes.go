@@ -2,7 +2,6 @@ package goscaleio
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 )
 
@@ -15,20 +14,11 @@ type PDRfCacheParams struct {
 
 // MarshalJSON implements a custom json marshalling
 func (params PDRfCacheParams) MarshalJSON() ([]byte, error) {
-	b := []byte("")
 	m := make(map[string]string)
 	if params.RfCachePageSizeKb != 0 {
-		acceptedVals := map[int]bool{4: true, 8: true, 16: true, 32: true, 64: true}
-		if _, ok := acceptedVals[params.RfCachePageSizeKb]; !ok {
-			return b, fmt.Errorf("RfCachePageSizeKb must be a power of 2 in range [4,64]")
-		}
 		m["pageSizeKb"] = strconv.Itoa(params.RfCachePageSizeKb)
 	}
 	if params.RfCacheMaxIoSizeKb != 0 {
-		acceptedVals := map[int]bool{16: true, 32: true, 64: true, 126: true}
-		if _, ok := acceptedVals[params.RfCachePageSizeKb]; !ok {
-			return b, fmt.Errorf("RfCacheMaxIoSizeKb must be a power of 2 in range [16,126]")
-		}
 		m["maxIOSizeKb"] = strconv.Itoa(params.RfCacheMaxIoSizeKb)
 	}
 	if params.RfCacheOperationalMode != "" {
