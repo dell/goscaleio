@@ -598,13 +598,35 @@ type StoragePropsParams struct {
 
 // DeviceParam defines struct for DeviceParam
 type DeviceParam struct {
-	Name                  string `json:"name,omitempty"`
-	DeviceCurrentPathname string `json:"deviceCurrentPathname"`
-	CapacityLimitInKb     int    `json:"capacityLimitInKb,omitempty"`
-	StoragePoolID         string `json:"storagePoolId"`
-	SdsID                 string `json:"sdsId"`
-	TestTimeSecs          int    `json:"testTimeSecs,omitempty"`
-	TestMode              string `json:"testMode,omitempty"`
+	Name                     string `json:"name,omitempty"`
+	DeviceCurrentPathname    string `json:"deviceCurrentPathname"`
+	CapacityLimitInKb        int    `json:"capacityLimitInKb,omitempty"`
+	StoragePoolID            string `json:"storagePoolId"`
+	SdsID                    string `json:"sdsId"`
+	TestTimeSecs             int    `json:"testTimeSecs,omitempty"`
+	TestMode                 string `json:"testMode,omitempty"`
+	MediaType                string `json:"mediaType,omitempty"`
+	ExternalAccelerationType string `json:"externalAccelerationType,omitempty"`
+}
+
+// SetDeviceName defines struct for setting device name
+type SetDeviceName struct {
+	Name string `json:"newName"`
+}
+
+// SetDeviceMediaType defines struct for setting device media type
+type SetDeviceMediaType struct {
+	MediaType string `json:"mediaType"`
+}
+
+// SetDeviceExternalAccelerationType defines struct for device external acceleration type
+type SetDeviceExternalAccelerationType struct {
+	ExternalAccelerationType string `json:"externalAccelerationType"`
+}
+
+// SetDeviceCapacityLimit defines struct for setting device capacity limit
+type SetDeviceCapacityLimit struct {
+	DeviceCapacityLimit string `json:"capacityLimitInGB"`
 }
 
 // DeviceResp defines struct for DeviceParam
