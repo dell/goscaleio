@@ -36,33 +36,8 @@ func getNasName(t *testing.T) string {
 	return nasServer.Name
 }
 
-// TestGetNasByName gets a single specific nas server by Name
-func TestGetNasByName(t *testing.T) {
-	system := getSystem()
-	assert.NotNil(t, system)
-
-	nasName := getNasName(t)
-	assert.NotZero(t, len(nasName))
-
-	if len(nasName) > 0 {
-		nas, err := system.GetNASByName(nasName)
-		assert.Nil(t, err)
-		assert.Equal(t, nasName, nas.Name)
-	}
-}
-
-// TestGetNasByNameInvalid attempts to get a nas server that does not exist
-func TestGetNasByNameInvalid(t *testing.T) {
-	system := getSystem()
-	assert.NotNil(t, system)
-
-	nas, err := system.GetNAS(invalidIdentifier)
-	assert.NotNil(t, err)
-	assert.Nil(t, nas)
-}
-
-// TestGetNasByID will return nas server by id
-func TestGetNasByID(t *testing.T) {
+// TestGetNasByIDName gets a single specific nas server by Name or ID
+func TestGetNASByIDName(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
@@ -78,18 +53,28 @@ func TestGetNasByID(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, nasserver.ID, nas.ID)
 	}
+
+	if len(nasName) > 0 {
+		nas, err := system.GetNASBYIDName("", nasName)
+		assert.Nil(t, err)
+		assert.Equal(t, nasName, nas.Name)
+	}
 }
 
-// TestGetNasByIDInvalid attempts to get a file system that does not exist
-func TestGetNasByIDInvalid(t *testing.T) {
+// TestGetNasByIDNameInvalid attempts to get a file system that does not exist
+func TestGetNasByIDNameInvalid(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	nas, err := system.GetNAS(invalidIdentifier)
+	nas, err := system.GetNASBYIDName(invalidIdentifier, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, nas)
-}
 
+	nasName, err := system.GetNASBYIDName("", invalidIdentifier)
+	assert.NotNil(t, err)
+	assert.Nil(t, nasName)
+
+}
 func TestCreateDeleteNAS(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)

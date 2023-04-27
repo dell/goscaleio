@@ -66,23 +66,9 @@ func TestGetAllFileSystems(t *testing.T) {
 	assert.NotZero(t, len(filesystems))
 }
 
-// TestGetFileSystemByName gets a single specific file system instance by Name
-func TestGetFileSystemByName(t *testing.T) {
-	system := getSystem()
-	assert.NotNil(t, system)
+// TestGetFileSystemByIDName will return specific filesystem by name or ID
+func TestGetFileSystemByIDName(t *testing.T) {
 
-	fsName := getFileSystemName(t)
-	assert.NotZero(t, len(fsName))
-
-	if len(fsName) > 0 {
-		fs, err := system.GetFileSystemByName(fsName)
-		assert.Nil(t, err)
-		assert.Equal(t, fsName, fs.Name)
-	}
-}
-
-// TestGetFileSystemByID will return all file system instances
-func TestGetFileSystemByID(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
@@ -94,30 +80,30 @@ func TestGetFileSystemByID(t *testing.T) {
 	assert.Equal(t, fsName, filesystem.Name)
 
 	if filesystem != nil {
-		fs, err := system.GetFileSystemByID(filesystem.ID)
+		fs, err := system.GetFileSystemByIDName(filesystem.ID, "")
 		assert.Nil(t, err)
 		assert.Equal(t, filesystem.ID, fs.ID)
 	}
+
+	if len(fsName) > 0 {
+		fs, err := system.GetFileSystemByIDName("", fsName)
+		assert.Nil(t, err)
+		assert.Equal(t, fsName, fs.Name)
+	}
 }
 
-// TestGetFileSystemByNameInvalid attempts to get a file system  that does not exist
-func TestGetFileSystemByNameInvalid(t *testing.T) {
+// TestGetFileSystemByNameIDInvalid attempts to get a file system  that does not exist
+func TestGetFileSystemByNameIDInvalid(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	fs, err := system.GetFileSystemByName(invalidIdentifier)
+	fs, err := system.GetFileSystemByIDName(invalidIdentifier, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, fs)
-}
 
-// TestGetFileSystemByIDInvalid attempts to get a file system that does not exist
-func TestGetFileSystemByIDInvalid(t *testing.T) {
-	system := getSystem()
-	assert.NotNil(t, system)
-
-	fs, err := system.GetFileSystemByID(invalidIdentifier)
+	filesystem, err := system.GetFileSystemByIDName("", invalidIdentifier)
 	assert.NotNil(t, err)
-	assert.Nil(t, fs)
+	assert.Nil(t, filesystem)
 }
 
 // TestCreateDeleteFileSystem attempts to create then delete a file system
