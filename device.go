@@ -223,6 +223,21 @@ func (sp *StoragePool) SetDeviceCapacityLimit(id, capacityLimitInGB string) erro
 	return nil
 }
 
+// UpdateDeviceOriginalPathways modifies device path if changed during server restart
+func (sp *StoragePool) UpdateDeviceOriginalPathways(id string) error {
+	defer TimeSpent("UpdateDeviceOriginalPathways", time.Now())
+
+	path := fmt.Sprintf("/api/instances/Device::%v/action/updateDeviceOriginalPathname", id)
+	deviceParam := &types.EmptyPayload{}
+
+	err := sp.client.getJSONWithRetry(
+		http.MethodPost, path, deviceParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // RemoveDevice removes device from storage pool
 func (sp *StoragePool) RemoveDevice(id string) error {
 	defer TimeSpent("RemoveDevice", time.Now())

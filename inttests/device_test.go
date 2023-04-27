@@ -317,6 +317,30 @@ func TestDeviceCapacityLimit(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// TestDeviceUpdateOriginalPathways updates device path if changed during server restart
+func TestDeviceUpdateOriginalPathways(t *testing.T) {
+	pool := getStoragePool(t)
+	assert.NotNil(t, pool)
+
+	sdsID := getSdsID()
+	assert.NotEqual(t, sdsID, "")
+
+	dev := &types.DeviceParam{
+		DeviceCurrentPathname: "/dev/sdc",
+		SdsID:                 sdsID,
+	}
+
+	deviceID, err := pool.AttachDevice(dev)
+	assert.Nil(t, err)
+	assert.NotNil(t, deviceID)
+
+	err = pool.UpdateDeviceOriginalPathways(deviceID)
+	assert.Nil(t, err)
+
+	err = pool.RemoveDevice(deviceID)
+	assert.Nil(t, err)
+}
+
 func TestGetDeviceByDeviceID(t *testing.T) {
 
 	system := getSystem()
