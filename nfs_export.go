@@ -48,53 +48,24 @@ func (c *Client) CreateNFSExport(createParams *types.NFSExportCreate) (respnfs *
 	return respnfs, nil
 }
 
-// GetNFSExportByID returns NFS Export properties by ID
-func (c *Client) GetNFSExportByID(id string) (respnfs *types.NFSExport, err error) {
-	defer TimeSpent("GetNfsExport", time.Now())
-	path := fmt.Sprintf("/rest/v1/nfs-exports/%s?select=*", id)
-
-	err = c.getJSONWithRetry(
-		http.MethodGet, path, nil, &respnfs)
-	if err != nil {
-		return nil, err
-	}
-	return respnfs, nil
-}
-
-// GetNFSExportByName returns NFS Export properties by name
-func (c *Client) GetNFSExportByName(name string) (*types.NFSExport, error) {
-	defer TimeSpent("GetFileSystemByName", time.Now())
-
-	nfsList, err := c.GetNFSExport()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, nfs := range nfsList {
-		if nfs.Name == name {
-			return &nfs, nil
-		}
-	}
-
-	return nil, errors.New("Couldn't find file system")
-}
-
-// GetNFSExportByIDName returns nfs export by ID or name
+// GetNFSExportByIDName returns NFS Export properties by name or ID
 func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NFSExport, err error) {
 	defer TimeSpent("GetNfsExport", time.Now())
-	if id != "" {
+
+	if id == "" && name == "" {
+		return nil, errors.New("NFS export name or ID is mandatory for fetching NFS export details, please enter a valid value")
+
+	} else if id != "" {
 		path := fmt.Sprintf("/rest/v1/nfs-exports/%s?select=*", id)
 
 		err = c.getJSONWithRetry(
 			http.MethodGet, path, nil, &respnfs)
 		if err != nil {
-			fmt.Println("id is wrong")
 			return nil, err
 		}
 		return respnfs, nil
 
-	}
-	if name != "" {
+	} else {
 		nfsList, err := c.GetNFSExport()
 		if err != nil {
 			return nil, err
@@ -106,15 +77,8 @@ func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NF
 			}
 		}
 
-		return nil, errors.New("Couldn't find nfs1")
-
+		return nil, errors.New("couldn't find NFS export by name")
 	}
-	if id == "" && name == "" {
-		return nil, errors.New("id and name cannot be empty")
-
-	}
-	return nil, errors.New("couldn't find nfs export")
-
 }
 
 // DeleteNFSExport deletes the NFS export

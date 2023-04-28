@@ -50,45 +50,15 @@ func (s *System) GetAllFileSystems() ([]types.FileSystem, error) {
 	return fs, nil
 }
 
-// GetFileSystemByID returns a file system by ID
-func (s *System) GetFileSystemByID(id string) (*types.FileSystem, error) {
-	defer TimeSpent("GetFileSystemByID", time.Now())
-
-	path := fmt.Sprintf("/rest/v1/file-systems/%v?select=*", id)
-	var fs types.FileSystem
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, &fs)
-	if err != nil {
-		return nil, err
-	}
-
-	return &fs, nil
-}
-
-// GetFileSystemByName returns a file system by Name
-func (s *System) GetFileSystemByName(name string) (*types.FileSystem, error) {
-	defer TimeSpent("GetFileSystemByName", time.Now())
-
-	filesystems, err := s.GetAllFileSystems()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, fs := range filesystems {
-		if fs.Name == name {
-			return &fs, nil
-		}
-	}
-
-	return nil, errors.New("Couldn't find file system")
-}
-
-// GetFileSystemByIDName returns filesystems by name or id
+// GetFileSystemByName returns a file system by Name or ID
 func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSystem, error) {
 	defer TimeSpent("GetFileSystemByID", time.Now())
 
-	if id != "" {
+	if id == "" && name == "" {
 
+		return nil, errors.New("file system name or ID is mandatory for fetching file system details, please enter a valid value")
+
+	} else if id != "" {
 		path := fmt.Sprintf("/rest/v1/file-systems/%v?select=*", id)
 		var fs types.FileSystem
 		err := s.client.getJSONWithRetry(
@@ -99,9 +69,7 @@ func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSyste
 
 		return &fs, nil
 
-	}
-
-	if name != "" {
+	} else {
 		filesystems, err := s.GetAllFileSystems()
 		if err != nil {
 			return nil, err
@@ -113,15 +81,10 @@ func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSyste
 			}
 		}
 
-		return nil, errors.New("couldn't find file system")
+		return nil, errors.New("couldn't find file system by name")
 
 	}
 
-	if id == "" && name == "" {
-		return nil, errors.New("id and name both cannot be empty")
-	}
-
-	return nil, errors.New("couldn't find file system")
 }
 
 // CreateFileSystem creates a file system
@@ -143,7 +106,7 @@ func (s *System) CreateFileSystem(fs *types.FsCreate) (*types.FileSystemResp, er
 func (s *System) DeleteFileSystem(name string) error {
 	defer TimeSpent("DeleteFileSystem", time.Now())
 
-	fs, err := s.GetFileSystemByName(name)
+	fs, err := s.GetFileSystemByIDName("", name)
 	if err != nil {
 		return err
 	}

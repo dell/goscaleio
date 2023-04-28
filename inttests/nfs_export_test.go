@@ -37,7 +37,7 @@ func TestNFSExportByIDName(t *testing.T) {
 	nfsName := GetNFSExportbyName(t)
 	assert.NotZero(t, len(nfsName))
 
-	nfs, err := C.GetNFSExportByName(nfsName)
+	nfs, err := C.GetNFSExportByIDName("", nfsName)
 	assert.Nil(t, err)
 	assert.Equal(t, nfsName, nfs.Name)
 
@@ -73,7 +73,7 @@ func TestCreateModifyDeleteNFSExport(t *testing.T) {
 	if os.Getenv("GOSCALEIO_FILESYSTEM_NFSEXPORT") != "" {
 		filesystemname = os.Getenv("GOSCALEIO_FILESYSTEM_NFSEXPORT")
 	}
-	filesystem, err := system.GetFileSystemByName(filesystemname)
+	filesystem, err := system.GetFileSystemByIDName("", filesystemname)
 	nfsexport := &types.NFSExportCreate{
 		Name:         nfsName,
 		FileSystemID: filesystem.ID,

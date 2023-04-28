@@ -27,7 +27,7 @@ func getNasName(t *testing.T) string {
 	}
 	system := getSystem()
 	assert.NotNil(t, system)
-	nasServer, _ := system.GetNASByName("")
+	nasServer, _ := system.GetNASByIDName("", "")
 	assert.NotNil(t, nasServer)
 	if nasServer == nil {
 		return ""
@@ -44,18 +44,18 @@ func TestGetNASByIDName(t *testing.T) {
 	nasName := getNasName(t)
 	assert.NotZero(t, len(nasName))
 
-	nasserver, err := system.GetNASByName(nasName)
+	nasserver, err := system.GetNASByIDName("", nasName)
 	assert.Nil(t, err)
 	assert.Equal(t, nasName, nasserver.Name)
 
 	if nasserver != nil {
-		nas, err := system.GetNAS(nasserver.ID)
+		nas, err := system.GetNASByIDName(nasserver.ID, "")
 		assert.Nil(t, err)
 		assert.Equal(t, nasserver.ID, nas.ID)
 	}
 
 	if len(nasName) > 0 {
-		nas, err := system.GetNASBYIDName("", nasName)
+		nas, err := system.GetNASByIDName("", nasName)
 		assert.Nil(t, err)
 		assert.Equal(t, nasName, nas.Name)
 	}
@@ -66,11 +66,11 @@ func TestGetNasByIDNameInvalid(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	nas, err := system.GetNASBYIDName(invalidIdentifier, "")
+	nas, err := system.GetNASByIDName(invalidIdentifier, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, nas)
 
-	nasName, err := system.GetNASBYIDName("", invalidIdentifier)
+	nasName, err := system.GetNASByIDName("", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, nasName)
 

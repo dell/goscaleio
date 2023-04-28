@@ -75,7 +75,7 @@ func TestGetFileSystemByIDName(t *testing.T) {
 	fsName := getFileSystemName(t)
 	assert.NotZero(t, len(fsName))
 
-	filesystem, err := system.GetFileSystemByName(fsName)
+	filesystem, err := system.GetFileSystemByIDName("", fsName)
 	assert.Nil(t, err)
 	assert.Equal(t, fsName, filesystem.Name)
 
@@ -132,7 +132,7 @@ func TestCreateDeleteFileSystem(t *testing.T) {
 	if os.Getenv("GOSCALEIO_NASSERVER") != "" {
 		nasServerName = os.Getenv("GOSCALEIO_NASSERVER")
 	}
-	nasServer, err := system.GetNASByName(nasServerName)
+	nasServer, err := system.GetNASByIDName("", nasServerName)
 	assert.NotNil(t, nasServer)
 
 	fs := &types.FsCreate{

@@ -20,42 +20,14 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
-// GetNASByName gets a NAS server by name
-func (s *System) GetNASByName(name string) (*types.NAS, error) {
+// GetNASByIDName gets a NAS server by name or ID
+func (s *System) GetNASByIDName(id string, name string) (*types.NAS, error) {
 	var nasList []types.NAS
 
-	path := fmt.Sprintf("/rest/v1/nas-servers?select=*")
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, &nasList)
-	if err != nil {
-		return nil, err
-	}
+	if name == "" && id == "" {
+		return nil, errors.New("NAS server name or ID is mandatory for fetching NAS server details, please enter a valid value")
 
-	for _, nas := range nasList {
-		if nas.Name == name {
-			return &nas, nil
-		}
-	}
-	return nil, errors.New("couldn't find given NAS server name")
-}
-
-// GetNAS gets a NAS server by ID
-func (s *System) GetNAS(id string) (*types.NAS, error) {
-	path := fmt.Sprintf("/rest/v1/nas-servers/%s?select=*", id)
-
-	var resp *types.NAS
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, &resp)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// GetNASByNameoID gets a NAS server by name or ID
-func (s *System) GetNASBYIDName(id string, name string) (*types.NAS, error) {
-	var nasList []types.NAS
-	if id != "" {
+	} else if id != "" {
 		path := fmt.Sprintf("/rest/v1/nas-servers/%s?select=*", id)
 
 		var resp *types.NAS
@@ -66,9 +38,7 @@ func (s *System) GetNASBYIDName(id string, name string) (*types.NAS, error) {
 		}
 		return resp, nil
 
-	}
-
-	if name != "" {
+	} else {
 		path := fmt.Sprintf("/rest/v1/nas-servers?select=*")
 		err := s.client.getJSONWithRetry(
 			http.MethodGet, path, nil, &nasList)
@@ -81,13 +51,9 @@ func (s *System) GetNASBYIDName(id string, name string) (*types.NAS, error) {
 				return &nas, nil
 			}
 		}
-		return nil, errors.New("couldn't find given NAS server name")
+		return nil, errors.New("couldn't find given NAS server by name")
 
 	}
-	if name == "" && id == "" {
-		return nil, errors.New("id and name cannot be empty")
-	}
-	return nil, errors.New("couldn't find NAS server")
 }
 
 // CreateNAS creates a NAS server
