@@ -257,3 +257,26 @@ func TestSetSdsPort(t *testing.T) {
 	err := pd.SetSdsPort(sdsID, 7072)
 	assert.NotNil(t, err)
 }
+
+// TestFindSds finds the SDS using system instance
+func TestFindSds(t *testing.T) {
+	// get system
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	sds := getAllSds(t)
+	assert.NotNil(t, sds)
+	if sds == nil {
+		return
+	}
+
+	found, err := system.FindSds("Name", sds[0].Sds.Name)
+	assert.Nil(t, err)
+	assert.NotNil(t, found)
+	assert.Equal(t, sds[0].Sds.Name, found.Name)
+
+	found, err = system.FindSds("ID", sds[0].Sds.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, found)
+	assert.Equal(t, sds[0].Sds.ID, found.ID)
+}
