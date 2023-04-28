@@ -1092,8 +1092,12 @@ const (
 type NFSServerInstance struct {
 	// Unique identifier for NFS server
 	ID string `json:"id"`
+	//HostName will be used by NFS clients to connect to this NFS server.
+	HostName string `json:"host_name,omitempty"`
 	// IsNFSv4Enabled is set to true if nfsv4 is enabled on NAS server
 	IsNFSv4Enabled bool `json:"is_nfsv4_enabled,omitempty"`
+	// IsNFSv4Enabled is set to true if nfsv4 is enabled on NAS server
+	IsNFSv3Enabled bool `json:"is_nfsv3_enabled,omitempty"`
 }
 
 // NAS defines struct for NAS.
