@@ -50,7 +50,7 @@ func (s *System) GetAllFileSystems() ([]types.FileSystem, error) {
 	return fs, nil
 }
 
-// GetFileSystemByName returns a file system by Name or ID
+// GetFileSystemByIDName returns a file system by Name or ID
 func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSystem, error) {
 	defer TimeSpent("GetFileSystemByID", time.Now())
 
