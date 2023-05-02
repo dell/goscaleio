@@ -75,6 +75,7 @@ type GatewayFunction interface {
 	BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) error
 }
 
+// UploadPackages used for upload packge to gateway server
 func (gc *GatewayClient) UploadPackages(filePath string) error {
 
 	file, err1 := os.Open(path.Clean(filePath))
@@ -117,6 +118,7 @@ func (gc *GatewayClient) UploadPackages(filePath string) error {
 	return nil
 }
 
+// ParseCSV used for upload CSV to gateway server and parse it
 func (gc *GatewayClient) ParseCSV(filePath string) error {
 
 	file, err1 := os.Open(path.Clean(filePath))
@@ -161,6 +163,7 @@ func (gc *GatewayClient) ParseCSV(filePath string) error {
 
 }
 
+// BeginInstallation used for start installation
 func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) error {
 
 	mapData, err := jsonToMap(jsonStr)
