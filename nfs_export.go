@@ -50,7 +50,7 @@ func (c *Client) CreateNFSExport(createParams *types.NFSExportCreate) (respnfs *
 
 // GetNFSExportByIDName returns NFS Export properties by name or ID
 func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NFSExport, err error) {
-	defer TimeSpent("GetNfsExport", time.Now())
+	defer TimeSpent("GetNFSExportByIDName", time.Now())
 
 	if id == "" && name == "" {
 		return nil, errors.New("NFS export name or ID is mandatory for fetching NFS export details, please enter a valid value")
@@ -61,7 +61,7 @@ func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NF
 		err = c.getJSONWithRetry(
 			http.MethodGet, path, nil, &respnfs)
 		if err != nil {
-			return nil, err
+			return nil, errors.New("couldn't find NFS export by ID")
 		}
 		return respnfs, nil
 
@@ -74,11 +74,14 @@ func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NF
 		for _, nfs := range nfsList {
 			if nfs.Name == name {
 				return &nfs, nil
+			} else {
+				return nil, errors.New("couldn't find NFS export by name")
 			}
-		}
 
-		return nil, errors.New("couldn't find NFS export by name")
+		}
 	}
+
+	return nil, errors.New("couldn't find NFS export")
 }
 
 // DeleteNFSExport deletes the NFS export
