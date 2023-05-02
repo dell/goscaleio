@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -77,6 +76,7 @@ type GatewayClient interface {
 }
 
 func (gc *gatewayclient) UploadPackages(filePath string) error {
+
 	file, err1 := os.Open(path.Clean(filePath))
 	if err1 != nil {
 		return err1
@@ -107,8 +107,10 @@ func (gc *gatewayclient) UploadPackages(filePath string) error {
 	if err5 != nil {
 		return err5
 	}
+
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	
 	client := gc.http
 	_, err6 := client.Do(req)
 	if err6 != nil {
@@ -118,6 +120,7 @@ func (gc *gatewayclient) UploadPackages(filePath string) error {
 }
 
 func (gc *gatewayclient) ParseCSV(filePath string) error {
+
 	file, err1 := os.Open(path.Clean(filePath))
 	if err1 != nil {
 		return err1
@@ -148,9 +151,11 @@ func (gc *gatewayclient) ParseCSV(filePath string) error {
 	if err5 != nil {
 		return err5
 	}
+
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
-	fmt.Println(body)
+
 	client := gc.http
 	_, err6 := client.Do(req)
 	if err6 != nil {
@@ -162,6 +167,7 @@ func (gc *gatewayclient) ParseCSV(filePath string) error {
 }
 
 func (gc *gatewayclient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) error {
+
 	mapData, err := jsonToMap(jsonStr)
 	if err != nil {
 		return err
@@ -170,12 +176,14 @@ func (gc *gatewayclient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	mapData["mdmUser"] = mdmUsername
 	mapData["liaPassword"] = liaPassword
 	finalJSON, _ := json.Marshal(mapData)
+
 	req, err1 := http.NewRequest("POST", gc.host+"/im/types/Configuration/actions/install", bytes.NewBuffer(finalJSON))
 	if err1 != nil {
 		return err1
 	}
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	req.Header.Set("Content-Type", "application/json")
+	
 	client := gc.http
 	_, err2 := client.Do(req)
 	if err2 != nil {
