@@ -110,7 +110,6 @@ func (gc *gatewayclient) UploadPackages(filePath string) error {
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
-	
 	client := gc.http
 	_, err6 := client.Do(req)
 	if err6 != nil {
@@ -153,9 +152,7 @@ func (gc *gatewayclient) ParseCSV(filePath string) error {
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
-
 	client := gc.http
 	_, err6 := client.Do(req)
 	if err6 != nil {
@@ -181,9 +178,9 @@ func (gc *gatewayclient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	if err1 != nil {
 		return err1
 	}
+	
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	req.Header.Set("Content-Type", "application/json")
-	
 	client := gc.http
 	_, err2 := client.Do(req)
 	if err2 != nil {
