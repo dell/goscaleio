@@ -19,7 +19,7 @@ var (
 	errSysCerts  = errors.New("Unable to initialize cert pool from system")
 )
 
-type gatewayclient struct {
+type GatewayClient struct {
 	http     *http.Client
 	host     string
 	username string
@@ -28,13 +28,13 @@ type gatewayclient struct {
 
 // NewGateway returns a new gateway client.
 func NewGateway(
-	host string, username, password string, insecure, useCerts bool) (GatewayClient, error) {
+	host string, username, password string, insecure, useCerts bool) (*GatewayClient, error) {
 
 	if host == "" {
 		return nil, errNewClient
 	}
 
-	gc := &gatewayclient{
+	gc := &GatewayClient{
 		http:     &http.Client{},
 		host:     host,
 		username: username,
@@ -69,13 +69,13 @@ func NewGateway(
 }
 
 // GatewayClient is an  inetface which has all the functionalities for the gateway.
-type GatewayClient interface {
+type GatewayFunction interface {
 	UploadPackages(fliePath string) error
 	ParseCSV(filePath string) error
 	BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) error
 }
 
-func (gc *gatewayclient) UploadPackages(filePath string) error {
+func (gc *GatewayClient) UploadPackages(filePath string) error {
 
 	file, err1 := os.Open(path.Clean(filePath))
 	if err1 != nil {
@@ -117,7 +117,7 @@ func (gc *gatewayclient) UploadPackages(filePath string) error {
 	return nil
 }
 
-func (gc *gatewayclient) ParseCSV(filePath string) error {
+func (gc *GatewayClient) ParseCSV(filePath string) error {
 
 	file, err1 := os.Open(path.Clean(filePath))
 	if err1 != nil {
@@ -161,7 +161,7 @@ func (gc *gatewayclient) ParseCSV(filePath string) error {
 
 }
 
-func (gc *gatewayclient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) error {
+func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) error {
 
 	mapData, err := jsonToMap(jsonStr)
 	if err != nil {
