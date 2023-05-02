@@ -64,7 +64,7 @@ func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSyste
 		err := s.client.getJSONWithRetry(
 			http.MethodGet, path, nil, &fs)
 		if err != nil {
-			return nil, errors.New("couldn't find filesystem by name")
+			return nil, errors.New("couldn't find filesystem by id")
 		}
 
 		return &fs, nil
