@@ -54,9 +54,9 @@ func (s *System) GetNASByIDName(id string, name string) (*types.NAS, error) {
 			}
 		}
 
+		return nil, errors.New("couldn't find given NAS server")
 	}
 
-	return nil, errors.New("couldn't find given NAS server")
 }
 
 // CreateNAS creates a NAS server
