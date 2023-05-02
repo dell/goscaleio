@@ -78,13 +78,11 @@ func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSyste
 		for _, fs := range filesystems {
 			if fs.Name == name {
 				return &fs, nil
-			} else {
-				return nil, errors.New("couldn't find file system by name")
 			}
 		}
-	}
 
-	return nil, errors.New("couldn't find file system")
+		return nil, errors.New("couldn't find file system by name")
+	}
 
 }
 

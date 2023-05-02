@@ -74,14 +74,12 @@ func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NF
 		for _, nfs := range nfsList {
 			if nfs.Name == name {
 				return &nfs, nil
-			} else {
-				return nil, errors.New("couldn't find NFS export by name")
 			}
-
 		}
+
+		return nil, errors.New("couldn't find NFS export by name")
 	}
 
-	return nil, errors.New("couldn't find NFS export")
 }
 
 // DeleteNFSExport deletes the NFS export
