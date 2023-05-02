@@ -79,9 +79,9 @@ type GatewayFunction interface {
 // UploadPackages used for upload packge to gateway server
 func (gc *GatewayClient) UploadPackages(filePath string) error {
 
-	file, err1 := os.Open(path.Clean(filePath))
-	if err1 != nil {
-		return err1
+	file, filePathError := os.Open(path.Clean(filePath))
+	if filePathError != nil {
+		return filePathError
 	}
 	defer func() error {
 		if err := file.Close(); err != nil {
@@ -92,29 +92,29 @@ func (gc *GatewayClient) UploadPackages(filePath string) error {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	part, err2 := writer.CreateFormFile("files", path.Base(filePath))
-	if err2 != nil {
-		return err2
+	part, fileReaderError := writer.CreateFormFile("files", path.Base(filePath))
+	if fileReaderError != nil {
+		return fileReaderError
 	}
-	_, err3 := io.Copy(part, file)
-	if err3 != nil {
-		return err3
+	_, fileContentError := io.Copy(part, file)
+	if fileContentError != nil {
+		return fileContentError
 	}
-	err4 := writer.Close()
-	if err4 != nil {
-		return err4
+	fileWriterError := writer.Close()
+	if fileWriterError != nil {
+		return fileWriterError
 	}
 
-	req, err5 := http.NewRequest("POST", gc.host+"/im/types/installationPackages/instances/actions/uploadPackages", body)
-	if err5 != nil {
-		return err5
+	req, httpError := http.NewRequest("POST", gc.host+"/im/types/installationPackages/instances/actions/uploadPackages", body)
+	if httpError != nil {
+		return httpError
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	client := gc.http
-	_, err6 := client.Do(req)
-	if err6 != nil {
-		return err6
+	_, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return httpReqError
 	}
 	return nil
 }
@@ -122,9 +122,9 @@ func (gc *GatewayClient) UploadPackages(filePath string) error {
 // ParseCSV used for upload CSV to gateway server and parse it
 func (gc *GatewayClient) ParseCSV(filePath string) error {
 
-	file, err1 := os.Open(path.Clean(filePath))
-	if err1 != nil {
-		return err1
+	file, filePathError := os.Open(path.Clean(filePath))
+	if filePathError != nil {
+		return filePathError
 	}
 	defer func() error {
 		if err := file.Close(); err != nil {
@@ -135,29 +135,29 @@ func (gc *GatewayClient) ParseCSV(filePath string) error {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	part, err2 := writer.CreateFormFile("file", path.Base(filePath))
-	if err2 != nil {
-		return err2
+	part, fileReaderError := writer.CreateFormFile("file", path.Base(filePath))
+	if fileReaderError != nil {
+		return fileReaderError
 	}
-	_, err3 := io.Copy(part, file)
-	if err3 != nil {
-		return err3
+	_, fileContentError := io.Copy(part, file)
+	if fileContentError != nil {
+		return fileContentError
 	}
-	err4 := writer.Close()
-	if err4 != nil {
-		return err4
+	fileWriterError := writer.Close()
+	if fileWriterError != nil {
+		return fileWriterError
 	}
 
-	req, err5 := http.NewRequest("POST", gc.host+"/im/types/Configuration/instances/actions/parseFromCSV", body)
-	if err5 != nil {
-		return err5
+	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/instances/actions/parseFromCSV", body)
+	if httpError != nil {
+		return httpError
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	client := gc.http
-	_, err6 := client.Do(req)
-	if err6 != nil {
-		return err6
+	_, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return httpReqError
 	}
 
 	return nil
@@ -167,25 +167,25 @@ func (gc *GatewayClient) ParseCSV(filePath string) error {
 // BeginInstallation used for start installation
 func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) error {
 
-	mapData, err := jsonToMap(jsonStr)
-	if err != nil {
-		return err
+	mapData, jsonParseError := jsonToMap(jsonStr)
+	if jsonParseError != nil {
+		return jsonParseError
 	}
 	mapData["mdmPassword"] = mdmPassword
 	mapData["mdmUser"] = mdmUsername
 	mapData["liaPassword"] = liaPassword
 	finalJSON, _ := json.Marshal(mapData)
 
-	req, err1 := http.NewRequest("POST", gc.host+"/im/types/Configuration/actions/install", bytes.NewBuffer(finalJSON))
-	if err1 != nil {
-		return err1
+	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/actions/install", bytes.NewBuffer(finalJSON))
+	if httpError != nil {
+		return httpError
 	}
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	req.Header.Set("Content-Type", "application/json")
 	client := gc.http
-	_, err2 := client.Do(req)
-	if err2 != nil {
-		return err2
+	_, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return httpReqError
 	}
 	return nil
 }
