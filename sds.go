@@ -407,3 +407,24 @@ func (pd *ProtectionDomain) SetSdsPerformanceProfile(id, perfProf string) error 
 
 	return nil
 }
+
+// FindSds returns a Sds using system instance
+func (sys *System) FindSds(
+	field, value string) (*types.Sds, error) {
+	defer TimeSpent("FindSds", time.Now())
+
+	sdss, err := sys.GetAllSds()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, sds := range sdss {
+		valueOf := reflect.ValueOf(sds)
+		switch {
+		case reflect.Indirect(valueOf).FieldByName(field).String() == value:
+			return &sds, nil
+		}
+	}
+
+	return nil, errors.New("Couldn't find SDS")
+}

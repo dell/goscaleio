@@ -71,7 +71,7 @@ func (e Error) Error() string {
 // 	Link []*types.Link `xml:"Link"`
 // }
 
-// System defines struct of PFlex array
+// System defines struct of PowerFlex array
 type System struct {
 	MdmMode                               string   `json:"mdmMode"`
 	MdmClusterState                       string   `json:"mdmClusterState"`
@@ -115,7 +115,7 @@ type BWC struct {
 	NumSeconds      int `json:"numSeconds"`
 }
 
-// Statistics defines struct of Statistics for Pflex Array
+// Statistics defines struct of Statistics for PowerFlex Array
 type Statistics struct {
 	PrimaryReadFromDevBwc                    BWC `json:"primaryReadFromDevBwc"`
 	NumOfStoragePools                        int `json:"numOfStoragePools"`
@@ -197,7 +197,7 @@ type Statistics struct {
 	VolumeAddressSpaceInKb                   int `json:"volumeAddressSpaceInKb"`
 }
 
-// SdcStatistics defines struct of Statistics for PFlex SDC
+// SdcStatistics defines struct of Statistics for PowerFlex SDC
 type SdcStatistics struct {
 	UserDataReadBwc         BWC      `json:"userDataReadBwc"`
 	UserDataWriteBwc        BWC      `json:"userDataWriteBwc"`
@@ -209,7 +209,7 @@ type SdcStatistics struct {
 	NumOfMappedVolumes      int      `json:"numOfMappedVolumes"`
 }
 
-// VolumeStatistics defines struct of Statistics for PFlex volume
+// VolumeStatistics defines struct of Statistics for PowerFlex volume
 type VolumeStatistics struct {
 	UserDataReadBwc         BWC      `json:"userDataReadBwc"`
 	UserDataWriteBwc        BWC      `json:"userDataWriteBwc"`
@@ -221,7 +221,7 @@ type VolumeStatistics struct {
 	NumOfMappedSdcs         int      `json:"numOfMappedSdcs"`
 }
 
-// User defines struct of User for PFlex array
+// User defines struct of User for PowerFlex array
 type User struct {
 	SystemID              string  `json:"systemId"`
 	UserRole              string  `json:"userRole"`
@@ -273,13 +273,13 @@ type PDConnInfo struct {
 	DisconnectedServerIP   *string `json:"disconnectedServerIp"`
 }
 
-// ProtectionDomain defines struct for PFlex ProtectionDomain
+// ProtectionDomain defines struct for PowerFlex ProtectionDomain
 type ProtectionDomain struct {
 	SystemID                    string     `json:"systemId"`
 	SdrSdsConnectivityInfo      PDConnInfo `json:"sdrSdsConnectivityInfo"`
 	ReplicationCapacityMaxRatio *int       `json:"replicationCapacityMaxRatio"`
 
-	// Network throttling params
+	// SDS Network throttling params
 	RebuildNetworkThrottlingInKbps                   int  `json:"rebuildNetworkThrottlingInKbps"`
 	RebalanceNetworkThrottlingInKbps                 int  `json:"rebalanceNetworkThrottlingInKbps"`
 	OverallIoNetworkThrottlingInKbps                 int  `json:"overallIoNetworkThrottlingInKbps"`
@@ -341,7 +341,7 @@ type ProtectionDomainResp struct {
 	ID string `json:"id"`
 }
 
-// Sdc defines struct for PFlex Sdc
+// Sdc defines struct for PowerFlex Sdc
 type Sdc struct {
 	SystemID           string  `json:"systemId"`
 	SdcApproved        bool    `json:"sdcApproved"`
@@ -503,29 +503,130 @@ type SdsPort struct {
 	SdsPort string `json:"sdsPort"`
 }
 
-// Device defines struct for Device
+// Device defines struct of Device for PowerFlex Array
 type Device struct {
-	ID                     string `json:"id,omitempty"`
-	Name                   string `json:"name,omitempty"`
-	DeviceCurrentPathname  string `json:"deviceCurrentPathname"`
-	DeviceOriginalPathname string `json:"deviceOriginalPathname,omitempty"`
-	DeviceState            string `json:"deviceState,omitempty"`
-	ErrorState             string `json:"errorState,omitempty"`
-	CapacityLimitInKb      int    `json:"capacityLimitInKb,omitempty"`
-	MaxCapacityInKb        int    `json:"maxCapacityInKb,omitempty"`
-	StoragePoolID          string `json:"storagePoolId"`
-	SdsID                  string `json:"sdsId"`
+	FglNvdimmMetadataAmortizationX100 int                     `json:"fglNvdimmMetadataAmortizationX100,omitempty"`
+	LogicalSectorSizeInBytes          int                     `json:"logicalSectorSizeInBytes,omitempty"`
+	FglNvdimmWriteCacheSize           int                     `json:"fglNvdimmWriteCacheSize,omitempty"`
+	AccelerationPoolID                string                  `json:"accelerationPoolId,omitempty"`
+	RfcacheProps                      RfcachePropsParams      `json:"rfcacheProps,omitempty"`
+	SdsID                             string                  `json:"sdsId"`
+	StoragePoolID                     string                  `json:"storagePoolId"`
+	CapacityLimitInKb                 int                     `json:"capacityLimitInKb,omitempty"`
+	ErrorState                        string                  `json:"errorState,omitempty"`
+	Capacity                          int                     `json:"capacity,omitempty"`
+	DeviceType                        string                  `json:"deviceType,omitempty"`
+	PersistentChecksumState           string                  `json:"persistentChecksumState,omitempty"`
+	DeviceState                       string                  `json:"deviceState,omitempty"`
+	LedSetting                        string                  `json:"ledSetting,omitempty"`
+	MaxCapacityInKb                   int                     `json:"maxCapacityInKb,omitempty"`
+	SpSdsID                           string                  `json:"spSdsId,omitempty"`
+	LongSuccessfulIos                 LongSuccessfulIosParams `json:"longSuccessfulIos,omitempty"`
+	AggregatedState                   string                  `json:"aggregatedState,omitempty"`
+	TemperatureState                  string                  `json:"temperatureState,omitempty"`
+	SsdEndOfLifeState                 string                  `json:"ssdEndOfLifeState,omitempty"`
+	ModelName                         string                  `json:"modelName,omitempty"`
+	VendorName                        string                  `json:"vendorName,omitempty"`
+	RaidControllerSerialNumber        string                  `json:"raidControllerSerialNumber,omitempty"`
+	FirmwareVersion                   string                  `json:"firmwareVersion,omitempty"`
+	CacheLookAheadActive              bool                    `json:"cacheLookAheadActive,omitempty"`
+	WriteCacheActive                  bool                    `json:"writeCacheActive,omitempty"`
+	AtaSecurityActive                 bool                    `json:"ataSecurityActive,omitempty"`
+	PhysicalSectorSizeInBytes         int                     `json:"physicalSectorSizeInBytes,omitempty"`
+	MediaFailing                      bool                    `json:"mediaFailing,omitempty"`
+	SlotNumber                        string                  `json:"slotNumber,omitempty"`
+	ExternalAccelerationType          string                  `json:"externalAccelerationType,omitempty"`
+	AutoDetectMediaType               string                  `json:"autoDetectMediaType,omitempty"`
+	StorageProps                      StoragePropsParams      `json:"storageProps,omitempty"`
+	AccelerationProps                 AccelerationPropsParams `json:"accelerationProps,omitempty"`
+	DeviceCurrentPathName             string                  `json:"deviceCurrentPathName"`
+	DeviceOriginalPathName            string                  `json:"deviceOriginalPathName,omitempty"`
+	RfcacheErrorDeviceDoesNotExist    bool                    `json:"rfcacheErrorDeviceDoesNotExist,omitempty"`
+	MediaType                         string                  `json:"mediaType,omitempty"`
+	SerialNumber                      string                  `json:"serialNumber,omitempty"`
+	Name                              string                  `json:"name,omitempty"`
+	ID                                string                  `json:"id,omitempty"`
+	Links                             []*Link                 `json:"links"`
+}
+
+// LongSuccessfulIosParams defines struct for Device
+type LongSuccessfulIosParams struct {
+	ShortWindow  DeviceWindowType `json:"shortWindow,omitempty"`
+	MediumWindow DeviceWindowType `json:"mediumWindow,omitempty"`
+	LongWindow   DeviceWindowType `json:"longWindow,omitempty"`
+}
+
+// DeviceWindowType defines struct for LongSuccessfulIosParams
+type DeviceWindowType struct {
+	Threshold            int `json:"threshold,omitempty"`
+	WindowSizeInSec      int `json:"windowSizeInSec,omitempty"`
+	LastOscillationCount int `json:"lastOscillationCount,omitempty"`
+	LastOscillationTime  int `json:"lastOscillationTime,omitempty"`
+	MaxFailuresCount     int `json:"maxFailuresCount,omitempty"`
+}
+
+// AccelerationPropsParams defines struct for Device
+type AccelerationPropsParams struct {
+	AccUsedCapacityInKb string `json:"accUsedCapacityInKb,omitempty"`
+}
+
+// RfcachePropsParams defines struct for Device
+type RfcachePropsParams struct {
+	DeviceUUID                     string `json:"deviceUuid,omitempty"`
+	RfcacheErrorStuckIO            bool   `json:"rfcacheErrorStuckIo,omitempty"`
+	RfcacheErrorHeavyLoadCacheSkip bool   `json:"rfcacheErrorHeavyLoadCacheSkip,omitempty"`
+	RfcacheErrorCardIoError        bool   `json:"rfcacheErrorCardIoError,omitempty"`
+}
+
+// StoragePropsParams defines struct for Device
+type StoragePropsParams struct {
+	FglAccDeviceID                   string `json:"fglAccDeviceId,omitempty"`
+	FglNvdimmSizeMb                  int    `json:"fglNvdimmSizeMb,omitempty"`
+	DestFglNvdimmSizeMb              int    `json:"destFglNvdimmSizeMb,omitempty"`
+	DestFglAccDeviceID               string `json:"destFglAccDeviceId,omitempty"`
+	ChecksumMode                     string `json:"checksumMode,omitempty"`
+	DestChecksumMode                 string `json:"destChecksumMode,omitempty"`
+	ChecksumAccDeviceID              string `json:"checksumAccDeviceId,omitempty"`
+	DestChecksumAccDeviceID          string `json:"destChecksumAccDeviceId,omitempty"`
+	ChecksumSizeMb                   int    `json:"checksumSizeMb,omitempty"`
+	IsChecksumFullyCalculated        bool   `json:"isChecksumFullyCalculated,omitempty"`
+	ChecksumChangelogAccDeviceID     string `json:"checksumChangelogAccDeviceId,omitempty"`
+	DestChecksumChangelogAccDeviceID string `json:"destChecksumChangelogAccDeviceId,omitempty"`
+	ChecksumChangelogSizeMb          int    `json:"checksumChangelogSizeMb,omitempty"`
+	DestChecksumChangelogSizeMb      int    `json:"destChecksumChangelogSizeMb,omitempty"`
 }
 
 // DeviceParam defines struct for DeviceParam
 type DeviceParam struct {
-	Name                  string `json:"name,omitempty"`
-	DeviceCurrentPathname string `json:"deviceCurrentPathname"`
-	CapacityLimitInKb     int    `json:"capacityLimitInKb,omitempty"`
-	StoragePoolID         string `json:"storagePoolId"`
-	SdsID                 string `json:"sdsId"`
-	TestTimeSecs          int    `json:"testTimeSecs,omitempty"`
-	TestMode              string `json:"testMode,omitempty"`
+	Name                     string `json:"name,omitempty"`
+	DeviceCurrentPathname    string `json:"deviceCurrentPathname"`
+	CapacityLimitInKb        int    `json:"capacityLimitInKb,omitempty"`
+	StoragePoolID            string `json:"storagePoolId"`
+	SdsID                    string `json:"sdsId"`
+	TestTimeSecs             int    `json:"testTimeSecs,omitempty"`
+	TestMode                 string `json:"testMode,omitempty"`
+	MediaType                string `json:"mediaType,omitempty"`
+	ExternalAccelerationType string `json:"externalAccelerationType,omitempty"`
+}
+
+// SetDeviceName defines struct for setting device name
+type SetDeviceName struct {
+	Name string `json:"newName"`
+}
+
+// SetDeviceMediaType defines struct for setting device media type
+type SetDeviceMediaType struct {
+	MediaType string `json:"mediaType"`
+}
+
+// SetDeviceExternalAccelerationType defines struct for device external acceleration type
+type SetDeviceExternalAccelerationType struct {
+	ExternalAccelerationType string `json:"externalAccelerationType"`
+}
+
+// SetDeviceCapacityLimit defines struct for setting device capacity limit
+type SetDeviceCapacityLimit struct {
+	DeviceCapacityLimit string `json:"capacityLimitInGB"`
 }
 
 // DeviceResp defines struct for DeviceParam
@@ -533,7 +634,7 @@ type DeviceResp struct {
 	ID string `json:"id"`
 }
 
-// StoragePool defines struct for PFlex StoragePool
+// StoragePool defines struct for PowerFlex StoragePool
 type StoragePool struct {
 	ProtectionDomainID                                              string  `json:"protectionDomainId"`
 	RebalanceioPriorityPolicy                                       string  `json:"rebalanceIoPriorityPolicy"`
@@ -604,11 +705,11 @@ type StoragePool struct {
 // StoragePoolParam defines struct for StoragePoolParam
 type StoragePoolParam struct {
 	Name                     string `json:"name"`
-	SparePercentage          int    `json:"sparePercentage,omitempty"`
+	SparePercentage          string `json:"sparePercentage,omitempty"`
 	RebuildEnabled           bool   `json:"rebuildEnabled,omitempty"`
 	RebalanceEnabled         bool   `json:"rebalanceEnabled,omitempty"`
 	ProtectionDomainID       string `json:"protectionDomainId"`
-	ZeroPaddingEnabled       bool   `json:"zeroPaddingEnabled,omitempty"`
+	ZeroPaddingEnabled       string `json:"zeroPaddingEnabled,omitempty"`
 	UseRmcache               string `json:"useRmcache,omitempty"`
 	UseRfcache               string `json:"useRfcache,omitempty"`
 	RmcacheWriteHandlingMode string `json:"rmcacheWriteHandlingMode,omitempty"`
@@ -632,6 +733,58 @@ type StoragePoolUseRmCache struct {
 
 // StoragePoolUseRfCache defines struct for StoragePoolUseRfCache
 type StoragePoolUseRfCache struct {
+}
+
+// StoragePoolZeroPadEnabled defines struct for zero Pad Enablement
+type StoragePoolZeroPadEnabled struct {
+	ZeroPadEnabled string `json:"zeroPadEnabled"`
+}
+
+// ReplicationJournalCapacityParam defines struct for Replication Journal Capacity
+type ReplicationJournalCapacityParam struct {
+	ReplicationJournalCapacityMaxRatio string `json:"replicationJournalCapacityMaxRatio"`
+}
+
+// CapacityAlertThresholdParam defines struct for Capacity Alert Threshold
+type CapacityAlertThresholdParam struct {
+	CapacityAlertHighThresholdPercent     string `json:"capacityAlertHighThresholdPercent,omitempty"`
+	CapacityAlertCriticalThresholdPercent string `json:"capacityAlertCriticalThresholdPercent,omitempty"`
+}
+
+// ProtectedMaintenanceModeParam defines struct for Protected Maintenance Mode
+type ProtectedMaintenanceModeParam struct {
+	Policy                      string `json:"policy"`
+	NumOfConcurrentIosPerDevice string `json:"numOfConcurrentIosPerDevice,omitempty"`
+	BwLimitPerDeviceInKbps      string `json:"bwLimitPerDeviceInKbps,omitempty"`
+}
+
+// RebalanceEnabledParam defines struct for Rebalance Enablement
+type RebalanceEnabledParam struct {
+	RebalanceEnabled string `json:"rebalanceEnabled"`
+}
+
+// SparePercentageParam defines struct for Spare Percentage
+type SparePercentageParam struct {
+	SparePercentage string `json:"sparePercentage"`
+}
+
+// RmcacheWriteHandlingModeParam defines struct for Rmcache Write Handling Mode
+type RmcacheWriteHandlingModeParam struct {
+	RmcacheWriteHandlingMode string `json:"rmcacheWriteHandlingMode"`
+}
+
+// RebuildEnabledParam defines struct for Rebuild Enablement
+type RebuildEnabledParam struct {
+	RebuildEnabled string `json:"rebuildEnabled"`
+}
+
+// RebuildRebalanceParallelismParam defines struct for Rebuild Rebalance Parallelism
+type RebuildRebalanceParallelismParam struct {
+	Limit string `json:"limit"`
+}
+
+// FragmentationParam defines struct for fragmentation
+type FragmentationParam struct {
 }
 
 // StoragePoolResp defines struct for StoragePoolResp
@@ -941,4 +1094,201 @@ type QueryReplicationPair struct {
 // QueryReplicationPairStatistics used for querying the statistics of a replication pair.
 type QueryReplicationPairStatistics struct {
 	InitialCopyProgress float64 `json:"initialCopyProgress"`
+}
+
+// NASServerOperationalStatusEnum NAS lifecycle state.
+type NASServerOperationalStatusEnum string
+
+// operational status of NAS
+const (
+	Stopped  NASServerOperationalStatusEnum = "Stopped"
+	Starting NASServerOperationalStatusEnum = "Starting"
+	Started  NASServerOperationalStatusEnum = "Started"
+	Stopping NASServerOperationalStatusEnum = "Stopping"
+	Failover NASServerOperationalStatusEnum = "Failover"
+	Degraded NASServerOperationalStatusEnum = "Degraded"
+	Unknown  NASServerOperationalStatusEnum = "Unknown"
+)
+
+// NFSServerInstance in NAS server
+type NFSServerInstance struct {
+	// Unique identifier for NFS server
+	ID string `json:"id"`
+	// IsNFSv4Enabled is set to true if nfsv4 is enabled on NAS server
+	IsNFSv4Enabled bool `json:"is_nfsv4_enabled,omitempty"`
+}
+
+// NAS defines struct for NAS.
+type NAS struct {
+	ID                              string                         `json:"id,omitempty"`
+	Description                     string                         `json:"description,omitempty"`
+	Name                            string                         `json:"name,omitempty"`
+	ProtectionDomainID              string                         `json:"protection_domain_id,omitempty"`
+	StoragePoolID                   string                         `json:"storage_pool_id,omitempty"`
+	PrimaryNodeID                   string                         `json:"primary_node_id,omitempty"`
+	BackUpNodeID                    string                         `json:"backup_node_id,omitempty"`
+	OperationalStatus               NASServerOperationalStatusEnum `json:"operational_status,omitempty"`
+	CurrentPreferredIPv4InterfaceID string                         `json:"current_preferred_IPv4_interface_id"`
+	NfsServers                      []NFSServerInstance            `json:"nfs_servers"`
+	CurrentNodeID                   string                         `json:"current_node_id,omitempty"`
+	DefaultUnixUser                 string                         `json:"default_unix_user,omitempty"`
+	DefaultWindowsUser              string                         `json:"default_windows_user,omitempty"`
+	CurrentUnixDirectoryService     string                         `json:"current_unix_directory_service,omitempty"`
+	IsUsernameTranslationEnabled    bool                           `json:"is_username_translation_enabled,omitempty"`
+	IsAutoUserMappingEnabled        bool                           `json:"is_auto_user_mapping_enabled,omitempty"`
+	ProductionIPv4InterfaceID       string                         `json:"production_IPv4_interface_id,omitempty"`
+	ProductionIPv6InterfaceID       string                         `json:"production_IPv6_interface_id,omitempty"`
+	BackupIPv4InterfaceID           string                         `json:"backup_IPv4_interface_id,omitempty"`
+	BackupIPv6InterfaceID           string                         `json:"backup_IPv6_interface_id,omitempty"`
+	CurrentPreferredIPv6InterfaceID string                         `json:"current_preferred_IPv6_interface_id,omitempty"`
+	OperationalStatusl10n           string                         `json:"operational_status_l10n,omitempty"`
+	CurrentUnixDirectoryServicel10n string                         `json:"current_unix_directory_service_l10n,omitempty"`
+}
+
+// CreateNASResponse defines the struct for CreateNASResponse
+type CreateNASResponse struct {
+	ID string `json:"id"`
+}
+
+// CreateNASParam defines the struct for CreateNASParam
+type CreateNASParam struct {
+	Name                         string `json:"name"`
+	ProtectionDomainID           string `json:"protection_domain_id"`
+	Description                  string `json:"description,omitempty"`
+	CurrentUnixDirectoryService  string `json:"current_unix_directory_service,omitempty"`
+	DefaultUnixUser              string `json:"default_unix_user,omitempty"`
+	DefaultWindowsUser           string `json:"default_windows_user,omitempty"`
+	IsUsernameTranslationEnabled bool   `json:"is_username_translation_enabled,omitempty"`
+	IsAutoUserMappingEnabled     bool   `json:"is_auto_user_mapping_enabled,omitempty"`
+}
+
+// FileSystem defines struct for PowerFlex FileSystem
+type FileSystem struct {
+	ID                         string `json:"id"`
+	Name                       string `json:"name"`
+	Description                string `json:"description"`
+	StoragePoolID              string `json:"storage_pool_id"`
+	NasServerID                string `json:"nas_server_id"`
+	ParentID                   string `json:"parent_id"`
+	StorageWwn                 string `json:"storage_wwn"`
+	ExportFsID                 string `json:"export_fsid"`
+	Type                       string `json:"type"`
+	SizeTotal                  int    `json:"size_total"`
+	SizeUsed                   int    `json:"size_used"`
+	IsReadOnly                 bool   `json:"is_read_only"`
+	ProtectionPolicyID         string `json:"protection_policy_id"`
+	AccessPolicy               string `json:"access_policy"`
+	LockingPolicy              string `json:"locking_policy"`
+	FolderRenamePolicy         string `json:"folder_rename_policy"`
+	IsSmbSyncWritesEnabled     bool   `json:"is_smb_sync_writes_enabled"`
+	IsSmbOpLocksEnabled        bool   `json:"is_smb_op_locks_enabled"`
+	IsSmbNoNotifyEnabled       bool   `json:"is_smb_no_notify_enabled"`
+	IsSmbNotifyOnAccessEnabled bool   `json:"is_smb_notify_on_access_enabled"`
+	IsSmbNotifyOnWriteEnabled  bool   `json:"is_smb_notify_on_write_enabled"`
+	SmbNotifyOnChangeDirDepth  int    `json:"smb_notify_on_change_dir_depth"`
+	IsAsyncMTimeEnabled        bool   `json:"is_async_MTime_enabled"`
+	IsFlrEnabled               bool   `json:"is_flr_enabled"`
+	IsQuotaEnabled             bool   `json:"is_quota_enabled"`
+	GracePeriod                int    `json:"grace_period"`
+	DefaultHardLimit           int    `json:"default_hard_limit"`
+	DefaultSoftLimit           int    `json:"default_soft_limit"`
+	CreationTimestamp          string `json:"creation_timestamp"`
+	ExpirationTimestamp        string `json:"expiration_timestamp"`
+	LastRefreshTimestamp       string `json:"last_refresh_timestamp"`
+	LastWritableTimestamp      string `json:"last_writable_timestamp"`
+	IsModified                 bool   `json:"is_modified"`
+	AccessType                 string `json:"access_type"`
+	CreatorType                string `json:"creator_type"`
+}
+
+// FsCreate defines struct for creating a PowerFlex FileSystem
+type FsCreate struct {
+	Name                       string `json:"name"`
+	Description                string `json:"description,omitempty"`
+	SizeTotal                  int    `json:"size_total"`
+	StoragePoolID              string `json:"storage_pool_id"`
+	NasServerID                string `json:"nas_server_id"`
+	IsReadOnly                 bool   `json:"is_read_only,omitempty"`
+	AccessPolicy               string `json:"access_policy,omitempty"`
+	LockingPolicy              string `json:"locking_policy,omitempty"`
+	FolderRenamePolicy         string `json:"folder_rename_policy,omitempty"`
+	IsSmbSyncWritesEnabled     bool   `json:"is_smb_sync_writes_enabled,omitempty"`
+	IsSmbNoNotifyEnabled       bool   `json:"is_smb_no_notify_enabled,omitempty"`
+	IsSmbOpLocksEnabled        bool   `json:"is_smb_op_locks_enabled,omitempty"`
+	IsSmbNotifyOnAccessEnabled bool   `json:"is_smb_notify_on_access_enabled,omitempty"`
+	IsSmbNotifyOnWriteEnabled  bool   `json:"is_smb_notify_on_write_enabled,omitempty"`
+	SmbNotifyOnChangeDirDepth  int    `json:"smb_notify_on_change_dir_depth,omitempty"`
+	IsAsyncMTimeEnabled        bool   `json:"is_async_MTime_enabled,omitempty"`
+}
+
+// FileSystemResp defines struct for FileSystemResp
+type FileSystemResp struct {
+	ID string `json:"id"`
+}
+
+// NFSExportDefaultAccessEnum defines default access
+type NFSExportDefaultAccessEnum string
+
+// Default access const
+const (
+	NoAccess     NFSExportDefaultAccessEnum = "No_Access"
+	ReadOnly     NFSExportDefaultAccessEnum = "Read_Only"
+	ReadWrite    NFSExportDefaultAccessEnum = "Read_Write"
+	Root         NFSExportDefaultAccessEnum = "Root"
+	ReadOnlyRoot NFSExportDefaultAccessEnum = "Read_Only_Root "
+)
+
+// NFSExport defines the struct for NFSExport
+type NFSExport struct {
+	ID                 string                     `json:"id,omitempty"`
+	FileSystemID       string                     `json:"file_system_id,omitempty"`
+	Name               string                     `json:"name,omitempty"`
+	Description        string                     `json:"description,omitempty"`
+	DefaultAccess      NFSExportDefaultAccessEnum `json:"default_access,omitempty"`
+	Path               string                     `json:"path,omitempty"`
+	ReadWriteHosts     []string                   `json:"read_write_hosts,omitempty"`
+	ReadOnlyHosts      []string                   `json:"read_only_hosts,omitempty"`
+	ReadWriteRootHosts []string                   `json:"read_write_root_hosts,omitempty"`
+	ReadOnlyRootHosts  []string                   `json:"read_only_root_hosts,omitempty"`
+}
+
+// NFSExportCreateResponse defines struct for response
+type NFSExportCreateResponse struct {
+	ID string `json:"id"`
+}
+
+// NFSExportCreate defines struct for Create NFS Export
+type NFSExportCreate struct {
+	Name               string   `json:"name"`
+	FileSystemID       string   `json:"file_system_id"`
+	Path               string   `json:"path"`
+	NoAccessHosts      []string `json:"no_access_hosts,omitempty"`
+	ReadOnlyHosts      []string `json:"read_only_hosts,omitempty"`
+	ReadWriteHosts     []string `json:"read_write_hosts,omitempty"`
+	ReadOnlyRootHosts  []string `json:"read_only_root_hosts,omitempty"`
+	ReadWriteRootHosts []string `json:"read_write_root_hosts,omitempty"`
+	AnonymousUID       int      `json:"anonymous_UID,omitempty"`
+	AnonymousGID       int      `json:"anonymous_GID,omiempty"`
+	IsNoSUID           bool     `json:"is_no_SUID,omitempty"`
+}
+
+// NFSExportModify defines struct for Modify NFS Export
+type NFSExportModify struct {
+	Description              string   `json:"description,omitempty"`
+	DefaultAccess            string   `json:"default_access,omitempty"`
+	NoAccessHosts            []string `json:"no_access_hosts,omitempty"`
+	AddNoAccessHosts         []string `json:"add_no_access_hosts,omitempty"`
+	RemoveNoAccessHosts      []string `json:"remove_no_access_hosts,omitempty"`
+	ReadOnlyHosts            []string `json:"read_only_hosts,omitempty"`
+	AddReadOnlyHosts         []string `json:"add_read_only_hosts,omitempty"`
+	RemoveReadOnlyHosts      []string `json:"remove_read_only_hosts,omitempty"`
+	ReadOnlyRootHosts        []string `json:"read_only_root_hosts,omitempty"`
+	AddReadOnlyRootHosts     []string `json:"add_read_only_root_hosts,omitempty"`
+	RemoveReadOnlyRootHosts  []string `json:"remove_read_only_root_hosts,omitempty"`
+	ReadWriteHosts           []string `json:"read_write_hosts,omitempty"`
+	AddReadWriteHosts        []string `json:"add_read_write_hosts,omitempty"`
+	RemoveReadWriteHosts     []string `json:"remove_read_write_hosts,omitempty"`
+	ReadWriteRootHosts       []string `json:"read_write_root_hosts,omitempty"`
+	AddReadWriteRootHosts    []string `json:"add_read_write_root_hosts,omitempty"`
+	RemoveReadWriteRootHosts []string `json:"remove_read_write_root_hosts,omitempty"`
 }

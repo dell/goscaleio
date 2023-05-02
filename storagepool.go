@@ -127,6 +127,173 @@ func (pd *ProtectionDomain) EnableRFCache(ID string) (string, error) {
 	return spResp.ID, nil
 }
 
+// EnableOrDisableZeroPadding Enables / disables zero padding
+func (pd *ProtectionDomain) EnableOrDisableZeroPadding(ID string, zeroPadValue string) error {
+
+	zeroPaddedParam := &types.StoragePoolZeroPadEnabled{
+		ZeroPadEnabled: zeroPadValue,
+	}
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setZeroPaddingPolicy", ID)
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, zeroPaddedParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetReplicationJournalCapacity Sets replication journal capacity
+func (pd *ProtectionDomain) SetReplicationJournalCapacity(ID string, replicationJournalCapacity string) error {
+
+	replicationJournalCapacityParam := &types.ReplicationJournalCapacityParam{
+		ReplicationJournalCapacityMaxRatio: replicationJournalCapacity,
+	}
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setReplicationJournalCapacity", ID)
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, replicationJournalCapacityParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetCapacityAlertThreshold Sets high or critical capacity alert threshold
+func (pd *ProtectionDomain) SetCapacityAlertThreshold(ID string, capacityAlertThreshold *types.CapacityAlertThresholdParam) error {
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setCapacityAlertThresholds", ID)
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, capacityAlertThreshold, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetProtectedMaintenanceModeIoPriorityPolicy sets protected maintenance mode IO priority policy
+func (pd *ProtectionDomain) SetProtectedMaintenanceModeIoPriorityPolicy(ID string, protectedMaintenanceModeParam *types.ProtectedMaintenanceModeParam) error {
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setProtectedMaintenanceModeIoPriorityPolicy", ID)
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, protectedMaintenanceModeParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetRebalanceEnabled sets rebalance enabled.
+func (pd *ProtectionDomain) SetRebalanceEnabled(ID string, rebalanceEnabledValue string) error {
+	rebalanceEnabledParam := &types.RebalanceEnabledParam{
+		RebalanceEnabled: rebalanceEnabledValue,
+	}
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setRebalanceEnabled", ID)
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, rebalanceEnabledParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetRebalanceIoPriorityPolicy Sets rebalance I/O priority policy
+func (pd *ProtectionDomain) SetRebalanceIoPriorityPolicy(ID string, protectedMaintenanceModeParam *types.ProtectedMaintenanceModeParam) error {
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setRebalanceIoPriorityPolicy", ID)
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, protectedMaintenanceModeParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetVTreeMigrationIOPriorityPolicy Sets V-Tree migration I/O priority policy
+func (pd *ProtectionDomain) SetVTreeMigrationIOPriorityPolicy(ID string, protectedMaintenanceModeParam *types.ProtectedMaintenanceModeParam) error {
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setVTreeMigrationIoPriorityPolicy", ID)
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, protectedMaintenanceModeParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetSparePercentage Sets spare percentage
+func (pd *ProtectionDomain) SetSparePercentage(ID string, sparePercentageValue string) error {
+	percentageParam := &types.SparePercentageParam{
+		SparePercentage: sparePercentageValue,
+	}
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setSparePercentage", ID)
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, percentageParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetRMcacheWriteHandlingMode Sets RMcache write handling mode
+func (pd *ProtectionDomain) SetRMcacheWriteHandlingMode(ID string, writeHandlingModeValue string) error {
+	writeHandlingParam := &types.RmcacheWriteHandlingModeParam{
+		RmcacheWriteHandlingMode: writeHandlingModeValue,
+	}
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setRmcacheWriteHandlingMode", ID)
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, writeHandlingParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetRebuildEnabled Sets Rebuild Enabled
+func (pd *ProtectionDomain) SetRebuildEnabled(ID string, rebuildEnabledValue string) error {
+	rebuildEnabled := &types.RebuildEnabledParam{
+		RebuildEnabled: rebuildEnabledValue,
+	}
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setRebuildEnabled", ID)
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, rebuildEnabled, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetRebuildRebalanceParallelismParam Sets rebuild/rebalance parallelism
+func (pd *ProtectionDomain) SetRebuildRebalanceParallelismParam(ID string, limitValue string) error {
+	rebuildRebalanceParam := &types.RebuildRebalanceParallelismParam{
+		Limit: limitValue,
+	}
+	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setRebuildRebalanceParallelism", ID)
+	err := pd.client.getJSONWithRetry(
+		http.MethodPost, path, rebuildRebalanceParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Fragmentation enables or disables fragmentation
+func (pd *ProtectionDomain) Fragmentation(ID string, value bool) error {
+	payload := &types.FragmentationParam{}
+	if value {
+
+		path := fmt.Sprintf("/api/instances/StoragePool::%v/action/enableFragmentation", ID)
+		err := pd.client.getJSONWithRetry(
+			http.MethodPost, path, payload, nil)
+		if err != nil {
+			return err
+		}
+	} else {
+		path := fmt.Sprintf("/api/instances/StoragePool::%v/action/disableFragmentation", ID)
+		err := pd.client.getJSONWithRetry(
+			http.MethodPost, path, payload, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // DisableRFCache Disables RFCache
 func (pd *ProtectionDomain) DisableRFCache(ID string) (string, error) {
 
