@@ -19,6 +19,7 @@ var (
 	errSysCerts  = errors.New("Unable to initialize cert pool from system")
 )
 
+// GatewayClient is client for Gateway server
 type GatewayClient struct {
 	http     *http.Client
 	host     string
@@ -68,7 +69,7 @@ func NewGateway(
 	return gc, nil
 }
 
-// GatewayClient is an  inetface which has all the functionalities for the gateway.
+// GatewayFunction is an  interface which has all the functionalities for the gateway.
 type GatewayFunction interface {
 	UploadPackages(fliePath string) error
 	ParseCSV(filePath string) error
