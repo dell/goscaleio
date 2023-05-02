@@ -49,12 +49,10 @@ func (s *System) GetNASByIDName(id string, name string) (*types.NAS, error) {
 		for _, nas := range nasList {
 			if nas.Name == name {
 				return &nas, nil
-			} else {
-				return nil, errors.New("couldn't find given NAS server by name")
 			}
 		}
 
-		return nil, errors.New("couldn't find given NAS server")
+		return nil, errors.New("couldn't find given NAS server by name")
 	}
 
 }
