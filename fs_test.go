@@ -24,7 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetFileSystemByID(t *testing.T) {
+func TestGetFileSystemByIDName(t *testing.T) {
 	type checkFn func(*testing.T, *types.FileSystem, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
@@ -40,13 +40,84 @@ func TestGetFileSystemByID(t *testing.T) {
 		}
 	}
 
-	checkResp := func(fsID string) func(t *testing.T, resp *types.FileSystem, err error) {
+	checkRespName := func(fsName string) func(t *testing.T, resp *types.FileSystem, err error) {
+		return func(t *testing.T, resp *types.FileSystem, err error) {
+			assert.Equal(t, fsName, resp.Name)
+		}
+	}
+
+	checkRespID := func(fsID string) func(t *testing.T, resp *types.FileSystem, err error) {
 		return func(t *testing.T, resp *types.FileSystem, err error) {
 			assert.Equal(t, fsID, resp.ID)
 		}
 	}
 
-	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
+	testsName := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
+		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
+			href := "/rest/v1/file-systems"
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				resp := []types.FileSystem{
+					{
+						ID:   "64366a19-54e8-1544-f3d7-2a50fb1ccff3",
+						Name: "fs-test-1",
+					},
+					{
+						ID:   "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
+						Name: "fs-test-2",
+					},
+				}
+
+				respData, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				fmt.Fprintln(w, string(respData))
+			}))
+			return ts, check(hasNoError, checkRespName("fs-test-2"))
+		},
+		"not found": func(t *testing.T) (*httptest.Server, []checkFn) {
+			href := "/rest/v1/file-systems"
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				resp := []types.FileSystem{
+					{
+						ID:   "64366a19-54e8-1544-f3d7-2a50fb1ccff3",
+						Name: "fs-test-1",
+					},
+					{
+						ID:   "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
+						Name: "fs-test-2",
+					},
+				}
+
+				respData, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				fmt.Fprintln(w, string(respData))
+			}))
+			return ts, check(hasError)
+		},
+	}
+
+	testsID := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
 			fsID := "64366a19-54e8-1544-f3d7-2a50fb1ccff3"
 			href := fmt.Sprintf("/rest/v1/file-systems/%s", fsID)
@@ -71,7 +142,7 @@ func TestGetFileSystemByID(t *testing.T) {
 				}
 				fmt.Fprintln(w, string(respData))
 			}))
-			return ts, check(hasNoError, checkResp("64366a19-54e8-1544-f3d7-2a50fb1ccff3"))
+			return ts, check(hasNoError, checkRespID("64366a19-54e8-1544-f3d7-2a50fb1ccff3"))
 		},
 		"not found": func(t *testing.T) (*httptest.Server, []checkFn) {
 			fsID := "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3"
@@ -92,127 +163,17 @@ func TestGetFileSystemByID(t *testing.T) {
 		},
 	}
 
-	var testCaseFSIds = map[string]string{
-		"success":   "64366a19-54e8-1544-f3d7-2a50fb1ccff3",
-		"not found": "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
-	}
-
-	for id, tc := range tests {
-		t.Run(id, func(t *testing.T) {
-			ts, checkFns := tc(t)
-			defer ts.Close()
-
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
-			client.configConnect.Version = "4.0"
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			s := System{
-				client: client,
-			}
-
-			resp, err := s.GetFileSystemByID(testCaseFSIds[id])
-			for _, checkFn := range checkFns {
-				checkFn(t, resp, err)
-			}
-		})
-	}
-}
-
-func TestGetFileSystemByName(t *testing.T) {
-	type checkFn func(*testing.T, *types.FileSystem, error)
-	check := func(fns ...checkFn) []checkFn { return fns }
-
-	hasNoError := func(t *testing.T, resp *types.FileSystem, err error) {
-		if err != nil {
-			t.Fatalf("expected no error")
-		}
-	}
-
-	hasError := func(t *testing.T, resp *types.FileSystem, err error) {
-		if err == nil {
-			t.Fatalf("expected error")
-		}
-	}
-
-	checkResp := func(fsName string) func(t *testing.T, resp *types.FileSystem, err error) {
-		return func(t *testing.T, resp *types.FileSystem, err error) {
-			assert.Equal(t, fsName, resp.Name)
-		}
-	}
-
-	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
-		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-			href := "/rest/v1/file-systems"
-
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.Method != http.MethodGet {
-					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
-				}
-
-				if r.URL.Path != href {
-					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
-				}
-
-				resp := []types.FileSystem{
-					{
-						ID:   "64366a19-54e8-1544-f3d7-2a50fb1ccff3",
-						Name: "fs-test-1",
-					},
-					{
-						ID:   "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
-						Name: "fs-test-2",
-					},
-				}
-
-				respData, err := json.Marshal(resp)
-				if err != nil {
-					t.Fatal(err)
-				}
-				fmt.Fprintln(w, string(respData))
-			}))
-			return ts, check(hasNoError, checkResp("fs-test-2"))
-		},
-		"not found": func(t *testing.T) (*httptest.Server, []checkFn) {
-			href := "/rest/v1/file-systems"
-
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.Method != http.MethodGet {
-					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
-				}
-
-				if r.URL.Path != href {
-					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
-				}
-
-				resp := []types.FileSystem{
-					{
-						ID:   "64366a19-54e8-1544-f3d7-2a50fb1ccff3",
-						Name: "fs-test-1",
-					},
-					{
-						ID:   "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
-						Name: "fs-test-2",
-					},
-				}
-
-				respData, err := json.Marshal(resp)
-				if err != nil {
-					t.Fatal(err)
-				}
-				fmt.Fprintln(w, string(respData))
-			}))
-			return ts, check(hasError)
-		},
-	}
-
 	var testCaseFSNames = map[string]string{
 		"success":   "fs-test-2",
 		"not found": "fs-test-3",
 	}
 
-	for name, tc := range tests {
+	var testCaseFSIds = map[string]string{
+		"success":   "64366a19-54e8-1544-f3d7-2a50fb1ccff3",
+		"not found": "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
+	}
+
+	for name, tc := range testsName {
 		t.Run(name, func(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
@@ -227,7 +188,29 @@ func TestGetFileSystemByName(t *testing.T) {
 				client: client,
 			}
 
-			resp, err := s.GetFileSystemByName(testCaseFSNames[name])
+			resp, err := s.GetFileSystemByIDName("", testCaseFSNames[name])
+			for _, checkFn := range checkFns {
+				checkFn(t, resp, err)
+			}
+		})
+	}
+
+	for id, tc := range testsID {
+		t.Run(id, func(t *testing.T) {
+			ts, checkFns := tc(t)
+			defer ts.Close()
+
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client.configConnect.Version = "4.0"
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+			}
+
+			resp, err := s.GetFileSystemByIDName(testCaseFSIds[id], "")
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}

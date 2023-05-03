@@ -33,42 +33,34 @@ func GetNFSExportbyName(t *testing.T) string {
 	return nfsexport[0].Name
 }
 
-func TestNFSExportByName(t *testing.T) {
-	fsName := GetNFSExportbyName(t)
-	assert.NotZero(t, len(fsName))
-
-	if len(fsName) > 0 {
-		fs, err := C.GetNFSExportByName(fsName)
-		assert.Nil(t, err)
-		assert.Equal(t, fsName, fs.Name)
-	}
-}
-
-func TestNFSExportByID(t *testing.T) {
+func TestNFSExportByIDName(t *testing.T) {
 	nfsName := GetNFSExportbyName(t)
 	assert.NotZero(t, len(nfsName))
 
-	nfs, err := C.GetNFSExportByName(nfsName)
+	nfs, err := C.GetNFSExportByIDName("", nfsName)
 	assert.Nil(t, err)
 	assert.Equal(t, nfsName, nfs.Name)
 
 	if nfs != nil {
-		fs, err := C.GetNFSExportByID(nfs.ID)
+		nfsexport, err := C.GetNFSExportByIDName(nfs.ID, "")
 		assert.Nil(t, err)
-		assert.Equal(t, nfs.ID, fs.ID)
+		assert.Equal(t, nfs.ID, nfsexport.ID)
+	}
+
+	if len(nfsName) > 0 {
+		nfs, err := C.GetNFSExportByIDName("", nfsName)
+		assert.Nil(t, err)
+		assert.Equal(t, nfsName, nfs.Name)
 	}
 }
-
-func TestNFSExportByNameInvalid(t *testing.T) {
-	fs, err := C.GetNFSExportByName(invalidIdentifier)
+func TestNFSExportByIDNameInvalid(t *testing.T) {
+	nfs, err := C.GetNFSExportByIDName(invalidIdentifier, "")
 	assert.NotNil(t, err)
-	assert.Nil(t, fs)
-}
+	assert.Nil(t, nfs)
 
-func TestNFSExportByIDInvalid(t *testing.T) {
-	fs, err := C.GetNFSExportByID(invalidIdentifier)
+	nfsexport, err := C.GetNFSExportByIDName("", invalidIdentifier)
 	assert.NotNil(t, err)
-	assert.Nil(t, fs)
+	assert.Nil(t, nfsexport)
 }
 
 func TestCreateModifyDeleteNFSExport(t *testing.T) {
@@ -81,7 +73,7 @@ func TestCreateModifyDeleteNFSExport(t *testing.T) {
 	if os.Getenv("GOSCALEIO_FILESYSTEM_NFSEXPORT") != "" {
 		filesystemname = os.Getenv("GOSCALEIO_FILESYSTEM_NFSEXPORT")
 	}
-	filesystem, err := system.GetFileSystemByName(filesystemname)
+	filesystem, err := system.GetFileSystemByIDName("", filesystemname)
 	nfsexport := &types.NFSExportCreate{
 		Name:         nfsName,
 		FileSystemID: filesystem.ID,

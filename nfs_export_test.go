@@ -30,7 +30,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetNFSExportByName(t *testing.T) {
+func TestGetNFSExportByIDName(t *testing.T) {
 	type checkFn func(*testing.T, *types.NFSExport, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
@@ -46,13 +46,19 @@ func TestGetNFSExportByName(t *testing.T) {
 		}
 	}
 
-	checkResp := func(nfsName string) func(t *testing.T, resp *types.NFSExport, err error) {
+	checkRespName := func(nfsName string) func(t *testing.T, resp *types.NFSExport, err error) {
 		return func(t *testing.T, resp *types.NFSExport, err error) {
 			assert.Equal(t, nfsName, resp.Name)
 		}
 	}
 
-	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
+	checkRespID := func(nfsID string) func(t *testing.T, resp *types.NFSExport, err error) {
+		return func(t *testing.T, resp *types.NFSExport, err error) {
+			assert.Equal(t, nfsID, resp.ID)
+		}
+	}
+
+	testsName := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
 			href := "/rest/v1/nfs-exports"
 
@@ -82,7 +88,7 @@ func TestGetNFSExportByName(t *testing.T) {
 				}
 				fmt.Fprintln(w, string(respData))
 			}))
-			return ts, check(hasNoError, checkResp("nfs-test-2"))
+			return ts, check(hasNoError, checkRespName("nfs-test-2"))
 		},
 		"not found": func(t *testing.T) (*httptest.Server, []checkFn) {
 			href := "/rest/v1/nfs-exports"
@@ -117,12 +123,64 @@ func TestGetNFSExportByName(t *testing.T) {
 		},
 	}
 
+	testsID := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
+		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
+			nfsID := "64242c06-7a78-1773-50f4-2a50fb1ccff3"
+			href := fmt.Sprintf("/rest/v1/nfs-exports/%s", nfsID)
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				resp := types.NFSExport{
+					ID:           "64242c06-7a78-1773-50f4-2a50fb1ccff3",
+					Name:         "nfs-test-1",
+					FileSystemID: "64242bfb-d188-e87b-c144-2a50fb1ccff3",
+				}
+
+				respData, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				fmt.Fprintln(w, string(respData))
+			}))
+			return ts, check(hasNoError, checkRespID("64242c06-7a78-1773-50f4-2a50fb1ccff3"))
+		},
+		"not found": func(t *testing.T) (*httptest.Server, []checkFn) {
+			nfsID := "6433a2b2-6d60-f737-9f3b-2a50fb1ccff3"
+			href := fmt.Sprintf("/rest/v1/nfs-exports/%s", nfsID)
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				http.Error(w, "nas not found", http.StatusNotFound)
+			}))
+			return ts, check(hasError)
+		},
+	}
+
 	var testCaseFSNames = map[string]string{
 		"success":   "nfs-test-2",
 		"not found": "nfs-test-3",
 	}
 
-	for name, tc := range tests {
+	var testCaseFSIds = map[string]string{
+		"success":   "64242c06-7a78-1773-50f4-2a50fb1ccff3",
+		"not found": "6433a2b2-6d60-f737-9f3b-2a50fb1ccff3",
+	}
+
+	for name, tc := range testsName {
 		t.Run(name, func(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
@@ -137,7 +195,29 @@ func TestGetNFSExportByName(t *testing.T) {
 				client: client,
 			}
 
-			resp, err := s.client.GetNFSExportByName(testCaseFSNames[name])
+			resp, err := s.client.GetNFSExportByIDName("", testCaseFSNames[name])
+			for _, checkFn := range checkFns {
+				checkFn(t, resp, err)
+			}
+		})
+	}
+
+	for id, tc := range testsID {
+		t.Run(id, func(t *testing.T) {
+			ts, checkFns := tc(t)
+			defer ts.Close()
+
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client.configConnect.Version = "4.0"
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+			}
+
+			resp, err := s.client.GetNFSExportByIDName(testCaseFSIds[id], "")
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -251,103 +331,6 @@ func TestCreateNFSExport(t *testing.T) {
 				checkFn(t, resp, err)
 			}
 
-		})
-	}
-}
-
-func TestGetNFSExportById(t *testing.T) {
-	type checkFn func(*testing.T, *types.NFSExport, error)
-	check := func(fns ...checkFn) []checkFn { return fns }
-
-	hasNoError := func(t *testing.T, resp *types.NFSExport, err error) {
-		if err != nil {
-			t.Fatalf("expected no error")
-		}
-	}
-
-	hasError := func(t *testing.T, resp *types.NFSExport, err error) {
-		if err == nil {
-			t.Fatalf("expected error")
-		}
-	}
-
-	checkResp := func(nfsID string) func(t *testing.T, resp *types.NFSExport, err error) {
-		return func(t *testing.T, resp *types.NFSExport, err error) {
-			assert.Equal(t, nfsID, resp.ID)
-		}
-	}
-
-	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
-		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-			nfsID := "64242c06-7a78-1773-50f4-2a50fb1ccff3"
-			href := fmt.Sprintf("/rest/v1/nfs-exports/%s", nfsID)
-
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.Method != http.MethodGet {
-					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
-				}
-
-				if r.URL.Path != href {
-					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
-				}
-
-				resp := types.NFSExport{
-					ID:           "64242c06-7a78-1773-50f4-2a50fb1ccff3",
-					Name:         "nfs-test-1",
-					FileSystemID: "64242bfb-d188-e87b-c144-2a50fb1ccff3",
-				}
-
-				respData, err := json.Marshal(resp)
-				if err != nil {
-					t.Fatal(err)
-				}
-				fmt.Fprintln(w, string(respData))
-			}))
-			return ts, check(hasNoError, checkResp("64242c06-7a78-1773-50f4-2a50fb1ccff3"))
-		},
-		"not found": func(t *testing.T) (*httptest.Server, []checkFn) {
-			nfsID := "6433a2b2-6d60-f737-9f3b-2a50fb1ccff3"
-			href := fmt.Sprintf("/rest/v1/nfs-exports/%s", nfsID)
-
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.Method != http.MethodGet {
-					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
-				}
-
-				if r.URL.Path != href {
-					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
-				}
-
-				http.Error(w, "nas not found", http.StatusNotFound)
-			}))
-			return ts, check(hasError)
-		},
-	}
-
-	var testCaseFSIds = map[string]string{
-		"success":   "64242c06-7a78-1773-50f4-2a50fb1ccff3",
-		"not found": "6433a2b2-6d60-f737-9f3b-2a50fb1ccff3",
-	}
-
-	for id, tc := range tests {
-		t.Run(id, func(t *testing.T) {
-			ts, checkFns := tc(t)
-			defer ts.Close()
-
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
-			client.configConnect.Version = "4.0"
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			s := System{
-				client: client,
-			}
-
-			resp, err := s.client.GetNFSExportByID(testCaseFSIds[id])
-			for _, checkFn := range checkFns {
-				checkFn(t, resp, err)
-			}
 		})
 	}
 }
