@@ -18,6 +18,9 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/dell/goscaleio/api"
+	types "github.com/dell/goscaleio/types/v1"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"math"
 	"net/http"
@@ -27,11 +30,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	log "github.com/sirupsen/logrus"
-
-	"github.com/dell/goscaleio/api"
-	types "github.com/dell/goscaleio/types/v1"
 )
 
 var (

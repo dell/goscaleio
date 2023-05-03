@@ -32,6 +32,7 @@ const (
 var (
 	C  *goscaleio.Client
 	C2 *goscaleio.Client
+	GC *goscaleio.GatewayClient
 )
 
 func initClient() {
@@ -71,7 +72,7 @@ func initClient2() bool {
 		os.Getenv("GOSCALEIO_VERSION"),
 		math.MaxInt64,
 		os.Getenv("GOSCALEIO_INSECURE") == "true",
-		os.Getenv("GOSCALEIO_USECERTS") == "true")
+		os.Getenv("GOSCALEIO_INSECURE") == "true")
 
 	if err != nil {
 		panic(err)
@@ -90,7 +91,21 @@ func initClient2() bool {
 	return true
 }
 
+func initGatewayClient() {
+	err := godotenv.Load(envVarsFile)
+	if err != nil {
+		log.Printf("%s file not found.", envVarsFile)
+	}
+
+	GC, err = goscaleio.NewGateway(os.Getenv("GATEWAY_ENDPOINT"), os.Getenv("GATEWAY_USERNAME"), os.Getenv("GATEWAY_PASSWORD"), os.Getenv("GATEWAY_INSECURE") == "true", os.Getenv("GATEWAY_INSECURE") == "true")
+	if err != nil {
+		panic(err)
+	}
+
+}
+
 func init() {
 	initClient()
 	initClient2()
+	initGatewayClient()
 }
