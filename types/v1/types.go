@@ -1309,3 +1309,9 @@ type PackageParam struct {
 	Size            int    `json:"size,omitempty"`
 	Latest          bool   `json:"latest,omitempty"`
 }
+
+type GatewayResponse struct {
+	Message    string `json:"message,omitempty"`
+	StatusCode int    `json:"httpStatusCode,omitempty"`
+	ErrorCode  int    `json:"errorCode,omitempty"`
+}

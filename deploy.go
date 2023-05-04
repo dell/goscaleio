@@ -13,6 +13,8 @@ import (
 	"net/http"
 	"os"
 	path "path/filepath"
+
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 var (
@@ -80,12 +82,12 @@ type GatewayFunction interface {
 }
 
 // UploadPackages used for upload packge to gateway server
-func (gc *GatewayClient) UploadPackages(filePath string) (string, error) {
-	var responseData string
+func (gc *GatewayClient) UploadPackages(filePath string) (types.GatewayResponse, error) {
+	var gatewayResponse types.GatewayResponse
 
 	file, filePathError := os.Open(path.Clean(filePath))
 	if filePathError != nil {
-		return responseData, filePathError
+		return gatewayResponse, filePathError
 	}
 	defer func() error {
 		if err := file.Close(); err != nil {
@@ -98,46 +100,45 @@ func (gc *GatewayClient) UploadPackages(filePath string) (string, error) {
 
 	part, fileReaderError := writer.CreateFormFile("files", path.Base(filePath))
 	if fileReaderError != nil {
-		return responseData, fileReaderError
+		return gatewayResponse, fileReaderError
 	}
 	_, fileContentError := io.Copy(part, file)
 	if fileContentError != nil {
-		return responseData, fileContentError
+		return gatewayResponse, fileContentError
 	}
 	fileWriterError := writer.Close()
 	if fileWriterError != nil {
-		return responseData, fileWriterError
+		return gatewayResponse, fileWriterError
 	}
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/installationPackages/instances/actions/uploadPackages", body)
 	if httpError != nil {
-		return responseData, httpError
+		return gatewayResponse, httpError
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	client := gc.http
 	response, httpReqError := client.Do(req)
+
 	if httpReqError != nil {
-		return responseData, httpReqError
+		return gatewayResponse, httpReqError
 	}
 
 	if response.StatusCode != 200 {
 		responseString, _ := extractString(response)
 
-		responseMap, _ := jsonToMap(responseString)
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
-		if responseMap != nil {
-			responseData = responseMap["message"].(string)
-
-			if len(responseData) == 0 {
-				responseData = responseMap["httpStatusCode"].(string)
-			}
+		if err != nil {
+			return gatewayResponse, fmt.Errorf("Error Uploading: %s", err)
 		}
 
-		return responseData, fmt.Errorf("Error Uploading: %s", responseData)
+		return gatewayResponse, fmt.Errorf("Error Uploading: %s", gatewayResponse.Message)
+	} else {
+		gatewayResponse.StatusCode = 200
 	}
 
-	return responseData, nil
+	return gatewayResponse, nil
 }
 
 // ParseCSV used for upload CSV to gateway server and parse it
@@ -186,13 +187,13 @@ func (gc *GatewayClient) ParseCSV(filePath string) error {
 }
 
 // GetPackgeDetails used for start installation
-func (gc *GatewayClient) GetPackgeDetails() (string, error) {
-	
-	var responseData string
+func (gc *GatewayClient) GetPackgeDetails() ([]types.PackageParam, error) {
 
-	req, httpError := http.NewRequest("GET", gc.host+"/im/types/installationPackages/instances?onlyLatest=false&_search=false",nil)
+	var packageParam []types.PackageParam
+
+	req, httpError := http.NewRequest("GET", gc.host+"/im/types/installationPackages/instances?onlyLatest=false&_search=false", nil)
 	if httpError != nil {
-		return "", httpError
+		return packageParam, httpError
 	}
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	req.Header.Set("Content-Type", "application/json")
@@ -200,28 +201,23 @@ func (gc *GatewayClient) GetPackgeDetails() (string, error) {
 	client := gc.http
 	httpRes, httpReqError := client.Do(req)
 	if httpReqError != nil {
-		return "", httpReqError
+		return packageParam, httpReqError
 	}
 
 	responseString, _ := extractString(httpRes)
 
-	if httpRes.StatusCode != 200 {
-		responseMap, _ := jsonToMap(responseString)
+	if httpRes.StatusCode == 200 {
 
-		if responseMap != nil {
-			responseData = responseMap["message"].(string)
+		err := json.Unmarshal([]byte(responseString), &packageParam)
 
-			if len(responseData) == 0 {
-				responseData = responseMap["httpStatusCode"].(string)
-			}
+		if err != nil {
+			return packageParam, fmt.Errorf("Error Parsing Data: %s", err)
 		}
 
-		return responseData, fmt.Errorf("Error Uploading: %s", responseData)
+		return packageParam, nil
 	}
 
-	responseData = responseString
-
-	return responseData, nil
+	return packageParam, nil
 
 }
 
