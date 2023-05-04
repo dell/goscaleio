@@ -50,37 +50,40 @@ func (s *System) GetAllFileSystems() ([]types.FileSystem, error) {
 	return fs, nil
 }
 
-// GetFileSystemByID returns a file system by ID
-func (s *System) GetFileSystemByID(id string) (*types.FileSystem, error) {
-	defer TimeSpent("GetFileSystemByID", time.Now())
+// GetFileSystemByIDName returns a file system by Name or ID
+func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSystem, error) {
+	defer TimeSpent("GetFileSystemByIDName", time.Now())
 
-	path := fmt.Sprintf("/rest/v1/file-systems/%v?select=*", id)
-	var fs types.FileSystem
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, &fs)
-	if err != nil {
-		return nil, err
-	}
+	if id == "" && name == "" {
 
-	return &fs, nil
-}
+		return nil, errors.New("file system name or ID is mandatory, please enter a valid value")
 
-// GetFileSystemByName returns a file system by Name
-func (s *System) GetFileSystemByName(name string) (*types.FileSystem, error) {
-	defer TimeSpent("GetFileSystemByName", time.Now())
-
-	filesystems, err := s.GetAllFileSystems()
-	if err != nil {
-		return nil, err
-	}
-
-	for _, fs := range filesystems {
-		if fs.Name == name {
-			return &fs, nil
+	} else if id != "" {
+		path := fmt.Sprintf("/rest/v1/file-systems/%v?select=*", id)
+		var fs types.FileSystem
+		err := s.client.getJSONWithRetry(
+			http.MethodGet, path, nil, &fs)
+		if err != nil {
+			return nil, errors.New("couldn't find filesystem by id")
 		}
+
+		return &fs, nil
+
+	} else {
+		filesystems, err := s.GetAllFileSystems()
+		if err != nil {
+			return nil, err
+		}
+
+		for _, fs := range filesystems {
+			if fs.Name == name {
+				return &fs, nil
+			}
+		}
+
+		return nil, errors.New("couldn't find file system by name")
 	}
 
-	return nil, errors.New("Couldn't find file system")
 }
 
 // CreateFileSystem creates a file system
@@ -102,7 +105,7 @@ func (s *System) CreateFileSystem(fs *types.FsCreate) (*types.FileSystemResp, er
 func (s *System) DeleteFileSystem(name string) error {
 	defer TimeSpent("DeleteFileSystem", time.Now())
 
-	fs, err := s.GetFileSystemByName(name)
+	fs, err := s.GetFileSystemByIDName("", name)
 	if err != nil {
 		return err
 	}

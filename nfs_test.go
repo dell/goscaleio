@@ -30,7 +30,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetNasByName(t *testing.T) {
+func TestGetNasByIDName(t *testing.T) {
 	type checkFn func(*testing.T, *types.NAS, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
@@ -46,13 +46,19 @@ func TestGetNasByName(t *testing.T) {
 		}
 	}
 
-	checkResp := func(nasName string) func(t *testing.T, resp *types.NAS, err error) {
+	checkRespName := func(nasName string) func(t *testing.T, resp *types.NAS, err error) {
 		return func(t *testing.T, resp *types.NAS, err error) {
 			assert.Equal(t, nasName, resp.Name)
 		}
 	}
 
-	tests := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
+	checkRespID := func(nasId string) func(t *testing.T, resp *types.NAS, err error) {
+		return func(t *testing.T, resp *types.NAS, err error) {
+			assert.Equal(t, nasId, resp.ID)
+		}
+	}
+
+	testsName := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
 			systemID := "0000aaacccddd1111"
 			href := "/rest/v1/nas-servers"
@@ -88,7 +94,7 @@ func TestGetNasByName(t *testing.T) {
 				}
 				fmt.Fprintln(w, string(respData))
 			}))
-			return ts, &system, check(hasNoError, checkResp("test-nas1"))
+			return ts, &system, check(hasNoError, checkRespName("test-nas1"))
 		},
 		"not found": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
 			systemID := "0000aaacccddd1111"
@@ -130,60 +136,7 @@ func TestGetNasByName(t *testing.T) {
 		},
 	}
 
-	var testCaseNasIDs = map[string]string{
-		"success":   "test-nas1",
-		"not found": "test-nas3",
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			ts, system, checkFns := tc(t)
-			defer ts.Close()
-
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
-			client.configConnect.Version = "4.0"
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			s := System{
-				client: client,
-				System: system,
-			}
-
-			resp, err := s.GetNASByName(testCaseNasIDs[name])
-			for _, checkFn := range checkFns {
-				checkFn(t, resp, err)
-			}
-
-		})
-	}
-
-}
-
-func TestGetNAS(t *testing.T) {
-	type checkFn func(*testing.T, *types.NAS, error)
-	check := func(fns ...checkFn) []checkFn { return fns }
-
-	hasNoError := func(t *testing.T, resp *types.NAS, err error) {
-		if err != nil {
-			t.Fatalf("expected no error")
-		}
-	}
-
-	hasError := func(t *testing.T, resp *types.NAS, err error) {
-		if err == nil {
-			t.Fatalf("expected error")
-		}
-	}
-
-	checkResp := func(nasId string) func(t *testing.T, resp *types.NAS, err error) {
-		return func(t *testing.T, resp *types.NAS, err error) {
-			assert.Equal(t, nasId, resp.ID)
-		}
-	}
-
-	tests := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
+	testsID := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
 			nasID := "5e8d8e8e-671b-336f-db4e-cee0fbdc981e"
 			systemID := "0000aaacccddd1111"
@@ -213,7 +166,7 @@ func TestGetNAS(t *testing.T) {
 				}
 				fmt.Fprintln(w, string(respData))
 			}))
-			return ts, &system, check(hasNoError, checkResp("5e8d8e8e-671b-336f-db4e-cee0fbdc981e"))
+			return ts, &system, check(hasNoError, checkRespID("5e8d8e8e-671b-336f-db4e-cee0fbdc981e"))
 		},
 		"not found": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
 			nasID := "6e8d8e8e-671b-336f-eb4e-dee0fbdc981f"
@@ -238,12 +191,17 @@ func TestGetNAS(t *testing.T) {
 		},
 	}
 
+	var testCaseNasNames = map[string]string{
+		"success":   "test-nas1",
+		"not found": "test-nas3",
+	}
+
 	var testCaseNasIDs = map[string]string{
 		"success":   "5e8d8e8e-671b-336f-db4e-cee0fbdc981e",
 		"not found": "6e8d8e8e-671b-336f-eb4e-dee0fbdc981f",
 	}
 
-	for name, tc := range tests {
+	for name, tc := range testsName {
 		t.Run(name, func(t *testing.T) {
 			ts, system, checkFns := tc(t)
 			defer ts.Close()
@@ -259,13 +217,38 @@ func TestGetNAS(t *testing.T) {
 				System: system,
 			}
 
-			resp, err := s.GetNAS(testCaseNasIDs[name])
+			resp, err := s.GetNASByIDName("", testCaseNasNames[name])
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
 
 		})
 	}
+
+	for name, tc := range testsID {
+		t.Run(name, func(t *testing.T) {
+			ts, system, checkFns := tc(t)
+			defer ts.Close()
+
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client.configConnect.Version = "4.0"
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+				System: system,
+			}
+
+			resp, err := s.GetNASByIDName(testCaseNasIDs[name], "")
+			for _, checkFn := range checkFns {
+				checkFn(t, resp, err)
+			}
+
+		})
+	}
+
 }
 
 func TestCreateNAS(t *testing.T) {
