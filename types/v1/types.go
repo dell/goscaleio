@@ -1292,3 +1292,20 @@ type NFSExportModify struct {
 	AddReadWriteRootHosts    []string `json:"add_read_write_root_hosts,omitempty"`
 	RemoveReadWriteRootHosts []string `json:"remove_read_write_root_hosts,omitempty"`
 }
+
+// UploadPackageParam defines struct for DeviceParam
+type UploadPackageParam struct {
+	FilePath string `json:"file_path"`
+}
+
+type PackageParam struct {
+	Filename        string `json:"filename,omitempty"`
+	OperatingSystem string `json:"operatingSystem,omitempty"`
+	LinuxFlavour    string `json:"linuxFlavour,omitempty"`
+	Version         string `json:"version,omitempty"`
+	SioPatchNumber  int    `json:"sioPatchNumber,omitempty"`
+	Label           string `json:"label,omitempty"`
+	Type            string `json:"type,omitempty"`
+	Size            int    `json:"size,omitempty"`
+	Latest          bool   `json:"latest,omitempty"`
+}

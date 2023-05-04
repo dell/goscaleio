@@ -8,7 +8,7 @@ import (
 
 // TestDeployUploadPackage function to test upload packge with dummy path of packages
 func TestDeployUploadPackage(t *testing.T) {
-	err := GC.UploadPackages("/test")
+	_, err := GC.UploadPackages("/test")
 	assert.NotNil(t, err)
 }
 
@@ -16,4 +16,11 @@ func TestDeployUploadPackage(t *testing.T) {
 func TestDeployParseCSV(t *testing.T) {
 	err := GC.ParseCSV("/test/test.csv")
 	assert.NotNil(t, err)
+}
+
+// TestDeployGetPackage function to test Get Packge Details function
+func TestDeployGetPackgeDetails(t *testing.T) {
+	res, err := GC.GetPackgeDetails()
+	assert.NotNil(t, res)
+	assert.Nil(t, err)
 }
