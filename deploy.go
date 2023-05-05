@@ -82,12 +82,12 @@ type GatewayFunction interface {
 }
 
 // UploadPackages used for upload packge to gateway server
-func (gc *GatewayClient) UploadPackages(filePath string) (types.GatewayResponse, error) {
+func (gc *GatewayClient) UploadPackages(filePath string) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
 	file, filePathError := os.Open(path.Clean(filePath))
 	if filePathError != nil {
-		return gatewayResponse, filePathError
+		return &gatewayResponse, filePathError
 	}
 	defer func() error {
 		if err := file.Close(); err != nil {
@@ -100,20 +100,20 @@ func (gc *GatewayClient) UploadPackages(filePath string) (types.GatewayResponse,
 
 	part, fileReaderError := writer.CreateFormFile("files", path.Base(filePath))
 	if fileReaderError != nil {
-		return gatewayResponse, fileReaderError
+		return &gatewayResponse, fileReaderError
 	}
 	_, fileContentError := io.Copy(part, file)
 	if fileContentError != nil {
-		return gatewayResponse, fileContentError
+		return &gatewayResponse, fileContentError
 	}
 	fileWriterError := writer.Close()
 	if fileWriterError != nil {
-		return gatewayResponse, fileWriterError
+		return &gatewayResponse, fileWriterError
 	}
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/installationPackages/instances/actions/uploadPackages", body)
 	if httpError != nil {
-		return gatewayResponse, httpError
+		return &gatewayResponse, httpError
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
@@ -121,7 +121,7 @@ func (gc *GatewayClient) UploadPackages(filePath string) (types.GatewayResponse,
 	response, httpReqError := client.Do(req)
 
 	if httpReqError != nil {
-		return gatewayResponse, httpReqError
+		return &gatewayResponse, httpReqError
 	}
 
 	if response.StatusCode != 200 {
@@ -130,15 +130,15 @@ func (gc *GatewayClient) UploadPackages(filePath string) (types.GatewayResponse,
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
 		if err != nil {
-			return gatewayResponse, fmt.Errorf("Error Uploading: %s", err)
+			return &gatewayResponse, fmt.Errorf("Error Uploading: %s", err)
 		}
 
-		return gatewayResponse, fmt.Errorf("Error Uploading: %s", gatewayResponse.Message)
+		return &gatewayResponse, fmt.Errorf("Error Uploading: %s", gatewayResponse.Message)
 	} else {
 		gatewayResponse.StatusCode = 200
 	}
 
-	return gatewayResponse, nil
+	return &gatewayResponse, nil
 }
 
 // ParseCSV used for upload CSV to gateway server and parse it
@@ -187,9 +187,9 @@ func (gc *GatewayClient) ParseCSV(filePath string) error {
 }
 
 // GetPackgeDetails used for start installation
-func (gc *GatewayClient) GetPackgeDetails() ([]types.PackageParam, error) {
+func (gc *GatewayClient) GetPackgeDetails() ([]*types.PackageParam, error) {
 
-	var packageParam []types.PackageParam
+	var packageParam []*types.PackageParam
 
 	req, httpError := http.NewRequest("GET", gc.host+"/im/types/installationPackages/instances?onlyLatest=false&_search=false", nil)
 	if httpError != nil {
