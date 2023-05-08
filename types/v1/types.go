@@ -1211,7 +1211,7 @@ type FileSystem struct {
 	IsModified                 bool         `json:"is_modified"`
 	AccessType                 string       `json:"access_type"`
 	CreatorType                string       `json:"creator_type"`
-	NFSExports                 []*NFSExport `json:"nfs_exports"`
+	NFSExports                 []NFSExport  `json:"nfs_exports,omitempty"`
 }
 
 // FsCreate defines struct for creating a PowerFlex FileSystem
