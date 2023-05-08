@@ -9,10 +9,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
 	path "path/filepath"
+	"strings"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
@@ -85,30 +87,69 @@ type GatewayFunction interface {
 func (gc *GatewayClient) UploadPackages(filePath string) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
-	file, filePathError := os.Open(path.Clean(filePath))
-	if filePathError != nil {
-		return &gatewayResponse, filePathError
-	}
-	defer func() error {
-		if err := file.Close(); err != nil {
-			return err
-		}
-		return nil
-	}()
+	info, err := os.Stat(filePath)
+
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	part, fileReaderError := writer.CreateFormFile("files", path.Base(filePath))
-	if fileReaderError != nil {
-		return &gatewayResponse, fileReaderError
+	if err != nil {
+		return &gatewayResponse, err
 	}
-	_, fileContentError := io.Copy(part, file)
-	if fileContentError != nil {
-		return &gatewayResponse, fileContentError
-	}
-	fileWriterError := writer.Close()
-	if fileWriterError != nil {
-		return &gatewayResponse, fileWriterError
+
+	if info.IsDir() { //If directory
+
+		files, _ := ioutil.ReadDir(filePath)
+
+		for _, file := range files {
+			fmt.Println(filePath + "/" + file.Name())
+
+			if strings.HasSuffix(file.Name(), ".tar") || strings.HasSuffix(file.Name(), ".rpm") {
+
+				file, filePathError := os.Open(path.Clean(filePath + "/" + file.Name()))
+				if filePathError != nil {
+					return &gatewayResponse, filePathError
+				}
+
+				part, fileReaderError := writer.CreateFormFile("files", path.Base(filePath+"/"+file.Name()))
+				if fileReaderError != nil {
+					return &gatewayResponse, fileReaderError
+				}
+				_, fileContentError := io.Copy(part, file)
+				if fileContentError != nil {
+					return &gatewayResponse, fileContentError
+				}
+			}
+		}
+
+		fileWriterError := writer.Close()
+		if fileWriterError != nil {
+			return &gatewayResponse, fileWriterError
+		}
+
+	} else { //If single file
+		file, filePathError := os.Open(path.Clean(filePath))
+		if filePathError != nil {
+			return &gatewayResponse, filePathError
+		}
+		defer func() error {
+			if err := file.Close(); err != nil {
+				return err
+			}
+			return nil
+		}()
+
+		part, fileReaderError := writer.CreateFormFile("files", path.Base(filePath))
+		if fileReaderError != nil {
+			return &gatewayResponse, fileReaderError
+		}
+		_, fileContentError := io.Copy(part, file)
+		if fileContentError != nil {
+			return &gatewayResponse, fileContentError
+		}
+		fileWriterError := writer.Close()
+		if fileWriterError != nil {
+			return &gatewayResponse, fileWriterError
+		}
 	}
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/installationPackages/instances/actions/uploadPackages", body)
@@ -252,7 +293,7 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 		return &gatewayResponse, nil
 	}
 
-	gatewayResponse.StatusCode=200
+	gatewayResponse.StatusCode = 200
 
 	return &gatewayResponse, nil
 }
