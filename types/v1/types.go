@@ -1293,25 +1293,39 @@ type NFSExportModify struct {
 	RemoveReadWriteRootHosts []string `json:"remove_read_write_root_hosts,omitempty"`
 }
 
-// UploadPackageParam defines struct for DeviceParam
+// UploadPackageParam defines struct for Upload Package
 type UploadPackageParam struct {
 	FilePath string `json:"file_path"`
 }
 
-type PackageParam struct {
-	Filename        string `json:"filename,omitempty"`
-	OperatingSystem string `json:"operatingSystem,omitempty"`
-	LinuxFlavour    string `json:"linuxFlavour,omitempty"`
-	Version         string `json:"version,omitempty"`
-	SioPatchNumber  int    `json:"sioPatchNumber,omitempty"`
-	Label           string `json:"label,omitempty"`
-	Type            string `json:"type,omitempty"`
-	Size            int    `json:"size,omitempty"`
-	Latest          bool   `json:"latest,omitempty"`
+// PackageDetails defines struct for Package Details Response
+type PackageDetails struct {
+	Filename        string `json:"filename"`
+	OperatingSystem string `json:"operatingSystem"`
+	LinuxFlavour    string `json:"linuxFlavour"`
+	Version         string `json:"version"`
+	SioPatchNumber  int    `json:"sioPatchNumber"`
+	Label           string `json:"label"`
+	Type            string `json:"type"`
+	Size            int    `json:"size"`
+	Latest          bool   `json:"latest"`
 }
 
+// GatewayResponse defines struct for Gateway API Response
 type GatewayResponse struct {
 	Message    string `json:"message,omitempty"`
 	StatusCode int    `json:"httpStatusCode,omitempty"`
 	ErrorCode  int    `json:"errorCode,omitempty"`
+}
+
+// MDMTopologyParam defines struct for Validate MDM Topology
+type MDMTopologyParam struct {
+	MdmIps                []string `json:"mdmIps"`
+	MdmUser               string   `json:"mdmUser"`
+	MdmPassword           string   `json:"mdmPassword"`
+	SecurityConfiguration struct {
+		AllowNonSecureCommunicationWithMdm bool `json:"allowNonSecureCommunicationWithMdm"`
+		AllowNonSecureCommunicationWithLia bool `json:"allowNonSecureCommunicationWithLia"`
+		DisableNonMgmtComponentsAuth       bool `json:"disableNonMgmtComponentsAuth"`
+	} `json:"securityConfiguration"`
 }

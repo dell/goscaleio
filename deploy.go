@@ -187,9 +187,9 @@ func (gc *GatewayClient) ParseCSV(filePath string) error {
 }
 
 // GetPackgeDetails used for start installation
-func (gc *GatewayClient) GetPackgeDetails() ([]*types.PackageParam, error) {
+func (gc *GatewayClient) GetPackgeDetails() ([]*types.PackageDetails, error) {
 
-	var packageParam []*types.PackageParam
+	var packageParam []*types.PackageDetails
 
 	req, httpError := http.NewRequest("GET", gc.host+"/im/types/installationPackages/instances?onlyLatest=false&_search=false", nil)
 	if httpError != nil {
@@ -219,6 +219,42 @@ func (gc *GatewayClient) GetPackgeDetails() ([]*types.PackageParam, error) {
 
 	return packageParam, nil
 
+}
+
+// ValidateMDMDetails used for Validate MDM Details
+func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.GatewayResponse, error) {
+
+	var gatewayResponse types.GatewayResponse
+
+	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/instances", bytes.NewBuffer(mdmTopologyParam))
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode != 200 {
+
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+		}
+
+		return &gatewayResponse, nil
+	}
+
+	gatewayResponse.StatusCode=200
+
+	return &gatewayResponse, nil
 }
 
 // GetPackgeDetails used for start installation
