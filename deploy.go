@@ -197,7 +197,7 @@ func (gc *GatewayClient) ParseCSV(filePath string) error {
 }
 
 // GetPackgeDetails used for get package details
-func (gc *GatewayClient) GetPackgeDetails() ([]*types.PackageDetails, error) {
+func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 
 	var packageParam []*types.PackageDetails
 
