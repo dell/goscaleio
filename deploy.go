@@ -82,7 +82,7 @@ type GatewayFunction interface {
 	BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) error
 }
 
-// UploadPackages used for upload packge to gateway server
+// UploadPackages used for upload packge to gateway installation server
 func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
