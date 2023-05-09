@@ -1329,3 +1329,19 @@ type MDMTopologyParam struct {
 		DisableNonMgmtComponentsAuth       bool `json:"disableNonMgmtComponentsAuth"`
 	} `json:"securityConfiguration"`
 }
+
+// InstallerPhaseDetail defines struct for Phase Details
+type InstallerPhaseDetail struct {
+	Phase                    PhaseDetails `json:"phase,omitempty"`
+	NextPhase                PhaseDetails `json:"nextPhase,omitempty"`
+	Operation                string       `json:"operation,omitempty"`
+	UpgradePersistenceRecord any          `json:"upgradePersistenceRecord,omitempty"`
+	RollbackEnabled          bool         `json:"rollbackEnabled,omitempty"`
+}
+
+type PhaseDetails struct {
+	Name            string `json:"name,omitempty"`
+	PreludeMessage  any    `json:"preludeMessage,omitempty"`
+	PrologueMessage any    `json:"prologueMessage,omitempty"`
+	AutoStart       bool   `json:"autoStart,omitempty"`
+}
