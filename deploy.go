@@ -91,7 +91,11 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 
 	for _, filePath := range filePaths {
 
-		info, _ := os.Stat(filePath)
+		info, err := os.Stat(filePath)
+
+		if err != nil {
+			return &gatewayResponse, err
+		}
 
 		if !info.IsDir() && (strings.HasSuffix(filePath, ".tar") || strings.HasSuffix(filePath, ".rpm")) {
 
@@ -112,35 +116,9 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 	}
 
 	fileWriterError := writer.Close()
-		if fileWriterError != nil {
-			return &gatewayResponse, fileWriterError
+	if fileWriterError != nil {
+		return &gatewayResponse, fileWriterError
 	}
-
-	// } else { //If single file
-	// 	file, filePathError := os.Open(path.Clean(filePath))
-	// 	if filePathError != nil {
-	// 		return &gatewayResponse, filePathError
-	// 	}
-	// 	defer func() error {
-	// 		if err := file.Close(); err != nil {
-	// 			return err
-	// 		}
-	// 		return nil
-	// 	}()
-
-	// 	part, fileReaderError := writer.CreateFormFile("files", path.Base(filePath))
-	// 	if fileReaderError != nil {
-	// 		return &gatewayResponse, fileReaderError
-	// 	}
-	// 	_, fileContentError := io.Copy(part, file)
-	// 	if fileContentError != nil {
-	// 		return &gatewayResponse, fileContentError
-	// 	}
-	// 	fileWriterError := writer.Close()
-	// 	if fileWriterError != nil {
-	// 		return &gatewayResponse, fileWriterError
-	// 	}
-	// }
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/installationPackages/instances/actions/uploadPackages", body)
 	if httpError != nil {
