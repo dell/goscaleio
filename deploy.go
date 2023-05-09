@@ -145,9 +145,9 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 		}
 
 		return &gatewayResponse, fmt.Errorf("Error Uploading: %s", gatewayResponse.Message)
-	} else {
-		gatewayResponse.StatusCode = 200
 	}
+
+	gatewayResponse.StatusCode = 200
 
 	return &gatewayResponse, nil
 }
@@ -228,6 +228,341 @@ func (gc *GatewayClient) GetPackgeDetails() ([]*types.PackageDetails, error) {
 	}
 
 	return packageParam, nil
+}
+
+// ValidateMDMDetails used for Validate MDM Details
+func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.GatewayResponse, error) {
+
+	var gatewayResponse types.GatewayResponse
+
+	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/instances", bytes.NewBuffer(mdmTopologyParam))
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode != 200 {
+
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+		}
+
+		return &gatewayResponse, nil
+	}
+
+	gatewayResponse.StatusCode = 200
+
+	return &gatewayResponse, nil
+}
+
+// GetPackgeDetails used for start installation
+func (gc *GatewayClient) DeletePackge(packageName string) (*types.GatewayResponse, error) {
+
+	var gatewayResponse types.GatewayResponse
+
+	req, httpError := http.NewRequest("DELETE", gc.host+"/im/types/installationPackages/instances/actions/delete::"+packageName, nil)
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode != 200 {
+
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+		}
+
+		return &gatewayResponse, nil
+	}
+
+	gatewayResponse.StatusCode = 200
+
+	return &gatewayResponse, nil
+}
+
+// BeginInstallation used for start installation
+func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) (*types.GatewayResponse, error) {
+
+	var gatewayResponse types.GatewayResponse
+
+	mapData, jsonParseError := jsonToMap(jsonStr)
+	if jsonParseError != nil {
+		return &gatewayResponse, jsonParseError
+	}
+
+	mapData["mdmPassword"] = mdmPassword
+	mapData["mdmUser"] = mdmUsername
+	mapData["liaPassword"] = liaPassword
+	finalJSON, _ := json.Marshal(mapData)
+
+	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/actions/install", bytes.NewBuffer(finalJSON))
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode != 200 {
+
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+		}
+
+		return &gatewayResponse, nil
+	}
+
+	gatewayResponse.StatusCode = 200
+
+	return &gatewayResponse, nil
+}
+
+// MoveToNextPhase used for move to next phases in installation
+func (gc *GatewayClient) MoveToNextPhase() (*types.GatewayResponse, error) {
+
+	var gatewayResponse types.GatewayResponse
+
+	req, httpError := http.NewRequest("POST", gc.host+"/im/types/ProcessPhase/actions/moveToNextPhase", nil)
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode != 200 {
+
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+		}
+
+		return &gatewayResponse, nil
+	}
+
+	gatewayResponse.StatusCode = 200
+
+	return &gatewayResponse, nil
+}
+
+// AbortOperation used for Abort Installation Operation
+func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
+
+	var gatewayResponse types.GatewayResponse
+
+	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Command/instances/actions/abort", nil)
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode != 200 {
+
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+		}
+
+		return &gatewayResponse, nil
+	}
+
+	gatewayResponse.StatusCode = 200
+
+	return &gatewayResponse, nil
+}
+
+// ClearQueueCommand used for Clear All Commands in Queue
+func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
+
+	var gatewayResponse types.GatewayResponse
+
+	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Command/instances/actions/clear", nil)
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode != 200 {
+
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+		}
+
+		return &gatewayResponse, nil
+	}
+
+	gatewayResponse.StatusCode = 200
+
+	return &gatewayResponse, nil
+}
+
+// MoveToIdlePhase used for move Gateway Installer to idle state
+func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
+
+	var gatewayResponse types.GatewayResponse
+
+	req, httpError := http.NewRequest("POST", gc.host+"/im/types/ProcessPhase/actions/moveToIdlePhase", nil)
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode != 200 {
+
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+		}
+
+		return &gatewayResponse, nil
+	}
+
+	gatewayResponse.StatusCode = 200
+
+	return &gatewayResponse, nil
+}
+
+// GetInQueueCommand used for start installation
+func (gc *GatewayClient) GetInQueueCommand() (*types.GatewayResponse, error) {
+
+	var gatewayResponse types.GatewayResponse
+
+	req, httpError := http.NewRequest("GET", gc.host+"/im/types/installationPackages/instances?onlyLatest=false&_search=false", nil)
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode == 200 {
+
+		gatewayResponse.Message = responseString
+
+		gatewayResponse.StatusCode = 200
+
+		return &gatewayResponse, nil
+	}
+
+	gatewayResponse.StatusCode = httpRes.StatusCode
+
+	return &gatewayResponse, nil
+}
+
+// GetInQueueCommand used for start installation
+func (gc *GatewayClient) GetInstallerPhaseDetails() (*types.GatewayResponse, error) {
+
+	var gatewayResponse types.GatewayResponse
+
+	req, httpError := http.NewRequest("GET", gc.host+"/im/types/ProcessPhase/instances/", nil)
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode == 200 {
+
+		gatewayResponse.Message = responseString
+
+		gatewayResponse.StatusCode = 200
+
+		return &gatewayResponse, nil
+	}
+
+	gatewayResponse.StatusCode = httpRes.StatusCode
+
+	return &gatewayResponse, nil
 }
 
 // jsonToMap used for move covert JSON to Map
