@@ -109,11 +109,11 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 				return &gatewayResponse, fileContentError
 			}
 		}
+	}
 
-		fileWriterError := writer.Close()
+	fileWriterError := writer.Close()
 		if fileWriterError != nil {
 			return &gatewayResponse, fileWriterError
-		}
 	}
 
 	// } else { //If single file
