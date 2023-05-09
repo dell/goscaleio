@@ -94,7 +94,8 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 		info, _ := os.Stat(filePath)
 
 		if !info.IsDir() && (strings.HasSuffix(filePath, ".tar") || strings.HasSuffix(filePath, ".rpm")) {
-			file, filePathError := os.Open(path.Clean(filePath + "/" + file.Name()))
+
+			file, filePathError := os.Open(path.Clean(filePath))
 			if filePathError != nil {
 				return &gatewayResponse, filePathError
 			}
