@@ -7,11 +7,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	path "path/filepath"
+	"strings"
+
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 var (
@@ -72,51 +76,80 @@ func NewGateway(
 // GatewayFunction is an  interface which has all the functionalities for the gateway.
 type GatewayFunction interface {
 	UploadPackages(fliePath string) error
+
 	ParseCSV(filePath string) error
+
 	BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) error
 }
 
 // UploadPackages used for upload packge to gateway server
-func (gc *GatewayClient) UploadPackages(filePath string) error {
+func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayResponse, error) {
+	var gatewayResponse types.GatewayResponse
 
-	file, filePathError := os.Open(path.Clean(filePath))
-	if filePathError != nil {
-		return filePathError
-	}
-	defer func() error {
-		if err := file.Close(); err != nil {
-			return err
-		}
-		return nil
-	}()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	part, fileReaderError := writer.CreateFormFile("files", path.Base(filePath))
-	if fileReaderError != nil {
-		return fileReaderError
+	for _, filePath := range filePaths {
+
+		info, err := os.Stat(filePath)
+
+		if err != nil {
+			return &gatewayResponse, err
+		}
+
+		if !info.IsDir() && (strings.HasSuffix(filePath, ".tar") || strings.HasSuffix(filePath, ".rpm")) {
+
+			file, filePathError := os.Open(path.Clean(filePath))
+			if filePathError != nil {
+				return &gatewayResponse, filePathError
+			}
+
+			part, fileReaderError := writer.CreateFormFile("files", path.Base(filePath))
+			if fileReaderError != nil {
+				return &gatewayResponse, fileReaderError
+			}
+			_, fileContentError := io.Copy(part, file)
+			if fileContentError != nil {
+				return &gatewayResponse, fileContentError
+			}
+		} else {
+			return &gatewayResponse, fmt.Errorf("invalid file type, please provide valid file type")
+		}
 	}
-	_, fileContentError := io.Copy(part, file)
-	if fileContentError != nil {
-		return fileContentError
-	}
+
 	fileWriterError := writer.Close()
 	if fileWriterError != nil {
-		return fileWriterError
+		return &gatewayResponse, fileWriterError
 	}
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/installationPackages/instances/actions/uploadPackages", body)
 	if httpError != nil {
-		return httpError
+		return &gatewayResponse, httpError
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	client := gc.http
-	_, httpReqError := client.Do(req)
+	response, httpReqError := client.Do(req)
+
 	if httpReqError != nil {
-		return httpReqError
+		return &gatewayResponse, httpReqError
 	}
-	return nil
+
+	if response.StatusCode != 200 {
+		responseString, _ := extractString(response)
+
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Uploading: %s", err)
+		}
+
+		return &gatewayResponse, fmt.Errorf("Error Uploading: %s", gatewayResponse.Message)
+	} else {
+		gatewayResponse.StatusCode = 200
+	}
+
+	return &gatewayResponse, nil
 }
 
 // ParseCSV used for upload CSV to gateway server and parse it
@@ -161,35 +194,43 @@ func (gc *GatewayClient) ParseCSV(filePath string) error {
 	}
 
 	return nil
-
 }
 
-// BeginInstallation used for start installation
-func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) error {
+// GetPackgeDetails used for get package details
+func (gc *GatewayClient) GetPackgeDetails() ([]*types.PackageDetails, error) {
 
-	mapData, jsonParseError := jsonToMap(jsonStr)
-	if jsonParseError != nil {
-		return jsonParseError
-	}
-	mapData["mdmPassword"] = mdmPassword
-	mapData["mdmUser"] = mdmUsername
-	mapData["liaPassword"] = liaPassword
-	finalJSON, _ := json.Marshal(mapData)
+	var packageParam []*types.PackageDetails
 
-	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/actions/install", bytes.NewBuffer(finalJSON))
+	req, httpError := http.NewRequest("GET", gc.host+"/im/types/installationPackages/instances?onlyLatest=false&_search=false", nil)
 	if httpError != nil {
-		return httpError
+		return packageParam, httpError
 	}
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	req.Header.Set("Content-Type", "application/json")
+
 	client := gc.http
-	_, httpReqError := client.Do(req)
+	httpRes, httpReqError := client.Do(req)
 	if httpReqError != nil {
-		return httpReqError
+		return packageParam, httpReqError
 	}
-	return nil
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode == 200 {
+
+		err := json.Unmarshal([]byte(responseString), &packageParam)
+
+		if err != nil {
+			return packageParam, fmt.Errorf("Error Parsing Data: %s", err)
+		}
+
+		return packageParam, nil
+	}
+
+	return packageParam, nil
 }
 
+// jsonToMap used for move covert JSON to Map
 func jsonToMap(jsonStr string) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
 	err := json.Unmarshal([]byte(jsonStr), &result)

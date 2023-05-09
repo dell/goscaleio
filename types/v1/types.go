@@ -1292,3 +1292,56 @@ type NFSExportModify struct {
 	AddReadWriteRootHosts    []string `json:"add_read_write_root_hosts,omitempty"`
 	RemoveReadWriteRootHosts []string `json:"remove_read_write_root_hosts,omitempty"`
 }
+
+// UploadPackageParam defines struct for Upload Package
+type UploadPackageParam struct {
+	FilePath string `json:"file_path"`
+}
+
+// PackageDetails defines struct for Package Details Response
+type PackageDetails struct {
+	Filename        string `json:"filename"`
+	OperatingSystem string `json:"operatingSystem"`
+	LinuxFlavour    string `json:"linuxFlavour"`
+	Version         string `json:"version"`
+	SioPatchNumber  int    `json:"sioPatchNumber"`
+	Label           string `json:"label"`
+	Type            string `json:"type"`
+	Size            int    `json:"size"`
+	Latest          bool   `json:"latest"`
+}
+
+// GatewayResponse defines struct for Gateway API Response
+type GatewayResponse struct {
+	Message    string `json:"message,omitempty"`
+	StatusCode int    `json:"httpStatusCode,omitempty"`
+	ErrorCode  int    `json:"errorCode,omitempty"`
+}
+
+// MDMTopologyParam defines struct for Validate MDM Topology
+type MDMTopologyParam struct {
+	MdmIps                []string `json:"mdmIps"`
+	MdmUser               string   `json:"mdmUser"`
+	MdmPassword           string   `json:"mdmPassword"`
+	SecurityConfiguration struct {
+		AllowNonSecureCommunicationWithMdm bool `json:"allowNonSecureCommunicationWithMdm"`
+		AllowNonSecureCommunicationWithLia bool `json:"allowNonSecureCommunicationWithLia"`
+		DisableNonMgmtComponentsAuth       bool `json:"disableNonMgmtComponentsAuth"`
+	} `json:"securityConfiguration"`
+}
+
+// InstallerPhaseDetail defines struct for Phase Details
+type InstallerPhaseDetail struct {
+	Phase                    PhaseDetails `json:"phase,omitempty"`
+	NextPhase                PhaseDetails `json:"nextPhase,omitempty"`
+	Operation                string       `json:"operation,omitempty"`
+	UpgradePersistenceRecord any          `json:"upgradePersistenceRecord,omitempty"`
+	RollbackEnabled          bool         `json:"rollbackEnabled,omitempty"`
+}
+
+type PhaseDetails struct {
+	Name            string `json:"name,omitempty"`
+	PreludeMessage  any    `json:"preludeMessage,omitempty"`
+	PrologueMessage any    `json:"prologueMessage,omitempty"`
+	AutoStart       bool   `json:"autoStart,omitempty"`
+}
