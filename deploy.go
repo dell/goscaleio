@@ -112,6 +112,8 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 			if fileContentError != nil {
 				return &gatewayResponse, fileContentError
 			}
+		} else {
+			return &gatewayResponse, fmt.Errorf("invalid file type, please provide valid file type")
 		}
 	}
 
