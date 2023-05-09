@@ -20,7 +20,7 @@ func TestDeployParseCSV(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-// TestDeployGetPackage function to test Get Packge Details function
+// TestDeployGetPackage function to test Get Packge Details
 func TestDeployGetPackgeDetails(t *testing.T) {
 	res, err := GC.GetPackgeDetails()
 	assert.NotNil(t, res)
