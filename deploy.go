@@ -100,7 +100,7 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 				return &gatewayResponse, filePathError
 			}
 
-			part, fileReaderError := writer.CreateFormFile("files", path.Base(filePath+"/"+file.Name()))
+			part, fileReaderError := writer.CreateFormFile("files", path.Base(filePath))
 			if fileReaderError != nil {
 				return &gatewayResponse, fileReaderError
 			}
