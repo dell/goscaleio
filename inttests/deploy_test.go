@@ -8,7 +8,9 @@ import (
 
 // TestDeployUploadPackage function to test upload packge with dummy path of packages
 func TestDeployUploadPackage(t *testing.T) {
-	_, err := GC.UploadPackages("/home/krunal/Work/Software/abc.txt")
+	var filePaths []string
+	filePaths[0] = "/home/krunal/Work/Software/abc.txt"
+	_, err := GC.UploadPackages(filePaths)
 	assert.NotNil(t, err)
 }
 
