@@ -136,6 +136,48 @@ func (sds *Sds) FindDevice(
 	return nil, errors.New("couldn't find device")
 }
 
+// GetAllDevice returns all device in the system
+func (system *System) GetAllDevice() ([]types.Device, error) {
+
+	defer TimeSpent("GetAllDevice", time.Now())
+
+	path := "/api/types/Device/instances"
+
+	var deviceResult []types.Device
+	err := system.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &deviceResult)
+	if err != nil {
+		return nil, err
+	}
+
+	return deviceResult, nil
+}
+
+// GetDeviceByField returns a Device list filter by the field
+func (system *System) GetDeviceByField(
+	field, value string) ([]types.Device, error) {
+	defer TimeSpent("GetDeviceByField", time.Now())
+
+	devices, err := system.GetAllDevice()
+	if err != nil {
+		return nil, err
+	}
+
+	var filterdevices []types.Device
+	for _, device := range devices {
+		valueOf := reflect.ValueOf(device)
+		if reflect.Indirect(valueOf).FieldByName(field).String() == value{
+			filterdevices = append(filterdevices, device)
+		}
+	}
+	if len(filterdevices) > 0 {
+		return filterdevices, nil
+	}
+
+	return nil, errors.New("couldn't find device")
+}
+
+
 // GetDevice returns a device using Device ID
 func (system *System) GetDevice(id string) (*types.Device, error) {
 
@@ -154,6 +196,7 @@ func (system *System) GetDevice(id string) (*types.Device, error) {
 
 	return &deviceResult, nil
 }
+
 
 // SetDeviceName modifies device name
 func (sp *StoragePool) SetDeviceName(id, name string) error {
