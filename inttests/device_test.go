@@ -147,7 +147,6 @@ func TestGetDeviceByAttributeInvalid(t *testing.T) {
 	assert.Nil(t, found)
 }
 
-
 // TestGetDeviceByAttribute gets a single specific Device by attribute
 func TestGetDeviceByField(t *testing.T) {
 	system := getSystem()
@@ -168,7 +167,6 @@ func TestGetDeviceByField(t *testing.T) {
 	assert.NotNil(t, found)
 	assert.Equal(t, devices[0].ID, found[0].ID)
 }
-
 
 // TestAddDeviceInvalid will attempt to add an invalid device to an invalid SDS
 func TestAddDeviceInvalid(t *testing.T) {

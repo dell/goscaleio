@@ -166,7 +166,7 @@ func (system *System) GetDeviceByField(
 	var filterdevices []types.Device
 	for _, device := range devices {
 		valueOf := reflect.ValueOf(device)
-		if reflect.Indirect(valueOf).FieldByName(field).String() == value{
+		if reflect.Indirect(valueOf).FieldByName(field).String() == value {
 			filterdevices = append(filterdevices, device)
 		}
 	}
@@ -176,7 +176,6 @@ func (system *System) GetDeviceByField(
 
 	return nil, errors.New("couldn't find device")
 }
-
 
 // GetDevice returns a device using Device ID
 func (system *System) GetDevice(id string) (*types.Device, error) {
@@ -196,7 +195,6 @@ func (system *System) GetDevice(id string) (*types.Device, error) {
 
 	return &deviceResult, nil
 }
-
 
 // SetDeviceName modifies device name
 func (sp *StoragePool) SetDeviceName(id, name string) error {
