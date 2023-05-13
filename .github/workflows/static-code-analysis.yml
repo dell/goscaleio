@@ -1,0 +1,33 @@
+name: Static Code Analysis
+on:
+  push:
+    branches:
+main  # Modify this to the desired branch name
+jobs:
+  build:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+name: Checkout code
+        uses: actions/checkout@v2
+      # Set up Go
+name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16  # Modify this to the desired Go version
+      # Install CodeQL
+name: Install CodeQL
+        uses: github/codeql-action/init@v1
+      # Build the Go project
+name: Build
+        run: go build ./...
+      # Run CodeQL analysis
+name: CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+      # Upload results as an artifact
+name: Upload CodeQL results
+        uses: actions/upload-artifact@v2
+        with:
+          name: codeql-results
+          path: ${{ github.workspace }}/codeql-results
