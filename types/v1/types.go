@@ -1314,6 +1314,7 @@ type PackageDetails struct {
 // GatewayResponse defines struct for Gateway API Response
 type GatewayResponse struct {
 	Message    string `json:"message,omitempty"`
+	Data       string `json:"data,omitempty"`
 	StatusCode int    `json:"httpStatusCode,omitempty"`
 	ErrorCode  int    `json:"errorCode,omitempty"`
 }
@@ -1337,6 +1338,9 @@ type InstallerPhaseDetail struct {
 	Operation                string       `json:"operation,omitempty"`
 	UpgradePersistenceRecord any          `json:"upgradePersistenceRecord,omitempty"`
 	RollbackEnabled          bool         `json:"rollbackEnabled,omitempty"`
+	Message                  string       `json:"message,omitempty"`
+	StatusCode               int          `json:"httpStatusCode,omitempty"`
+	ErrorCode                int          `json:"errorCode,omitempty"`
 }
 
 type PhaseDetails struct {

@@ -11,8 +11,10 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	path "path/filepath"
+	"strconv"
 	"strings"
 
 	types "github.com/dell/goscaleio/types/v1"
@@ -153,47 +155,68 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 }
 
 // ParseCSV used for upload CSV to gateway server and parse it
-func (gc *GatewayClient) ParseCSV(filePath string) error {
+func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, error) {
+	var gatewayResponse types.GatewayResponse
 
 	file, filePathError := os.Open(path.Clean(filePath))
 	if filePathError != nil {
-		return filePathError
+		return &gatewayResponse, filePathError
 	}
+
 	defer func() error {
 		if err := file.Close(); err != nil {
 			return err
 		}
 		return nil
 	}()
+
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
 	part, fileReaderError := writer.CreateFormFile("file", path.Base(filePath))
 	if fileReaderError != nil {
-		return fileReaderError
+		return &gatewayResponse, fileReaderError
 	}
 	_, fileContentError := io.Copy(part, file)
 	if fileContentError != nil {
-		return fileContentError
+		return &gatewayResponse, fileContentError
 	}
 	fileWriterError := writer.Close()
 	if fileWriterError != nil {
-		return fileWriterError
+		return &gatewayResponse, fileWriterError
 	}
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/instances/actions/parseFromCSV", body)
 	if httpError != nil {
-		return httpError
+		return &gatewayResponse, httpError
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	client := gc.http
-	_, httpReqError := client.Do(req)
+	response, httpReqError := client.Do(req)
+
 	if httpReqError != nil {
-		return httpReqError
+		return &gatewayResponse, httpReqError
 	}
 
-	return nil
+	responseString, _ := extractString(response)
+
+	if response.StatusCode == 200 {
+
+		gatewayResponse.Data = responseString
+
+		gatewayResponse.StatusCode = response.StatusCode
+
+		return &gatewayResponse, nil
+	}
+
+	err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error While Parsing  Response Data: %s", err)
+	}
+
+	return &gatewayResponse, fmt.Errorf("Error Uploading: %s", gatewayResponse.Message)
 }
 
 // GetPackgeDetails used for get package details
@@ -232,7 +255,6 @@ func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 
 // ValidateMDMDetails used for Validate MDM Details
 func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.GatewayResponse, error) {
-
 	var gatewayResponse types.GatewayResponse
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/instances", bytes.NewBuffer(mdmTopologyParam))
@@ -303,7 +325,7 @@ func (gc *GatewayClient) DeletePackge(packageName string) (*types.GatewayRespons
 }
 
 // BeginInstallation used for start installation
-func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) (*types.GatewayResponse, error) {
+func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string, expansion bool) (*types.GatewayResponse, error) {
 
 	var gatewayResponse types.GatewayResponse
 
@@ -317,7 +339,17 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	mapData["liaPassword"] = liaPassword
 	finalJSON, _ := json.Marshal(mapData)
 
-	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/actions/install", bytes.NewBuffer(finalJSON))
+	u, _ := url.Parse(gc.host + "/im/types/Configuration/actions/install")
+	q := u.Query()
+	q.Set("noUpload", "false")
+	q.Set("noInstall", "false")
+	q.Set("noConfigure", "false")
+	q.Set("noLinuxDevValidation", "false")
+	q.Set("globalZeroPadPolicy", "false")
+	q.Set("extend", strconv.FormatBool(expansion))
+	u.RawQuery = q.Encode()
+
+	req, httpError := http.NewRequest("POST", u.String(), bytes.NewBuffer(finalJSON))
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
@@ -331,9 +363,9 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 		return &gatewayResponse, httpReqError
 	}
 
-	responseString, _ := extractString(httpRes)
-
 	if httpRes.StatusCode != 200 {
+
+		responseString, _ := extractString(httpRes)
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
@@ -532,13 +564,13 @@ func (gc *GatewayClient) GetInQueueCommand() (*types.GatewayResponse, error) {
 }
 
 // GetInQueueCommand used for start installation
-func (gc *GatewayClient) GetInstallerPhaseDetails() (*types.GatewayResponse, error) {
+func (gc *GatewayClient) GetInstallerPhaseDetails() (*types.InstallerPhaseDetail, error) {
 
-	var gatewayResponse types.GatewayResponse
+	var installerPhaseDetail types.InstallerPhaseDetail
 
 	req, httpError := http.NewRequest("GET", gc.host+"/im/types/ProcessPhase/instances/", nil)
 	if httpError != nil {
-		return &gatewayResponse, httpError
+		return &installerPhaseDetail, httpError
 	}
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	req.Header.Set("Content-Type", "application/json")
@@ -546,23 +578,20 @@ func (gc *GatewayClient) GetInstallerPhaseDetails() (*types.GatewayResponse, err
 	client := gc.http
 	httpRes, httpReqError := client.Do(req)
 	if httpReqError != nil {
-		return &gatewayResponse, httpReqError
+		return &installerPhaseDetail, httpReqError
 	}
 
 	responseString, _ := extractString(httpRes)
 
-	if httpRes.StatusCode == 200 {
+	err := json.Unmarshal([]byte(responseString), &installerPhaseDetail)
 
-		gatewayResponse.Message = responseString
-
-		gatewayResponse.StatusCode = 200
-
-		return &gatewayResponse, nil
+	if err != nil {
+		return &installerPhaseDetail, fmt.Errorf("Error Parsing Data: %s", err)
 	}
 
-	gatewayResponse.StatusCode = httpRes.StatusCode
+	installerPhaseDetail.StatusCode = httpRes.StatusCode
 
-	return &gatewayResponse, nil
+	return &installerPhaseDetail, nil
 }
 
 // jsonToMap used for move covert JSON to Map
