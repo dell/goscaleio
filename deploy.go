@@ -337,6 +337,14 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	mapData["mdmPassword"] = mdmPassword
 	mapData["mdmUser"] = mdmUsername
 	mapData["liaPassword"] = liaPassword
+
+	secureData := map[string]interface{}{
+		"allowNonSecureCommunicationWithMdm": true,
+		"allowNonSecureCommunicationWithLia": true,
+		"disableNonMgmtComponentsAuth":       false,
+	}
+	mapData["securityConfiguration"] = secureData
+
 	finalJSON, _ := json.Marshal(mapData)
 
 	u, _ := url.Parse(gc.host + "/im/types/Configuration/actions/install")
