@@ -20,6 +20,26 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// GetFileInterface gets a FileInterface by id
+func (s *System) GetFileInterface(id string) (*types.FileInterface, error) {
+	if id == "" {
+		return nil, errors.New("id is mandatory, please enter a valid value")
+	}
+	path := fmt.Sprintf("/rest/v1/file-interfaces/%s?select=*", id)
+
+	var resp *types.FileInterface
+
+	err := s.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &resp)
+
+	if err != nil {
+		return nil, errors.New("could not find the File interface using id")
+	}
+
+	return resp, nil
+
+}
+
 // GetNASByIDName gets a NAS server by name or ID
 func (s *System) GetNASByIDName(id string, name string) (*types.NAS, error) {
 	var nasList []types.NAS
