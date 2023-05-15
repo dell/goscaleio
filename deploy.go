@@ -538,13 +538,13 @@ func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 }
 
 // GetInQueueCommand used for start installation
-func (gc *GatewayClient) GetInQueueCommand() (*types.GatewayResponse, error) {
+func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, error) {
 
-	var gatewayResponse types.GatewayResponse
+	var mdmQueueCommandDetails []types.MDMQueueCommandDetails
 
-	req, httpError := http.NewRequest("GET", gc.host+"/im/types/installationPackages/instances?onlyLatest=false&_search=false", nil)
+	req, httpError := http.NewRequest("GET", gc.host+"/im/types/Command/instances", nil)
 	if httpError != nil {
-		return &gatewayResponse, httpError
+		return mdmQueueCommandDetails, httpError
 	}
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	req.Header.Set("Content-Type", "application/json")
@@ -552,23 +552,31 @@ func (gc *GatewayClient) GetInQueueCommand() (*types.GatewayResponse, error) {
 	client := gc.http
 	httpRes, httpReqError := client.Do(req)
 	if httpReqError != nil {
-		return &gatewayResponse, httpReqError
+		return mdmQueueCommandDetails, httpReqError
 	}
 
 	responseString, _ := extractString(httpRes)
 
 	if httpRes.StatusCode == 200 {
 
-		gatewayResponse.Message = responseString
+		var queueCommandDetails map[string]interface{}
 
-		gatewayResponse.StatusCode = 200
+		json.Unmarshal([]byte(responseString), &queueCommandDetails)
 
-		return &gatewayResponse, nil
+		mdmCommands,_ := json.Marshal(queueCommandDetails["MDM Commands"])
+
+		err := json.Unmarshal([]byte(mdmCommands), &mdmQueueCommandDetails)
+
+		if err != nil {
+			return mdmQueueCommandDetails, fmt.Errorf("Error Parsing Data: %s", err)
+		}
+
+		return mdmQueueCommandDetails, nil
 	}
 
-	gatewayResponse.StatusCode = httpRes.StatusCode
+	// mdmQueueCommandDetails.StatusCode = httpRes.StatusCode
 
-	return &gatewayResponse, nil
+	return mdmQueueCommandDetails, nil
 }
 
 // GetInQueueCommand used for start installation

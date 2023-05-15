@@ -16,13 +16,20 @@ func TestDeployUploadPackage(t *testing.T) {
 
 // TestDeployParseCSV function to test parse csv function with dummy path of CSV file
 func TestDeployParseCSV(t *testing.T) {
-	err := GC.ParseCSV("/test/test.csv")
+	_,err := GC.ParseCSV("/test/test.csv")
 	assert.NotNil(t, err)
 }
 
 // TestDeployGetPackage function to test Get Packge Details
 func TestDeployGetPackgeDetails(t *testing.T) {
-	res, err := GC.GetPackgeDetails()
+	res, err := GC.GetPackageDetails()
+	assert.NotNil(t, res)
+	assert.Nil(t, err)
+}
+
+
+func TestDeployGetInQueueCommand(t *testing.T){
+	res, err := GC.GetInQueueCommand()
 	assert.NotNil(t, res)
 	assert.Nil(t, err)
 }
