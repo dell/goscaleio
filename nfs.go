@@ -20,6 +20,7 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// GetFileInterface gets a FileInterface by id
 func (s *System) GetFileInterface(id string) (*types.FileInterface, error) {
 	if id == "" {
 		return nil, errors.New("id is mandatory, please enter a valid value")

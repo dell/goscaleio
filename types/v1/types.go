@@ -1122,12 +1122,12 @@ type NFSServerInstance struct {
 	IsNFSv3Enabled bool `json:"is_nfsv3_enabled,omitempty"`
 }
 
-// Details about the file interface
+// FileInterface defines struct for FileInterface.
 type FileInterface struct {
 	// Unique id of the file interface
 	ID string `json:"id"`
 	// Ip address of file interface
-	IpAddress string `json:"ip_address"`
+	IPAddress string `json:"ip_address"`
 }
 
 // NAS defines struct for NAS.
