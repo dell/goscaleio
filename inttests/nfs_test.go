@@ -111,3 +111,19 @@ func TestCreateDeleteNAS(t *testing.T) {
 	assert.NotNil(t, err)
 
 }
+
+func TestGetFileInterfaceById(t *testing.T) {
+	system := getSystem()
+	nasName := getNasName(t)
+	assert.NotZero(t, len(nasName))
+
+	nasserver, err := system.GetNASByIDName("", nasName)
+	assert.Nil(t, err)
+	assert.Equal(t, nasName, nasserver.Name)
+
+	if nasserver != nil {
+		fileInterface, err := system.GetFileInterface(nasserver.CurrentPreferredIPv4InterfaceID)
+		assert.Nil(t, err)
+		assert.NotNil(t, fileInterface)
+	}
+}
