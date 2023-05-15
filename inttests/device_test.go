@@ -47,6 +47,24 @@ func getAllDevices(t *testing.T) []*goscaleio.Device {
 
 }
 
+func getAllDevicesFromSystem(t *testing.T) []goscaleio.Device {
+	system := getSystem()
+	var allDevice []goscaleio.Device
+	devices, err1 := system.GetAllDevice()
+	assert.Nil(t, err1)
+	assert.NotZero(t, len(devices))
+	for _, d := range devices {
+		// create a device to return to the caller
+		outDevice := goscaleio.NewDeviceEx(C, &d)
+		allDevice = append(allDevice, *outDevice)
+		// create a device via NewDevice for testing purposes
+		tempDevice := goscaleio.NewDevice(C)
+		tempDevice.Device = &d
+		assert.Equal(t, outDevice.Device.ID, tempDevice.Device.ID)
+	}
+	return allDevice
+}
+
 // getAllDevices will return all Device instances
 func getAllSdsDevices(t *testing.T) []*goscaleio.Device {
 	sds := getAllSds(t)[0]
@@ -75,6 +93,8 @@ func getAllSdsDevices(t *testing.T) []*goscaleio.Device {
 // TestGetDevices will return all Device instances
 func TestGetDevices(t *testing.T) {
 	getAllDevices(t)
+	getAllDevicesFromSystem(t)
+	TestGetDeviceByField(t)
 }
 
 // TestGetDeviceByAttribute gets a single specific Device by attribute
@@ -125,6 +145,27 @@ func TestGetDeviceByAttributeInvalid(t *testing.T) {
 	found, err = pool.FindDevice("ID", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, found)
+}
+
+// TestGetDeviceByAttribute gets a single specific Device by attribute
+func TestGetDeviceByField(t *testing.T) {
+	system := getSystem()
+	devices, err1 := system.GetAllDevice()
+	assert.NotNil(t, devices)
+	assert.NotZero(t, len(devices))
+	if devices == nil || err1 != nil {
+		return
+	}
+
+	found, err := system.GetDeviceByField("Name", devices[0].Name)
+	assert.Nil(t, err)
+	assert.NotNil(t, found)
+	assert.Equal(t, devices[0].Name, found[0].Name)
+
+	found, err = system.GetDeviceByField("ID", devices[0].ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, found)
+	assert.Equal(t, devices[0].ID, found[0].ID)
 }
 
 // TestAddDeviceInvalid will attempt to add an invalid device to an invalid SDS
