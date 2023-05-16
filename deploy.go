@@ -426,6 +426,43 @@ func (gc *GatewayClient) MoveToNextPhase() (*types.GatewayResponse, error) {
 	return &gatewayResponse, nil
 }
 
+// RetryPhase used for re run to failed phases in installation
+func (gc *GatewayClient) RetryPhase() (*types.GatewayResponse, error) {
+
+	var gatewayResponse types.GatewayResponse
+
+	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Command/instances/actions/retry/", nil)
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode != 200 {
+
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+		}
+
+		return &gatewayResponse, nil
+	}
+
+	gatewayResponse.StatusCode = 200
+
+	return &gatewayResponse, nil
+}
+
 // AbortOperation used for Abort Installation Operation
 func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
 
@@ -559,11 +596,19 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 
 	if httpRes.StatusCode == 200 {
 
-		var queueCommandDetails map[string]interface{}
+		var queueCommandDetails map[string][]interface{}
 
 		json.Unmarshal([]byte(responseString), &queueCommandDetails)
 
-		mdmCommands,_ := json.Marshal(queueCommandDetails["MDM Commands"])
+		var commandList []interface{}
+
+		for _, value := range queueCommandDetails {
+			commandList = append(commandList, value...)
+		}
+
+		mdmCommands, _ := json.Marshal(commandList)
+
+		fmt.Print(string(mdmCommands))
 
 		err := json.Unmarshal([]byte(mdmCommands), &mdmQueueCommandDetails)
 
@@ -574,9 +619,40 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 		return mdmQueueCommandDetails, nil
 	}
 
-	// mdmQueueCommandDetails.StatusCode = httpRes.StatusCode
-
 	return mdmQueueCommandDetails, nil
+}
+
+func (gc *GatewayClient) CheckForCompletionQueueCommands(currentPhase string) (*types.GatewayResponse, error) {
+	var gatewayResponse types.GatewayResponse
+
+	mdmQueueCommandDetails, err := gc.GetInQueueCommand()
+
+	if err != nil {
+		return &gatewayResponse, err
+	}
+
+	checkCompleted := "Completed"
+
+	var errMsg bytes.Buffer
+
+	for _, mdmQueueCommandDetail := range mdmQueueCommandDetails {
+
+		if currentPhase == mdmQueueCommandDetail.AllowedPhase && mdmQueueCommandDetail.CommandState == "pending" {
+			checkCompleted = "Running"
+			break
+		} else if currentPhase == mdmQueueCommandDetail.AllowedPhase && mdmQueueCommandDetail.CommandState == "failed" {
+			checkCompleted = "Failed"
+			errMsg.WriteString(strings.Join(mdmQueueCommandDetail., "") + ": " + mdmQueueCommandDetail.Message + ", ")
+		}
+	}
+
+	if len(errMsg.String()) > 0 {
+		gatewayResponse.Message = errMsg.String()[:len(errMsg.String())-2]
+	}
+
+	gatewayResponse.Data = checkCompleted
+
+	return &gatewayResponse, nil
 }
 
 // GetInQueueCommand used for start installation

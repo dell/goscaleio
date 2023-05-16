@@ -1,0 +1,5 @@
+IPs,Password,Operating System,Is MDM/TB,Is SDC
+10.247.103.159,dangerous,linux,TB,Yes
+10.247.103.160,dangerous,linux,Secondary,Yes
+10.247.103.161,dangerous,linux,Primary,Yes
+10.247.39.45,dangerous,linux,Standby,Yes

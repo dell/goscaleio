@@ -27,9 +27,8 @@ func TestDeployGetPackgeDetails(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-
 func TestDeployGetInQueueCommand(t *testing.T){
-	res, err := GC.GetInQueueCommand()
+	res, err := GC.CheckForCompletionQueueCommands("query")
 	assert.NotNil(t, res)
 	assert.Nil(t, err)
 }
