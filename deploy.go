@@ -608,8 +608,6 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 
 		mdmCommands, _ := json.Marshal(commandList)
 
-		fmt.Print(string(mdmCommands))
-
 		err := json.Unmarshal([]byte(mdmCommands), &mdmQueueCommandDetails)
 
 		if err != nil {
@@ -642,7 +640,7 @@ func (gc *GatewayClient) CheckForCompletionQueueCommands(currentPhase string) (*
 			break
 		} else if currentPhase == mdmQueueCommandDetail.AllowedPhase && mdmQueueCommandDetail.CommandState == "failed" {
 			checkCompleted = "Failed"
-			errMsg.WriteString(strings.Join(mdmQueueCommandDetail., "") + ": " + mdmQueueCommandDetail.Message + ", ")
+			errMsg.WriteString(mdmQueueCommandDetail.TargetEntityIdentifier + ": " + mdmQueueCommandDetail.Message + ", ")
 		}
 	}
 
@@ -653,37 +651,6 @@ func (gc *GatewayClient) CheckForCompletionQueueCommands(currentPhase string) (*
 	gatewayResponse.Data = checkCompleted
 
 	return &gatewayResponse, nil
-}
-
-// GetInQueueCommand used for start installation
-func (gc *GatewayClient) GetInstallerPhaseDetails() (*types.InstallerPhaseDetail, error) {
-
-	var installerPhaseDetail types.InstallerPhaseDetail
-
-	req, httpError := http.NewRequest("GET", gc.host+"/im/types/ProcessPhase/instances/", nil)
-	if httpError != nil {
-		return &installerPhaseDetail, httpError
-	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
-	req.Header.Set("Content-Type", "application/json")
-
-	client := gc.http
-	httpRes, httpReqError := client.Do(req)
-	if httpReqError != nil {
-		return &installerPhaseDetail, httpReqError
-	}
-
-	responseString, _ := extractString(httpRes)
-
-	err := json.Unmarshal([]byte(responseString), &installerPhaseDetail)
-
-	if err != nil {
-		return &installerPhaseDetail, fmt.Errorf("Error Parsing Data: %s", err)
-	}
-
-	installerPhaseDetail.StatusCode = httpRes.StatusCode
-
-	return &installerPhaseDetail, nil
 }
 
 // jsonToMap used for move covert JSON to Map

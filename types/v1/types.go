@@ -1364,67 +1364,14 @@ type PhaseDetails struct {
 }
 
 type MDMQueueCommandDetails struct {
-	CommandName string   `json:"commandName,omitempty"`
-	MdmIPs      []string `json:"mdmIPs,omitempty"`
-	Mdm         struct {
-		Node struct {
-			Ostype          string   `json:"ostype,omitempty"`
-			NodeName        any      `json:"nodeName,omitempty"`
-			NodeIPs         []string `json:"nodeIPs,omitempty"`
-			Domain          any      `json:"domain,omitempty"`
-			UserName        string   `json:"userName,omitempty"`
-			Password        string   `json:"password,omitempty"`
-			LiaLdapUsername any      `json:"liaLdapUsername,omitempty"`
-			LiaLdapPassword any      `json:"liaLdapPassword,omitempty"`
-			LiaPassword     string   `json:"liaPassword,omitempty"`
-		} `json:"node,omitempty"`
-		NodeInfo struct {
-			DiskDevices []struct {
-				DiskName string `json:"diskName,omitempty"`
-			} `json:"diskDevices,omitempty"`
-			InstalledComponents []struct {
-				EcsComponentType string `json:"ecsComponentType,omitempty"`
-				Version          struct {
-					Version        string `json:"version,omitempty"`
-					SioPatchNumber int    `json:"sioPatchNumber,omitempty"`
-				} `json:"version,omitempty"`
-			} `json:"installedComponents,omitempty"`
-			OsType          string    `json:"osType,omitempty"`
-			LinuxFlavour    string    `json:"linuxFlavour,omitempty"`
-			PythonInstalled bool      `json:"pythonInstalled,omitempty"`
-			Timestamp       time.Time `json:"timestamp,omitempty"`
-			EsxVersion      any       `json:"esxVersion,omitempty"`
-			VmsIDNameMap    struct {
-			} `json:"vmsIdNameMap,omitempty"`
-			DasCacheInstalled bool   `json:"dasCacheInstalled,omitempty"`
-			DasCacheVersion   string `json:"dasCacheVersion,omitempty"`
-			Ips               any    `json:"ips,omitempty"`
-		} `json:"nodeInfo,omitempty"`
-		Tunables        any      `json:"tunables,omitempty"`
-		RollbackVersion any      `json:"rollbackVersion,omitempty"`
-		MdmIPs          []string `json:"mdmIPs,omitempty"`
-		Name            string   `json:"name,omitempty"`
-		ID              any      `json:"id,omitempty"`
-		IPForActor      any      `json:"ipForActor,omitempty"`
-		ManagementIPs   any      `json:"managementIPs,omitempty"`
-		VirtIPIntfsList any      `json:"virtIpIntfsList,omitempty"`
-	} `json:"mdm,omitempty"`
-	AllManagementIPs               []string  `json:"allManagementIPs,omitempty"`
-	VirtIpsList                    any       `json:"virtIpsList,omitempty"`
-	VirtIPIntfsList                any       `json:"virtIpIntfsList,omitempty"`
-	CommandID                      string    `json:"commandID,omitempty"`
-	FailAsWarning                  bool      `json:"failAsWarning,omitempty"`
-	UntrustedCertificateThumbprint any       `json:"untrustedCertificateThumbprint,omitempty"`
-	CommandState                   string    `json:"commandState,omitempty"`
-	StartTime                      time.Time `json:"startTime,omitempty"`
-	CompletionTime                 time.Time `json:"completionTime,omitempty"`
-	Message                        string    `json:"message,omitempty"`
-	Result                         any       `json:"result,omitempty"`
-	FollowingCommand               string    `json:"followingCommand,omitempty"`
-	QueueName                      string    `json:"queueName,omitempty"`
-	TargetEntityIdentifier         string    `json:"targetEntityIdentifier,omitempty"`
-	AllowedPhase                   string    `json:"allowedPhase,omitempty"`
-	Archived                       bool      `json:"archived,omitempty"`
-	DefaultErrorMessage            any       `json:"defaultErrorMessage,omitempty"`
-	CommandParameters              []any     `json:"commandParameters,omitempty"`
+	CommandName            string    `json:"commandName,omitempty"`
+	MdmIPs                 []string  `json:"mdmIPs,omitempty"`
+	CommandState           string    `json:"commandState,omitempty"`
+	StartTime              time.Time `json:"startTime,omitempty"`
+	CompletionTime         time.Time `json:"completionTime,omitempty"`
+	Message                string    `json:"message,omitempty"`
+	NodeIPs                []string  `json:"nodeIPs,omitempty"`
+	CommandParameters      []string  `json:"commandParameters,omitempty"`
+	TargetEntityIdentifier string    `json:"targetEntityIdentifier,omitempty"`
+	AllowedPhase           string    `json:"allowedPhase,omitempty"`
 }
