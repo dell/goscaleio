@@ -75,15 +75,6 @@ func NewGateway(
 	return gc, nil
 }
 
-// GatewayFunction is an  interface which has all the functionalities for the gateway.
-type GatewayFunction interface {
-	UploadPackages(fliePath string) error
-
-	ParseCSV(filePath string) error
-
-	BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string) error
-}
-
 // UploadPackages used for upload packge to gateway server
 func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
@@ -143,10 +134,10 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
 		if err != nil {
-			return &gatewayResponse, fmt.Errorf("Error Uploading: %s", err)
+			return &gatewayResponse, fmt.Errorf("Error For Uploading Package: %s", err)
 		}
 
-		return &gatewayResponse, fmt.Errorf("Error Uploading: %s", gatewayResponse.Message)
+		return &gatewayResponse, fmt.Errorf("Error For Uploading Package: %s", gatewayResponse.Message)
 	}
 
 	gatewayResponse.StatusCode = 200
@@ -154,7 +145,7 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 	return &gatewayResponse, nil
 }
 
-// ParseCSV used for upload CSV to gateway server and parse it
+// ParseCSV used for upload csv to gateway server and parse it
 func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
@@ -213,10 +204,10 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 	err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
 	if err != nil {
-		return &gatewayResponse, fmt.Errorf("Error While Parsing  Response Data: %s", err)
+		return &gatewayResponse, fmt.Errorf("Error While Parsing Response Data For CSV: %s", err)
 	}
 
-	return &gatewayResponse, fmt.Errorf("Error Uploading: %s", gatewayResponse.Message)
+	return &gatewayResponse, fmt.Errorf("Error For Parse CSV: %s", gatewayResponse.Message)
 }
 
 // GetPackgeDetails used for get package details
@@ -244,7 +235,7 @@ func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 		err := json.Unmarshal([]byte(responseString), &packageParam)
 
 		if err != nil {
-			return packageParam, fmt.Errorf("Error Parsing Data: %s", err)
+			return packageParam, fmt.Errorf("Error For Get Package Details: %s", err)
 		}
 
 		return packageParam, nil
@@ -253,7 +244,7 @@ func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 	return packageParam, nil
 }
 
-// ValidateMDMDetails used for Validate MDM Details
+// ValidateMDMDetails used for validate mdm details
 func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
@@ -277,7 +268,7 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
 		if err != nil {
-			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+			return &gatewayResponse, fmt.Errorf("Error For Validate MDM Details: %s", err)
 		}
 
 		return &gatewayResponse, nil
@@ -288,7 +279,7 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 	return &gatewayResponse, nil
 }
 
-// GetPackgeDetails used for start installation
+// GetPackgeDetails used for get dackages details
 func (gc *GatewayClient) DeletePackge(packageName string) (*types.GatewayResponse, error) {
 
 	var gatewayResponse types.GatewayResponse
@@ -313,7 +304,7 @@ func (gc *GatewayClient) DeletePackge(packageName string) (*types.GatewayRespons
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
 		if err != nil {
-			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+			return &gatewayResponse, fmt.Errorf("Error For Delete Package: %s", err)
 		}
 
 		return &gatewayResponse, nil
@@ -378,7 +369,7 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
 		if err != nil {
-			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+			return &gatewayResponse, fmt.Errorf("Error For Begin Installation: %s", err)
 		}
 
 		return &gatewayResponse, nil
@@ -415,7 +406,7 @@ func (gc *GatewayClient) MoveToNextPhase() (*types.GatewayResponse, error) {
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
 		if err != nil {
-			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+			return &gatewayResponse, fmt.Errorf("Error For Move To Next Phase: %s", err)
 		}
 
 		return &gatewayResponse, nil
@@ -452,7 +443,7 @@ func (gc *GatewayClient) RetryPhase() (*types.GatewayResponse, error) {
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
 		if err != nil {
-			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+			return &gatewayResponse, fmt.Errorf("Error For Retry Phase: %s", err)
 		}
 
 		return &gatewayResponse, nil
@@ -463,7 +454,7 @@ func (gc *GatewayClient) RetryPhase() (*types.GatewayResponse, error) {
 	return &gatewayResponse, nil
 }
 
-// AbortOperation used for Abort Installation Operation
+// AbortOperation used for abort installation operation
 func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
 
 	var gatewayResponse types.GatewayResponse
@@ -489,7 +480,7 @@ func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
 		if err != nil {
-			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+			return &gatewayResponse, fmt.Errorf("Error For Abort Operation: %s", err)
 		}
 
 		return &gatewayResponse, nil
@@ -500,7 +491,7 @@ func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
 	return &gatewayResponse, nil
 }
 
-// ClearQueueCommand used for Clear All Commands in Queue
+// ClearQueueCommand used for clear all commands in queue
 func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
 
 	var gatewayResponse types.GatewayResponse
@@ -526,7 +517,7 @@ func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
 		if err != nil {
-			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+			return &gatewayResponse, fmt.Errorf("Error For Clear Queue Commands: %s", err)
 		}
 
 		return &gatewayResponse, nil
@@ -537,7 +528,7 @@ func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
 	return &gatewayResponse, nil
 }
 
-// MoveToIdlePhase used for move Gateway Installer to idle state
+// MoveToIdlePhase used for move gateway installer to idle state
 func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 
 	var gatewayResponse types.GatewayResponse
@@ -563,7 +554,7 @@ func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
 		if err != nil {
-			return &gatewayResponse, fmt.Errorf("Error Parsing Data: %s", err)
+			return &gatewayResponse, fmt.Errorf("Error For Move To Ideal Phase: %s", err)
 		}
 
 		return &gatewayResponse, nil
@@ -574,7 +565,7 @@ func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 	return &gatewayResponse, nil
 }
 
-// GetInQueueCommand used for start installation
+// GetInQueueCommand used for get in queue commands
 func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, error) {
 
 	var mdmQueueCommandDetails []types.MDMQueueCommandDetails
@@ -611,7 +602,7 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 		err := json.Unmarshal([]byte(mdmCommands), &mdmQueueCommandDetails)
 
 		if err != nil {
-			return mdmQueueCommandDetails, fmt.Errorf("Error Parsing Data: %s", err)
+			return mdmQueueCommandDetails, fmt.Errorf("Error For Get In Queue Commands: %s", err)
 		}
 
 		return mdmQueueCommandDetails, nil
@@ -620,6 +611,7 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 	return mdmQueueCommandDetails, nil
 }
 
+// CheckForCompletionQueueCommands used for check queue commands completed or not
 func (gc *GatewayClient) CheckForCompletionQueueCommands(currentPhase string) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
@@ -650,10 +642,12 @@ func (gc *GatewayClient) CheckForCompletionQueueCommands(currentPhase string) (*
 
 	gatewayResponse.Data = checkCompleted
 
+	gatewayResponse.StatusCode = 200
+
 	return &gatewayResponse, nil
 }
 
-// jsonToMap used for move covert JSON to Map
+// jsonToMap used for convert json to map
 func jsonToMap(jsonStr string) (map[string]interface{}, error) {
 	result := make(map[string]interface{})
 	err := json.Unmarshal([]byte(jsonStr), &result)

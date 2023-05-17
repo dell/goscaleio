@@ -50,12 +50,15 @@ func TestDeployValidateMDMDetails(t *testing.T) {
 
 	assert.NotNil(t, res)
 
+	assert.EqualValues(t, res.StatusCode, 200)
+
 	assert.Nil(t, err)
 }
 
 // TestDeployDeletePackge function to test Delete Functionality
 func TestDeployDeletePackge(t *testing.T) {
 	res, err := GC.DeletePackge("ABC")
+	assert.EqualValues(t, res.StatusCode, 500)
 	assert.NotNil(t, res)
 	assert.Nil(t, err)
 }
@@ -70,6 +73,7 @@ func TestDeployBeginInstallation(t *testing.T) {
 func TestDeployMoveToNextPhase(t *testing.T) {
 	res, err := GC.MoveToNextPhase()
 	assert.NotNil(t, res)
+	assert.EqualValues(t, res.StatusCode, 500)
 	assert.Nil(t, err)
 }
 
@@ -77,6 +81,7 @@ func TestDeployMoveToNextPhase(t *testing.T) {
 func TestDeployRetryPhase(t *testing.T) {
 	res, err := GC.RetryPhase()
 	assert.NotNil(t, res)
+	assert.EqualValues(t, res.StatusCode, 200)
 	assert.Nil(t, err)
 }
 
@@ -84,6 +89,7 @@ func TestDeployRetryPhase(t *testing.T) {
 func TestDeployAbortOperation(t *testing.T) {
 	res, err := GC.AbortOperation()
 	assert.NotNil(t, res)
+	assert.EqualValues(t, res.StatusCode, 200)
 	assert.Nil(t, err)
 }
 
@@ -98,6 +104,7 @@ func TestDeployClearQueueCommand(t *testing.T) {
 func TestDeployMoveToIdlePhase(t *testing.T) {
 	res, err := GC.MoveToIdlePhase()
 	assert.NotNil(t, res)
+	assert.EqualValues(t, res.StatusCode,200)
 	assert.Nil(t, err)
 }
 
@@ -110,6 +117,7 @@ func TestDeployGetInQueueCommand(t *testing.T) {
 // TestDeployCheckForCompletionQueueCommands function to test Queue Command Completed or not
 func TestDeployCheckForCompletionQueueCommands(t *testing.T) {
 	res, err := GC.CheckForCompletionQueueCommands("query")
+	assert.EqualValues(t, res.StatusCode,200)
 	assert.NotNil(t, res)
 	assert.Nil(t, err)
 }
