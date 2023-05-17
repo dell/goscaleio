@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 )
 
 const errorWithDetails = "Error with details"
@@ -1303,4 +1304,87 @@ type NFSExportModify struct {
 	ReadWriteRootHosts       []string `json:"read_write_root_hosts,omitempty"`
 	AddReadWriteRootHosts    []string `json:"add_read_write_root_hosts,omitempty"`
 	RemoveReadWriteRootHosts []string `json:"remove_read_write_root_hosts,omitempty"`
+}
+
+// UploadPackageParam defines struct for Upload Package
+type UploadPackageParam struct {
+	FilePath string `json:"file_path"`
+}
+
+// PackageDetails defines struct for Package Details Response
+type PackageDetails struct {
+	Filename        string `json:"filename"`
+	OperatingSystem string `json:"operatingSystem"`
+	LinuxFlavour    string `json:"linuxFlavour"`
+	Version         string `json:"version"`
+	SioPatchNumber  int    `json:"sioPatchNumber"`
+	Label           string `json:"label"`
+	Type            string `json:"type"`
+	Size            int    `json:"size"`
+	Latest          bool   `json:"latest"`
+}
+
+// GatewayResponse defines struct for Gateway API Response
+type GatewayResponse struct {
+	Message    string `json:"message,omitempty"`
+	Data       string `json:"data,omitempty"`
+	StatusCode int    `json:"httpStatusCode,omitempty"`
+	ErrorCode  int    `json:"errorCode,omitempty"`
+}
+
+// MDMTopologyParam defines struct for Validate MDM Topology
+type MDMTopologyParam struct {
+	MdmIps                []string                     `json:"mdmIps"`
+	MdmUser               string                       `json:"mdmUser"`
+	MdmPassword           string                       `json:"mdmPassword"`
+	SecurityConfiguration SecurityConfigurationDetails `json:"securityConfiguration"`
+}
+
+// SecurityConfigurationDetails defines struct for Security Details MDM Validation
+type SecurityConfigurationDetails struct {
+	AllowNonSecureCommunicationWithMdm bool `json:"allowNonSecureCommunicationWithMdm"`
+	AllowNonSecureCommunicationWithLia bool `json:"allowNonSecureCommunicationWithLia"`
+	DisableNonMgmtComponentsAuth       bool `json:"disableNonMgmtComponentsAuth"`
+}
+
+// MDMTopologyDetails defines struct for Validated MDM Topology Details
+type MDMTopologyDetails struct {
+	MdmIPs            []string `json:"mdmIPs,omitempty"`
+	SdsAndMdmIps      []string `json:"sdsAndMdmIps,omitempty"`
+	SdcIps            []string `json:"sdcIps,omitempty"`
+	SystemVersionName string   `json:"systemVersionName,omitempty"`
+}
+
+// InstallerPhaseDetail defines struct for Current and Next Phase Details
+type InstallerPhaseDetail struct {
+	Phase                    PhaseDetails `json:"phase,omitempty"`
+	NextPhase                PhaseDetails `json:"nextPhase,omitempty"`
+	Operation                string       `json:"operation,omitempty"`
+	UpgradePersistenceRecord any          `json:"upgradePersistenceRecord,omitempty"`
+	RollbackEnabled          bool         `json:"rollbackEnabled,omitempty"`
+	Message                  string       `json:"message,omitempty"`
+	StatusCode               int          `json:"httpStatusCode,omitempty"`
+	ErrorCode                int          `json:"errorCode,omitempty"`
+}
+
+// PhaseDetails defines struct for specific phase details
+type PhaseDetails struct {
+	Name            string `json:"name,omitempty"`
+	PreludeMessage  any    `json:"preludeMessage,omitempty"`
+	PrologueMessage any    `json:"prologueMessage,omitempty"`
+	AutoStart       bool   `json:"autoStart,omitempty"`
+}
+
+// MDMQueueCommandDetails defines struct for In Queue command details
+type MDMQueueCommandDetails struct {
+	CommandName            string    `json:"commandName,omitempty"`
+	MdmIPs                 []string  `json:"mdmIPs,omitempty"`
+	CommandState           string    `json:"commandState,omitempty"`
+	StartTime              time.Time `json:"startTime,omitempty"`
+	CompletionTime         time.Time `json:"completionTime,omitempty"`
+	Message                string    `json:"message,omitempty"`
+	NodeIPs                []string  `json:"nodeIPs,omitempty"`
+	CommandParameters      []string  `json:"commandParameters,omitempty"`
+	TargetEntityIdentifier string    `json:"targetEntityIdentifier,omitempty"`
+	AllowedPhase           string    `json:"allowedPhase,omitempty"`
 }
