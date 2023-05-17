@@ -1334,14 +1334,17 @@ type GatewayResponse struct {
 
 // MDMTopologyParam defines struct for Validate MDM Topology
 type MDMTopologyParam struct {
-	MdmIps                []string `json:"mdmIps"`
-	MdmUser               string   `json:"mdmUser"`
-	MdmPassword           string   `json:"mdmPassword"`
-	SecurityConfiguration struct {
-		AllowNonSecureCommunicationWithMdm bool `json:"allowNonSecureCommunicationWithMdm"`
-		AllowNonSecureCommunicationWithLia bool `json:"allowNonSecureCommunicationWithLia"`
-		DisableNonMgmtComponentsAuth       bool `json:"disableNonMgmtComponentsAuth"`
-	} `json:"securityConfiguration"`
+	MdmIps                []string                     `json:"mdmIps"`
+	MdmUser               string                       `json:"mdmUser"`
+	MdmPassword           string                       `json:"mdmPassword"`
+	SecurityConfiguration SecurityConfigurationDetails `json:"securityConfiguration"`
+}
+
+// SecurityConfigurationDetails defines struct for Security Details MDM Validation
+type SecurityConfigurationDetails struct {
+	AllowNonSecureCommunicationWithMdm bool `json:"allowNonSecureCommunicationWithMdm"`
+	AllowNonSecureCommunicationWithLia bool `json:"allowNonSecureCommunicationWithLia"`
+	DisableNonMgmtComponentsAuth       bool `json:"disableNonMgmtComponentsAuth"`
 }
 
 // MDMTopologyDetails defines struct for Validated MDM Topology Details
