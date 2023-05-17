@@ -194,11 +194,26 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 
 	if response.StatusCode == 200 {
 
-		gatewayResponse.Data = responseString
+		var parseCSVData map[string]interface{}
 
-		gatewayResponse.StatusCode = response.StatusCode
+		err := json.Unmarshal([]byte(responseString), &parseCSVData)
 
-		return &gatewayResponse, nil
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error While Parsing Response Data For CSV: %s", err)
+		}
+
+		if parseCSVData["masterMdm"] != nil {
+			gatewayResponse.Data = responseString
+
+			gatewayResponse.StatusCode = response.StatusCode
+
+			return &gatewayResponse, nil
+		}
+
+		gatewayResponse.StatusCode = 500
+
+		return &gatewayResponse, fmt.Errorf("Error For Parse CSV: Unable to detect a Primary MDM in the CSV file. All the details about the Primary MDM are needed for extending your PowerFlex system. The Primary MDM will not be reinstalled.")
+
 	}
 
 	err := json.Unmarshal([]byte(responseString), &gatewayResponse)
