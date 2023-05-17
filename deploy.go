@@ -274,7 +274,17 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 		return &gatewayResponse, nil
 	}
 
+	var mdmTopologyDetails types.MDMTopologyDetails
+
+	err := json.Unmarshal([]byte(responseString), &mdmTopologyDetails)
+
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error For Validate MDM Details: %s", err)
+	}
+
 	gatewayResponse.StatusCode = 200
+
+	gatewayResponse.Data = strings.Join(mdmTopologyDetails.SdcIps, ",")
 
 	return &gatewayResponse, nil
 }
@@ -362,7 +372,7 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 		return &gatewayResponse, httpReqError
 	}
 
-	if httpRes.StatusCode != 200 {
+	if httpRes.StatusCode != 202 {
 
 		responseString, _ := extractString(httpRes)
 

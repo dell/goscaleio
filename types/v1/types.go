@@ -1344,6 +1344,14 @@ type MDMTopologyParam struct {
 	} `json:"securityConfiguration"`
 }
 
+// MDMTopologyDetails defines struct for Validated MDM Topology Details
+type MDMTopologyDetails struct {
+	MdmIPs            []string `json:"mdmIPs,omitempty"`
+	SdsAndMdmIps      []string `json:"sdsAndMdmIps,omitempty"`
+	SdcIps            []string `json:"sdcIps,omitempty"`
+	SystemVersionName string   `json:"systemVersionName,omitempty"`
+}
+
 // InstallerPhaseDetail defines struct for Current and Next Phase Details
 type InstallerPhaseDetail struct {
 	Phase                    PhaseDetails `json:"phase,omitempty"`
