@@ -30,7 +30,6 @@ func TestDeployGetPackgeDetails(t *testing.T) {
 
 // TestDeployValidateMDMDetails function to test Retrival of MDM Topology Function
 func TestDeployValidateMDMDetails(t *testing.T) {
-
 	mapData := map[string]interface{}{
 		"mdmUser":     "admin",
 		"mdmPassword": "Password123",
@@ -57,7 +56,7 @@ func TestDeployValidateMDMDetails(t *testing.T) {
 
 // TestDeployDeletePackge function to test Delete Functionality
 func TestDeployDeletePackge(t *testing.T) {
-	res, err := GC.DeletePackge("ABC")
+	res, err := GC.DeletePackage("ABC")
 	assert.EqualValues(t, res.StatusCode, 500)
 	assert.NotNil(t, res)
 	assert.Nil(t, err)
@@ -104,7 +103,7 @@ func TestDeployClearQueueCommand(t *testing.T) {
 func TestDeployMoveToIdlePhase(t *testing.T) {
 	res, err := GC.MoveToIdlePhase()
 	assert.NotNil(t, res)
-	assert.EqualValues(t, res.StatusCode,200)
+	assert.EqualValues(t, res.StatusCode, 200)
 	assert.Nil(t, err)
 }
 
@@ -117,7 +116,7 @@ func TestDeployGetInQueueCommand(t *testing.T) {
 // TestDeployCheckForCompletionQueueCommands function to test Queue Command Completed or not
 func TestDeployCheckForCompletionQueueCommands(t *testing.T) {
 	res, err := GC.CheckForCompletionQueueCommands("query")
-	assert.EqualValues(t, res.StatusCode,200)
+	assert.EqualValues(t, res.StatusCode, 200)
 	assert.NotNil(t, res)
 	assert.Nil(t, err)
 }

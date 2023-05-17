@@ -1344,7 +1344,7 @@ type MDMTopologyParam struct {
 	} `json:"securityConfiguration"`
 }
 
-// InstallerPhaseDetail defines struct for Phase Details
+// InstallerPhaseDetail defines struct for Current and Next Phase Details
 type InstallerPhaseDetail struct {
 	Phase                    PhaseDetails `json:"phase,omitempty"`
 	NextPhase                PhaseDetails `json:"nextPhase,omitempty"`
@@ -1356,6 +1356,7 @@ type InstallerPhaseDetail struct {
 	ErrorCode                int          `json:"errorCode,omitempty"`
 }
 
+// PhaseDetails defines struct for specific phase details
 type PhaseDetails struct {
 	Name            string `json:"name,omitempty"`
 	PreludeMessage  any    `json:"preludeMessage,omitempty"`
@@ -1363,6 +1364,7 @@ type PhaseDetails struct {
 	AutoStart       bool   `json:"autoStart,omitempty"`
 }
 
+// MDMQueueCommandDetails defines struct for In Queue command details
 type MDMQueueCommandDetails struct {
 	CommandName            string    `json:"commandName,omitempty"`
 	MdmIPs                 []string  `json:"mdmIPs,omitempty"`

@@ -210,7 +210,7 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 	return &gatewayResponse, fmt.Errorf("Error For Parse CSV: %s", gatewayResponse.Message)
 }
 
-// GetPackgeDetails used for get package details
+// GetPackageDetails used for get package details
 func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 
 	var packageParam []*types.PackageDetails
@@ -279,8 +279,8 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 	return &gatewayResponse, nil
 }
 
-// GetPackgeDetails used for get dackages details
-func (gc *GatewayClient) DeletePackge(packageName string) (*types.GatewayResponse, error) {
+// DeletePackage used for delete packages from gateway server
+func (gc *GatewayClient) DeletePackage(packageName string) (*types.GatewayResponse, error) {
 
 	var gatewayResponse types.GatewayResponse
 
@@ -589,7 +589,11 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 
 		var queueCommandDetails map[string][]interface{}
 
-		json.Unmarshal([]byte(responseString), &queueCommandDetails)
+		err := json.Unmarshal([]byte(responseString), &queueCommandDetails)
+
+		if err != nil {
+			return mdmQueueCommandDetails, fmt.Errorf("Error For Get In Queue Commands: %s", err)
+		}
 
 		var commandList []interface{}
 
@@ -599,7 +603,7 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 
 		mdmCommands, _ := json.Marshal(commandList)
 
-		err := json.Unmarshal([]byte(mdmCommands), &mdmQueueCommandDetails)
+		err = json.Unmarshal([]byte(mdmCommands), &mdmQueueCommandDetails)
 
 		if err != nil {
 			return mdmQueueCommandDetails, fmt.Errorf("Error For Get In Queue Commands: %s", err)
