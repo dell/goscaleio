@@ -315,7 +315,7 @@ func (pd *ProtectionDomain) DisableRFCache(ID string) (string, error) {
 // DeleteStoragePool will delete a storage pool
 func (pd *ProtectionDomain) DeleteStoragePool(name string) error {
 	// get the storage pool name
-	pool, err := pd.client.FindStoragePool("", name, "", "")
+	pool, err := pd.FindStoragePool("", name, "")
 	if err != nil {
 		return err
 	}
