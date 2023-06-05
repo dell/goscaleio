@@ -61,6 +61,7 @@ type ConfigConnect struct {
 	Version  string
 	Username string
 	Password string
+	Insecure bool
 }
 
 // ClientPersistent defines struct for ClientPersistent
@@ -305,6 +306,11 @@ func (c *Client) SetToken(token string) {
 // GetToken returns token
 func (c *Client) GetToken() string {
 	return c.api.GetToken()
+}
+
+// GetToken returns token
+func (c *Client) GetConfigConnect() *ConfigConnect {
+	return c.configConnect
 }
 
 // NewClient returns a new client
