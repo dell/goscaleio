@@ -157,3 +157,15 @@ func TestChangeSdcName(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, nameChngBack)
 }
+
+// TestDeleteSdc will attempt to delete an SDS, which results in faliure
+func TestDeleteSdc(t *testing.T) {
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	// attempt to delete an SDC with a invalid Id
+	// this is done, in a failure mode, to prevent removing the data in existance
+	sdsID := "e3ce1fb600000001"
+	err := system.DeleteSdc(sdsID)
+	assert.NotNil(t, err)
+}

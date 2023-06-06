@@ -51,7 +51,6 @@ func initClient() {
 			Endpoint: os.Getenv(mainEndpoint),
 			Username: os.Getenv("GOSCALEIO_USERNAME"),
 			Password: os.Getenv("GOSCALEIO_PASSWORD"),
-			Insecure: os.Getenv("GOSCALEIO_INSECURE") == "true",
 		})
 		if err != nil {
 			panic(fmt.Errorf("unable to login to VxFlexOS Gateway: %s", err.Error()))

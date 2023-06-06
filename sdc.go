@@ -276,3 +276,18 @@ func (c *Client) RenameSdc(sdcID, name string) error {
 	}
 	return nil
 }
+
+// DeleteSdc deletes a Sdc against Id
+func (s *System) DeleteSdc(id string) error {
+	defer TimeSpent("DeleteSdc", time.Now())
+
+	path := fmt.Sprintf("/api/instances/Sdc::%v/action/removeSdc", id)
+
+	sdcParam := &types.EmptyPayload{}
+	err := s.client.getJSONWithRetry(http.MethodPost, path, sdcParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
