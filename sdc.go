@@ -92,6 +92,26 @@ func (s *System) ChangeSdcName(idOfSdc, name string) (*Sdc, error) {
 	return NewSdc(s.client, &sdc), nil
 }
 
+// ChangeSdcPerfProfile returns a Sdc after changing its PerfProfile
+func (s *System) ChangeSdcPerfProfile(idOfSdc, perfProfile string) (*Sdc, error) {
+	defer TimeSpent("ChangeSdcPerfProfile", time.Now())
+
+	path := fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcPerformanceParameters", idOfSdc)
+
+	var sdc types.Sdc
+
+	var body types.ChangeSdcPerfProfile = types.ChangeSdcPerfProfile{
+		PerfProfile: perfProfile,
+	}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, body, &sdc)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewSdc(s.client, &sdc), nil
+}
+
 // FindSdc returns a Sdc
 func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	defer TimeSpent("FindSdc", time.Now())

@@ -158,6 +158,25 @@ func TestChangeSdcName(t *testing.T) {
 	assert.NotNil(t, nameChngBack)
 }
 
+// TestChangeSdcPerfProfile function tests Change PerfProfile functionality of SDC.
+func TestChangeSdcPerfProfile(t *testing.T) {
+
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	sdc, err := system.GetSdc()
+	assert.Nil(t, err)
+	firstSdc := sdc[0]
+
+	basePerfProgile := firstSdc.PerfProfile
+	ppChng, err := system.ChangeSdcPerfProfile(firstSdc.ID, "Compact")
+	assert.Nil(t, err)
+	assert.NotNil(t, ppChng)
+	nameChngBack, err := system.ChangeSdcPerfProfile(firstSdc.ID, basePerfProgile)
+	assert.Nil(t, err)
+	assert.NotNil(t, nameChngBack)
+}
+
 // TestDeleteSdc will attempt to delete an SDS, which results in faliure
 func TestDeleteSdc(t *testing.T) {
 	system := getSystem()
