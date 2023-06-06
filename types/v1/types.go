@@ -916,9 +916,9 @@ type RenameSdcParam struct {
 	SdcName string `json:"sdcName,omitempty"`
 }
 
-// PerformanceProfileSdcParam defines struct for RenameSdc
-type PerformanceProfileSdcParam struct {
-	PerfProfile string `json:"perfProfile,omitempty"`
+// GetSdcIdParam defines struct for SDC ID
+type GetSdcIdParam struct {
+	IP string `json:"ip,omitempty"`
 }
 
 // SnapshotDef defines struct for SnapshotDef
