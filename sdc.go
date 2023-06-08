@@ -312,8 +312,8 @@ func (s *System) DeleteSdc(id string) error {
 	return nil
 }
 
-// GetSdcId get a Sdc id by IP Address
-func (s *System) GetSdcIdByIP(ip string) (string, error) {
+// GetSdcIDByIP get a Sdc id by IP Address
+func (s *System) GetSdcIDByIP(ip string) (string, error) {
 	defer TimeSpent("GetSdcId", time.Now())
 
 	path := fmt.Sprintf("/api/types/Sdc/instances/action/queryIdByKey")

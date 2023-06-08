@@ -201,7 +201,7 @@ func TestGetSdcIdByIP(t *testing.T) {
 	firstSdc := sdc[0]
 
 	sdsIP := firstSdc.SdcIP
-	sdcId, err := system.GetSdcIdByIP(sdsIP)
-	assert.NotNil(t, sdcId)
+	sdcID, err := system.GetSdcIDByIP(sdsIP)
+	assert.NotNil(t, sdcID)
 	assert.Nil(t, err)
 }
