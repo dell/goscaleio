@@ -157,20 +157,28 @@ func GetLocalVolumeMap() (mappedVolumes []*SdcMappedVolume, err error) {
 
 func getVolumeMapping(sysID string, volID string) (mappedVolumes []*SdcMappedVolume, err error) {
 	defer TimeSpent("GetLocalVolumeMap", time.Now())
+	fmt.Println("sysID", "volID", sysID, volID)
 
 	mappedVolumesMap := make(map[string]*SdcMappedVolume)
 
 	diskIDPath := FSDevDirectoryPrefix + "/dev/disk/by-id"
+	fmt.Println("diskIDPath", diskIDPath)
 	files, _ := ioutil.ReadDir(diskIDPath)
+	fmt.Println("files:", files)
 	strRegex := fmt.Sprintf(`^emc-vol-%s-%s$`, sysID, volID)
+	fmt.Println("strRegex:", strRegex)
 	r, _ := regexp.Compile(strRegex)
 	for _, f := range files {
 		matched := r.MatchString(f.Name())
+		fmt.Println("matched:", matched)
 		if matched {
 			split := strings.Split(f.Name(), "-")
 			mdmVolumeID := fmt.Sprintf("%s-%s", split[2], split[3])
+			fmt.Println("mdmVolumeID:", mdmVolumeID)
 			devPath, _ := filepath.EvalSymlinks(fmt.Sprintf("%s/%s", diskIDPath, f.Name()))
+			fmt.Println("devPath", devPath)
 			mappedVolumesMap[mdmVolumeID] = &SdcMappedVolume{MdmID: split[2], VolumeID: split[3], SdcDevice: devPath}
+			fmt.Printf("%#v\n", mappedVolumesMap)
 		}
 	}
 
@@ -183,6 +191,7 @@ func getVolumeMapping(sysID string, volID string) (mappedVolumes []*SdcMappedVol
 	for _, key := range keys {
 		mappedVolumes = append(mappedVolumes, mappedVolumesMap[key])
 	}
+	fmt.Println("mappedVolumes:", mappedVolumes)
 
 	return mappedVolumes, nil
 }
