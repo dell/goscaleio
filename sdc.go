@@ -132,7 +132,7 @@ func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	return nil, errors.New("Couldn't find SDC")
 }
 
-// ApproveSdcByGUID approves the Sdc When the Powerfl Array is operating in Guid RestrictedSdcMode.
+// ApproveSdcByGUID approves the Sdc When the Powerflex Array is operating in Guid RestrictedSdcMode.
 func (s *System) ApproveSdcByGUID(sdcGUID string) (*types.ApproveSdcByGUIDResponse, error) {
 	defer TimeSpent("ApproveSdcByGUID", time.Now())
 
@@ -318,7 +318,7 @@ func (s *System) GetSdcIdByIP(ip string) (string, error) {
 
 	path := fmt.Sprintf("/api/types/Sdc/instances/action/queryIdByKey")
 
-	sdcParam := &types.GetSdcIdParam{
+	sdcParam := &types.GetSdcIdByIPParam{
 		IP: ip,
 	}
 	sdcID, err := s.client.getStringWithRetry(http.MethodPost, path, sdcParam)
