@@ -916,8 +916,8 @@ type RenameSdcParam struct {
 	SdcName string `json:"sdcName,omitempty"`
 }
 
-// GetSdcIdParam defines struct for SDC ID
-type GetSdcIdParam struct {
+// GetSdcIdByIPParam defines struct for SDC ID
+type GetSdcIdByIPParam struct {
 	IP string `json:"ip,omitempty"`
 }
 

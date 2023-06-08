@@ -132,7 +132,7 @@ func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	return nil, errors.New("Couldn't find SDC")
 }
 
-// ApproveSdcByGUID approves the Sdc When the Powerflex Array is operating in Guid RestrictedSdcMode.
+// ApproveSdcByGUID approves the Sdc When the Powerfl Array is operating in Guid RestrictedSdcMode.
 func (s *System) ApproveSdcByGUID(sdcGUID string) (*types.ApproveSdcByGUIDResponse, error) {
 	defer TimeSpent("ApproveSdcByGUID", time.Now())
 
@@ -281,6 +281,22 @@ func (v *Volume) SetMappedSdcLimits(
 	return nil
 }
 
+// RenameSdc renames the sdc with given name
+func (c *Client) RenameSdc(sdcID, name string) error {
+	path := fmt.Sprintf("/api/instances/Sdc::%s/action/setSdcName", sdcID)
+
+	renameSdcParam := &types.RenameSdcParam{
+		SdcName: name,
+	}
+
+	err := c.getJSONWithRetry(
+		http.MethodPost, path, renameSdcParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // DeleteSdc deletes a Sdc against Id
 func (s *System) DeleteSdc(id string) error {
 	defer TimeSpent("DeleteSdc", time.Now())
@@ -297,7 +313,7 @@ func (s *System) DeleteSdc(id string) error {
 }
 
 // GetSdcId get a Sdc id by IP Address
-func (s *System) GetSdcId(ip string) (string, error) {
+func (s *System) GetSdcIdByIP(ip string) (string, error) {
 	defer TimeSpent("GetSdcId", time.Now())
 
 	path := fmt.Sprintf("/api/types/Sdc/instances/action/queryIdByKey")
@@ -305,11 +321,10 @@ func (s *System) GetSdcId(ip string) (string, error) {
 	sdcParam := &types.GetSdcIdParam{
 		IP: ip,
 	}
-	sdcID,err := s.client.getStringWithRetry(http.MethodPost, path, sdcParam)
-	fmt.Printf("[FindSDCID] sdcID: %+v\n", sdcID)
+	sdcID, err := s.client.getStringWithRetry(http.MethodPost, path, sdcParam)
 	if err != nil {
-		return "",err
+		return "", err
 	}
 
-	return sdcID,nil
+	return sdcID, nil
 }
