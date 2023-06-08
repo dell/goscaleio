@@ -327,7 +327,7 @@ type ChangeSdcNameParam struct {
 	SdcName string `json:"sdcName"`
 }
 
-// ChangeSdcPerfProfile defines struct for passing parameters to changeSDCname endpoint
+// ChangeSdcPerfProfile defines struct for passing parameters to setSdcPerformanceParameters endpoint
 type ChangeSdcPerfProfile struct {
 	PerfProfile string `json:"perfProfile"`
 }
@@ -916,7 +916,7 @@ type RenameSdcParam struct {
 	SdcName string `json:"sdcName,omitempty"`
 }
 
-// GetSdcIdByIPParam defines struct for SDC ID
+// GetSdcIdByIPParam defines struct for SDC ID to get by IP
 type GetSdcIdByIPParam struct {
 	IP string `json:"ip,omitempty"`
 }

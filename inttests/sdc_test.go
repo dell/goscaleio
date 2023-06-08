@@ -182,21 +182,25 @@ func TestDeleteSdc(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	// attempt to delete an SDC with a invalid Id
-	// this is done, in a failure mode, to prevent removing the data in existance
-	sdsID := "e3ce1fb6001"
-	err := system.DeleteSdc(sdsID)
+	sdc, err := system.GetSdc()
+	assert.Nil(t, err)
+	firstSdc := sdc[0]
+
+	sdsID := firstSdc.ID
+	err = system.DeleteSdc(sdsID)
 	assert.NotNil(t, err)
 }
 
-// TestGetSdcId will attempt to get SDC ID
-func TestGetSdcId(t *testing.T) {
+// GetSdcIdByIP will attempt to get SDC ID By IP Address
+func TestGetSdcIdByIP(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	// attempt to delete an SDC with a invalid Id
-	// this is done, in a failure mode, to prevent removing the data in existance
-	sdsIP := "10.247.66.67"
+	sdc, err := system.GetSdc()
+	assert.Nil(t, err)
+	firstSdc := sdc[0]
+
+	sdsIP := firstSdc.SdcIP
 	sdcId, err := system.GetSdcIdByIP(sdsIP)
 	assert.NotNil(t, sdcId)
 	assert.Nil(t, err)

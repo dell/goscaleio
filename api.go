@@ -309,7 +309,7 @@ func (c *Client) GetToken() string {
 	return c.api.GetToken()
 }
 
-// GetToken returns token
+// GetConfigConnect returns Config of client
 func (c *Client) GetConfigConnect() *ConfigConnect {
 	return c.configConnect
 }
