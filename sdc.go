@@ -318,7 +318,7 @@ func (s *System) GetSdcIdByIP(ip string) (string, error) {
 
 	path := fmt.Sprintf("/api/types/Sdc/instances/action/queryIdByKey")
 
-	sdcParam := &types.GetSdcIdByIPParam{
+	sdcParam := &types.GetSdcIDByIPParam{
 		IP: ip,
 	}
 	sdcID, err := s.client.getStringWithRetry(http.MethodPost, path, sdcParam)
