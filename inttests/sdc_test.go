@@ -157,3 +157,51 @@ func TestChangeSdcName(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, nameChngBack)
 }
+
+// TestChangeSdcPerfProfile function tests Change PerfProfile functionality of SDC.
+func TestChangeSdcPerfProfile(t *testing.T) {
+
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	sdc, err := system.GetSdc()
+	assert.Nil(t, err)
+	firstSdc := sdc[0]
+
+	basePerfProgile := firstSdc.PerfProfile
+	ppChng, err := system.ChangeSdcPerfProfile(firstSdc.ID, "Compact")
+	assert.Nil(t, err)
+	assert.NotNil(t, ppChng)
+	nameChngBack, err := system.ChangeSdcPerfProfile(firstSdc.ID, basePerfProgile)
+	assert.Nil(t, err)
+	assert.NotNil(t, nameChngBack)
+}
+
+// TestDeleteSdc will attempt to delete an SDS, which results in faliure
+func TestDeleteSdc(t *testing.T) {
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	sdc, err := system.GetSdc()
+	assert.Nil(t, err)
+	firstSdc := sdc[0]
+
+	sdsID := firstSdc.ID
+	err = system.DeleteSdc(sdsID)
+	assert.NotNil(t, err)
+}
+
+// GetSdcIdByIP will attempt to get SDC ID By IP Address
+func TestGetSdcIdByIP(t *testing.T) {
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	sdc, err := system.GetSdc()
+	assert.Nil(t, err)
+	firstSdc := sdc[0]
+
+	sdsIP := firstSdc.SdcIP
+	sdcID, err := system.GetSdcIDByIP(sdsIP)
+	assert.NotNil(t, sdcID)
+	assert.Nil(t, err)
+}

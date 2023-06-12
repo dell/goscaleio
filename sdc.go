@@ -92,6 +92,26 @@ func (s *System) ChangeSdcName(idOfSdc, name string) (*Sdc, error) {
 	return NewSdc(s.client, &sdc), nil
 }
 
+// ChangeSdcPerfProfile returns a Sdc after changing its PerfProfile
+func (s *System) ChangeSdcPerfProfile(idOfSdc, perfProfile string) (*Sdc, error) {
+	defer TimeSpent("ChangeSdcPerfProfile", time.Now())
+
+	path := fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcPerformanceParameters", idOfSdc)
+
+	var sdc types.Sdc
+
+	var body types.ChangeSdcPerfProfile = types.ChangeSdcPerfProfile{
+		PerfProfile: perfProfile,
+	}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, body, &sdc)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewSdc(s.client, &sdc), nil
+}
+
 // FindSdc returns a Sdc
 func (s *System) FindSdc(field, value string) (*Sdc, error) {
 	defer TimeSpent("FindSdc", time.Now())
@@ -275,4 +295,36 @@ func (c *Client) RenameSdc(sdcID, name string) error {
 		return err
 	}
 	return nil
+}
+
+// DeleteSdc deletes a Sdc against Id
+func (s *System) DeleteSdc(id string) error {
+	defer TimeSpent("DeleteSdc", time.Now())
+
+	path := fmt.Sprintf("/api/instances/Sdc::%v/action/removeSdc", id)
+
+	sdcParam := &types.EmptyPayload{}
+	err := s.client.getJSONWithRetry(http.MethodPost, path, sdcParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// GetSdcIDByIP get a Sdc id by IP Address
+func (s *System) GetSdcIDByIP(ip string) (string, error) {
+	defer TimeSpent("GetSdcId", time.Now())
+
+	path := fmt.Sprintf("/api/types/Sdc/instances/action/queryIdByKey")
+
+	sdcParam := &types.GetSdcIDByIPParam{
+		IP: ip,
+	}
+	sdcID, err := s.client.getStringWithRetry(http.MethodPost, path, sdcParam)
+	if err != nil {
+		return "", err
+	}
+
+	return sdcID, nil
 }

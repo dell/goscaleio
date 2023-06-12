@@ -327,6 +327,11 @@ type ChangeSdcNameParam struct {
 	SdcName string `json:"sdcName"`
 }
 
+// ChangeSdcPerfProfile defines struct for passing parameters to setSdcPerformanceParameters endpoint
+type ChangeSdcPerfProfile struct {
+	PerfProfile string `json:"perfProfile"`
+}
+
 // ApproveSdcParam defines struct for ApproveSdcParam
 type ApproveSdcParam struct {
 	SdcGUID string `json:"sdcGuid"`
@@ -351,6 +356,8 @@ type Sdc struct {
 	SdcGUID            string  `json:"sdcGuid"`
 	MdmConnectionState string  `json:"mdmConnectionState"`
 	Name               string  `json:"name"`
+	PerfProfile        string  `json:"perfProfile"`
+	OSType             string  `json:"osType"`
 	ID                 string  `json:"id"`
 	Links              []*Link `json:"links"`
 }
@@ -907,6 +914,11 @@ type SetMappedSdcLimitsParam struct {
 // RenameSdcParam defines struct for RenameSdc
 type RenameSdcParam struct {
 	SdcName string `json:"sdcName,omitempty"`
+}
+
+// GetSdcIDByIPParam defines struct for SDC ID to get by IP
+type GetSdcIDByIPParam struct {
+	IP string `json:"ip,omitempty"`
 }
 
 // SnapshotDef defines struct for SnapshotDef

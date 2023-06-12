@@ -18,9 +18,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/dell/goscaleio/api"
-	types "github.com/dell/goscaleio/types/v1"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"math"
 	"net/http"
@@ -30,6 +27,10 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/dell/goscaleio/api"
+	types "github.com/dell/goscaleio/types/v1"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -61,6 +62,7 @@ type ConfigConnect struct {
 	Version  string
 	Username string
 	Password string
+	Insecure bool
 }
 
 // ClientPersistent defines struct for ClientPersistent
@@ -305,6 +307,11 @@ func (c *Client) SetToken(token string) {
 // GetToken returns token
 func (c *Client) GetToken() string {
 	return c.api.GetToken()
+}
+
+// GetConfigConnect returns Config of client
+func (c *Client) GetConfigConnect() *ConfigConnect {
+	return c.configConnect
 }
 
 // NewClient returns a new client
