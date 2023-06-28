@@ -120,3 +120,27 @@ func (s *System) DeleteFileSystem(name string) error {
 
 	return nil
 }
+
+func (s *System) ModifyFileSystem(id string, size int) error {
+	defer TimeSpent("ModifyFileSystem", time.Now())
+
+	fs, err := s.GetFileSystemByIDName(id, "")
+
+	if err != nil {
+		return err
+	}
+
+	var body types.FSModify = types.FSModify{
+		Size: size,
+	}
+
+	path := fmt.Sprintf("/rest/v1/file-systems/%v", fs.ID)
+
+	err = s.client.getJSONWithRetry(http.MethodPatch, path, body, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
