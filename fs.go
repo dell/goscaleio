@@ -121,7 +121,7 @@ func (s *System) DeleteFileSystem(name string) error {
 	return nil
 }
 
-func (s *System) ModifyFileSystem(id string, size int) error {
+func (s *System) ModifyFileSystem(modifyFsParam *types.FSModify, id string) error {
 	defer TimeSpent("ModifyFileSystem", time.Now())
 
 	fs, err := s.GetFileSystemByIDName(id, "")
@@ -130,9 +130,7 @@ func (s *System) ModifyFileSystem(id string, size int) error {
 		return err
 	}
 
-	var body types.FSModify = types.FSModify{
-		Size: size,
-	}
+	var body *types.FSModify = modifyFsParam
 
 	path := fmt.Sprintf("/rest/v1/file-systems/%v", fs.ID)
 
