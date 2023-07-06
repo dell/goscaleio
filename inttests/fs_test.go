@@ -162,3 +162,59 @@ func TestCreateDeleteFileSystem(t *testing.T) {
 	assert.NotNil(t, err)
 
 }
+
+// TestModifyFileSystem attempts to create then delete a file system
+func TestModifyFileSystem(t *testing.T) {
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	fsName := fmt.Sprintf("%s-%s", "FS", testPrefix)
+
+	// get protection domain
+	pd := getProtectionDomain(t)
+	assert.NotNil(t, pd)
+
+	// get storage pool
+	pool := getStoragePool(t)
+	assert.NotNil(t, pool)
+	var spID string
+	if pd != nil && pool != nil {
+		sp, _ := pd.FindStoragePool(pool.StoragePool.ID, "", "")
+		assert.NotNil(t, sp)
+		spID = sp.ID
+	}
+
+	// get NAS server ID
+	var nasServerName string
+	if os.Getenv("GOSCALEIO_NASSERVER") != "" {
+		nasServerName = os.Getenv("GOSCALEIO_NASSERVER")
+	}
+	nasServer, err := system.GetNASByIDName("", nasServerName)
+	assert.NotNil(t, nasServer)
+
+	fs := &types.FsCreate{
+		Name:          fsName,
+		SizeTotal:     10737418240,
+		StoragePoolID: spID,
+		NasServerID:   nasServer.ID,
+	}
+
+	// create the file system
+	filesystem, err := system.CreateFileSystem(fs)
+	fsID := filesystem.ID
+	assert.Nil(t, err)
+	assert.NotNil(t, fsID)
+
+	// modify-expand filesystem
+	modifyParam := &types.FSModify{
+		Size:        16106127360,
+		Description: "filesystem size modified",
+	}
+	err = system.ModifyFileSystem(modifyParam, fsID)
+	assert.Nil(t, err)
+
+	// negative case
+	err = system.ModifyFileSystem(modifyParam, "")
+	assert.NotNil(t, err)
+
+}

@@ -14,6 +14,7 @@ package goscaleio
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -311,6 +312,86 @@ func TestCreateFileSystem(t *testing.T) {
 				checkFn(t, resp, err)
 			}
 
+		})
+	}
+}
+
+func TestDeleteFileSystem(t *testing.T) {
+
+	name := "new-fs"
+
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer svr.Close()
+
+	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+	client.configConnect.Version = "4.0"
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := System{
+		client: client,
+	}
+
+	err = s.DeleteFileSystem(name)
+	assert.NotNil(t, err)
+}
+
+func TestModifyFileSystem(t *testing.T) {
+	type testCase struct {
+		fsID        string
+		newSize     int
+		description string
+		expected    error
+	}
+	cases := []testCase{
+		{
+			"64a6b2a4-1ff6-acaf-39a0-5643ff849351",
+			10737418240,
+			"",
+			nil,
+		},
+		{
+			"",
+			10737418240,
+			"",
+			errors.New("file system name or ID is mandatory, please enter a valid value"),
+		},
+	}
+	// mock a powerflex endpoint
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	}))
+	defer svr.Close()
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(ts *testing.T) {
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			s := System{
+				client: client,
+			}
+
+			fsParam := &types.FSModify{
+				Size:        tc.newSize,
+				Description: tc.description,
+			}
+
+			// calling ModifyFileSystem with mock value
+			err = s.ModifyFileSystem(fsParam, tc.fsID)
+			if err != nil {
+				if tc.expected == nil {
+					t.Errorf("Modifying FS did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
+				} else {
+					if err.Error() != tc.expected.Error() {
+						t.Errorf("Modifying FS did not work as expected, \n\tgot: %s \n\twant: %s", err, tc.expected)
+					}
+				}
+			}
 		})
 	}
 }
