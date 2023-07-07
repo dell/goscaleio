@@ -1246,6 +1246,12 @@ type FsCreate struct {
 	IsAsyncMTimeEnabled        bool   `json:"is_async_MTime_enabled,omitempty"`
 }
 
+// FSModify defines struct for modify FS
+type FSModify struct {
+	Size        int    `json:"size_total"`
+	Description string `json:"description,omitempty"`
+}
+
 // FileSystemResp defines struct for FileSystemResp
 type FileSystemResp struct {
 	ID string `json:"id"`
