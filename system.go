@@ -106,3 +106,96 @@ func (s *System) CreateSnapshotConsistencyGroup(
 
 	return &snapResp, nil
 }
+
+// GetMDMClusterDetails returns MDM cluster details
+func (s *System) GetMDMClusterDetails() (*types.MdmCluster, error) {
+	defer TimeSpent("GetMDMClusterDetails", time.Now())
+
+	path := "api/instances/System/queryMdmCluster"
+	mdmParam := &types.EmptyPayload{}
+
+	mdmResp := types.MdmCluster{}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, mdmParam, &mdmResp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &mdmResp, nil
+}
+
+// AddStandByMdm adds the standby MDMs to the MDM cluster
+func (s *System) AddStandByMdm(mdmParam *types.StandByMdm) (string, error) {
+	defer TimeSpent("AddStandByMdm", time.Now())
+
+	path := "api/instances/System/action/addStandbyMdm"
+	mdm := &types.Mdm{}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, mdmParam, &mdm)
+	if err != nil {
+		return "", err
+	}
+	return mdm.ID, nil
+}
+
+// RemoveStandByMdm removes standby MDM
+func (s *System) RemoveStandByMdm(id string) error {
+	defer TimeSpent("RemoveStandByMdm", time.Now())
+
+	path := "/api/instances/System/action/removeStandbyMdm"
+	mdmParam := &types.RemoveStandByMdmParam{
+		ID: id,
+	}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, mdmParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// ModifyPerformanceProfileMdmCluster modifies performance profile of MDM cluster
+func (s *System) ModifyPerformanceProfileMdmCluster(perfProfile string) error {
+	defer TimeSpent("ModifyPerformanceProfileMdmCluster", time.Now())
+
+	path := "/api/instances/System/action/setMdmPerformanceParameters"
+	mdmParam := &types.ChangeMdmPerfProfile{
+		PerfProfile: perfProfile,
+	}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, mdmParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SwitchClusterMode changes the MDM cluster mode
+func (s *System) SwitchClusterMode(switchClusterMode *types.SwitchClusterMode) error {
+	defer TimeSpent("SwitchClusterMode", time.Now())
+
+	path := "/api/instances/System/action/switchClusterMode"
+
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, switchClusterMode, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// ChangeMdmOwnerShip modifies the primary MDM
+func (s *System) ChangeMdmOwnerShip(id string) error {
+	defer TimeSpent("ChangeMdmOwnerShip", time.Now())
+
+	path := "/api/instances/System/action/changeMdmOwnership"
+	mdmParam := &types.ChangeMdmOwnerShip{
+		ID: id,
+	}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, mdmParam, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
