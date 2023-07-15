@@ -1175,6 +1175,10 @@ type CreateNASResponse struct {
 	ID string `json:"id"`
 }
 
+type TreeQuotaCreateResponse struct {
+	ID string `json:"id"`
+}
+
 // CreateNASParam defines the struct for CreateNASParam
 type CreateNASParam struct {
 	Name                         string `json:"name"`
@@ -1301,6 +1305,16 @@ type NFSExportCreate struct {
 	AnonymousUID       int      `json:"anonymous_UID,omitempty"`
 	AnonymousGID       int      `json:"anonymous_GID,omiempty"`
 	IsNoSUID           bool     `json:"is_no_SUID,omitempty"`
+}
+
+type TreeQuotaCreate struct {
+	FileSysytemID       string `json:"file_system_id"`
+	Path                string `json:"path"`
+	Description         string `json:"description,omitempty"`
+	Hard_Limit          int    `json:"hard_limit,omitempty"`
+	Soft_Limit          int    `json:"soft_limit,omitempty"`
+	IsUserQuotaEnforced bool   `json:"is_user_quotas_enforced,omitempty"`
+	GracePeroid         int    `json:"grace_period,omitempty"`
 }
 
 // NFSExportModify defines struct for Modify NFS Export
