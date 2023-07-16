@@ -1175,10 +1175,6 @@ type CreateNASResponse struct {
 	ID string `json:"id"`
 }
 
-type TreeQuotaCreateResponse struct {
-	ID string `json:"id"`
-}
-
 // CreateNASParam defines the struct for CreateNASParam
 type CreateNASParam struct {
 	Name                         string `json:"name"`
@@ -1252,8 +1248,12 @@ type FsCreate struct {
 
 // FSModify defines struct for modify FS
 type FSModify struct {
-	Size        int    `json:"size_total"`
-	Description string `json:"description,omitempty"`
+	Size             int    `json:"size_total,omitempty"`
+	Description      string `json:"description,omitempty"`
+	IsQuotaEnabled   bool   `json:"is_quota_enabled,omitempty"`
+	GracePeriod      int    `json:"grace_period,omitempty"`
+	DefaultHardLimit int    `json:"default_hard_limit,omitempty"`
+	DefaultSoftLimit int    `json:"default_soft_limit,omitempty"`
 }
 
 // FileSystemResp defines struct for FileSystemResp
@@ -1292,6 +1292,10 @@ type NFSExportCreateResponse struct {
 	ID string `json:"id"`
 }
 
+type TreeQuotaCreateResponse struct {
+	ID string `json:"id"`
+}
+
 // NFSExportCreate defines struct for Create NFS Export
 type NFSExportCreate struct {
 	Name               string   `json:"name"`
@@ -1303,18 +1307,39 @@ type NFSExportCreate struct {
 	ReadOnlyRootHosts  []string `json:"read_only_root_hosts,omitempty"`
 	ReadWriteRootHosts []string `json:"read_write_root_hosts,omitempty"`
 	AnonymousUID       int      `json:"anonymous_UID,omitempty"`
-	AnonymousGID       int      `json:"anonymous_GID,omiempty"`
+	AnonymousGID       int      `json:"anonymous_GID,omitempty"`
 	IsNoSUID           bool     `json:"is_no_SUID,omitempty"`
 }
 
 type TreeQuotaCreate struct {
-	FileSysytemID       string `json:"file_system_id"`
+	FileSystemID        string `json:"file_system_id"`
 	Path                string `json:"path"`
 	Description         string `json:"description,omitempty"`
 	Hard_Limit          int    `json:"hard_limit,omitempty"`
 	Soft_Limit          int    `json:"soft_limit,omitempty"`
 	IsUserQuotaEnforced bool   `json:"is_user_quotas_enforced,omitempty"`
 	GracePeroid         int    `json:"grace_period,omitempty"`
+}
+
+type TreeQuota struct {
+	ID                   string
+	FileSysytemID        string `json:"file_system_id"`
+	Path                 string `json:"path"`
+	Description          string `json:"description,omitempty"`
+	Hard_Limit           int    `json:"hard_limit,omitempty"`
+	Soft_Limit           int    `json:"soft_limit,omitempty"`
+	IsUserQuotaEnforced  bool   `json:"is_user_quotas_enforced,omitempty"`
+	GracePeroid          int    `json:"grace_period,omitempty"`
+	State                string `json:"state,omitempty"`
+	RemainingGracePeroid int    `json:"remaining_grace_period,omitempty"`
+	SizeUsed             int    `json:"size_used,omitempty"`
+}
+type TreeQuotaModify struct {
+	Description          string `json:"description,omitempty"`
+	HardLimit            int    `json:"hard_limit,omitempty"`
+	SoftLimit            int    `json:"soft_limit,omitempty"`
+	IsUserQuotasEnforced bool   `json:"is_user_quotas_enforced,omitempty"`
+	GracePeroid          int    `json:"grace_period,omitempty"`
 }
 
 // NFSExportModify defines struct for Modify NFS Export
