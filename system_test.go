@@ -115,7 +115,7 @@ func TestAddStandByMDM(t *testing.T) {
 
 func TestRemoveStandByMDM(t *testing.T) {
 	type testCase struct {
-		mdmId    string
+		mdmID    string
 		expected error
 	}
 
@@ -147,7 +147,7 @@ func TestRemoveStandByMDM(t *testing.T) {
 				client: client,
 			}
 
-			err = s.RemoveStandByMdm(tc.mdmId)
+			err = s.RemoveStandByMdm(tc.mdmID)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Adding standby mdm did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
@@ -165,7 +165,7 @@ func TestRemoveStandByMDM(t *testing.T) {
 
 func TestChangeMDMOwnership(t *testing.T) {
 	type testCase struct {
-		mdmId    string
+		mdmID    string
 		expected error
 	}
 
@@ -197,7 +197,7 @@ func TestChangeMDMOwnership(t *testing.T) {
 				client: client,
 			}
 
-			err = s.ChangeMdmOwnerShip(tc.mdmId)
+			err = s.ChangeMdmOwnerShip(tc.mdmID)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Changing MDM ownership did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
