@@ -1329,8 +1329,8 @@ type TreeQuota struct {
 	FileSysytemID        string `json:"file_system_id"`
 	Path                 string `json:"path"`
 	Description          string `json:"description,omitempty"`
-	Hard_Limit           int    `json:"hard_limit,omitempty"`
-	Soft_Limit           int    `json:"soft_limit,omitempty"`
+	HardLimit            int    `json:"hard_limit,omitempty"`
+	SoftLimit            int    `json:"soft_limit,omitempty"`
 	IsUserQuotaEnforced  bool   `json:"is_user_quotas_enforced,omitempty"`
 	GracePeroid          int    `json:"grace_period,omitempty"`
 	State                string `json:"state,omitempty"`
