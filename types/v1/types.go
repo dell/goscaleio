@@ -1292,6 +1292,7 @@ type NFSExportCreateResponse struct {
 	ID string `json:"id"`
 }
 
+// TreeQuotaCreateResponse defines struct for response
 type TreeQuotaCreateResponse struct {
 	ID string `json:"id"`
 }
@@ -1311,16 +1312,18 @@ type NFSExportCreate struct {
 	IsNoSUID           bool     `json:"is_no_SUID,omitempty"`
 }
 
+// TreeQuotaCreate defines a struct for Create Tree Quota
 type TreeQuotaCreate struct {
 	FileSystemID        string `json:"file_system_id"`
 	Path                string `json:"path"`
 	Description         string `json:"description,omitempty"`
-	Hard_Limit          int    `json:"hard_limit,omitempty"`
-	Soft_Limit          int    `json:"soft_limit,omitempty"`
+	HardLimit           int    `json:"hard_limit,omitempty"`
+	SoftLimit           int    `json:"soft_limit,omitempty"`
 	IsUserQuotaEnforced bool   `json:"is_user_quotas_enforced,omitempty"`
 	GracePeroid         int    `json:"grace_period,omitempty"`
 }
 
+// TreeQuota defines a struct for tree quota
 type TreeQuota struct {
 	ID                   string
 	FileSysytemID        string `json:"file_system_id"`
@@ -1334,6 +1337,8 @@ type TreeQuota struct {
 	RemainingGracePeroid int    `json:"remaining_grace_period,omitempty"`
 	SizeUsed             int    `json:"size_used,omitempty"`
 }
+
+// TreeQuotaModify defines struct for Modify Tree Quota
 type TreeQuotaModify struct {
 	Description          string `json:"description,omitempty"`
 	HardLimit            int    `json:"hard_limit,omitempty"`
