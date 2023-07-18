@@ -1325,7 +1325,7 @@ type TreeQuotaCreate struct {
 
 // TreeQuota defines a struct for tree quota
 type TreeQuota struct {
-	ID                   string
+	ID                   string `json:"id,omitempty"`
 	FileSysytemID        string `json:"file_system_id"`
 	Path                 string `json:"path"`
 	Description          string `json:"description,omitempty"`

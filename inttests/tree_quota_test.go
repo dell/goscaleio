@@ -53,7 +53,6 @@ func TestCreateModifyDeleteTreeQuota(t *testing.T) {
 	var filesystemname string
 	if os.Getenv("GOSCALEIO_FILESYSTEM") != "" {
 		filesystemname = os.Getenv("GOSCALEIO_FILESYSTEM")
-		fmt.Println("name...", filesystemname)
 	}
 	filesystem, err := system.GetFileSystemByIDName("", filesystemname)
 	treequota := &types.TreeQuotaCreate{
@@ -64,12 +63,9 @@ func TestCreateModifyDeleteTreeQuota(t *testing.T) {
 	err = system.ModifyFileSystem(&types.FSModify{
 		IsQuotaEnabled: true}, filesystem.ID)
 
-	fmt.Println("iddd..", filesystem.ID)
-
 	//create tree quota
 	quota, err := system.CreateTreeQuota(treequota)
 	quotaid := quota.ID
-	fmt.Println("quotaid", quotaid)
 	assert.Nil(t, err)
 	assert.NotNil(t, quotaid)
 
@@ -85,7 +81,6 @@ func TestCreateModifyDeleteTreeQuota(t *testing.T) {
 
 	err = system.ModifyTreeQuota(quotaModify, quotaid)
 	assert.Nil(t, err)
-	fmt.Println("errmod", err)
 
 	// negative case
 	err = system.ModifyTreeQuota(quotaModify, "")
