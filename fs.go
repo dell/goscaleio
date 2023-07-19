@@ -141,3 +141,17 @@ func (s *System) ModifyFileSystem(modifyFsParam *types.FSModify, id string) erro
 	return nil
 
 }
+
+func (s *System) CreateFileSystemClone(cloneFsParam *types.FSclone, fsid string) (*types.FileSystemResp, error) {
+	defer TimeSpent("CreateFileSystemClone", time.Now())
+
+	path := fmt.Sprintf("/rest/v1/file_system/%v/clone", fsid)
+	fsResponse := types.FileSystemResp{}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, cloneFsParam, &fsResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &fsResponse, nil
+}

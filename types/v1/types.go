@@ -1316,6 +1316,12 @@ type FSModify struct {
 	Description string `json:"description,omitempty"`
 }
 
+// FSModify defines struct for modify FS
+type FSclone struct {
+	Name        int    `json:"name"`
+	Description string `json:"description,omitempty"`
+}
+
 // FileSystemResp defines struct for FileSystemResp
 type FileSystemResp struct {
 	ID string `json:"id"`
