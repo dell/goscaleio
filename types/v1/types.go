@@ -101,6 +101,70 @@ type System struct {
 	Name                                  string   `json:"name"`
 	ID                                    string   `json:"id"`
 	Links                                 []*Link  `json:"links"`
+	PerformanceProfile                    string   `json:"perfProfile"`
+}
+
+// MdmCluster defines struct for MDM cluster
+type MdmCluster struct {
+	ID              string `json:"id"`
+	ClusterState    string `json:"clusterState"`
+	ClusterMode     string `json:"clusterMode"`
+	GoodNodesNum    int    `json:"goodNodesNum"`
+	GoodReplicasNum int    `json:"goodReplicasNum"`
+	PrimaryMDM      Mdm    `json:"master"`
+	SecondaryMDM    []Mdm  `json:"slaves"`
+	TiebreakerMdm   []Mdm  `json:"tieBreakers"`
+	StandByMdm      []Mdm  `json:"standbyMDMs"`
+}
+
+// Mdm defines struct for a MDM
+type Mdm struct {
+	ID                string   `json:"id"`
+	Name              string   `json:"name"`
+	Port              int      `json:"port"`
+	IPs               []string `json:"ips"`
+	ManagementIPs     []string `json:"managementIPs"`
+	Role              string   `json:"role"`
+	Status            string   `json:"status"`
+	VirtualInterfaces []string `json:"virtualInterfaces"`
+	VersionInfo       string   `json:"versionInfo"`
+	OpenSslVersion    string   `json:"opensslVersion"`
+}
+
+// StandByMdm defines struct for StandBy MDM
+type StandByMdm struct {
+	Name               string   `json:"name,omitempty"`
+	Port               int      `json:"port,omitempty"`
+	IPs                []string `json:"ips"`
+	ManagementIPs      []string `json:"managementIps,omitempty"`
+	Role               string   `json:"role"`
+	VirtualInterfaces  []string `json:"virtIpIntfs,omitempty"`
+	ForceClean         string   `json:"forceClean,omitempty"`
+	AllowAsymmetricIps string   `json:"allowAsymmetricIps,omitempty"`
+}
+
+// RemoveStandByMdmParam defines struct for removing standby MDM
+type RemoveStandByMdmParam struct {
+	ID string `json:"id"`
+}
+
+// ChangeMdmOwnerShip defines struct for changing MDM ownership
+type ChangeMdmOwnerShip struct {
+	ID string `json:"id"`
+}
+
+// ChangeMdmPerfProfile defines struct for modifying performance profile
+type ChangeMdmPerfProfile struct {
+	PerfProfile string `json:"perfProfile"`
+}
+
+// SwitchClusterMode defines struct for switching cluster mode
+type SwitchClusterMode struct {
+	Mode                string   `json:"mode"`
+	AddSecondaryMdms    []string `json:"addSlaveMdmIdList,omitempty"`
+	AddTBMdms           []string `json:"addTBIdList,omitempty"`
+	RemoveSecondaryMdms []string `json:"removeSlaveMdmIdList,omitempty"`
+	RemoveTBMdms        []string `json:"removeTBIdList,omitempty"`
 }
 
 // Link defines struct of Link

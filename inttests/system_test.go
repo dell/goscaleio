@@ -17,6 +17,7 @@ import (
 	"testing"
 
 	"github.com/dell/goscaleio"
+	types "github.com/dell/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -83,4 +84,116 @@ func TestGetSystemStatistics(t *testing.T) {
 	stats, err := system.GetStatistics()
 	assert.Nil(t, err)
 	assert.NotNil(t, stats)
+}
+
+// TestGetMDMClusterDetails will return MDM cluster details
+func TestGetMDMClusterDetails(t *testing.T) {
+	// first, get all of the systems
+	allSystems, err := C.GetSystems()
+	assert.Nil(t, err)
+
+	// then try to get the first one returned, explicitly
+	system, err := C.FindSystem(allSystems[0].ID, "", "")
+	assert.Nil(t, err)
+	assert.Equal(t, allSystems[0].ID, system.System.ID)
+
+	mdmDetails, err := system.GetMDMClusterDetails()
+	assert.Nil(t, err)
+	assert.NotNil(t, mdmDetails)
+}
+
+// TestMDMClusterPerformanceProfile modifies MDM cluster performace profile
+func TestMDMClusterPerformanceProfileInvalid(t *testing.T) {
+	// first, get all of the systems
+	allSystems, err := C.GetSystems()
+	assert.Nil(t, err)
+
+	// then try to get the first one returned, explicitly
+	system, err := C.FindSystem(allSystems[0].ID, "", "")
+	assert.Nil(t, err)
+	assert.Equal(t, allSystems[0].ID, system.System.ID)
+
+	err = system.ModifyPerformanceProfileMdmCluster("High")
+	assert.NotNil(t, err)
+}
+
+// TestAddStandByMDMInvalid attempts to add invalid standby MDM, results in failure
+func TestAddStandByMDMInvalid(t *testing.T) {
+	allSystems, err := C.GetSystems()
+	assert.Nil(t, err)
+
+	// then try to get the first one returned, explicitly
+	system, err := C.FindSystem(allSystems[0].ID, "", "")
+	assert.Nil(t, err)
+	assert.Equal(t, allSystems[0].ID, system.System.ID)
+
+	payload := types.StandByMdm{
+		IPs:  []string{"0.1.1.1", "0.2.2.2"},
+		Role: "Manager",
+	}
+
+	_, err1 := system.AddStandByMdm(&payload)
+	assert.NotNil(t, err1)
+}
+
+// TestRemoveStandByMDMInvalid attempts to remove invalid standby MDM, results in failure
+func TestRemoveStandByMDMInvalid(t *testing.T) {
+	allSystems, err := C.GetSystems()
+	assert.Nil(t, err)
+
+	// then try to get the first one returned, explicitly
+	system, err := C.FindSystem(allSystems[0].ID, "", "")
+	assert.Nil(t, err)
+	assert.Equal(t, allSystems[0].ID, system.System.ID)
+
+	mdmDetails, err1 := system.GetMDMClusterDetails()
+	assert.Nil(t, err1)
+	assert.NotNil(t, mdmDetails)
+
+	if len(mdmDetails.StandByMdm) > 0 {
+		err = system.RemoveStandByMdm(mdmDetails.StandByMdm[0].ID)
+		assert.Nil(t, err)
+	}
+}
+
+// TestSwitchClusterModeInvalid attempts to switch cluster mode with invalid mode
+func TestSwitchClusterModeInvalid(t *testing.T) {
+	allSystems, err := C.GetSystems()
+	assert.Nil(t, err)
+
+	// then try to get the first one returned, explicitly
+	system, err := C.FindSystem(allSystems[0].ID, "", "")
+	assert.Nil(t, err)
+	assert.Equal(t, allSystems[0].ID, system.System.ID)
+
+	mdmDetails, err1 := system.GetMDMClusterDetails()
+	assert.Nil(t, err1)
+	assert.NotNil(t, mdmDetails)
+
+	payload := types.SwitchClusterMode{
+		Mode:             "FourNodes",
+		AddSecondaryMdms: []string{"invalid"},
+	}
+
+	err = system.SwitchClusterMode(&payload)
+	assert.NotNil(t, err)
+}
+
+// TestChangeMDMOwnership modifies primary MDM
+func TestChangeMDMOwnership(t *testing.T) {
+	// first, get all of the systems
+	allSystems, err := C.GetSystems()
+	assert.Nil(t, err)
+
+	// then try to get the first one returned, explicitly
+	system, err := C.FindSystem(allSystems[0].ID, "", "")
+	assert.Nil(t, err)
+	assert.Equal(t, allSystems[0].ID, system.System.ID)
+
+	mdmDetails, err1 := system.GetMDMClusterDetails()
+	assert.Nil(t, err1)
+	assert.NotNil(t, mdmDetails)
+
+	err = system.ChangeMdmOwnerShip(mdmDetails.SecondaryMDM[0].ID)
+	assert.Nil(t, err)
 }
