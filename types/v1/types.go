@@ -303,7 +303,6 @@ type UserParam struct {
 	Password string `json:"password"`
 }
 
-
 // UserResp defines struct for the response which you get after creating the user.
 type UserResp struct {
 	ID string `json:"id"`
