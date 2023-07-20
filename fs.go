@@ -142,7 +142,7 @@ func (s *System) ModifyFileSystem(modifyFsParam *types.FSModify, id string) erro
 
 }
 
-func (s *System) CreateFileSystemClone(cloneFsParam *types.FSclone, fsid string) (*types.FileSystemResp, error) {
+func (s *System) CreateFileSystemClone(cloneFsParam *types.FSClone, fsid string) (*types.FileSystemResp, error) {
 	defer TimeSpent("CreateFileSystemClone", time.Now())
 
 	path := fmt.Sprintf("/rest/v1/file_system/%v/clone", fsid)

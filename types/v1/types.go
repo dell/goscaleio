@@ -1316,8 +1316,8 @@ type FSModify struct {
 	Description string `json:"description,omitempty"`
 }
 
-// FSModify defines struct for modify FS
-type FSclone struct {
+// FSClone defines struct for modify FS
+type FSClone struct {
 	Name        int    `json:"name"`
 	Description string `json:"description,omitempty"`
 }
