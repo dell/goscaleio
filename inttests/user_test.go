@@ -14,7 +14,8 @@ package inttests
 
 import (
 	"testing"
-
+	"os"
+	siotypes "github.com/dell/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,4 +27,29 @@ func TestGetAllUsers(t *testing.T) {
 	allUsers, err := system.GetUser()
 	assert.Nil(t, err)
 	assert.NotZero(t, len(allUsers))
+}
+
+func TestCreateAndDeleteUser(t *testing.T) {
+	system := getSystem()
+	assert.NotNil(t, system)
+	userParams := siotypes.UserParam{
+		Name:     "testUser",
+		Password: os.Getenv("USER_PASSWORD"),
+		UserRole: "Security",
+	}
+	resp, err1 := system.CreateUser(&userParams)
+	assert.Nil(t, err1)
+	assert.NotEmpty(t, resp)
+	user, err2 := system.GetUserByID(resp.ID)
+	assert.Nil(t, err2)
+	assert.Equal(t, "testUser", user.Name)
+	assert.Equal(t, "Security", user.UserRole)
+	userRoleParams := siotypes.UserRoleParam{
+		UserRole: "Configure",
+	}
+	err3 := system.SetUserRole(&userRoleParams, resp.ID)
+	assert.Nil(t, err3)
+	err4 := system.RemoveUser(resp.ID)
+	assert.Nil(t, err4)
+
 }
