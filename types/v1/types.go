@@ -296,16 +296,20 @@ type User struct {
 	Links                  []*Link `json:"links"`
 }
 
+// UserParam defines struct for creating a new user on the pflex array.
 type UserParam struct {
 	Name     string `json:"name"`
 	UserRole string `json:"userRole"`
 	Password string `json:"password"`
 }
 
+
+// UserResp defines struct for the response which you get after creating the user.
 type UserResp struct {
 	ID string `json:"id"`
 }
 
+// UserRoleParam defines struct for changing the user role.
 type UserRoleParam struct {
 	UserRole string `json:"userRole"`
 }
