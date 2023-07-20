@@ -13,10 +13,10 @@
 package inttests
 
 import (
-	"testing"
-	"os"
 	siotypes "github.com/dell/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
+	"os"
+	"testing"
 )
 
 // TestGetAllUsers will return all user instances
@@ -30,8 +30,11 @@ func TestGetAllUsers(t *testing.T) {
 }
 
 func TestCreateAndDeleteUser(t *testing.T) {
+	// Get the System
 	system := getSystem()
 	assert.NotNil(t, system)
+
+	// Create a new User
 	userParams := siotypes.UserParam{
 		Name:     "testUser",
 		Password: os.Getenv("USER_PASSWORD"),
@@ -40,15 +43,21 @@ func TestCreateAndDeleteUser(t *testing.T) {
 	resp, err1 := system.CreateUser(&userParams)
 	assert.Nil(t, err1)
 	assert.NotEmpty(t, resp)
+
+	// Fetch the User which you just now created
 	user, err2 := system.GetUserByID(resp.ID)
 	assert.Nil(t, err2)
 	assert.Equal(t, "testUser", user.Name)
 	assert.Equal(t, "Security", user.UserRole)
+
+	// Change the user role
 	userRoleParams := siotypes.UserRoleParam{
 		UserRole: "Configure",
 	}
 	err3 := system.SetUserRole(&userRoleParams, resp.ID)
 	assert.Nil(t, err3)
+
+	// Remove the user
 	err4 := system.RemoveUser(resp.ID)
 	assert.Nil(t, err4)
 

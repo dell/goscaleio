@@ -38,9 +38,9 @@ func (s *System) GetUser() ([]types.User, error) {
 }
 
 // GetUserByID returns a specific user based on it's user id
-func (s *System) GetUserByID(userId string) (*types.User, error) {
+func (s *System) GetUserByID(userID string) (*types.User, error) {
 	path := fmt.Sprintf("/api/instances/User::%v",
-		userId)
+		userID)
 
 	user := &types.User{}
 	err := s.client.getJSONWithRetry(
@@ -63,8 +63,8 @@ func (s *System) CreateUser(userParam *types.UserParam) (*types.UserResp, error)
 }
 
 // RemoveUser removes a particular user.
-func (s *System) RemoveUser(userId string) error {
-	path := fmt.Sprintf("/api/instances/User::%v/action/removeUser", userId)
+func (s *System) RemoveUser(userID string) error {
+	path := fmt.Sprintf("/api/instances/User::%v/action/removeUser", userID)
 	empty := &types.EmptyPayload{}
 	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, empty, nil)
@@ -72,8 +72,8 @@ func (s *System) RemoveUser(userId string) error {
 }
 
 // SetUserRole sets a new role for a particular user.
-func (s *System) SetUserRole(userRole *types.UserRoleParam, userId string) error {
-	path := fmt.Sprintf("/api/instances/User::%v/action/setUserRole", userId)
+func (s *System) SetUserRole(userRole *types.UserRoleParam, userID string) error {
+	path := fmt.Sprintf("/api/instances/User::%v/action/setUserRole", userID)
 	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, userRole, nil)
 	return err
