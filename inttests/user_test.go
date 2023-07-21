@@ -45,11 +45,15 @@ func TestCreateAndDeleteUser(t *testing.T) {
 	assert.NotEmpty(t, resp)
 
 	// Fetch the User which you just now created
-	user, err2 := system.GetUserByID(resp.ID)
+	user, err2 := system.GetUserByIDName(resp.ID, "")
 	assert.Nil(t, err2)
 	assert.Equal(t, "testUser", user.Name)
 	assert.Equal(t, "Security", user.UserRole)
 
+	user2, err2 := system.GetUserByIDName("", "testUser")
+	assert.Nil(t, err2)
+	assert.Equal(t, "testUser", user2.Name)
+	assert.Equal(t, "Security", user2.UserRole)
 	// Change the user role
 	userRoleParams := siotypes.UserRoleParam{
 		UserRole: "Configure",

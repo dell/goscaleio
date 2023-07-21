@@ -13,11 +13,11 @@
 package goscaleio
 
 import (
+	"errors"
 	"fmt"
+	types "github.com/dell/goscaleio/types/v1"
 	"net/http"
 	"time"
-
-	types "github.com/dell/goscaleio/types/v1"
 )
 
 // GetUser returns user
@@ -38,17 +38,37 @@ func (s *System) GetUser() ([]types.User, error) {
 }
 
 // GetUserByID returns a specific user based on it's user id
-func (s *System) GetUserByID(userID string) (*types.User, error) {
-	path := fmt.Sprintf("/api/instances/User::%v",
-		userID)
+func (s *System) GetUserByIDName(userID string, username string) (*types.User, error) {
+	if userID == "" && username == "" {
 
-	user := &types.User{}
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, &user)
-	if err != nil {
-		return nil, err
+		return nil, errors.New("user name or ID is mandatory, please enter a valid value")
+
+	} else if userID != "" {
+		path := fmt.Sprintf("/api/instances/User::%v",
+			userID)
+		user := &types.User{}
+		err := s.client.getJSONWithRetry(
+			http.MethodGet, path, nil, &user)
+		if err != nil {
+			return nil, err
+		}
+
+		return user, nil
+
+	} else {
+		allUsers, err := s.GetUser()
+		if err != nil {
+			return nil, err
+		}
+
+		for _, u := range allUsers {
+			if u.Name == username {
+				return &u, nil
+			}
+		}
+
+		return nil, errors.New("couldn't find user by name")
 	}
-	return user, nil
 }
 
 // CreateUser creates a new user with some role.
