@@ -37,7 +37,7 @@ func (s *System) GetUser() ([]types.User, error) {
 	return user, nil
 }
 
-// GetUserByID returns a specific user based on it's user id
+// GetUserByIDName returns a specific user based on it's user id
 func (s *System) GetUserByIDName(userID string, username string) (*types.User, error) {
 	if userID == "" && username == "" {
 

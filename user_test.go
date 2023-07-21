@@ -122,7 +122,7 @@ func TestRemoveUser(t *testing.T) {
 		},
 		{
 			id:       "eeb2dec800000005",
-			expected: errors.New("User not found. Please check that you have the correct user name."),
+			expected: errors.New("User not found. Please check that you have the correct user name"),
 		},
 	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -173,7 +173,7 @@ func TestSetRole(t *testing.T) {
 				UserRole: "any",
 			},
 			id:       "eeb2dec800000001",
-			expected: errors.New("userRole should get one of the following values: Monitor, Configure, Administrator, Security, FrontendConfig, BackendConfig, but its value is any."),
+			expected: errors.New("userRole should get one of the following values: Monitor, Configure, Administrator, Security, FrontendConfig, BackendConfig, but its value is any"),
 		},
 	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
