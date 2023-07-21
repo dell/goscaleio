@@ -136,6 +136,26 @@ func (s *System) DeleteFileSystem(name string) error {
 	return nil
 }
 
+// DeleteFileSystemByID deletes a file system by id
+func (s *System) DeleteFileSystemByID(id string) error {
+	defer TimeSpent("DeleteFileSystem", time.Now())
+
+	fs, err := s.GetFileSystemByIDName(id, "")
+	if err != nil {
+		return err
+	}
+
+	path := fmt.Sprintf("/rest/v1/file-systems/%v", fs.ID)
+
+	err = s.client.getJSONWithRetry(
+		http.MethodDelete, path, nil, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // ModifyFileSystem modifies a file system
 func (s *System) ModifyFileSystem(modifyFsParam *types.FSModify, id string) error {
 	defer TimeSpent("ModifyFileSystem", time.Now())
