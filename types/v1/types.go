@@ -1320,7 +1320,7 @@ type TreeQuotaCreate struct {
 	HardLimit           int    `json:"hard_limit,omitempty"`
 	SoftLimit           int    `json:"soft_limit,omitempty"`
 	IsUserQuotaEnforced bool   `json:"is_user_quotas_enforced,omitempty"`
-	GracePeroid         int    `json:"grace_period,omitempty"`
+	GracePeriod         int    `json:"grace_period,omitempty"`
 }
 
 // TreeQuota defines a struct for tree quota
@@ -1332,9 +1332,9 @@ type TreeQuota struct {
 	HardLimit            int    `json:"hard_limit,omitempty"`
 	SoftLimit            int    `json:"soft_limit,omitempty"`
 	IsUserQuotaEnforced  bool   `json:"is_user_quotas_enforced,omitempty"`
-	GracePeroid          int    `json:"grace_period,omitempty"`
+	GracePeriod          int    `json:"grace_period,omitempty"`
 	State                string `json:"state,omitempty"`
-	RemainingGracePeroid int    `json:"remaining_grace_period,omitempty"`
+	RemainingGracePeriod int    `json:"remaining_grace_period,omitempty"`
 	SizeUsed             int    `json:"size_used,omitempty"`
 }
 
@@ -1344,7 +1344,7 @@ type TreeQuotaModify struct {
 	HardLimit            int    `json:"hard_limit,omitempty"`
 	SoftLimit            int    `json:"soft_limit,omitempty"`
 	IsUserQuotasEnforced bool   `json:"is_user_quotas_enforced,omitempty"`
-	GracePeroid          int    `json:"grace_period,omitempty"`
+	GracePeriod          int    `json:"grace_period,omitempty"`
 }
 
 // NFSExportModify defines struct for Modify NFS Export
