@@ -34,7 +34,7 @@ func TestDeployValidateMDMDetails(t *testing.T) {
 		"mdmUser":     "admin",
 		"mdmPassword": "Password123",
 	}
-	mapData["mdmIps"] = []string{"10.247.101.68"}
+	mapData["mdmIps"] = []string{"10.247.103.161"}
 
 	secureData := map[string]interface{}{
 		"allowNonSecureCommunicationWithMdm": true,
@@ -46,6 +46,31 @@ func TestDeployValidateMDMDetails(t *testing.T) {
 	jsonres, _ := json.Marshal(mapData)
 
 	res, err := GC.ValidateMDMDetails(jsonres)
+
+	assert.NotNil(t, res)
+
+	assert.EqualValues(t, res.StatusCode, 200)
+
+	assert.Nil(t, err)
+}
+
+func TestDeployGetClusterDetails(t *testing.T) {
+	mapData := map[string]interface{}{
+		"mdmUser":     "admin",
+		"mdmPassword": "Password123",
+	}
+	mapData["mdmIps"] = []string{"10.247.103.161"}
+
+	secureData := map[string]interface{}{
+		"allowNonSecureCommunicationWithMdm": true,
+		"allowNonSecureCommunicationWithLia": true,
+		"disableNonMgmtComponentsAuth":       false,
+	}
+	mapData["securityConfiguration"] = secureData
+
+	jsonres, _ := json.Marshal(mapData)
+
+	res, err := GC.GetClusterDetails(jsonres)
 
 	assert.NotNil(t, res)
 

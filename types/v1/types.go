@@ -1338,10 +1338,11 @@ type PackageDetails struct {
 
 // GatewayResponse defines struct for Gateway API Response
 type GatewayResponse struct {
-	Message    string `json:"message,omitempty"`
-	Data       string `json:"data,omitempty"`
-	StatusCode int    `json:"httpStatusCode,omitempty"`
-	ErrorCode  int    `json:"errorCode,omitempty"`
+	Message        string             `json:"message,omitempty"`
+	Data           string             `json:"data,omitempty"`
+	ClusterDetails MDMTopologyDetails `json:"clusterDetails,omitempty"`
+	StatusCode     int                `json:"httpStatusCode,omitempty"`
+	ErrorCode      int                `json:"errorCode,omitempty"`
 }
 
 // MDMTopologyParam defines struct for Validate MDM Topology
@@ -1361,10 +1362,125 @@ type SecurityConfigurationDetails struct {
 
 // MDMTopologyDetails defines struct for Validated MDM Topology Details
 type MDMTopologyDetails struct {
-	MdmIPs            []string `json:"mdmIPs,omitempty"`
-	SdsAndMdmIps      []string `json:"sdsAndMdmIps,omitempty"`
-	SdcIps            []string `json:"sdcIps,omitempty"`
-	SystemVersionName string   `json:"systemVersionName,omitempty"`
+	MdmIPs            []string            `json:"mdmIPs,omitempty"`
+	SdsAndMdmIps      []string            `json:"sdsAndMdmIps,omitempty"`
+	SdcIps            []string            `json:"sdcIps,omitempty"`
+	SystemVersionName string              `json:"systemVersionName,omitempty"`
+	SdsList           []SdsList           `json:"sdsList,omitempty"`
+	SdcList           []SdcList           `json:"sdcList,omitempty"`
+	ProtectionDomains []ProtectionDomains `json:"protectionDomains,omitempty"`
+	SdrList           []SdrList           `json:"sdrList,omitempty"`
+	VasaProviderList  []any               `json:"vasaProviderList,omitempty"`
+	MasterMdm         MasterMdm           `json:"masterMdm,omitempty"`
+	SlaveMdmSet       []SlaveMdmSet       `json:"slaveMdmSet,omitempty"`
+	TbSet             []TbSet             `json:"tbSet,omitempty"`
+	StandbyMdmSet     []any               `json:"standbyMdmSet,omitempty"`
+	StandbyTbSet      []any               `json:"standbyTbSet,omitempty"`
+}
+
+type MasterMdm struct {
+	Node            Node     `json:"node,omitempty"`
+	MdmIPs          []string `json:"mdmIPs,omitempty"`
+	Name            string   `json:"name,omitempty"`
+	ID              string   `json:"id,omitempty"`
+	IPForActor      any      `json:"ipForActor,omitempty"`
+	ManagementIPs   []string `json:"managementIPs,omitempty"`
+	VirtIPIntfsList []string `json:"virtIpIntfsList,omitempty"`
+}
+type SlaveMdmSet struct {
+	Node            Node     `json:"node,omitempty"`
+	MdmIPs          []string `json:"mdmIPs,omitempty"`
+	Name            string   `json:"name,omitempty"`
+	ID              string   `json:"id,omitempty"`
+	IPForActor      any      `json:"ipForActor,omitempty"`
+	ManagementIPs   []string `json:"managementIPs,omitempty"`
+	VirtIPIntfsList []string `json:"virtIpIntfsList,omitempty"`
+}
+type TbSet struct {
+	Node   Node     `json:"node,omitempty"`
+	MdmIPs []string `json:"mdmIPs,omitempty"`
+	Name   string   `json:"name,omitempty"`
+	ID     string   `json:"id,omitempty"`
+	TbIPs  []string `json:"tbIPs,omitempty"`
+}
+
+type Node struct {
+	Ostype   string   `json:"ostype,omitempty"`
+	NodeName string   `json:"nodeName,omitempty"`
+	NodeIPs  []string `json:"nodeIPs,omitempty"`
+}
+type Devices struct {
+	DevicePath      string `json:"devicePath,omitempty"`
+	StoragePool     string `json:"storagePool,omitempty"`
+	DeviceName      string `json:"deviceName,omitempty"`
+	MaxCapacityInKb int    `json:"maxCapacityInKb,omitempty"`
+}
+type SdsList struct {
+	Node                 Node      `json:"node,omitempty"`
+	SdsName              string    `json:"sdsName,omitempty"`
+	ProtectionDomain     string    `json:"protectionDomain,omitempty"`
+	ProtectionDomainID   string    `json:"protectionDomainId,omitempty"`
+	FaultSet             string    `json:"faultSet,omitempty"`
+	FaultSetID           string    `json:"faultSetId,omitempty"`
+	AllIPs               []string  `json:"allIPs,omitempty"`
+	SdsOnlyIPs           []any     `json:"sdsOnlyIPs,omitempty"`
+	SdcOnlyIPs           []any     `json:"sdcOnlyIPs,omitempty"`
+	Devices              []Devices `json:"devices,omitempty"`
+	RfCached             bool      `json:"rfCached,omitempty"`
+	RfCachedPools        []any     `json:"rfCachedPools,omitempty"`
+	RfCachedDevices      []any     `json:"rfCachedDevices,omitempty"`
+	RfCacheType          any       `json:"rfCacheType,omitempty"`
+	FlashAccDevices      []any     `json:"flashAccDevices,omitempty"`
+	NvdimmAccDevices     []any     `json:"nvdimmAccDevices,omitempty"`
+	UseRmCache           bool      `json:"useRmCache,omitempty"`
+	Optimized            bool      `json:"optimized,omitempty"`
+	OptimizedNumOfIOBufs int       `json:"optimizedNumOfIOBufs,omitempty"`
+	Port                 int       `json:"port,omitempty"`
+	ID                   string    `json:"id,omitempty"`
+}
+type SdcList struct {
+	Node      Node   `json:"node,omitempty"`
+	GUID      string `json:"guid,omitempty"`
+	SdcName   any    `json:"sdcName,omitempty"`
+	Optimized bool   `json:"optimized,omitempty"`
+	ID        string `json:"id,omitempty"`
+}
+type SdrList struct {
+	Node                      Node     `json:"node,omitempty"`
+	ProtectionDomain          string   `json:"protectionDomain,omitempty"`
+	ProtectionDomainID        string   `json:"protectionDomainId,omitempty"`
+	ApplicationOnlyIPs        []any    `json:"applicationOnlyIPs,omitempty"`
+	StorageOnlyIPs            []any    `json:"storageOnlyIPs,omitempty"`
+	ExternalOnlyIPs           []any    `json:"externalOnlyIPs,omitempty"`
+	ApplicationAndStorageIPs  []any    `json:"applicationAndStorageIPs,omitempty"`
+	ApplicationAndExternalIPs []any    `json:"applicationAndExternalIPs,omitempty"`
+	StorageAndExternalIPs     []any    `json:"storageAndExternalIPs,omitempty"`
+	AllIPs                    []string `json:"allIPs,omitempty"`
+	SupersetIPs               any      `json:"supersetIPs,omitempty"`
+	SdrName                   string   `json:"sdrName,omitempty"`
+	SdrPort                   int      `json:"sdrPort,omitempty"`
+	Optimized                 bool     `json:"optimized,omitempty"`
+	ID                        string   `json:"id,omitempty"`
+}
+type ProtectionDomains struct {
+	Name              string         `json:"name,omitempty"`
+	StoragePools      []StoragePools `json:"storagePools,omitempty"`
+	AccelerationPools []any          `json:"accelerationPools,omitempty"`
+}
+
+type StoragePools struct {
+	Name                     string `json:"name,omitempty"`
+	MediaType                string `json:"mediaType,omitempty"`
+	ExternalAccelerationType string `json:"externalAccelerationType,omitempty"`
+	DataLayout               string `json:"dataLayout,omitempty"`
+	CompressionMethod        string `json:"compressionMethod,omitempty"`
+	SpefAccPoolName          any    `json:"spefAccPoolName,omitempty"`
+	ShouldApplyZeroPadding   bool   `json:"shouldApplyZeroPadding,omitempty"`
+	WriteAtomicitySize       any    `json:"writeAtomicitySize,omitempty"`
+	OverProvisioningFactor   any    `json:"overProvisioningFactor,omitempty"`
+	MaxCompressionRatio      any    `json:"maxCompressionRatio,omitempty"`
+	PerfProfile              any    `json:"perfProfile,omitempty"`
+	RplJournalCapacity       any    `json:"rplJournalCapacity,omitempty"`
 }
 
 // InstallerPhaseDetail defines struct for Current and Next Phase Details

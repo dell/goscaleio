@@ -304,6 +304,51 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 	return &gatewayResponse, nil
 }
 
+// GetClusterDetails used for get cluster details
+func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte) (*types.GatewayResponse, error) {
+	var gatewayResponse types.GatewayResponse
+
+	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/instances", bytes.NewBuffer(mdmTopologyParam))
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	responseString, _ := extractString(httpRes)
+
+	if httpRes.StatusCode != 200 {
+
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error For Validate MDM Details: %s", err)
+		}
+
+		return &gatewayResponse, nil
+	}
+
+	var mdmTopologyDetails types.MDMTopologyDetails
+
+	err := json.Unmarshal([]byte(responseString), &mdmTopologyDetails)
+
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error For Validate MDM Details: %s", err)
+	}
+
+	gatewayResponse.StatusCode = 200
+
+	gatewayResponse.ClusterDetails = mdmTopologyDetails
+
+	return &gatewayResponse, nil
+}
+
 // DeletePackage used for delete packages from gateway server
 func (gc *GatewayClient) DeletePackage(packageName string) (*types.GatewayResponse, error) {
 
