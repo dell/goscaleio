@@ -61,9 +61,9 @@ func (s *System) GetUserByIDName(userID string, username string) (*types.User, e
 			return nil, err
 		}
 
-		for _, u := range allUsers {
-			if u.Name == username {
-				return &u, nil
+		for _, user := range allUsers {
+			if user.Name == username {
+				return &user, nil
 			}
 		}
 
