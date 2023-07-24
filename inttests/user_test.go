@@ -13,9 +13,10 @@
 package inttests
 
 import (
-	"testing"
-
+	siotypes "github.com/dell/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
+	"os"
+	"testing"
 )
 
 // TestGetAllUsers will return all user instances
@@ -26,4 +27,42 @@ func TestGetAllUsers(t *testing.T) {
 	allUsers, err := system.GetUser()
 	assert.Nil(t, err)
 	assert.NotZero(t, len(allUsers))
+}
+
+func TestCreateAndDeleteUser(t *testing.T) {
+	// Get the System
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	// Create a new User
+	userParams := siotypes.UserParam{
+		Name:     "testUser",
+		Password: os.Getenv("USER_PASSWORD"),
+		UserRole: "Security",
+	}
+	resp, err1 := system.CreateUser(&userParams)
+	assert.Nil(t, err1)
+	assert.NotEmpty(t, resp)
+
+	// Fetch the User which you just now created
+	user, err2 := system.GetUserByIDName(resp.ID, "")
+	assert.Nil(t, err2)
+	assert.Equal(t, "testUser", user.Name)
+	assert.Equal(t, "Security", user.UserRole)
+
+	user2, err2 := system.GetUserByIDName("", "testUser")
+	assert.Nil(t, err2)
+	assert.Equal(t, "testUser", user2.Name)
+	assert.Equal(t, "Security", user2.UserRole)
+	// Change the user role
+	userRoleParams := siotypes.UserRoleParam{
+		UserRole: "Configure",
+	}
+	err3 := system.SetUserRole(&userRoleParams, resp.ID)
+	assert.Nil(t, err3)
+
+	// Remove the user
+	err4 := system.RemoveUser(resp.ID)
+	assert.Nil(t, err4)
+
 }
