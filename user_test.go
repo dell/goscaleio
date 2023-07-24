@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
-	//"github.com/stretchr/testify/assert"
 )
 
 func TestCreateUser(t *testing.T) {
