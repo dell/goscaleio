@@ -96,9 +96,9 @@ func (s *System) GetTreeQuotaByFSID(id string) (*types.TreeQuota, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, tq := range treeQuotaList {
-		if tq.FileSysytemID == id {
-			return &tq, nil
+	for _, treeQuota := range treeQuotaList {
+		if treeQuota.FileSysytemID == id {
+			return &treeQuota, nil
 		}
 	}
 	return nil, errors.New("couldn't find tree quota by filesystem ID")
