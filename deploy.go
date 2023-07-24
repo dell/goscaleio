@@ -334,12 +334,16 @@ func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte) (*types.Gate
 		return &gatewayResponse, nil
 	}
 
+	if responseString == "" {
+		return &gatewayResponse, fmt.Errorf("Error while getting Cluster Details")
+	}
+
 	var mdmTopologyDetails types.MDMTopologyDetails
 
 	err := json.Unmarshal([]byte(responseString), &mdmTopologyDetails)
 
 	if err != nil {
-		return &gatewayResponse, fmt.Errorf("Error For Validate MDM Details: %s", err)
+		return &gatewayResponse, fmt.Errorf("Error For Get Cluster Details: %s", err)
 	}
 
 	gatewayResponse.StatusCode = 200

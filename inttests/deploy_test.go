@@ -59,7 +59,7 @@ func TestDeployGetClusterDetails(t *testing.T) {
 		"mdmUser":     "admin",
 		"mdmPassword": "Password123",
 	}
-	mapData["mdmIps"] = []string{"10.247.103.161"}
+	mapData["mdmIps"] = []string{"10.247.103.164"}
 
 	secureData := map[string]interface{}{
 		"allowNonSecureCommunicationWithMdm": true,
