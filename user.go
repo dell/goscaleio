@@ -13,11 +13,11 @@
 package goscaleio
 
 import (
+	"errors"
 	"fmt"
+	types "github.com/dell/goscaleio/types/v1"
 	"net/http"
 	"time"
-
-	types "github.com/dell/goscaleio/types/v1"
 )
 
 // GetUser returns user
@@ -35,4 +35,66 @@ func (s *System) GetUser() ([]types.User, error) {
 	}
 
 	return user, nil
+}
+
+// GetUserByIDName returns a specific user based on it's user id
+func (s *System) GetUserByIDName(userID string, username string) (*types.User, error) {
+	if userID == "" && username == "" {
+
+		return nil, errors.New("user name or ID is mandatory, please enter a valid value")
+
+	} else if userID != "" {
+		path := fmt.Sprintf("/api/instances/User::%v",
+			userID)
+		user := &types.User{}
+		err := s.client.getJSONWithRetry(
+			http.MethodGet, path, nil, &user)
+		if err != nil {
+			return nil, err
+		}
+
+		return user, nil
+
+	} else {
+		allUsers, err := s.GetUser()
+		if err != nil {
+			return nil, err
+		}
+
+		for _, user := range allUsers {
+			if user.Name == username {
+				return &user, nil
+			}
+		}
+
+		return nil, errors.New("couldn't find user by name")
+	}
+}
+
+// CreateUser creates a new user with some role.
+func (s *System) CreateUser(userParam *types.UserParam) (*types.UserResp, error) {
+	userResp := &types.UserResp{}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, "/api/types/User/instances", userParam, &userResp)
+	if err != nil {
+		return nil, err
+	}
+	return userResp, nil
+}
+
+// RemoveUser removes a particular user.
+func (s *System) RemoveUser(userID string) error {
+	path := fmt.Sprintf("/api/instances/User::%v/action/removeUser", userID)
+	empty := &types.EmptyPayload{}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, empty, nil)
+	return err
+}
+
+// SetUserRole sets a new role for a particular user.
+func (s *System) SetUserRole(userRole *types.UserRoleParam, userID string) error {
+	path := fmt.Sprintf("/api/instances/User::%v/action/setUserRole", userID)
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, userRole, nil)
+	return err
 }
