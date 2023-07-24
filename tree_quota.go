@@ -89,8 +89,8 @@ func (s *System) DeleteTreeQuota(id string) error {
 	return nil
 }
 
-//GetTreeQuotaByFSID gets a specific tree quota by filesystem ID
-func (s *System) GetTreeQuotaByFSID (id string) (*types.TreeQuota, error) {
+// GetTreeQuotaByFSID gets a specific tree quota by filesystem ID
+func (s *System) GetTreeQuotaByFSID(id string) (*types.TreeQuota, error) {
 	defer TimeSpent("GetTreeQuotaByFSID", time.Now())
 	treeQuotaList, err := s.GetTreeQuota()
 	if err != nil {
