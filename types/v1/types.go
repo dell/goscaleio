@@ -1307,6 +1307,29 @@ type FileSystem struct {
 	CreatorType                string `json:"creator_type"`
 }
 
+// CreateFileSystemSnapshotParam defines struct for  FileSystem Snapshot Request
+type CreateFileSystemSnapshotParam struct {
+	Name                       string `json:"name,omitempty"`
+	Description                string `json:"description,omitempty"`
+	ExpirationTimestamp        string `json:"expiration_timestamp,omitempty"`
+	AccessType                 string `json:"access_type,omitempty"`
+	AccessPolicy               string `json:"access_policy,omitempty"`
+	LockingPolicy              string `json:"locking_policy,omitempty"`
+	FolderRenamePolicy         string `json:"folder_rename_policy,omitempty"`
+	IsSmbSyncWritesEnabled     bool   `json:"is_smb_sync_writes_enabled,omitempty"`
+	IsSmbNoNotifyEnabled       bool   `json:"is_smb_no_notify_enabled,omitempty"`
+	IsSmbOpLocksEnabled        bool   `json:"is_smb_op_locks_enabled,omitempty"`
+	IsSmbNotifyOnAccessEnabled bool   `json:"is_smb_notify_on_access_enabled,omitempty"`
+	IsSmbNotifyOnWriteEnabled  bool   `json:"is_smb_notify_on_write_enabled,omitempty"`
+	SmbNotifyOnChangeDirDepth  int    `json:"smb_notify_on_change_dir_depth,omitempty"`
+	IsAsyncMTimeEnabled        bool   `json:"is_async_MTime_enabled,omitempty"`
+}
+
+// CreateFileSystemSnapshotResponse defines struct for FileSystem Snapshot Response
+type CreateFileSystemSnapshotResponse struct {
+	ID string `json:"id,omitempty"`
+}
+
 // FsCreate defines struct for creating a PowerFlex FileSystem
 type FsCreate struct {
 	Name                       string `json:"name"`
