@@ -120,3 +120,24 @@ func (s *System) DeleteFileSystem(name string) error {
 
 	return nil
 }
+
+// ModifyFileSystem modifies a file system
+func (s *System) ModifyFileSystem(modifyFsParam *types.FSModify, id string) error {
+	defer TimeSpent("ModifyFileSystem", time.Now())
+
+	fs, err := s.GetFileSystemByIDName(id, "")
+	if err != nil {
+		return err
+	}
+
+	var body *types.FSModify = modifyFsParam
+	path := fmt.Sprintf("/rest/v1/file-systems/%v", fs.ID)
+
+	err = s.client.getJSONWithRetry(http.MethodPatch, path, body, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}

@@ -101,6 +101,70 @@ type System struct {
 	Name                                  string   `json:"name"`
 	ID                                    string   `json:"id"`
 	Links                                 []*Link  `json:"links"`
+	PerformanceProfile                    string   `json:"perfProfile"`
+}
+
+// MdmCluster defines struct for MDM cluster
+type MdmCluster struct {
+	ID              string `json:"id"`
+	ClusterState    string `json:"clusterState"`
+	ClusterMode     string `json:"clusterMode"`
+	GoodNodesNum    int    `json:"goodNodesNum"`
+	GoodReplicasNum int    `json:"goodReplicasNum"`
+	PrimaryMDM      Mdm    `json:"master"`
+	SecondaryMDM    []Mdm  `json:"slaves"`
+	TiebreakerMdm   []Mdm  `json:"tieBreakers"`
+	StandByMdm      []Mdm  `json:"standbyMDMs"`
+}
+
+// Mdm defines struct for a MDM
+type Mdm struct {
+	ID                string   `json:"id"`
+	Name              string   `json:"name"`
+	Port              int      `json:"port"`
+	IPs               []string `json:"ips"`
+	ManagementIPs     []string `json:"managementIPs"`
+	Role              string   `json:"role"`
+	Status            string   `json:"status"`
+	VirtualInterfaces []string `json:"virtualInterfaces"`
+	VersionInfo       string   `json:"versionInfo"`
+	OpenSslVersion    string   `json:"opensslVersion"`
+}
+
+// StandByMdm defines struct for StandBy MDM
+type StandByMdm struct {
+	Name               string   `json:"name,omitempty"`
+	Port               int      `json:"port,omitempty"`
+	IPs                []string `json:"ips"`
+	ManagementIPs      []string `json:"managementIps,omitempty"`
+	Role               string   `json:"role"`
+	VirtualInterfaces  []string `json:"virtIpIntfs,omitempty"`
+	ForceClean         string   `json:"forceClean,omitempty"`
+	AllowAsymmetricIps string   `json:"allowAsymmetricIps,omitempty"`
+}
+
+// RemoveStandByMdmParam defines struct for removing standby MDM
+type RemoveStandByMdmParam struct {
+	ID string `json:"id"`
+}
+
+// ChangeMdmOwnerShip defines struct for changing MDM ownership
+type ChangeMdmOwnerShip struct {
+	ID string `json:"id"`
+}
+
+// ChangeMdmPerfProfile defines struct for modifying performance profile
+type ChangeMdmPerfProfile struct {
+	PerfProfile string `json:"perfProfile"`
+}
+
+// SwitchClusterMode defines struct for switching cluster mode
+type SwitchClusterMode struct {
+	Mode                string   `json:"mode"`
+	AddSecondaryMdms    []string `json:"addSlaveMdmIdList,omitempty"`
+	AddTBMdms           []string `json:"addTBIdList,omitempty"`
+	RemoveSecondaryMdms []string `json:"removeSlaveMdmIdList,omitempty"`
+	RemoveTBMdms        []string `json:"removeTBIdList,omitempty"`
 }
 
 // Link defines struct of Link
@@ -1246,6 +1310,16 @@ type FsCreate struct {
 	IsAsyncMTimeEnabled        bool   `json:"is_async_MTime_enabled,omitempty"`
 }
 
+// FSModify defines struct for modify FS
+type FSModify struct {
+	Size             int    `json:"size_total,omitempty"`
+	Description      string `json:"description,omitempty"`
+	IsQuotaEnabled   bool   `json:"is_quota_enabled,omitempty"`
+	GracePeriod      int    `json:"grace_period,omitempty"`
+	DefaultHardLimit int    `json:"default_hard_limit,omitempty"`
+	DefaultSoftLimit int    `json:"default_soft_limit,omitempty"`
+}
+
 // FileSystemResp defines struct for FileSystemResp
 type FileSystemResp struct {
 	ID string `json:"id"`
@@ -1282,6 +1356,11 @@ type NFSExportCreateResponse struct {
 	ID string `json:"id"`
 }
 
+// TreeQuotaCreateResponse defines struct for response
+type TreeQuotaCreateResponse struct {
+	ID string `json:"id"`
+}
+
 // NFSExportCreate defines struct for Create NFS Export
 type NFSExportCreate struct {
 	Name               string   `json:"name"`
@@ -1293,8 +1372,43 @@ type NFSExportCreate struct {
 	ReadOnlyRootHosts  []string `json:"read_only_root_hosts,omitempty"`
 	ReadWriteRootHosts []string `json:"read_write_root_hosts,omitempty"`
 	AnonymousUID       int      `json:"anonymous_UID,omitempty"`
-	AnonymousGID       int      `json:"anonymous_GID,omiempty"`
+	AnonymousGID       int      `json:"anonymous_GID,omitempty"`
 	IsNoSUID           bool     `json:"is_no_SUID,omitempty"`
+}
+
+// TreeQuotaCreate defines a struct for Create Tree Quota
+type TreeQuotaCreate struct {
+	FileSystemID        string `json:"file_system_id"`
+	Path                string `json:"path"`
+	Description         string `json:"description,omitempty"`
+	HardLimit           int    `json:"hard_limit,omitempty"`
+	SoftLimit           int    `json:"soft_limit,omitempty"`
+	IsUserQuotaEnforced bool   `json:"is_user_quotas_enforced,omitempty"`
+	GracePeriod         int    `json:"grace_period,omitempty"`
+}
+
+// TreeQuota defines a struct for tree quota
+type TreeQuota struct {
+	ID                   string `json:"id,omitempty"`
+	FileSysytemID        string `json:"file_system_id"`
+	Path                 string `json:"path"`
+	Description          string `json:"description,omitempty"`
+	HardLimit            int    `json:"hard_limit,omitempty"`
+	SoftLimit            int    `json:"soft_limit,omitempty"`
+	IsUserQuotaEnforced  bool   `json:"is_user_quotas_enforced,omitempty"`
+	GracePeriod          int    `json:"grace_period,omitempty"`
+	State                string `json:"state,omitempty"`
+	RemainingGracePeriod int    `json:"remaining_grace_period,omitempty"`
+	SizeUsed             int    `json:"size_used,omitempty"`
+}
+
+// TreeQuotaModify defines struct for Modify Tree Quota
+type TreeQuotaModify struct {
+	Description          string `json:"description,omitempty"`
+	HardLimit            int    `json:"hard_limit,omitempty"`
+	SoftLimit            int    `json:"soft_limit,omitempty"`
+	IsUserQuotasEnforced bool   `json:"is_user_quotas_enforced,omitempty"`
+	GracePeriod          int    `json:"grace_period,omitempty"`
 }
 
 // NFSExportModify defines struct for Modify NFS Export
