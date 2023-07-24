@@ -116,6 +116,21 @@ func (s *System) CreateFileSystemSnapshot(createSnapParam *types.CreateFileSyste
 	return &snapResponse, nil
 }
 
+// RestoreFileSystemFromSnapshot restores the filesystem from a given snapshot using filesytem id
+func (s *System) RestoreFileSystemFromSnapshot(restoreSnapParam *types.RestoreFsSnapParam, fsID string) (*types.RestoreFsSnapResponse, error) {
+	defer TimeSpent("CreateFileSystemSnapshot", time.Now())
+
+	path := fmt.Sprintf("/rest/v1/file-systems/%v/restore", fsID)
+	restoreFsResponse := types.RestoreFsSnapResponse{}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, restoreSnapParam, &restoreFsResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &restoreFsResponse, nil
+}
+
 // DeleteFileSystem deletes a file system
 func (s *System) DeleteFileSystem(name string) error {
 	defer TimeSpent("DeleteFileSystem", time.Now())
