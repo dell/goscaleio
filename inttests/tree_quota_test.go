@@ -90,3 +90,49 @@ func TestCreateModifyDeleteTreeQuota(t *testing.T) {
 	err = system.DeleteTreeQuota(quotaid)
 	assert.Nil(t, err)
 }
+
+// TestGetTreeQuotaByFSID will return specific tree quota by filesystem ID
+func TestGetTreeQuotaByFSID(t *testing.T) {
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	fsName := getFileSystemName(t)
+	assert.NotZero(t, len(fsName))
+
+	filesystem, err := system.GetFileSystemByIDName("", fsName)
+	assert.Nil(t, err)
+	assert.Equal(t, fsName, filesystem.Name)
+
+	// enable quota for filesystem
+	err = system.ModifyFileSystem(&types.FSModify{
+		IsQuotaEnabled: true}, filesystem.ID)
+
+	// set tree quota for filesystem
+	treequota := &types.TreeQuotaCreate{
+		FileSystemID: filesystem.ID,
+		Path:         "/fs",
+		HardLimit:    10737418240,
+		SoftLimit:    2147483648,
+		GracePeriod:  604800,
+	}
+
+	quota, err := system.CreateTreeQuota(treequota)
+	quotaid := quota.ID
+	assert.Nil(t, err)
+	assert.NotNil(t, quotaid)
+
+	treeQuota, err := system.GetTreeQuotaByFSID(filesystem.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, filesystem.ID, treeQuota.FileSysytemID)
+
+	if treeQuota != nil {
+		treequota, err := system.GetTreeQuotaByID(treeQuota.ID)
+		assert.Nil(t, err)
+		assert.Equal(t, treequota.ID, quota.ID)
+	}
+
+	//Delete tree Quota
+	err = system.DeleteTreeQuota(treeQuota.ID)
+	assert.Nil(t, err)
+
+}
