@@ -1365,6 +1365,17 @@ type FileSystemResp struct {
 	ID string `json:"id"`
 }
 
+// RestoreFsSnapParam defines struct for Restoring filesytem from snapshot
+type RestoreFsSnapParam struct {
+	SnapshotID string `json:"snapshot_id"`
+	CopyName   string `json:"copy_name,omitempty"`
+}
+
+// RestoreFsSnapResponse defines struct for Restore Filesystem snapshot response
+type RestoreFsSnapResponse struct {
+	ID string `json:"id"`
+}
+
 // NFSExportDefaultAccessEnum defines default access
 type NFSExportDefaultAccessEnum string
 
