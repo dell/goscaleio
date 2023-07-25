@@ -104,6 +104,12 @@ type System struct {
 	PerformanceProfile                    string   `json:"perfProfile"`
 }
 
+// Constants representing cluster mode
+const (
+	FiveNodesClusterMode  = "FiveNodes"
+	ThreeNodesClusterMode = "ThreeNodes"
+)
+
 // MdmCluster defines struct for MDM cluster
 type MdmCluster struct {
 	ID              string `json:"id"`
