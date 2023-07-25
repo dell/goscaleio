@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -121,15 +122,35 @@ func (s *System) RestoreFileSystemFromSnapshot(restoreSnapParam *types.RestoreFs
 	defer TimeSpent("CreateFileSystemSnapshot", time.Now())
 
 	path := fmt.Sprintf("/rest/v1/file-systems/%v/restore", fsID)
+	body, err1 := json.Marshal(restoreSnapParam)
+
+	if err1 != nil {
+		return nil, err1
+	}
+
+	fmt.Printf("%#v\n", string(body))
+
 	restoreFsResponse := types.RestoreFsSnapResponse{}
-	fmt.Printf("%#v\n", restoreSnapParam)
-	err := s.client.getJSONWithRetry(
-		http.MethodPost, path, restoreSnapParam, &restoreFsResponse)
+	var err error
+	if restoreSnapParam.CopyName == "" {
+		err = s.client.getJSONWithRetry(
+			http.MethodPost, path, restoreSnapParam, nil)
+		if err == nil {
+			return nil, nil
+		}
+	} else {
+		err = s.client.getJSONWithRetry(
+			http.MethodPost, path, restoreSnapParam, &restoreFsResponse)
+		if err == nil {
+			return &restoreFsResponse, nil
+		}
+	}
+
 	if err != nil {
 		return nil, err
 	}
 
-	return &restoreFsResponse, nil
+	return nil, nil
 }
 
 // DeleteFileSystem deletes a file system
