@@ -122,6 +122,7 @@ func (s *System) RestoreFileSystemFromSnapshot(restoreSnapParam *types.RestoreFs
 
 	path := fmt.Sprintf("/rest/v1/file-systems/%v/restore", fsID)
 	restoreFsResponse := types.RestoreFsSnapResponse{}
+	fmt.Printf("%#v\n", restoreSnapParam)
 	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, restoreSnapParam, &restoreFsResponse)
 	if err != nil {
