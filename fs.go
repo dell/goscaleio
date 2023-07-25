@@ -13,7 +13,6 @@
 package goscaleio
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -122,13 +121,6 @@ func (s *System) RestoreFileSystemFromSnapshot(restoreSnapParam *types.RestoreFs
 	defer TimeSpent("CreateFileSystemSnapshot", time.Now())
 
 	path := fmt.Sprintf("/rest/v1/file-systems/%v/restore", fsID)
-	body, err1 := json.Marshal(restoreSnapParam)
-
-	if err1 != nil {
-		return nil, err1
-	}
-
-	fmt.Printf("%#v\n", string(body))
 
 	restoreFsResponse := types.RestoreFsSnapResponse{}
 	var err error
