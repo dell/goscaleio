@@ -167,6 +167,12 @@ type SwitchClusterMode struct {
 	RemoveTBMdms        []string `json:"removeTBIdList,omitempty"`
 }
 
+// RenameMdm defines struct for modifying MDM name
+type RenameMdm struct {
+	ID      string `json:"id"`
+	NewName string `json:"newName"`
+}
+
 // Link defines struct of Link
 type Link struct {
 	Rel  string `json:"rel"`

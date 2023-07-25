@@ -179,6 +179,45 @@ func TestSwitchClusterModeInvalid(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+// TestRenameMdm modifies MDM name
+func TestRenameMdm(t *testing.T) {
+	// first, get all of the systems
+	allSystems, err := C.GetSystems()
+	assert.Nil(t, err)
+
+	// then try to get the first one returned, explicitly
+	system, err := C.FindSystem(allSystems[0].ID, "", "")
+	assert.Nil(t, err)
+
+	mdmDetails, err1 := system.GetMDMClusterDetails()
+	assert.Nil(t, err1)
+	assert.NotNil(t, mdmDetails)
+
+	payload := types.RenameMdm{
+		ID:      mdmDetails.TiebreakerMdm[0].ID,
+		NewName: "mdm_renamed",
+	}
+
+	err = system.RenameMdm(&payload)
+	assert.Nil(t, err)
+
+	payload = types.RenameMdm{
+		ID:      mdmDetails.TiebreakerMdm[0].ID,
+		NewName: "mdm_renamed",
+	}
+
+	err = system.RenameMdm(&payload)
+	assert.NotNil(t, err)
+
+	payload = types.RenameMdm{
+		ID:      mdmDetails.TiebreakerMdm[0].ID,
+		NewName: "tb_mdm",
+	}
+
+	err = system.RenameMdm(&payload)
+	assert.Nil(t, err)
+}
+
 // TestChangeMDMOwnership modifies primary MDM
 func TestChangeMDMOwnership(t *testing.T) {
 	// first, get all of the systems
