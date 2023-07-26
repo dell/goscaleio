@@ -305,7 +305,7 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 }
 
 // GetClusterDetails used for get cluster details
-func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte) (*types.GatewayResponse, error) {
+func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJsonOutput bool) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/instances", bytes.NewBuffer(mdmTopologyParam))
@@ -336,6 +336,14 @@ func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte) (*types.Gate
 
 	if responseString == "" {
 		return &gatewayResponse, fmt.Errorf("Error while getting Cluster Details")
+	}
+
+	if requireJsonOutput {
+		gatewayResponse.StatusCode = 200
+
+		gatewayResponse.Data = responseString
+
+		return &gatewayResponse, nil
 	}
 
 	var mdmTopologyDetails types.MDMTopologyDetails
@@ -390,7 +398,7 @@ func (gc *GatewayClient) DeletePackage(packageName string) (*types.GatewayRespon
 }
 
 // BeginInstallation used for start installation
-func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string, expansion bool) (*types.GatewayResponse, error) {
+func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, expansion bool) (*types.GatewayResponse, error) {
 
 	var gatewayResponse types.GatewayResponse
 
@@ -419,7 +427,11 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	q.Set("noConfigure", "false")
 	q.Set("noLinuxDevValidation", "false")
 	q.Set("globalZeroPadPolicy", "false")
-	q.Set("extend", strconv.FormatBool(expansion))
+
+	if expansion {
+		q.Set("extend", strconv.FormatBool(expansion))
+	}
+
 	u.RawQuery = q.Encode()
 
 	req, httpError := http.NewRequest("POST", u.String(), bytes.NewBuffer(finalJSON))
@@ -719,6 +731,63 @@ func (gc *GatewayClient) CheckForCompletionQueueCommands(currentPhase string) (*
 	}
 
 	gatewayResponse.Data = checkCompleted
+
+	gatewayResponse.StatusCode = 200
+
+	return &gatewayResponse, nil
+}
+
+// UninstallCluster used for start installation
+func (gc *GatewayClient) UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword string, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, expansion bool) (*types.GatewayResponse, error) {
+
+	var gatewayResponse types.GatewayResponse
+
+	mapData, jsonParseError := jsonToMap(jsonStr)
+	if jsonParseError != nil {
+		return &gatewayResponse, jsonParseError
+	}
+
+	mapData["mdmPassword"] = mdmPassword
+	mapData["mdmUser"] = mdmUsername
+	mapData["liaPassword"] = liaPassword
+
+	secureData := map[string]interface{}{
+		"allowNonSecureCommunicationWithMdm": allowNonSecureCommunicationWithMdm,
+		"allowNonSecureCommunicationWithLia": allowNonSecureCommunicationWithLia,
+		"disableNonMgmtComponentsAuth":       disableNonMgmtComponentsAuth,
+	}
+	mapData["securityConfiguration"] = secureData
+
+	finalJSON, _ := json.Marshal(mapData)
+
+	u, _ := url.Parse(gc.host + "/im/types/Configuration/actions/uninstall")
+
+	req, httpError := http.NewRequest("POST", u.String(), bytes.NewBuffer(finalJSON))
+	if httpError != nil {
+		return &gatewayResponse, httpError
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+
+	httpRes, httpReqError := client.Do(req)
+	if httpReqError != nil {
+		return &gatewayResponse, httpReqError
+	}
+
+	if httpRes.StatusCode != 202 {
+
+		responseString, _ := extractString(httpRes)
+
+		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error For Uninstall Cluster: %s", err)
+		}
+
+		return &gatewayResponse, nil
+	}
 
 	gatewayResponse.StatusCode = 200
 

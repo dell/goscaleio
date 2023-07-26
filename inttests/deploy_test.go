@@ -70,7 +70,7 @@ func TestDeployGetClusterDetails(t *testing.T) {
 
 	jsonres, _ := json.Marshal(mapData)
 
-	res, err := GC.GetClusterDetails(jsonres)
+	res, err := GC.GetClusterDetails(jsonres, false)
 
 	assert.NotNil(t, res)
 
@@ -89,7 +89,7 @@ func TestDeployDeletePackge(t *testing.T) {
 
 // TestDeployBeginInstallation function to test Begin Installation with Parsed CSV Data
 func TestDeployBeginInstallation(t *testing.T) {
-	_, err := GC.BeginInstallation("", "admin", "Password", "Password", true)
+	_, err := GC.BeginInstallation("", "admin", "Password", "Password", true, true, false, true)
 	assert.NotNil(t, err)
 }
 

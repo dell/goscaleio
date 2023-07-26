@@ -1537,8 +1537,8 @@ type SdsList struct {
 	FaultSet             string    `json:"faultSet,omitempty"`
 	FaultSetID           string    `json:"faultSetId,omitempty"`
 	AllIPs               []string  `json:"allIPs,omitempty"`
-	SdsOnlyIPs           []any     `json:"sdsOnlyIPs,omitempty"`
-	SdcOnlyIPs           []any     `json:"sdcOnlyIPs,omitempty"`
+	SdsOnlyIPs           []string  `json:"sdsOnlyIPs,omitempty"`
+	SdcOnlyIPs           []string  `json:"sdcOnlyIPs,omitempty"`
 	Devices              []Devices `json:"devices,omitempty"`
 	RfCached             bool      `json:"rfCached,omitempty"`
 	RfCachedPools        []any     `json:"rfCachedPools,omitempty"`
@@ -1555,7 +1555,7 @@ type SdsList struct {
 type SdcList struct {
 	Node      Node   `json:"node,omitempty"`
 	GUID      string `json:"guid,omitempty"`
-	SdcName   any    `json:"sdcName,omitempty"`
+	SdcName   string `json:"sdcName,omitempty"`
 	Optimized bool   `json:"optimized,omitempty"`
 	ID        string `json:"id,omitempty"`
 }
@@ -1563,12 +1563,12 @@ type SdrList struct {
 	Node                      Node     `json:"node,omitempty"`
 	ProtectionDomain          string   `json:"protectionDomain,omitempty"`
 	ProtectionDomainID        string   `json:"protectionDomainId,omitempty"`
-	ApplicationOnlyIPs        []any    `json:"applicationOnlyIPs,omitempty"`
-	StorageOnlyIPs            []any    `json:"storageOnlyIPs,omitempty"`
-	ExternalOnlyIPs           []any    `json:"externalOnlyIPs,omitempty"`
-	ApplicationAndStorageIPs  []any    `json:"applicationAndStorageIPs,omitempty"`
-	ApplicationAndExternalIPs []any    `json:"applicationAndExternalIPs,omitempty"`
-	StorageAndExternalIPs     []any    `json:"storageAndExternalIPs,omitempty"`
+	ApplicationOnlyIPs        []string `json:"applicationOnlyIPs,omitempty"`
+	StorageOnlyIPs            []string `json:"storageOnlyIPs,omitempty"`
+	ExternalOnlyIPs           []string `json:"externalOnlyIPs,omitempty"`
+	ApplicationAndStorageIPs  []string `json:"applicationAndStorageIPs,omitempty"`
+	ApplicationAndExternalIPs []string `json:"applicationAndExternalIPs,omitempty"`
+	StorageAndExternalIPs     []string `json:"storageAndExternalIPs,omitempty"`
 	AllIPs                    []string `json:"allIPs,omitempty"`
 	SupersetIPs               any      `json:"supersetIPs,omitempty"`
 	SdrName                   string   `json:"sdrName,omitempty"`
@@ -1594,7 +1594,7 @@ type StoragePools struct {
 	OverProvisioningFactor   any    `json:"overProvisioningFactor,omitempty"`
 	MaxCompressionRatio      any    `json:"maxCompressionRatio,omitempty"`
 	PerfProfile              any    `json:"perfProfile,omitempty"`
-	RplJournalCapacity       any    `json:"rplJournalCapacity,omitempty"`
+	RplJournalCapacity       int    `json:"rplJournalCapacity,omitempty"`
 }
 
 // InstallerPhaseDetail defines struct for Current and Next Phase Details
