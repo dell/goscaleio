@@ -410,6 +410,7 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	mapData["mdmPassword"] = mdmPassword
 	mapData["mdmUser"] = mdmUsername
 	mapData["liaPassword"] = liaPassword
+	mapData["liaLdapInitialMode"] = "NATIVE_AUTHENTICATION"
 
 	secureData := map[string]interface{}{
 		"allowNonSecureCommunicationWithMdm": true,
@@ -750,6 +751,7 @@ func (gc *GatewayClient) UninstallCluster(jsonStr, mdmUsername, mdmPassword, lia
 	mapData["mdmPassword"] = mdmPassword
 	mapData["mdmUser"] = mdmUsername
 	mapData["liaPassword"] = liaPassword
+	mapData["liaLdapInitialMode"] = "NATIVE_AUTHENTICATION"
 
 	secureData := map[string]interface{}{
 		"allowNonSecureCommunicationWithMdm": allowNonSecureCommunicationWithMdm,
