@@ -413,9 +413,9 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	mapData["liaLdapInitialMode"] = "NATIVE_AUTHENTICATION"
 
 	secureData := map[string]interface{}{
-		"allowNonSecureCommunicationWithMdm": true,
-		"allowNonSecureCommunicationWithLia": true,
-		"disableNonMgmtComponentsAuth":       false,
+		"allowNonSecureCommunicationWithMdm": allowNonSecureCommunicationWithMdm,
+		"allowNonSecureCommunicationWithLia": allowNonSecureCommunicationWithLia,
+		"disableNonMgmtComponentsAuth":       disableNonMgmtComponentsAuth,
 	}
 	mapData["securityConfiguration"] = secureData
 
