@@ -305,7 +305,7 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 }
 
 // GetClusterDetails used for get cluster details
-func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJsonOutput bool) (*types.GatewayResponse, error) {
+func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJSONOutput bool) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/instances", bytes.NewBuffer(mdmTopologyParam))
@@ -338,7 +338,7 @@ func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJsonO
 		return &gatewayResponse, fmt.Errorf("Error while getting Cluster Details")
 	}
 
-	if requireJsonOutput {
+	if requireJSONOutput {
 		gatewayResponse.StatusCode = 200
 
 		gatewayResponse.Data = responseString

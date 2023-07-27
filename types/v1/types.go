@@ -1539,10 +1539,11 @@ type MDMTopologyDetails struct {
 	MasterMdm         MasterMdm           `json:"masterMdm,omitempty"`
 	SlaveMdmSet       []SlaveMdmSet       `json:"slaveMdmSet,omitempty"`
 	TbSet             []TbSet             `json:"tbSet,omitempty"`
-	StandbyMdmSet     []any               `json:"standbyMdmSet,omitempty"`
-	StandbyTbSet      []any               `json:"standbyTbSet,omitempty"`
+	StandbyMdmSet     []StandbyMdmSet     `json:"standbyMdmSet,omitempty"`
+	StandbyTbSet      []StandbyTbSet      `json:"standbyTbSet,omitempty"`
 }
 
+// MasterMdm defines struct for Mster MDM Details
 type MasterMdm struct {
 	Node            Node     `json:"node,omitempty"`
 	MdmIPs          []string `json:"mdmIPs,omitempty"`
@@ -1552,6 +1553,8 @@ type MasterMdm struct {
 	ManagementIPs   []string `json:"managementIPs,omitempty"`
 	VirtIPIntfsList []string `json:"virtIpIntfsList,omitempty"`
 }
+
+// SlaveMdmSet defines struct for Slave MDMs Details
 type SlaveMdmSet struct {
 	Node            Node     `json:"node,omitempty"`
 	MdmIPs          []string `json:"mdmIPs,omitempty"`
@@ -1561,6 +1564,19 @@ type SlaveMdmSet struct {
 	ManagementIPs   []string `json:"managementIPs,omitempty"`
 	VirtIPIntfsList []string `json:"virtIpIntfsList,omitempty"`
 }
+
+// StandbyMdmSet defines struct for Standby MDMs Details
+type StandbyMdmSet struct {
+	Node            Node     `json:"node,omitempty"`
+	MdmIPs          []string `json:"mdmIPs,omitempty"`
+	Name            string   `json:"name,omitempty"`
+	ID              string   `json:"id,omitempty"`
+	IPForActor      any      `json:"ipForActor,omitempty"`
+	ManagementIPs   []string `json:"managementIPs,omitempty"`
+	VirtIPIntfsList []string `json:"virtIpIntfsList,omitempty"`
+}
+
+// TbSet defines struct for TB MDMs Details
 type TbSet struct {
 	Node   Node     `json:"node,omitempty"`
 	MdmIPs []string `json:"mdmIPs,omitempty"`
@@ -1569,17 +1585,31 @@ type TbSet struct {
 	TbIPs  []string `json:"tbIPs,omitempty"`
 }
 
+// StandbyTbSet defines struct for Standby TB MDMs Details
+type StandbyTbSet struct {
+	Node   Node     `json:"node,omitempty"`
+	MdmIPs []string `json:"mdmIPs,omitempty"`
+	Name   string   `json:"name,omitempty"`
+	ID     string   `json:"id,omitempty"`
+	TbIPs  []string `json:"tbIPs,omitempty"`
+}
+
+// Node defines struct for Node Information
 type Node struct {
 	Ostype   string   `json:"ostype,omitempty"`
 	NodeName string   `json:"nodeName,omitempty"`
 	NodeIPs  []string `json:"nodeIPs,omitempty"`
 }
+
+// Devices defines struct for Devices Details
 type Devices struct {
 	DevicePath      string `json:"devicePath,omitempty"`
 	StoragePool     string `json:"storagePool,omitempty"`
 	DeviceName      string `json:"deviceName,omitempty"`
 	MaxCapacityInKb int    `json:"maxCapacityInKb,omitempty"`
 }
+
+// SdsList defines struct for SDSs Details
 type SdsList struct {
 	Node                 Node      `json:"node,omitempty"`
 	SdsName              string    `json:"sdsName,omitempty"`
@@ -1603,6 +1633,8 @@ type SdsList struct {
 	Port                 int       `json:"port,omitempty"`
 	ID                   string    `json:"id,omitempty"`
 }
+
+// SdcList defines struct for SDCs Details
 type SdcList struct {
 	Node      Node   `json:"node,omitempty"`
 	GUID      string `json:"guid,omitempty"`
@@ -1610,6 +1642,8 @@ type SdcList struct {
 	Optimized bool   `json:"optimized,omitempty"`
 	ID        string `json:"id,omitempty"`
 }
+
+// SdrList defines struct for SDRs Details
 type SdrList struct {
 	Node                      Node     `json:"node,omitempty"`
 	ProtectionDomain          string   `json:"protectionDomain,omitempty"`
@@ -1627,12 +1661,15 @@ type SdrList struct {
 	Optimized                 bool     `json:"optimized,omitempty"`
 	ID                        string   `json:"id,omitempty"`
 }
+
+// ProtectionDomains defines struct for ProtectionDomains Details
 type ProtectionDomains struct {
 	Name              string         `json:"name,omitempty"`
 	StoragePools      []StoragePools `json:"storagePools,omitempty"`
 	AccelerationPools []any          `json:"accelerationPools,omitempty"`
 }
 
+// StoragePools defines struct for StoragePools Details
 type StoragePools struct {
 	Name                     string `json:"name,omitempty"`
 	MediaType                string `json:"mediaType,omitempty"`
