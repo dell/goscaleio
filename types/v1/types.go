@@ -110,6 +110,12 @@ const (
 	ThreeNodesClusterMode = "ThreeNodes"
 )
 
+// Constants representing MDM role
+const (
+	Manager    = "Manager"
+	TieBreaker = "TieBreaker"
+)
+
 // MdmCluster defines struct for MDM cluster
 type MdmCluster struct {
 	ID              string `json:"id"`
