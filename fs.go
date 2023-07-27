@@ -101,6 +101,50 @@ func (s *System) CreateFileSystem(fs *types.FsCreate) (*types.FileSystemResp, er
 	return &fsResponse, nil
 }
 
+// CreateFileSystemSnapshot creates a snapshot for a given file system
+func (s *System) CreateFileSystemSnapshot(createSnapParam *types.CreateFileSystemSnapshotParam, fsID string) (*types.CreateFileSystemSnapshotResponse, error) {
+	defer TimeSpent("CreateFileSystemSnapshot", time.Now())
+
+	path := fmt.Sprintf("/rest/v1/file-systems/%v/snapshot", fsID)
+	snapResponse := types.CreateFileSystemSnapshotResponse{}
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, createSnapParam, &snapResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &snapResponse, nil
+}
+
+// RestoreFileSystemFromSnapshot restores the filesystem from a given snapshot using filesytem id
+func (s *System) RestoreFileSystemFromSnapshot(restoreSnapParam *types.RestoreFsSnapParam, fsID string) (*types.RestoreFsSnapResponse, error) {
+	defer TimeSpent("CreateFileSystemSnapshot", time.Now())
+
+	path := fmt.Sprintf("/rest/v1/file-systems/%v/restore", fsID)
+
+	restoreFsResponse := types.RestoreFsSnapResponse{}
+	var err error
+	if restoreSnapParam.CopyName == "" {
+		err = s.client.getJSONWithRetry(
+			http.MethodPost, path, restoreSnapParam, nil)
+		if err == nil {
+			return nil, nil
+		}
+	} else {
+		err = s.client.getJSONWithRetry(
+			http.MethodPost, path, restoreSnapParam, &restoreFsResponse)
+		if err == nil {
+			return &restoreFsResponse, nil
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
 // DeleteFileSystem deletes a file system
 func (s *System) DeleteFileSystem(name string) error {
 	defer TimeSpent("DeleteFileSystem", time.Now())

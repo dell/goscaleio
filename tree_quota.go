@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -86,4 +87,19 @@ func (s *System) DeleteTreeQuota(id string) error {
 	}
 
 	return nil
+}
+
+// GetTreeQuotaByFSID gets a specific tree quota by filesystem ID
+func (s *System) GetTreeQuotaByFSID(id string) (*types.TreeQuota, error) {
+	defer TimeSpent("GetTreeQuotaByFSID", time.Now())
+	treeQuotaList, err := s.GetTreeQuota()
+	if err != nil {
+		return nil, err
+	}
+	for _, treeQuota := range treeQuotaList {
+		if treeQuota.FileSysytemID == id {
+			return &treeQuota, nil
+		}
+	}
+	return nil, errors.New("couldn't find tree quota by filesystem ID")
 }
