@@ -84,7 +84,7 @@ func TestGetVTreeInstances(t *testing.T) {
 		},
 		{
 			ids:      []string{"b21581e400000002"},
-			expected: errors.New("Query selected Instances type: VTree - Got no statistics for id b21581e300000002. It doesn't exist."),
+			expected: errors.New("Query selected Instances type: VTree - Got no statistics for id b21581e300000002. It doesn't exist"),
 		},
 	}
 
