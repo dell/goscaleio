@@ -3,6 +3,7 @@ package inttests
 import (
 	"encoding/json"
 	"testing"
+	"os"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -30,20 +31,20 @@ func TestDeployGetPackgeDetails(t *testing.T) {
 
 // TestDeployValidateMDMDetails function to test Retrival of MDM Topology Function
 func TestDeployValidateMDMDetails(t *testing.T) {
-	mapData := map[string]interface{}{
+	clusterData := map[string]interface{}{
 		"mdmUser":     "admin",
-		"mdmPassword": "Password123",
+		"mdmPassword": string(os.Getenv("GOSCALEIO_MDMPASSWORD")),
 	}
-	mapData["mdmIps"] = []string{"10.247.66.67"}
+	clusterData["mdmIps"] = []string{string(os.Getenv("GOSCALEIO_MDMIP"))}
 
 	secureData := map[string]interface{}{
 		"allowNonSecureCommunicationWithMdm": true,
 		"allowNonSecureCommunicationWithLia": true,
 		"disableNonMgmtComponentsAuth":       false,
 	}
-	mapData["securityConfiguration"] = secureData
+	clusterData["securityConfiguration"] = secureData
 
-	jsonres, _ := json.Marshal(mapData)
+	jsonres, _ := json.Marshal(clusterData)
 
 	res, err := GC.ValidateMDMDetails(jsonres)
 
@@ -55,20 +56,20 @@ func TestDeployValidateMDMDetails(t *testing.T) {
 }
 
 func TestDeployGetClusterDetails(t *testing.T) {
-	mapData := map[string]interface{}{
+	clusterData := map[string]interface{}{
 		"mdmUser":     "admin",
-		"mdmPassword": "Password123",
+		"mdmPassword": string(os.Getenv("GOSCALEIO_MDMPASSWORD")),
 	}
-	mapData["mdmIps"] = []string{"10.247.66.67"}
+	clusterData["mdmIps"] = []string{string(os.Getenv("GOSCALEIO_MDMIP"))}
 
 	secureData := map[string]interface{}{
 		"allowNonSecureCommunicationWithMdm": true,
 		"allowNonSecureCommunicationWithLia": true,
 		"disableNonMgmtComponentsAuth":       false,
 	}
-	mapData["securityConfiguration"] = secureData
+	clusterData["securityConfiguration"] = secureData
 
-	jsonres, _ := json.Marshal(mapData)
+	jsonres, _ := json.Marshal(clusterData)
 
 	res, err := GC.GetClusterDetails(jsonres, false)
 

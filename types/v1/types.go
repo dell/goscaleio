@@ -1601,7 +1601,7 @@ type Node struct {
 	NodeIPs  []string `json:"nodeIPs,omitempty"`
 }
 
-// Devices defines struct for Devices Details
+// Devices defines struct for Device Details
 type Devices struct {
 	DevicePath      string `json:"devicePath,omitempty"`
 	StoragePool     string `json:"storagePool,omitempty"`
@@ -1609,7 +1609,7 @@ type Devices struct {
 	MaxCapacityInKb int    `json:"maxCapacityInKb,omitempty"`
 }
 
-// SdsList defines struct for SDSs Details
+// SdsList defines struct for SDS Details
 type SdsList struct {
 	Node                 Node      `json:"node,omitempty"`
 	SdsName              string    `json:"sdsName,omitempty"`
@@ -1634,7 +1634,7 @@ type SdsList struct {
 	ID                   string    `json:"id,omitempty"`
 }
 
-// SdcList defines struct for SDCs Details
+// SdcList defines struct for SDC Details
 type SdcList struct {
 	Node      Node   `json:"node,omitempty"`
 	GUID      string `json:"guid,omitempty"`
@@ -1643,7 +1643,7 @@ type SdcList struct {
 	ID        string `json:"id,omitempty"`
 }
 
-// SdrList defines struct for SDRs Details
+// SdrList defines struct for SDR Details
 type SdrList struct {
 	Node                      Node     `json:"node,omitempty"`
 	ProtectionDomain          string   `json:"protectionDomain,omitempty"`
