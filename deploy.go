@@ -122,10 +122,10 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	client := gc.http
-	response, httpResError := client.Do(req)
+	response, httpRespError := client.Do(req)
 
-	if httpResError != nil {
-		return &gatewayResponse, httpResError
+	if httpRespError != nil {
+		return &gatewayResponse, httpRespError
 	}
 
 	if response.StatusCode != 200 {
@@ -184,10 +184,10 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	client := gc.http
-	response, httpResError := client.Do(req)
+	response, httpRespError := client.Do(req)
 
-	if httpResError != nil {
-		return &gatewayResponse, httpResError
+	if httpRespError != nil {
+		return &gatewayResponse, httpRespError
 	}
 
 	responseString, _ := extractString(response)
@@ -238,18 +238,17 @@ func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
-	httpRes, httpResError := client.Do(req)
-	if httpResError != nil {
-		return packageParam, httpResError
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return packageParam, httpRespError
 	}
 
-	responseString, error := extractString(httpRes)
-	if error !=nil {
+	responseString, error := extractString(httpResp)
+	if error != nil {
 		return packageParam, fmt.Errorf("Error Extracting Response: %s", error)
 	}
 
-
-	if httpRes.StatusCode == 200 {
+	if httpResp.StatusCode == 200 {
 
 		err := json.Unmarshal([]byte(responseString), &packageParam)
 
@@ -275,17 +274,17 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
-	httpRes, httpResError := client.Do(req)
-	if httpResError != nil {
-		return &gatewayResponse, httpResError
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpRes)
-	if error !=nil {
+	responseString, error := extractString(httpResp)
+	if error != nil {
 		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
 	}
 
-	if httpRes.StatusCode != 200 {
+	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
@@ -323,17 +322,17 @@ func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJSONO
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
-	httpRes, httpResError := client.Do(req)
-	if httpResError != nil {
-		return &gatewayResponse, httpResError
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpRes)
-	if error !=nil {
+	responseString, error := extractString(httpResp)
+	if error != nil {
 		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
 	}
 
-	if httpRes.StatusCode != 200 {
+	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
@@ -384,17 +383,17 @@ func (gc *GatewayClient) DeletePackage(packageName string) (*types.GatewayRespon
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
-	httpRes, httpResError := client.Do(req)
-	if httpResError != nil {
-		return &gatewayResponse, httpResError
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpRes)
-	if error !=nil {
+	responseString, error := extractString(httpResp)
+	if error != nil {
 		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
 	}
 
-	if httpRes.StatusCode != 200 {
+	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
@@ -457,15 +456,15 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 
 	client := gc.http
 
-	httpRes, httpResError := client.Do(req)
-	if httpResError != nil {
-		return &gatewayResponse, httpResError
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return &gatewayResponse, httpRespError
 	}
 
-	if httpRes.StatusCode != 202 {
+	if httpResp.StatusCode != 202 {
 
-		responseString, error := extractString(httpRes)
-		if error !=nil {
+		responseString, error := extractString(httpResp)
+		if error != nil {
 			return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
 		}
 
@@ -497,17 +496,17 @@ func (gc *GatewayClient) MoveToNextPhase() (*types.GatewayResponse, error) {
 
 	client := gc.http
 
-	httpRes, httpResError := client.Do(req)
-	if httpResError != nil {
-		return &gatewayResponse, httpResError
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpRes)
-	if error !=nil {
+	responseString, error := extractString(httpResp)
+	if error != nil {
 		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
 	}
 
-	if httpRes.StatusCode != 200 {
+	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
@@ -537,17 +536,17 @@ func (gc *GatewayClient) RetryPhase() (*types.GatewayResponse, error) {
 
 	client := gc.http
 
-	httpRes, httpResError := client.Do(req)
-	if httpResError != nil {
-		return &gatewayResponse, httpResError
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpRes)
-	if error !=nil {
+	responseString, error := extractString(httpResp)
+	if error != nil {
 		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
 	}
 
-	if httpRes.StatusCode != 200 {
+	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
@@ -577,17 +576,17 @@ func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
 
 	client := gc.http
 
-	httpRes, httpResError := client.Do(req)
-	if httpResError != nil {
-		return &gatewayResponse, httpResError
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpRes)
-	if error !=nil {
+	responseString, error := extractString(httpResp)
+	if error != nil {
 		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
 	}
 
-	if httpRes.StatusCode != 200 {
+	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
@@ -617,17 +616,17 @@ func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
 
 	client := gc.http
 
-	httpRes, httpResError := client.Do(req)
-	if httpResError != nil {
-		return &gatewayResponse, httpResError
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpRes)
-	if error !=nil {
+	responseString, error := extractString(httpResp)
+	if error != nil {
 		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
 	}
 
-	if httpRes.StatusCode != 200 {
+	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
@@ -657,17 +656,17 @@ func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 
 	client := gc.http
 
-	httpRes, httpResError := client.Do(req)
-	if httpResError != nil {
-		return &gatewayResponse, httpResError
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpRes)
-	if error !=nil {
+	responseString, error := extractString(httpResp)
+	if error != nil {
 		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
 	}
 
-	if httpRes.StatusCode != 200 {
+	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 
@@ -696,17 +695,17 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
-	httpRes, httpResError := client.Do(req)
-	if httpResError != nil {
-		return mdmQueueCommandDetails, httpResError
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return mdmQueueCommandDetails, httpRespError
 	}
 
-	responseString, error := extractString(httpRes)
-	if error !=nil {
+	responseString, error := extractString(httpResp)
+	if error != nil {
 		return mdmQueueCommandDetails, fmt.Errorf("Error Extracting Response: %s", error)
 	}
 
-	if httpRes.StatusCode == 200 {
+	if httpResp.StatusCode == 200 {
 
 		var queueCommandDetails map[string][]interface{}
 
@@ -807,15 +806,15 @@ func (gc *GatewayClient) UninstallCluster(jsonStr, mdmUsername, mdmPassword, lia
 
 	client := gc.http
 
-	httpRes, httpResError := client.Do(req)
-	if httpResError != nil {
-		return &gatewayResponse, httpResError
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return &gatewayResponse, httpRespError
 	}
 
-	if httpRes.StatusCode != 202 {
+	if httpResp.StatusCode != 202 {
 
-		responseString, error := extractString(httpRes)
-		if error !=nil {
+		responseString, error := extractString(httpResp)
+		if error != nil {
 			return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
 		}
 
