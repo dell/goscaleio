@@ -2,8 +2,8 @@ package inttests
 
 import (
 	"encoding/json"
-	"testing"
 	"os"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
