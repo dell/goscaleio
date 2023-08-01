@@ -144,6 +144,20 @@ func (s *System) RestoreFileSystemFromSnapshot(restoreSnapParam *types.RestoreFs
 
 	return nil, nil
 }
+func (s *System) GetFsSnapshotsByVolumeID(fsId string) ([]types.FileSystem, error) {
+	defer TimeSpent("GetFsSnapshotsByVolumeID", time.Now())
+	var snapshotList []types.FileSystem
+	fsList, err := s.GetAllFileSystems()
+	if err != nil {
+		return nil, err
+	}
+	for _, fs := range fsList {
+		if fs.ParentID == fsId {
+			snapshotList = append(snapshotList, fs)
+		}
+	}
+	return snapshotList, err
+}
 
 // DeleteFileSystem deletes a file system
 func (s *System) DeleteFileSystem(name string) error {
