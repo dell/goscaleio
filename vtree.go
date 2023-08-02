@@ -65,3 +65,15 @@ func (c *Client) GetVTreeInstances(ids []string) ([]types.VTreeDetails, error) {
 	}
 	return vTree, nil
 }
+
+// GetVTreeByVolumeID returns VTree details based on Volume ID
+func (c *Client) GetVTreeByVolumeID(id string) (*types.VTreeDetails, error) {
+	defer TimeSpent("GetVTreeByVolumeID", time.Now())
+
+	volDetails, err := c.GetVolume("", id, "", "", false)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.GetVTreeByID(volDetails[0].VTreeID)
+}

@@ -39,3 +39,17 @@ func TestGetVTreeInstances(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, allVTrees)
 }
+
+func TestGetVTreeByVolumeID(t *testing.T) {
+	allVTrees, err := C.GetVTrees()
+	assert.Nil(t, err)
+	assert.NotNil(t, allVTrees)
+
+	vTree, err := C.GetVTreeByVolumeID(allVTrees[0].RootVolumes[0])
+	assert.Nil(t, err)
+	assert.NotNil(t, vTree)
+
+	vTree, err = C.GetVTreeByVolumeID(invalidIdentifier)
+	assert.NotNil(t, err)
+	assert.Nil(t, vTree)
+}
