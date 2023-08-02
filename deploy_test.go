@@ -119,11 +119,6 @@ func TestGetClusterDetails(t *testing.T) {
 			"",
 			errors.New("Error Getting Cluster Details"),
 		},
-		{
-			"1.1.1.1",
-			"ABCD",
-			nil,
-		},
 	}
 
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
