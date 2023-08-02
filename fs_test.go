@@ -412,6 +412,108 @@ func TestCreateFileSystemSnapshot(t *testing.T) {
 	}
 }
 
+func TestGetFsSnapshotsByVolumeID(t *testing.T) {
+	type checkFn func(*testing.T, []types.FileSystem, error)
+	check := func(fns ...checkFn) []checkFn { return fns }
+
+	hasNoError := func(t *testing.T, resp []types.FileSystem, err error) {
+		if err != nil {
+			t.Fatalf("expected no error")
+		}
+	}
+
+	hasError := func(t *testing.T, resp []types.FileSystem, err error) {
+		if err == nil {
+			t.Fatalf("expected error")
+		}
+	}
+
+	checkResp := func(snapLength int) func(t *testing.T, resp []types.FileSystem, err error) {
+		return func(t *testing.T, resp []types.FileSystem, err error) {
+			assert.Equal(t, snapLength, len(resp))
+		}
+	}
+
+	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
+		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
+
+			href := "/rest/v1/file-systems"
+			var resp []types.FileSystem
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				resp = []types.FileSystem{
+					{
+						ID:   "64366a19-54e8-1544-f3d7-2a50fb1ccff3",
+						Name: "fs-test-1",
+					},
+					{
+						ID:   "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
+						Name: "fs-test-2",
+					},
+				}
+
+				respData, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				fmt.Fprintln(w, string(respData))
+
+			}))
+			return ts, check(hasNoError, checkResp(len(resp)))
+		},
+
+		"operation-failed": func(t *testing.T) (*httptest.Server, []checkFn) {
+			href := "/rest/v1/file-systems"
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				http.Error(w, "operation failed", http.StatusUnprocessableEntity)
+			}))
+			return ts, check(hasError)
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			ts, checkFns := tc(t)
+			defer ts.Close()
+
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client.configConnect.Version = "4.0"
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+			}
+
+			fsID := "64366a19-54e8-1544-f3d7-2a50fb1ccff3"
+
+			resp, err := s.GetFsSnapshotsByVolumeID(fsID)
+			for _, checkFn := range checkFns {
+				checkFn(t, resp, err)
+			}
+
+		})
+	}
+}
+
 func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 	type checkFn func(*testing.T, *types.RestoreFsSnapResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }

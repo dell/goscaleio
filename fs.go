@@ -144,7 +144,9 @@ func (s *System) RestoreFileSystemFromSnapshot(restoreSnapParam *types.RestoreFs
 
 	return nil, nil
 }
-func (s *System) GetFsSnapshotsByVolumeID(fsId string) ([]types.FileSystem, error) {
+
+// GetFsSnapshotsByVolumeID gets list of snapshots associated with a filesystem
+func (s *System) GetFsSnapshotsByVolumeID(fsID string) ([]types.FileSystem, error) {
 	defer TimeSpent("GetFsSnapshotsByVolumeID", time.Now())
 	var snapshotList []types.FileSystem
 	fsList, err := s.GetAllFileSystems()
@@ -152,7 +154,7 @@ func (s *System) GetFsSnapshotsByVolumeID(fsId string) ([]types.FileSystem, erro
 		return nil, err
 	}
 	for _, fs := range fsList {
-		if fs.ParentID == fsId {
+		if fs.ParentID == fsID {
 			snapshotList = append(snapshotList, fs)
 		}
 	}
