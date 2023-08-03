@@ -104,6 +104,18 @@ type System struct {
 	PerformanceProfile                    string   `json:"perfProfile"`
 }
 
+// Constants representing cluster mode
+const (
+	FiveNodesClusterMode  = "FiveNodes"
+	ThreeNodesClusterMode = "ThreeNodes"
+)
+
+// Constants representing MDM role
+const (
+	Manager    = "Manager"
+	TieBreaker = "TieBreaker"
+)
+
 // MdmCluster defines struct for MDM cluster
 type MdmCluster struct {
 	ID              string `json:"id"`
@@ -165,6 +177,12 @@ type SwitchClusterMode struct {
 	AddTBMdms           []string `json:"addTBIdList,omitempty"`
 	RemoveSecondaryMdms []string `json:"removeSlaveMdmIdList,omitempty"`
 	RemoveTBMdms        []string `json:"removeTBIdList,omitempty"`
+}
+
+// RenameMdm defines struct for modifying MDM name
+type RenameMdm struct {
+	ID      string `json:"id"`
+	NewName string `json:"newName"`
 }
 
 // Link defines struct of Link
