@@ -2,6 +2,7 @@ package inttests
 
 import (
 	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -30,22 +31,47 @@ func TestDeployGetPackgeDetails(t *testing.T) {
 
 // TestDeployValidateMDMDetails function to test Retrival of MDM Topology Function
 func TestDeployValidateMDMDetails(t *testing.T) {
-	mapData := map[string]interface{}{
+	clusterData := map[string]interface{}{
 		"mdmUser":     "admin",
-		"mdmPassword": "Password123",
+		"mdmPassword": string(os.Getenv("GOSCALEIO_MDMPASSWORD")),
 	}
-	mapData["mdmIps"] = []string{"10.247.101.68"}
+	clusterData["mdmIps"] = []string{string(os.Getenv("GOSCALEIO_MDMIP"))}
 
 	secureData := map[string]interface{}{
 		"allowNonSecureCommunicationWithMdm": true,
 		"allowNonSecureCommunicationWithLia": true,
 		"disableNonMgmtComponentsAuth":       false,
 	}
-	mapData["securityConfiguration"] = secureData
+	clusterData["securityConfiguration"] = secureData
 
-	jsonres, _ := json.Marshal(mapData)
+	jsonres, _ := json.Marshal(clusterData)
 
 	res, err := GC.ValidateMDMDetails(jsonres)
+
+	assert.NotNil(t, res)
+
+	assert.EqualValues(t, res.StatusCode, 200)
+
+	assert.Nil(t, err)
+}
+
+func TestDeployGetClusterDetails(t *testing.T) {
+	clusterData := map[string]interface{}{
+		"mdmUser":     "admin",
+		"mdmPassword": string(os.Getenv("GOSCALEIO_MDMPASSWORD")),
+	}
+	clusterData["mdmIps"] = []string{string(os.Getenv("GOSCALEIO_MDMIP"))}
+
+	secureData := map[string]interface{}{
+		"allowNonSecureCommunicationWithMdm": true,
+		"allowNonSecureCommunicationWithLia": true,
+		"disableNonMgmtComponentsAuth":       false,
+	}
+	clusterData["securityConfiguration"] = secureData
+
+	jsonres, _ := json.Marshal(clusterData)
+
+	res, err := GC.GetClusterDetails(jsonres, false)
 
 	assert.NotNil(t, res)
 
@@ -64,7 +90,13 @@ func TestDeployDeletePackge(t *testing.T) {
 
 // TestDeployBeginInstallation function to test Begin Installation with Parsed CSV Data
 func TestDeployBeginInstallation(t *testing.T) {
-	_, err := GC.BeginInstallation("", "admin", "Password", "Password", true)
+	_, err := GC.BeginInstallation("", "admin", "Password", "Password", true, true, false, true)
+	assert.NotNil(t, err)
+}
+
+// TestDeployUninstallCluster function to test Begin Installation with Parsed CSV Data
+func TestDeployUninstallCluster(t *testing.T) {
+	_, err := GC.UninstallCluster("", "admin", "Password", "Password", true, true, false, true)
 	assert.NotNil(t, err)
 }
 

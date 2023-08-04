@@ -199,3 +199,16 @@ func (s *System) ChangeMdmOwnerShip(id string) error {
 	}
 	return nil
 }
+
+// RenameMdm modifies name of the MDM
+func (s *System) RenameMdm(renameMdm *types.RenameMdm) error {
+	defer TimeSpent("ChangeMdmOwnerShip", time.Now())
+
+	path := "/api/instances/System/action/renameMdm"
+	err := s.client.getJSONWithRetry(
+		http.MethodPost, path, renameMdm, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
