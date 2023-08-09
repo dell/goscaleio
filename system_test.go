@@ -292,3 +292,61 @@ func TestGetMDMClusterDetails(t *testing.T) {
 	assert.NotNil(t, mdmDetails)
 	assert.Nil(t, err1)
 }
+
+func TestRenameMdm(t *testing.T) {
+	type testCase struct {
+		id       string
+		newName  string
+		expected error
+	}
+
+	cases := []testCase{
+		{
+			"0e4f0a2f5978ae02",
+			"mdm_renamed",
+			nil,
+		},
+		{
+			"FiveNodes",
+			"mdm_renamed",
+			errors.New("An MDM with the same name already exists"),
+		},
+	}
+
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer svr.Close()
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(ts *testing.T) {
+
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client.configConnect.Version = "3.6"
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+			}
+
+			payload := types.RenameMdm{
+				ID:      tc.id,
+				NewName: tc.newName,
+			}
+
+			err = s.RenameMdm(&payload)
+			if err != nil {
+				if tc.expected == nil {
+					t.Errorf("Renaming MDM did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
+				} else {
+					if err.Error() != tc.expected.Error() {
+						t.Errorf("Renaming MDM did not work as expected, \n\tgot: %s \n\twant: %s", err, tc.expected)
+					}
+				}
+			}
+		})
+	}
+}
