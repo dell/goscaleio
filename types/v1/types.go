@@ -243,6 +243,7 @@ type Statistics struct {
 	ProtectedVacInKb                         int `json:"protectedVacInKb"`
 	PendingMovingInBckRebuildJobs            int `json:"pendingMovingInBckRebuildJobs"`
 	CapacityAvailableForVolumeAllocationInKb int `json:"capacityAvailableForVolumeAllocationInKb"`
+	VolumeAllocationLimitInKb                int `json:"volumeAllocationLimitInKb"`
 	PendingRebalanceCapacityInKb             int `json:"pendingRebalanceCapacityInKb"`
 	PendingMovingRebalanceJobs               int `json:"pendingMovingRebalanceJobs"`
 	NumOfProtectionDomains                   int `json:"numOfProtectionDomains"`
