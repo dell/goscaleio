@@ -15,8 +15,8 @@ package goscaleio
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -161,7 +161,7 @@ func getVolumeMapping(sysID string, volID string) (mappedVolumes []*SdcMappedVol
 	mappedVolumesMap := make(map[string]*SdcMappedVolume)
 
 	diskIDPath := FSDevDirectoryPrefix + "/dev/disk/by-id"
-	files, _ := ioutil.ReadDir(diskIDPath)
+	files, _ := os.ReadDir(diskIDPath)
 	strRegex := fmt.Sprintf(`^emc-vol-%s-%s$`, sysID, volID)
 	r, _ := regexp.Compile(strRegex)
 	for _, f := range files {

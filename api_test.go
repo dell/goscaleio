@@ -16,7 +16,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"net/http"
 	"net/http/httptest"
@@ -305,7 +304,7 @@ func testBuildError(code int) error {
 
 func testReadAll(t *testing.T, rc io.ReadCloser) []byte {
 	t.Helper()
-	b, err := ioutil.ReadAll(rc)
+	b, err := io.ReadAll(rc)
 	if err != nil {
 		t.Fatal(err)
 	}

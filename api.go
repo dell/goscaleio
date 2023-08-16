@@ -18,7 +18,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math"
 	"net/http"
 	"os"
@@ -219,7 +219,7 @@ func (c *Client) getJSONWithRetry(
 }
 
 func extractString(resp *http.Response) (string, error) {
-	bs, err := ioutil.ReadAll(resp.Body)
+	bs, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", errBodyRead
 	}
