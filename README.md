@@ -43,7 +43,7 @@ Once a client struct is created via the ```NewClient()``` function, you can repl
     client.SetToken(oldToken)
 
 ### Get Systems
-Retrieving systems is the first step after authentication which enables you to work with other necessary methods.
+Retrieving the systems is the first step after authentication which enables you to work with other necessary methods.
 
 #### All Systems
 
