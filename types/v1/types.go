@@ -1549,6 +1549,7 @@ type MDMTopologyDetails struct {
 	MdmIPs            []string            `json:"mdmIPs,omitempty"`
 	SdsAndMdmIps      []string            `json:"sdsAndMdmIps,omitempty"`
 	SdcIps            []string            `json:"sdcIps,omitempty"`
+	VirtualIPs        []string            `json:"virtualIps,omitempty"`
 	SystemVersionName string              `json:"systemVersionName,omitempty"`
 	SdsList           []SdsList           `json:"sdsList,omitempty"`
 	SdcList           []SdcList           `json:"sdcList,omitempty"`
