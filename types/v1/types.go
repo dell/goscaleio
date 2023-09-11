@@ -146,7 +146,7 @@ type Mdm struct {
 // StandByMdm defines struct for StandBy MDM
 type StandByMdm struct {
 	Name               string   `json:"name,omitempty"`
-	Port               int      `json:"port,omitempty"`
+	Port               string   `json:"port,omitempty"`
 	IPs                []string `json:"ips"`
 	ManagementIPs      []string `json:"managementIps,omitempty"`
 	Role               string   `json:"role"`
