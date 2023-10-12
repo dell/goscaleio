@@ -22,9 +22,8 @@ import (
 func (c *Client) GetSystemLimits() (syslimit []types.QuerySystemLimits, err error) {
 	defer TimeSpent("GetSystemLimits", time.Now())
 	path := "/api/instances/System/action/querySystemLimits"
-
 	err = c.getJSONWithRetry(
-		http.MethodPost, path, nil, &syslimit)
+		http.MethodPost, path, nil, syslimit)
 	if err != nil {
 		return nil, err
 	}
