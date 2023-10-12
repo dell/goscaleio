@@ -356,8 +356,9 @@ func (c *client) DoAndGetResponseBody(
 		}
 		isContentTypeSet = true
 	} else {
-		fmt.Printf("req3: %#v\n", req)
+
 		req, err = http.NewRequest(method, u.String(), nil)
+		fmt.Printf("req3: %#v\n", req)
 	}
 
 	if err != nil {
