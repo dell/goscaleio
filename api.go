@@ -23,7 +23,6 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -42,8 +41,8 @@ var (
 	errBodyRead   = errors.New("error reading body")
 	errNoLink     = errors.New("Error: problem finding link")
 
-	debug, _    = strconv.ParseBool(os.Getenv("GOSCALEIO_DEBUG"))
-	showHTTP, _ = strconv.ParseBool(os.Getenv("GOSCALEIO_SHOWHTTP"))
+	debug    = true
+	showHTTP = true
 )
 
 // Client defines struct for Client
