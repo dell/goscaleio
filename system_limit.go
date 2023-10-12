@@ -19,7 +19,7 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
-func (c *Client) GetSystemLimits() (syslimit []types.QuerySystemLimits, err error) {
+func (c *Client) GetSystemLimits() (syslimit *types.Limit, err error) {
 	defer TimeSpent("GetSystemLimits", time.Now())
 	path := "/api/instances/System/action/querySystemLimits"
 	err = c.getJSONWithRetry(

@@ -326,6 +326,8 @@ func (c *client) DoAndGetResponseBody(
 	if r, ok := body.(io.ReadCloser); ok {
 		req, err = http.NewRequest(method, u.String(), r)
 
+		fmt.Printf("req: %#v\n", req)
+
 		defer func() {
 			if err := r.Close(); err != nil {
 				c.doLog(log.WithError(err).Error, "")

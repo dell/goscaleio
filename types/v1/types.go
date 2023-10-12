@@ -1742,6 +1742,9 @@ type MDMQueueCommandDetails struct {
 type QuerySystemLimits struct {
 	Type        string `json:"type,omitempty"`
 	Description string `json:"description,omitempty"`
-	MinVal      string `json:"min_val,omitempty"`
-	MaxVal      string `json:"max_val,omitempty"`
+	MaxVal      string `json:"maxVal,omitempty"`
+}
+
+type Limit struct {
+	SystemLimitEntryList []QuerySystemLimits `json:"systemLimitEntryList"`
 }
