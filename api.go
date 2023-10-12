@@ -200,6 +200,8 @@ func (c *Client) getJSONWithRetry(
 		return nil
 	}
 
+	fmt.Printf("err: %#v\n", err)
+
 	// check if we need to authenticate
 	if e, ok := err.(*types.Error); ok {
 		doLog(log.WithError(err).Debug, fmt.Sprintf("Got JSON error: %+v", e))
