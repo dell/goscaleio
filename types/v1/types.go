@@ -1738,3 +1738,10 @@ type MDMQueueCommandDetails struct {
 	TargetEntityIdentifier string    `json:"targetEntityIdentifier,omitempty"`
 	AllowedPhase           string    `json:"allowedPhase,omitempty"`
 }
+
+type QuerySystemLimits struct {
+	Type        string `json:"type,omitempty"`
+	Description string `json:"description,omitempty"`
+	MinVal      string `json:"min_val,omitempty"`
+	MaxVal      string `json:"max_val,omitempty"`
+}
