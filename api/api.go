@@ -411,7 +411,7 @@ func (c *client) DoAndGetResponseBody(
 		fmt.Printf("err:%#v\n", err)
 		return nil, err
 	}
-	fmt.Printf("err:%#v", err)
+	fmt.Printf("res:%#v", res)
 
 	if c.showHTTP {
 		logResponse(ctx, res, c.doLog)
