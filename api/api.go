@@ -447,6 +447,7 @@ func (c *client) ParseJSONError(r *http.Response) error {
 	if jsonError.Message == "" {
 		jsonError.Message = r.Status
 	}
+	fmt.Println("jsonError", jsonError)
 
 	return jsonError
 }
