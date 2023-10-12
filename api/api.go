@@ -342,6 +342,7 @@ func (c *client) DoAndGetResponseBody(
 		}
 		isContentTypeSet = true
 	} else if body != nil {
+		fmt.Printf("req1: %#v\n", req)
 		buf := &bytes.Buffer{}
 		enc := json.NewEncoder(buf)
 		if err = enc.Encode(body); err != nil {
@@ -355,6 +356,7 @@ func (c *client) DoAndGetResponseBody(
 		}
 		isContentTypeSet = true
 	} else {
+		fmt.Printf("req3: %#v\n", req)
 		req, err = http.NewRequest(method, u.String(), nil)
 	}
 
@@ -406,8 +408,10 @@ func (c *client) DoAndGetResponseBody(
 	// send the request
 	req = req.WithContext(ctx)
 	if res, err = c.http.Do(req); err != nil {
+		fmt.Printf("err:%#v\n", err)
 		return nil, err
 	}
+	fmt.Printf("err:%#v", err)
 
 	if c.showHTTP {
 		logResponse(ctx, res, c.doLog)
