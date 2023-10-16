@@ -13,20 +13,43 @@
 package goscaleio
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+type emptyBody struct {
+}
+
 func (c *Client) GetSystemLimits() (syslimit *types.Limit, err error) {
 	defer TimeSpent("GetSystemLimits", time.Now())
+	var e emptyBody
 	path := "/api/instances/System/action/querySystemLimits"
 	err = c.getJSONWithRetry(
-		http.MethodPost, path, nil, &syslimit)
+		http.MethodPost, path, e, &syslimit)
 	if err != nil {
 		return nil, err
 	}
 
 	return syslimit, nil
+}
+
+func (c *Client) GetMaxVol() (sys string, err error) {
+	defer TimeSpent("GetMaxVol", time.Now())
+	maxlimitType, err := c.GetSystemLimits()
+
+	if err != nil {
+		return "", err
+	}
+
+	for _, systype := range maxlimitType.SystemLimitEntryList {
+
+		if systype.Type == "volumeSizeGb" {
+			return systype.MaxVal, nil
+		}
+
+	}
+	return "", errors.New("couldn't get max vol size")
 }
