@@ -1738,3 +1738,18 @@ type MDMQueueCommandDetails struct {
 	TargetEntityIdentifier string    `json:"targetEntityIdentifier,omitempty"`
 	AllowedPhase           string    `json:"allowedPhase,omitempty"`
 }
+
+// SystemLimits defines struct for system limits
+type SystemLimits struct {
+	Type        string `json:"type,omitempty"`
+	Description string `json:"description,omitempty"`
+	MaxVal      string `json:"maxVal,omitempty"`
+}
+
+// SystemLimitEntryList defines struct for system limit entryList
+type QuerySystemLimitsResponse struct {
+	SystemLimitEntryList []SystemLimits `json:"systemLimitEntryList"`
+}
+
+type QuerySystemLimitsParam struct {
+}
