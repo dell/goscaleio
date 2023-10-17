@@ -23,6 +23,8 @@ import (
 type emptyBody struct {
 }
 
+// GetSystemLimits gets list of sytem limits
+
 func (c *Client) GetSystemLimits() (syslimit *types.Limit, err error) {
 	defer TimeSpent("GetSystemLimits", time.Now())
 	var e emptyBody
@@ -36,6 +38,7 @@ func (c *Client) GetSystemLimits() (syslimit *types.Limit, err error) {
 	return syslimit, nil
 }
 
+// GetMaxVol returns max volume size in GB
 func (c *Client) GetMaxVol() (sys string, err error) {
 	defer TimeSpent("GetMaxVol", time.Now())
 	maxlimitType, err := c.GetSystemLimits()

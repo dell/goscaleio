@@ -19,6 +19,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestGetSystemLimits gets the list of system limits
 func TestGetSystemLimits(t *testing.T) {
 	resp, err := C.GetSystemLimits()
 	fmt.Println("systemlimit", resp)
@@ -26,6 +27,7 @@ func TestGetSystemLimits(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// TestGetMaxVol get the max volume
 func TestGetMaxVol(t *testing.T) {
 	maxvolsize, err := C.GetMaxVol()
 	fmt.Println("max vol size", maxvolsize)
