@@ -326,8 +326,6 @@ func (c *client) DoAndGetResponseBody(
 	if r, ok := body.(io.ReadCloser); ok {
 		req, err = http.NewRequest(method, u.String(), r)
 
-		fmt.Printf("req: %#v\n", req)
-
 		defer func() {
 			if err := r.Close(); err != nil {
 				c.doLog(log.WithError(err).Error, "")
@@ -342,7 +340,6 @@ func (c *client) DoAndGetResponseBody(
 		}
 		isContentTypeSet = true
 	} else if body != nil {
-		fmt.Printf("req1: %#v\n", req)
 		buf := &bytes.Buffer{}
 		enc := json.NewEncoder(buf)
 		if err = enc.Encode(body); err != nil {
@@ -356,9 +353,7 @@ func (c *client) DoAndGetResponseBody(
 		}
 		isContentTypeSet = true
 	} else {
-
 		req, err = http.NewRequest(method, u.String(), nil)
-		fmt.Printf("req3: %#v\n", req)
 	}
 
 	if err != nil {
@@ -409,10 +404,8 @@ func (c *client) DoAndGetResponseBody(
 	// send the request
 	req = req.WithContext(ctx)
 	if res, err = c.http.Do(req); err != nil {
-		fmt.Printf("err:%#v\n", err)
 		return nil, err
 	}
-	fmt.Printf("res:%#v", res)
 
 	if c.showHTTP {
 		logResponse(ctx, res, c.doLog)
@@ -448,7 +441,6 @@ func (c *client) ParseJSONError(r *http.Response) error {
 	if jsonError.Message == "" {
 		jsonError.Message = r.Status
 	}
-	fmt.Println("jsonError", jsonError)
 
 	return jsonError
 }
