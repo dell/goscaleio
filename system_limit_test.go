@@ -25,23 +25,23 @@ import (
 )
 
 func TestGetSystemLimits(t *testing.T) {
-	type checkFn func(*testing.T, *types.Limit, error)
+	type checkFn func(*testing.T, *types.QuerySystemLimitsResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, syslimit *types.Limit, err error) {
+	hasNoError := func(t *testing.T, syslimit *types.QuerySystemLimitsResponse, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, syslimit *types.Limit, err error) {
+	hasError := func(t *testing.T, syslimit *types.QuerySystemLimitsResponse, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
-	checkLimitType := func(expectedType string) func(t *testing.T, syslimit *types.Limit, err error) {
-		return func(t *testing.T, syslimit *types.Limit, err error) {
+	checkLimitType := func(expectedType string) func(t *testing.T, syslimit *types.QuerySystemLimitsResponse, err error) {
+		return func(t *testing.T, syslimit *types.QuerySystemLimitsResponse, err error) {
 			if err == nil {
 				// Add your custom assertions here to check the syslimit.Type.
 				assert.Equal(t, expectedType, syslimit.SystemLimitEntryList[0].Type)
@@ -49,8 +49,8 @@ func TestGetSystemLimits(t *testing.T) {
 		}
 	}
 
-	checkLimitDescription := func(expectedDescription string) func(t *testing.T, syslimit *types.Limit, err error) {
-		return func(t *testing.T, syslimit *types.Limit, err error) {
+	checkLimitDescription := func(expectedDescription string) func(t *testing.T, syslimit *types.QuerySystemLimitsResponse, err error) {
+		return func(t *testing.T, syslimit *types.QuerySystemLimitsResponse, err error) {
 			if err == nil {
 				// Add your custom assertions here to check the syslimit.Description.
 				assert.Equal(t, expectedDescription, syslimit.SystemLimitEntryList[0].Description)
@@ -58,8 +58,8 @@ func TestGetSystemLimits(t *testing.T) {
 		}
 	}
 
-	checkLimitMaxVal := func(expectedMaxVal string) func(t *testing.T, syslimit *types.Limit, err error) {
-		return func(t *testing.T, syslimit *types.Limit, err error) {
+	checkLimitMaxVal := func(expectedMaxVal string) func(t *testing.T, syslimit *types.QuerySystemLimitsResponse, err error) {
+		return func(t *testing.T, syslimit *types.QuerySystemLimitsResponse, err error) {
 			if err == nil {
 				// Add your custom assertions here to check the syslimit.MaxVal.
 				assert.Equal(t, expectedMaxVal, syslimit.SystemLimitEntryList[0].MaxVal)
@@ -81,8 +81,8 @@ func TestGetSystemLimits(t *testing.T) {
 				}
 
 				// Simulate a successful response for GetSystemLimits.
-				resp := types.Limit{
-					SystemLimitEntryList: []types.QuerySystemLimits{
+				resp := types.QuerySystemLimitsResponse{
+					SystemLimitEntryList: []types.SystemLimits{
 						{
 							Type:        "volumeSizeGb",
 							Description: "Maximum volume size in GB",

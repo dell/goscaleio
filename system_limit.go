@@ -20,14 +20,10 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
-type QuerySystemLimitsParam struct {
-}
-
 // GetSystemLimits gets list of sytem limits
-
-func (c *Client) GetSystemLimits() (systemLimits *types.Limit, err error) {
+func (c *Client) GetSystemLimits() (systemLimits *types.QuerySystemLimitsResponse, err error) {
 	defer TimeSpent("GetSystemLimits", time.Now())
-	var body QuerySystemLimitsParam
+	var body *types.QuerySystemLimitsParam
 	path := "/api/instances/System/action/querySystemLimits"
 	err = c.getJSONWithRetry(
 		http.MethodPost, path, body, &systemLimits)
@@ -41,16 +37,16 @@ func (c *Client) GetSystemLimits() (systemLimits *types.Limit, err error) {
 // GetMaxVol returns max volume size in GB
 func (c *Client) GetMaxVol() (systemLimits string, err error) {
 	defer TimeSpent("GetMaxVol", time.Now())
-	maxLimitType, err := c.GetSystemLimits()
+	sysLimit, err := c.GetSystemLimits()
 
 	if err != nil {
 		return "", err
 	}
 
-	for _, systemType := range maxLimitType.SystemLimitEntryList {
+	for _, systemLimit := range sysLimit.SystemLimitEntryList {
 
-		if systemType.Type == "volumeSizeGb" {
-			return systemType.MaxVal, nil
+		if systemLimit.Type == "volumeSizeGb" {
+			return systemLimit.MaxVal, nil
 		}
 
 	}
