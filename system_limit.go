@@ -39,18 +39,18 @@ func (c *Client) GetSystemLimits() (systemLimits *types.Limit, err error) {
 }
 
 // GetMaxVol returns max volume size in GB
-func (c *Client) GetMaxVol() (sys string, err error) {
+func (c *Client) GetMaxVol() (systemLimits string, err error) {
 	defer TimeSpent("GetMaxVol", time.Now())
-	maxlimitType, err := c.GetSystemLimits()
+	maxLimitType, err := c.GetSystemLimits()
 
 	if err != nil {
 		return "", err
 	}
 
-	for _, systype := range maxlimitType.SystemLimitEntryList {
+	for _, systemType := range maxLimitType.SystemLimitEntryList {
 
-		if systype.Type == "volumeSizeGb" {
-			return systype.MaxVal, nil
+		if systemType.Type == "volumeSizeGb" {
+			return systemType.MaxVal, nil
 		}
 
 	}
