@@ -35,7 +35,7 @@ func (c *Client) GetSystemLimits() (systemLimits *types.QuerySystemLimitsRespons
 }
 
 // GetMaxVol returns max volume size in GB
-func (c *Client) GetMaxVol() (systemLimits string, err error) {
+func (c *Client) GetMaxVol() (MaxVolumeSize string, err error) {
 	defer TimeSpent("GetMaxVol", time.Now())
 	sysLimit, err := c.GetSystemLimits()
 
