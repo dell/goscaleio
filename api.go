@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -41,8 +42,8 @@ var (
 	errBodyRead   = errors.New("error reading body")
 	errNoLink     = errors.New("Error: problem finding link")
 
-	debug    = true
-	showHTTP = true
+	debug, _    = strconv.ParseBool(os.Getenv("GOSCALEIO_DEBUG"))
+	showHTTP, _ = strconv.ParseBool(os.Getenv("GOSCALEIO_SHOWHTTP"))
 )
 
 // Client defines struct for Client
@@ -198,8 +199,6 @@ func (c *Client) getJSONWithRetry(
 	if err == nil {
 		return nil
 	}
-
-	fmt.Printf("err: %#v\n", err)
 
 	// check if we need to authenticate
 	if e, ok := err.(*types.Error); ok {
