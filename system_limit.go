@@ -23,7 +23,7 @@ import (
 // GetSystemLimits gets list of sytem limits
 func (c *Client) GetSystemLimits() (systemLimits *types.QuerySystemLimitsResponse, err error) {
 	defer TimeSpent("GetSystemLimits", time.Now())
-	var body *types.QuerySystemLimitsParam
+	var body types.QuerySystemLimitsParam
 	path := "/api/instances/System/action/querySystemLimits"
 	err = c.getJSONWithRetry(
 		http.MethodPost, path, body, &systemLimits)
