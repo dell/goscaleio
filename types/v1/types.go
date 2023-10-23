@@ -1756,8 +1756,8 @@ type QuerySystemLimitsParam struct {
 
 // FaultSetParam is the parameters required to create a fault set
 type FaultSetParam struct {
-	ProtectionDomainID	string	`json:"protectionDomainId"`
-	Name	string		`json:"name"`
+	ProtectionDomainID string `json:"protectionDomainId"`
+	Name               string `json:"name"`
 }
 
 // FaultSetResp defines struct for the response when fault set is created successfully
@@ -1767,8 +1767,8 @@ type FaultSetResp struct {
 
 // FaultSetResp defines struct for the response when fault set is created successfully
 type FaultSet struct {
-	ID string `json:"id"`
-	Name string `json:"name"`
+	ID                 string `json:"id"`
+	Name               string `json:"name"`
 	ProtectionDomainId string `json:"protectionDomainId"`
 }
 

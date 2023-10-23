@@ -21,7 +21,6 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
-
 // CreateFaultSet creates a fault set
 func (pd *ProtectionDomain) CreateFaultSet(fs *types.FaultSetParam) (string, error) {
 	path := fmt.Sprintf("/api/types/FaultSet/instances")
@@ -85,6 +84,5 @@ func (pd *ProtectionDomain) ReadFaultSet(id string) (*types.FaultSet, error) {
 	if err != nil {
 		return nil, err
 	}
-	return fs,nil
+	return fs, nil
 }
-
