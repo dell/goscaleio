@@ -60,8 +60,8 @@ func (pd *ProtectionDomain) ModifyFaultSetName(id, name string) error {
 	return nil
 }
 
-// ModifyFaultSetName will modify the name of the fault set
-func (pd *ProtectionDomain) ModifyFaultSetPerFrofile(id, perfProfile string) error {
+// ModifyFaultSetPerfProfile will modify the performance profile of the fault set
+func (pd *ProtectionDomain) ModifyFaultSetPerfProfile(id, perfProfile string) error {
 	pp := &types.ChangeSdcPerfProfile{}
 	pp.PerfProfile = perfProfile
 	path := fmt.Sprintf("/api/instances/FaultSet::%v/action/setSdsPerformanceParameters", id)
@@ -74,12 +74,12 @@ func (pd *ProtectionDomain) ModifyFaultSetPerFrofile(id, perfProfile string) err
 	return nil
 }
 
-// ModifyFaultSetName will modify the name of the fault set
-func (pd *ProtectionDomain) ReadFaultSet(id string) (*types.FaultSet, error) {
+// GetFaultSetByID will read the fault set using the ID.
+func (system *System) GetFaultSetByID(id string) (*types.FaultSet, error) {
 	fs := &types.FaultSet{}
 	path := fmt.Sprintf("/api/instances/FaultSet::%v", id)
 
-	err := pd.client.getJSONWithRetry(
+	err := system.client.getJSONWithRetry(
 		http.MethodGet, path, nil, fs)
 	if err != nil {
 		return nil, err

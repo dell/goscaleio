@@ -23,7 +23,9 @@ import (
 
 func TestCreateModifyDeleteFaultSet(t *testing.T) {
 	domain := getProtectionDomain(t)
+	system := getSystem()
 	assert.NotNil(t, domain)
+	assert.NotNil(t, system)
 	fsName := fmt.Sprintf("%s-%s", testPrefix, "FaultSet")
 
 	fs := &types.FaultSetParam{
@@ -46,12 +48,12 @@ func TestCreateModifyDeleteFaultSet(t *testing.T) {
 	assert.Nil(t, err)
 
 	// modify fault set performance profile
-	err = domain.ModifyFaultSetPerFrofile(fsID, "Compact")
+	err = domain.ModifyFaultSetPerfProfile(fsID, "Compact")
 	assert.Nil(t, err)
 	time.Sleep(5 * time.Second)
 
 	// read the fault set
-	fsr, err := domain.ReadFaultSet(fsID)
+	fsr, err := system.GetFaultSetByID(fsID)
 	assert.Equal(t, "faultSetRenamed", fsr.Name)
 
 	// delete the fault set
