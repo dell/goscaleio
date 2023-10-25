@@ -1,4 +1,4 @@
-// Copyright © 2019 - 2022 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2019 - 2023 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -1765,14 +1765,14 @@ type FaultSetResp struct {
 	ID string `json:"id"`
 }
 
-// FaultSetResp defines struct for the response when fault set is created successfully
+// FaultSet defines struct for reading the fault set
 type FaultSet struct {
 	ID                 string `json:"id"`
 	Name               string `json:"name"`
 	ProtectionDomainId string `json:"protectionDomainId"`
 }
 
-// FaultSetResp defines struct for the response when fault set is created successfully
+// FaultSetRename defines struct for renaming the fault set
 type FaultSetRename struct {
 	NewName string `json:"newName"`
 }
