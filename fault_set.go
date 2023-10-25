@@ -13,12 +13,9 @@
 package goscaleio
 
 import (
-	// "errors"
 	"fmt"
-	"net/http"
-	// "time"
-
 	types "github.com/dell/goscaleio/types/v1"
+	"net/http"
 )
 
 // CreateFaultSet creates a fault set
