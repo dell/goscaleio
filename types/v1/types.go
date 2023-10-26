@@ -1767,9 +1767,10 @@ type FaultSetResp struct {
 
 // FaultSet defines struct for reading the fault set
 type FaultSet struct {
-	ID                 string `json:"id"`
-	Name               string `json:"name"`
-	ProtectionDomainId string `json:"protectionDomainId"`
+	ID                 string  `json:"id"`
+	Name               string  `json:"name"`
+	ProtectionDomainId string  `json:"protectionDomainId"`
+	Links              []*Link `json:"links"`
 }
 
 // FaultSetRename defines struct for renaming the fault set

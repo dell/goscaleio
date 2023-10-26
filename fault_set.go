@@ -13,9 +13,12 @@
 package goscaleio
 
 import (
+	"errors"
 	"fmt"
-	types "github.com/dell/goscaleio/types/v1"
 	"net/http"
+	"time"
+
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 // CreateFaultSet creates a fault set
@@ -82,4 +85,50 @@ func (system *System) GetFaultSetByID(id string) (*types.FaultSet, error) {
 		return nil, err
 	}
 	return fs, nil
+}
+
+// GetAllFaultSets returns all fault sets on the system
+func (sys *System) GetAllFaultSets() ([]types.FaultSet, error) {
+	defer TimeSpent("FaultSet", time.Now())
+	path := "/api/types/FaultSet/instances"
+
+	var faultsets []types.FaultSet
+	err := sys.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &faultsets)
+	if err != nil {
+		return nil, err
+	}
+
+	return faultsets, nil
+}
+
+// GetAllFaultSetsSds returns SDS details associated with fault set
+func (sys *System) GetAllFaultSetsSds(faultsetid string) ([]types.Sds, error) {
+	defer TimeSpent("FaultSet", time.Now())
+	path := fmt.Sprintf("/api/instances/FaultSet::%v/relationships/Sds", faultsetid)
+
+	var faultsets []types.Sds
+	err := sys.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &faultsets)
+	if err != nil {
+		return nil, err
+	}
+
+	return faultsets, nil
+}
+
+// GetFaultSetByName will read the fault set using the name
+func (sys *System) GetFaultSetByName(name string) (*types.FaultSet, error) {
+	allFaultSets, err := sys.GetAllFaultSets()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, faultset := range allFaultSets {
+		if faultset.Name == name {
+			return &faultset, nil
+		}
+	}
+
+	return nil, errors.New("couldn't find faultset by name")
 }
