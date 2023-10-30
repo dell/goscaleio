@@ -102,8 +102,8 @@ func (sys *System) GetAllFaultSets() ([]types.FaultSet, error) {
 	return faultsets, nil
 }
 
-// GetAllFaultSetsSds returns SDS details associated with fault set
-func (sys *System) GetAllFaultSetsSds(faultsetid string) ([]types.Sds, error) {
+// GetAllSDSByFaultSetID returns SDS details associated with fault set
+func (sys *System) GetAllSDSByFaultSetID(faultsetid string) ([]types.Sds, error) {
 	defer TimeSpent("FaultSet", time.Now())
 	path := fmt.Sprintf("/api/instances/FaultSet::%v/relationships/Sds", faultsetid)
 

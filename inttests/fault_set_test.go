@@ -81,7 +81,7 @@ func TestGetSdsFaultSet(t *testing.T) {
 	assert.Nil(t, err)
 
 	if len(faultsets) > 0 {
-		_, err = system.GetAllFaultSetsSds(faultsets[0].ID)
+		_, err = system.GetAllSDSByFaultSetID(faultsets[0].ID)
 		assert.Nil(t, err)
 	}
 }

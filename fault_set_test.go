@@ -319,7 +319,7 @@ func TestGetAllFaultSetsSds(t *testing.T) {
 			s := System{
 				client: client,
 			}
-			_, err2 := s.GetAllFaultSetsSds(tc.id)
+			_, err2 := s.GetAllSDSByFaultSetID(tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Getting sds related with fault set did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
