@@ -64,3 +64,45 @@ func TestCreateModifyDeleteFaultSet(t *testing.T) {
 	err3 := domain.DeleteFaultSet(invalidIdentifier)
 	assert.NotNil(t, err3)
 }
+
+func TestGetAllFaultSets(t *testing.T) {
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	_, err := system.GetAllFaultSets()
+	assert.Nil(t, err)
+}
+
+func TestGetSdsFaultSet(t *testing.T) {
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	faultsets, err := system.GetAllFaultSets()
+	assert.Nil(t, err)
+
+	if len(faultsets) > 0 {
+		_, err = system.GetAllSDSByFaultSetID(faultsets[0].ID)
+		assert.Nil(t, err)
+	}
+}
+
+func TestGetFaultSetByName(t *testing.T) {
+	domain := getProtectionDomain(t)
+	system := getSystem()
+	assert.NotNil(t, domain)
+	assert.NotNil(t, system)
+	fsName := fmt.Sprintf("%s-%s", testPrefix, "FaultSet")
+
+	fs := &types.FaultSetParam{
+		Name:               fsName,
+		ProtectionDomainID: domain.ProtectionDomain.ID,
+	}
+
+	// create the fault set
+	_, err := domain.CreateFaultSet(fs)
+	assert.Nil(t, err)
+
+	fsDetails, err := system.GetFaultSetByName(fsName)
+	assert.NotNil(t, fsDetails)
+	assert.Nil(t, err)
+}

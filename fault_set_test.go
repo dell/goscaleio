@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -260,6 +261,71 @@ func TestDeleteFaultSet(t *testing.T) {
 				} else {
 					if err2.Error() != tc.expected.Error() {
 						t.Errorf("Removing fault set did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestGetAllFaultSets(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer svr.Close()
+
+	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := System{
+		client: client,
+	}
+
+	faultsets, err := s.GetAllFaultSets()
+	assert.Equal(t, len(faultsets), 0)
+	assert.Nil(t, err)
+}
+
+func TestGetAllFaultSetsSds(t *testing.T) {
+	type testCase struct {
+		id       string
+		expected error
+	}
+	cases := []testCase{
+		{
+			id:       "6b2b5ce800000000",
+			expected: nil,
+		},
+		{
+			id:       "6b2b5ce800000001",
+			expected: errors.New("Error in get relationship Sds"),
+		},
+	}
+
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	}))
+	defer svr.Close()
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(ts *testing.T) {
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+			}
+			_, err2 := s.GetAllSDSByFaultSetID(tc.id)
+			if err2 != nil {
+				if tc.expected == nil {
+					t.Errorf("Getting sds related with fault set did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
+				} else {
+					if err2.Error() != tc.expected.Error() {
+						t.Errorf("Getting sds related with fault set did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
 					}
 				}
 			}
