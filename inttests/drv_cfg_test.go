@@ -55,6 +55,9 @@ func TestGetDrvCfgGUIDSDCNotInstalled(t *testing.T) {
 // TestGetSrvCfgSystems will return the PowerFlex systems connected to tyhe local SDC
 func TestGetDrvCfgSystems(t *testing.T) {
 	goscaleio.SDCDevice = goscaleio.IOCTLDevice
+	// Adding symlink in order to run query_mdm cmd on the host and fetch the systems
+	os.Symlink("/", "/noderoot")
+	defer os.Remove("/noderoot")
 	systems, err := goscaleio.DrvCfgQuerySystems()
 
 	// The response depends on the installation state of the SDC
