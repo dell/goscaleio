@@ -15,6 +15,8 @@ package goscaleio
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
@@ -34,6 +36,7 @@ const (
 	IOCTLDevice = "/dev/scini"
 	mockGUID    = "9E56672F-2F4B-4A42-BFF4-88B6846FBFDA"
 	mockSystem  = "14dbbf5617523654"
+	drvCfg      = "/opt/emc/scaleio/sdc/bin/drv_cfg"
 )
 
 var (
@@ -124,40 +127,12 @@ func DrvCfgQueryRescan() (string, error) {
 	return rcCode, err
 }
 
-// internal, opaque to us, struct of IP addresses
-type netAddress struct {
-	opaque [24]byte
-}
-
-type ioctlMdmInfo struct {
-	filler     [4]byte
-	mdmIDL     uint32
-	mdmIDH     uint32
-	sdcIDL     uint32
-	sdcIDH     uint32
-	installIDL uint32
-	installIDH uint32
-	/*Total amount of socket addresses*/
-	numSockAddrs uint64
-	/*The MDM socket addresses*/
-	addresses [16]netAddress
-}
-
 // ConfiguredCluster contains configuration information for one connected system
 type ConfiguredCluster struct {
 	// SystemID is the MDM cluster system ID
 	SystemID string
 	// SdcID is the ID of the SDC as known to the MDM cluster
 	SdcID string
-}
-
-type ioctlQueryMDMs struct {
-	rc      [8]byte
-	numMdms uint16
-
-	filler [4]byte //uint32
-	/*Variable array of MDM. Its size is determined by numMdms*/
-	mdms [20]ioctlMdmInfo
 }
 
 // DrvCfgQuerySystems will return the configured MDM endpoints for the locally installed SDC
@@ -175,38 +150,23 @@ func DrvCfgQuerySystems() (*[]ConfiguredCluster, error) {
 		return &clusters, nil
 	}
 
-	f, err := os.Open(SDCDevice)
+	cmd := exec.Command("chroot", "/noderoot", drvCfg, "--query_mdm")
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("DrvCfgQuerySystems: Request to query MDM failed : %v", err)
 	}
 
-	defer func() {
-		_ = f.Close()
-	}()
-
-	opCode := _IO(_IOCTLBase, _IOCTLQueryMDM)
-
-	buf := ioctlQueryMDMs{}
-
-	buf.numMdms = uint16(len(buf.mdms))
-
-	// #nosec CWE-242, validated buffer is large enough to hold data
-	err = ioctl(f.Fd(), opCode, uintptr(unsafe.Pointer(&buf)))
-
-	if err != nil {
-		return nil, fmt.Errorf("queryMDM error: %v", err)
+	// Parse the output to extract MDM information
+	re := regexp.MustCompile(`MDM-ID ([a-f0-9]+) SDC ID ([a-f0-9]+)`)
+	matches := re.FindAllStringSubmatch(string(output), -1)
+	if len(matches) == 0 {
+		return nil, fmt.Errorf("no MDM information found in drv_cfg output")
 	}
 
-	rc, err := strconv.ParseInt(hex.EncodeToString(buf.rc[0:1]), 16, 64)
-	if rc != 65 {
-		return nil, fmt.Errorf("Request to query MDM failed, RC=%d", rc)
-	}
-
-	for i := uint16(0); i < buf.numMdms; i++ {
-		systemID := fmt.Sprintf("%8.8x%8.8x",
-			buf.mdms[i].mdmIDH, buf.mdms[i].mdmIDL)
-		sdcID := fmt.Sprintf("%8.8x%8.8x",
-			buf.mdms[i].sdcIDH, buf.mdms[i].sdcIDL)
+	// Fetch the systemID and sdcID for each system
+	for _, match := range matches {
+		systemID := match[1]
+		sdcID := match[2]
 		aCluster := ConfiguredCluster{
 			SystemID: systemID,
 			SdcID:    sdcID,
