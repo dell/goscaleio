@@ -14,10 +14,13 @@ import (
 	"net/url"
 	"os"
 	path "path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/dell/goscaleio/api"
 	types "github.com/dell/goscaleio/types/v1"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -28,14 +31,16 @@ var (
 // GatewayClient is client for Gateway server
 type GatewayClient struct {
 	http     *http.Client
+	api      api.Client
 	host     string
 	username string
 	password string
+	token    string
+	version  string
 }
 
 // NewGateway returns a new gateway client.
-func NewGateway(
-	host string, username, password string, insecure, useCerts bool) (*GatewayClient, error) {
+func NewGateway(host string, username, password string, insecure, useCerts bool) (*GatewayClient, error) {
 
 	if host == "" {
 		return nil, errNewClient
@@ -72,7 +77,110 @@ func NewGateway(
 		}
 	}
 
+	version, err := gc.GetVersion()
+	if err != nil {
+		return nil, err
+	}
+
+	if version == "3.5" {
+		gc.version = version
+		//No need to create token
+	} else {
+		bodyData := map[string]interface{}{
+			"username": username,
+			"password": password,
+		}
+
+		body, _ := json.Marshal(bodyData)
+
+		req, err := http.NewRequest("POST", host+"/rest/auth/login", bytes.NewBuffer(body))
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Add("Content-Type", "application/json")
+
+		resp, err := gc.http.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				doLog(log.WithError(err).Error, "")
+			}
+		}()
+
+		// parse the response
+		switch {
+		case resp == nil:
+			return nil, errNilReponse
+		case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
+			return nil, gc.api.ParseJSONError(resp)
+		}
+
+		bs, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		responseBody := string(bs)
+
+		result := make(map[string]interface{})
+		json.Unmarshal([]byte(responseBody), &result)
+
+		token := result["access_token"].(string)
+
+		gc.token = token
+
+		version, err = gc.GetVersion()
+		if err != nil {
+			return nil, err
+		}
+		gc.version = version
+	}
+
 	return gc, nil
+}
+
+// GetVersion returns version
+func (gc *GatewayClient) GetVersion() (string, error) {
+
+	req, httpError := http.NewRequest("GET", gc.host+"/api/version", nil)
+	if httpError != nil {
+		return "", httpError
+	}
+
+	if gc.token != "" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	resp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return "", httpRespError
+	}
+
+	// parse the response
+	switch {
+	case resp == nil:
+		return "", errNilReponse
+	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
+		return "", nil
+	}
+
+	version, err := extractString(resp)
+	if err != nil {
+		return "", err
+	}
+
+	versionRX := regexp.MustCompile(`^(\d+?\.\d+?).*$`)
+	if m := versionRX.FindStringSubmatch(version); len(m) > 0 {
+		return m[1], nil
+	}
+	return version, nil
 }
 
 // UploadPackages used for upload packge to gateway server
@@ -120,7 +228,11 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 		return &gatewayResponse, httpError
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	client := gc.http
 	response, httpRespError := client.Do(req)
 
@@ -182,7 +294,11 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 		return &gatewayResponse, httpError
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	client := gc.http
 	response, httpRespError := client.Do(req)
 
@@ -234,7 +350,13 @@ func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 	if httpError != nil {
 		return packageParam, httpError
 	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
@@ -270,7 +392,11 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
@@ -318,7 +444,11 @@ func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJSONO
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
@@ -379,7 +509,11 @@ func (gc *GatewayClient) DeletePackage(packageName string) (*types.GatewayRespon
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
@@ -451,7 +585,11 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
@@ -491,7 +629,11 @@ func (gc *GatewayClient) MoveToNextPhase() (*types.GatewayResponse, error) {
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
@@ -531,7 +673,11 @@ func (gc *GatewayClient) RetryPhase() (*types.GatewayResponse, error) {
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
@@ -571,7 +717,11 @@ func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
@@ -611,7 +761,11 @@ func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
@@ -651,7 +805,11 @@ func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
@@ -691,7 +849,11 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 	if httpError != nil {
 		return mdmQueueCommandDetails, httpError
 	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
@@ -801,7 +963,11 @@ func (gc *GatewayClient) UninstallCluster(jsonStr, mdmUsername, mdmPassword, lia
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
-	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	client := gc.http
