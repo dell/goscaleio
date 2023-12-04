@@ -93,7 +93,7 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 
 		body, _ := json.Marshal(bodyData)
 
-		req, err := http.NewRequest("POST", host+"rest/auth/login", bytes.NewBuffer(body))
+		req, err := http.NewRequest("POST", host+"/rest/auth/login", bytes.NewBuffer(body))
 		if err != nil {
 			return nil, err
 		}
