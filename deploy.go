@@ -572,14 +572,15 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 
 	u, _ := url.Parse(gc.host + "/im/types/Configuration/actions/install")
 	q := u.Query()
-	q.Set("noUpload", "false")
-	q.Set("noInstall", "false")
-	q.Set("noConfigure", "false")
-	q.Set("noLinuxDevValidation", "false")
-	q.Set("globalZeroPadPolicy", "false")
 
 	if gc.version == "4.0" {
 		q.Set("noSecurityBootstrap", "false")
+	} else {
+		q.Set("noUpload", "false")
+		q.Set("noInstall", "false")
+		q.Set("noConfigure", "false")
+		q.Set("noLinuxDevValidation", "false")
+		q.Set("globalZeroPadPolicy", "false")
 	}
 
 	if expansion {
