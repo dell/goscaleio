@@ -127,7 +127,10 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		responseBody := string(bs)
 
 		result := make(map[string]interface{})
-		json.Unmarshal([]byte(responseBody), &result)
+		jsonErr := json.Unmarshal([]byte(responseBody), &result)
+		if err != nil {
+			return nil, fmt.Errorf("Error For Uploading Package: %s", jsonErr)
+		}
 
 		token := result["access_token"].(string)
 
@@ -574,6 +577,10 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	q.Set("noConfigure", "false")
 	q.Set("noLinuxDevValidation", "false")
 	q.Set("globalZeroPadPolicy", "false")
+
+	if gc.version == "4.0" {
+		q.Set("noSecurityBootstrap", "false")
+	}
 
 	if expansion {
 		q.Set("extend", strconv.FormatBool(expansion))
