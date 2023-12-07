@@ -452,6 +452,7 @@ type Sdc struct {
 	SystemID           string  `json:"systemId"`
 	SdcApproved        bool    `json:"sdcApproved"`
 	SdcIP              string  `json:"SdcIp"`
+	SdcIPs             []string  `json:"SdcIps"`
 	OnVMWare           bool    `json:"onVmWare"`
 	SdcGUID            string  `json:"sdcGuid"`
 	MdmConnectionState string  `json:"mdmConnectionState"`
