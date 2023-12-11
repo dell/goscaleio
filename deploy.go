@@ -437,6 +437,8 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 		}
 
 		return &gatewayResponse, nil
+	} else if httpResp.StatusCode == 200 && responseString == "" {
+		return &gatewayResponse, errors.New("Wrong Primary MDM IP, Please provide valid Primary MDM IP")
 	}
 
 	if gc.version == "4.0" {
