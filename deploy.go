@@ -608,7 +608,7 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	u, _ := url.Parse(gc.host + "/im/types/Configuration/actions/install")
 	q := u.Query()
 
-	if gc.version == "4.0" {
+	if gc.version == "4.0" && !expansion {
 		q.Set("noSecurityBootstrap", "false")
 	} else {
 		q.Set("noUpload", "false")
