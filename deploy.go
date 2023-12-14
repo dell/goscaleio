@@ -994,7 +994,7 @@ func (gc *GatewayClient) CheckForCompletionQueueCommands(currentPhase string) (*
 
 	for _, mdmQueueCommandDetail := range mdmQueueCommandDetails {
 
-		if currentPhase == mdmQueueCommandDetail.AllowedPhase && mdmQueueCommandDetail.CommandState == "pending" {
+		if currentPhase == mdmQueueCommandDetail.AllowedPhase && (mdmQueueCommandDetail.CommandState == "pending" || mdmQueueCommandDetail.CommandState == "running") {
 			checkCompleted = "Running"
 			break
 		} else if currentPhase == mdmQueueCommandDetail.AllowedPhase && mdmQueueCommandDetail.CommandState == "failed" {
