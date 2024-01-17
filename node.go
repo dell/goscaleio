@@ -51,3 +51,16 @@ func (c *Client) GetNodeByFilters(key string, value string) ([]types.NodeDetails
 	}
 	return nodes, nil
 }
+
+func (c *Client) GetNodePoolByID(id int) (*types.NodePoolDetails, error) {
+	defer TimeSpent("GetNodeByID", time.Now())
+
+	path := fmt.Sprintf("/Api/V1/nodepool/%v", id)
+
+	var nodePool types.NodePoolDetails
+	err := c.getJSONWithRetry(http.MethodGet, path, nil, &nodePool)
+	if err != nil {
+		return nil, err
+	}
+	return &nodePool, nil
+}
