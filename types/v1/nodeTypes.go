@@ -12,6 +12,7 @@
 
 package goscaleio
 
+// NodeDetails defines struct for Node
 type NodeDetails struct {
 	RefID               string          `json:"refId"`
 	IPAddress           string          `json:"ipAddress"`
@@ -47,11 +48,13 @@ type NodeDetails struct {
 	EsxiMaintMode       int             `json:"esxiMaintMode"`
 }
 
+// DeviceGroupList defines struct for devices
 type DeviceGroupList struct {
 	DeviceGroup    []DeviceGroup `json:"deviceGroup"`
 	ManagedDevices []NodeDetails `json:"managedDevices"`
 }
 
+// DeviceGroup defines struct for nodepool
 type DeviceGroup struct {
 	GroupSeqID       int           `json:"groupSeqId"`
 	GroupName        string        `json:"groupName"`
@@ -63,11 +66,13 @@ type DeviceGroup struct {
 	GroupUserList    GroupUserList `json:"groupUserList"`
 }
 
+// GroupUserList defines struct for group users
 type GroupUserList struct {
 	TotalRecords int          `json:"totalRecords"`
 	GroupUsers   []GroupUsers `json:"groupUsers"`
 }
 
+// GroupUsers defines struct for group user
 type GroupUsers struct {
 	UserSeqID string `json:"userSeqId"`
 	UserName  string `json:"userName"`
@@ -77,16 +82,19 @@ type GroupUsers struct {
 	Enabled   bool   `json:"enabled"`
 }
 
+// DetailLink defines struct for links
 type DetailLink struct {
 	Title string `json:"title"`
 	Href  string `json:"href"`
 	Rel   string `json:"rel"`
 }
 
+// ManagedDeviceList defines struct for managed devices
 type ManagedDeviceList struct {
 	ManagedDevices []NodeDetails `json:"managedDevices"`
 }
 
+// NodePoolDetails defines struct for nodepools
 type NodePoolDetails struct {
 	DeviceGroup       DeviceGroup       `json:"deviceGroup"`
 	ManagedDeviceList ManagedDeviceList `json:"managedDeviceList"`

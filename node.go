@@ -21,6 +21,7 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// GetNodeByID gets the node details based on ID
 func (c *Client) GetNodeByID(id string) (*types.NodeDetails, error) {
 	defer TimeSpent("GetNodeByID", time.Now())
 
@@ -34,6 +35,7 @@ func (c *Client) GetNodeByID(id string) (*types.NodeDetails, error) {
 	return &node, nil
 }
 
+// GetAllNodes gets all the node details
 func (c *Client) GetAllNodes() ([]types.NodeDetails, error) {
 	defer TimeSpent("GetNodeByID", time.Now())
 
@@ -47,6 +49,7 @@ func (c *Client) GetAllNodes() ([]types.NodeDetails, error) {
 	return nodes, nil
 }
 
+// GetNodeByFilters gets the node details based on the provided filter
 func (c *Client) GetNodeByFilters(key string, value string) ([]types.NodeDetails, error) {
 	defer TimeSpent("GetNodeByFilters", time.Now())
 
@@ -64,6 +67,7 @@ func (c *Client) GetNodeByFilters(key string, value string) ([]types.NodeDetails
 	return nodes, nil
 }
 
+// GetNodePoolByID gets the nodepool details based on ID
 func (c *Client) GetNodePoolByID(id int) (*types.NodePoolDetails, error) {
 	defer TimeSpent("GetNodeByID", time.Now())
 
