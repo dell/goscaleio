@@ -1,4 +1,4 @@
-// Copyright © 2021 - 2022 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,4 +44,10 @@ func TestGetNodeByFilters(t *testing.T) {
 	allNodes, err := C.GetNodeByFilters("invalid", "invalid")
 	assert.NotNil(t, err)
 	assert.Nil(t, allNodes)
+}
+
+func TestGetNodePoolByID(t *testing.T) {
+	nodePool, err := C.GetNodePoolByID(-2)
+	assert.Nil(t, err)
+	assert.Equal(t, nodePool.DeviceGroup.GroupName, "")
 }
