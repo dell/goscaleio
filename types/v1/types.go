@@ -1086,12 +1086,12 @@ type SnapshotPolicy struct {
 
 // SnapshotPolicyCreate defines the struct for creating a Snapshot Policy
 type SnapshotPolicyCreateParam struct {
-	AutoSnapshotCreationCadenceInMin string    `json:"autoSnapshotCreationCadenceInMin"`
-	NumOfRetainedSnapshotsPerLevel   []string  `json:"numOfRetainedSnapshotsPerLevel"`
-	SnapshotAccessMode               string `json:"snapshotAccessMode,omitempty"`
+	AutoSnapshotCreationCadenceInMin string   `json:"autoSnapshotCreationCadenceInMin"`
+	NumOfRetainedSnapshotsPerLevel   []string `json:"numOfRetainedSnapshotsPerLevel"`
+	SnapshotAccessMode               string   `json:"snapshotAccessMode,omitempty"`
 	SecureSnapshots                  string   `json:"secureSnapshots,omitempty"`
-	Name                             string `json:"name"`
-	Paused                           string `json:"paused,omitempty"`
+	Name                             string   `json:"name"`
+	Paused                           string   `json:"paused,omitempty"`
 }
 
 // SnapShotPolicyCreateResp defines struct for the response when snapshot policy is created successfully
@@ -1101,18 +1101,18 @@ type SnapShotPolicyCreateResp struct {
 
 // SnapshotPolicyRenameParam defines the struct for renaming a Snapshot Policy
 type SnapshotPolicyRenameParam struct {
-	NewName                             string `json:"newName"`
+	NewName string `json:"newName"`
 }
 
 // SnapshotPolicyModifyParam defines the struct for modifying a Snapshot Policy
 type SnapshotPolicyModifyParam struct {
-	AutoSnapshotCreationCadenceInMin string    `json:"autoSnapshotCreationCadenceInMin"`
-	NumOfRetainedSnapshotsPerLevel   []string  `json:"numOfRetainedSnapshotsPerLevel"`
+	AutoSnapshotCreationCadenceInMin string   `json:"autoSnapshotCreationCadenceInMin"`
+	NumOfRetainedSnapshotsPerLevel   []string `json:"numOfRetainedSnapshotsPerLevel"`
 }
 
 // AssignVolumeToSnapshotPolicyParam defines the struct for assigning volume to a Snapshot Policy
 type AssignVolumeToSnapshotPolicyParam struct {
-	SourceVolumeId string    `json:"sourceVolumeId"`
+	SourceVolumeId            string `json:"sourceVolumeId"`
 	AutoSnapshotRemovalAction string `json:"autoSnapshotRemovalAction,omitempty"`
 }
 

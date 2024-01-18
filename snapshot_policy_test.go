@@ -23,7 +23,7 @@ import (
 )
 
 var (
-	ID2    string
+	ID2     string
 	errSnap error
 )
 
@@ -35,18 +35,18 @@ func TestCreateSnapshotPolicy(t *testing.T) {
 	cases := []testCase{
 		{
 			fs: &types.SnapshotPolicyCreateParam{
-				Name:               "testSnapshotPolicy",
+				Name:                             "testSnapshotPolicy",
 				AutoSnapshotCreationCadenceInMin: "5",
-				NumOfRetainedSnapshotsPerLevel: []string{"1"},
+				NumOfRetainedSnapshotsPerLevel:   []string{"1"},
 			},
 			expected: nil,
 		},
 		{
 			fs: &types.SnapshotPolicyCreateParam{
-				Name:               "testSnapshotPolicy2",
+				Name:                             "testSnapshotPolicy2",
 				AutoSnapshotCreationCadenceInMin: "5",
-				NumOfRetainedSnapshotsPerLevel: []string{"1"},
-				SnapshotAccessMode: "Invalid",
+				NumOfRetainedSnapshotsPerLevel:   []string{"1"},
+				SnapshotAccessMode:               "Invalid",
 			},
 			expected: errors.New("accessMode should get one of the following values: ReadWrite, ReadOnly, but its value is Invalid."),
 		},
@@ -131,24 +131,24 @@ func TestModifySnapshotPolicyName(t *testing.T) {
 
 func TestModifySnapshotPolicy(t *testing.T) {
 	type testCase struct {
-		id string
-		snap       *types.SnapshotPolicyModifyParam
+		id       string
+		snap     *types.SnapshotPolicyModifyParam
 		expected error
 	}
 	cases := []testCase{
 		{
-			id:       ID2,
+			id: ID2,
 			snap: &types.SnapshotPolicyModifyParam{
 				AutoSnapshotCreationCadenceInMin: "6",
-				NumOfRetainedSnapshotsPerLevel: []string{"2", "3"},
+				NumOfRetainedSnapshotsPerLevel:   []string{"2", "3"},
 			},
 			expected: nil,
 		},
 		{
-			id:       "Invalid",
+			id: "Invalid",
 			snap: &types.SnapshotPolicyModifyParam{
 				AutoSnapshotCreationCadenceInMin: "6",
-				NumOfRetainedSnapshotsPerLevel: []string{"2", "3"},
+				NumOfRetainedSnapshotsPerLevel:   []string{"2", "3"},
 			},
 			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
 		},
@@ -185,27 +185,27 @@ func TestModifySnapshotPolicy(t *testing.T) {
 
 func TestAssignSnapshotPolicy(t *testing.T) {
 	type testCase struct {
-		id string
-		snap       *types.AssignVolumeToSnapshotPolicyParam
+		id       string
+		snap     *types.AssignVolumeToSnapshotPolicyParam
 		expected error
 	}
 	cases := []testCase{
 		{
-			id:       ID2,
+			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
 				SourceVolumeId: "edba1bff00000001",
 			},
 			expected: nil,
 		},
 		{
-			id:       "Invalid",
+			id: "Invalid",
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
 				SourceVolumeId: "edba1bff00000001",
 			},
 			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
 		},
 		{
-			id:       ID2,
+			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
 				SourceVolumeId: "edba1bff000000",
 			},
@@ -244,39 +244,39 @@ func TestAssignSnapshotPolicy(t *testing.T) {
 
 func TestUnassignSnapshotPolicy(t *testing.T) {
 	type testCase struct {
-		id string
-		snap       *types.AssignVolumeToSnapshotPolicyParam
+		id       string
+		snap     *types.AssignVolumeToSnapshotPolicyParam
 		expected error
 	}
 	cases := []testCase{
 		{
-			id:       ID2,
+			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId: "edba1bff00000001",
+				SourceVolumeId:            "edba1bff00000001",
 				AutoSnapshotRemovalAction: "Remove",
 			},
 			expected: nil,
 		},
 		{
-			id:       "Invalid",
+			id: "Invalid",
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId: "edba1bff00000001",
+				SourceVolumeId:            "edba1bff00000001",
 				AutoSnapshotRemovalAction: "Remove",
 			},
 			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
 		},
 		{
-			id:       ID2,
+			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId: "edba1bff000000",
+				SourceVolumeId:            "edba1bff000000",
 				AutoSnapshotRemovalAction: "Remove",
 			},
 			expected: errors.New("Invalid volume. Please try again with a valid ID or name."),
 		},
 		{
-			id:       ID2,
+			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId: "edba1bff000000",
+				SourceVolumeId:            "edba1bff000000",
 				AutoSnapshotRemovalAction: "Invalid",
 			},
 			expected: errors.New("autoSnapshotRemovalAction should get one of the following values: Remove, Detach, but its value is Invalid."),
@@ -314,7 +314,7 @@ func TestUnassignSnapshotPolicy(t *testing.T) {
 
 func TestPauseSnapshotPolicy(t *testing.T) {
 	type testCase struct {
-		id string
+		id       string
 		expected error
 	}
 	cases := []testCase{
@@ -357,10 +357,9 @@ func TestPauseSnapshotPolicy(t *testing.T) {
 	}
 }
 
-
 func TestResumeSnapshotPolicy(t *testing.T) {
 	type testCase struct {
-		id string
+		id       string
 		expected error
 	}
 	cases := []testCase{
@@ -405,7 +404,7 @@ func TestResumeSnapshotPolicy(t *testing.T) {
 
 func TestDeleteSnapshotPolicy(t *testing.T) {
 	type testCase struct {
-		id string
+		id       string
 		expected error
 	}
 	cases := []testCase{

@@ -27,12 +27,11 @@ func TestCreateModifyDeleteSnapshotPolicy(t *testing.T) {
 	spName := fmt.Sprintf("%s-%s", testPrefix, "SnapPolicy")
 
 	snap := &types.SnapshotPolicyCreateParam{
-		Name:               spName,
+		Name:                             spName,
 		AutoSnapshotCreationCadenceInMin: "5",
-		NumOfRetainedSnapshotsPerLevel: []string{"1"},
-		SnapshotAccessMode: "ReadOnly",
-		Paused: "true",
-
+		NumOfRetainedSnapshotsPerLevel:   []string{"1"},
+		SnapshotAccessMode:               "ReadOnly",
+		Paused:                           "true",
 	}
 
 	// create the snapshot policy
@@ -45,7 +44,6 @@ func TestCreateModifyDeleteSnapshotPolicy(t *testing.T) {
 	_, err2 := system.CreateSnapshotPolicy(snap)
 	assert.NotNil(t, err2)
 
-
 	// modify snapshot policy name
 	err = system.RenameSnapshotPolicy(snapID, "SnapshotPolicyRenamed")
 	assert.Nil(t, err)
@@ -53,36 +51,52 @@ func TestCreateModifyDeleteSnapshotPolicy(t *testing.T) {
 	// modify other parameters of snapshot policy
 	snapModify := &types.SnapshotPolicyModifyParam{
 		AutoSnapshotCreationCadenceInMin: "6",
-		NumOfRetainedSnapshotsPerLevel: []string{"2","6"},
-
+		NumOfRetainedSnapshotsPerLevel:   []string{"2", "6"},
 	}
-	err = system.ModifySnapshotPolicy(snapModify,snapID)
+	err = system.ModifySnapshotPolicy(snapModify, snapID)
 	assert.Nil(t, err)
 
 	volID, err := createVolume(t, "")
 	assignVolume := &types.AssignVolumeToSnapshotPolicyParam{
 		SourceVolumeId: volID,
-
 	}
 
 	// Assign and unassign volume to Snapshot Policy
-	err = system.AssignVolumeToSnapshotPolicy(assignVolume,snapID)
+	err = system.AssignVolumeToSnapshotPolicy(assignVolume, snapID)
 	assert.Nil(t, err)
+
+	assignVolume = &types.AssignVolumeToSnapshotPolicyParam{
+		SourceVolumeId: "Invalid",
+	}
+	err = system.AssignVolumeToSnapshotPolicy(assignVolume, snapID)
+	assert.NotNil(t, err)
 
 	unassignVolume := &types.AssignVolumeToSnapshotPolicyParam{
-		SourceVolumeId: volID,
+		SourceVolumeId:            volID,
 		AutoSnapshotRemovalAction: "Remove",
-
 	}
-	err = system.UnassignVolumeFromSnapshotPolicy(unassignVolume,snapID)
+	err = system.UnassignVolumeFromSnapshotPolicy(unassignVolume, snapID)
 	assert.Nil(t, err)
+
+	unassignVolume = &types.AssignVolumeToSnapshotPolicyParam{
+		SourceVolumeId:            volID,
+		AutoSnapshotRemovalAction: "Invalid",
+	}
+	err = system.UnassignVolumeFromSnapshotPolicy(unassignVolume, snapID)
+	assert.NotNil(t, err)
 
 	// Resume and Pause the SnapshotPolicy
 	err = system.ResumeSnapshotPolicy(snapID)
 	assert.Nil(t, err)
 
+	err = system.ResumeSnapshotPolicy("Invalid")
+	assert.NotNil(t, err)
+
 	err = system.PauseSnapshotPolicy(snapID)
 	assert.Nil(t, err)
+
+	err = system.PauseSnapshotPolicy("Invalid")
+	assert.NotNil(t, err)
 
 	// delete the snapshot policy
 	err = system.RemoveSnapshotPolicy(snapID)
