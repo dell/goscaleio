@@ -14,6 +14,7 @@ package goscaleio
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"net/http"
 	"net/http/httptest"
@@ -139,5 +140,94 @@ func TestGetNodeByFilters(t *testing.T) {
 
 	nodeDetails, err := client.GetNodeByFilters("ipAddress", "1.1.1.1")
 	assert.Equal(t, len(nodeDetails), 0)
+	assert.NotNil(t, err)
+}
+
+func TestGetNodePoolByName(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer svr.Close()
+
+	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+	client.configConnect.Version = "4.5"
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	NodePoolDetails, err := client.GetNodePoolByName("nodepool")
+	assert.Nil(t, NodePoolDetails)
+	assert.NotNil(t, err)
+}
+
+func TestGetNodePoolByNameError(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintln(w, `{"error":"Resource not found"}`)
+	}))
+	defer svr.Close()
+
+	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+	client.configConnect.Version = "4.5"
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	NodePoolDetails, err := client.GetNodePoolByName("nodepool")
+	assert.Nil(t, NodePoolDetails)
+	assert.NotNil(t, err)
+}
+
+func TestGetNodePoolByIDNegative(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintln(w, `{"error":"Resource not found"}`)
+	}))
+	defer svr.Close()
+
+	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+	client.configConnect.Version = "4.5"
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	NodePoolDetails, err := client.GetNodePoolByID(-100)
+	assert.Nil(t, NodePoolDetails)
+	assert.NotNil(t, err)
+}
+
+func TestGetNodeByIDNegative(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprintln(w, `{"error":"Resource not found"}`)
+	}))
+	defer svr.Close()
+
+	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+	client.configConnect.Version = "4.5"
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	node, err := client.GetNodeByID("-100")
+	assert.Nil(t, node)
+	assert.NotNil(t, err)
+}
+
+func TestGetAllNodesNegative(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
+	}))
+	defer svr.Close()
+
+	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+	client.configConnect.Version = "4.5"
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nodes, err := client.GetAllNodes()
+	assert.Nil(t, nodes)
 	assert.NotNil(t, err)
 }

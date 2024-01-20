@@ -51,3 +51,15 @@ func TestGetNodePoolByID(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, nodePool.DeviceGroup.GroupName, "")
 }
+
+func TestGetNodePoolByName(t *testing.T) {
+	nodePool, err := C.GetNodePoolByName(invalidIdentifier)
+	assert.NotNil(t, err)
+	assert.Nil(t, nodePool)
+}
+
+func TestGetAllNodePools(t *testing.T) {
+	allNodePools, err := C.GetAllNodePools()
+	assert.Nil(t, err)
+	assert.NotNil(t, allNodePools)
+}

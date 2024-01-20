@@ -100,3 +100,8 @@ type NodePoolDetails struct {
 	ManagedDeviceList ManagedDeviceList `json:"managedDeviceList"`
 	GroupUserList     GroupUserList     `json:"groupUserList"`
 }
+
+// NodePoolDetailsFilter defines struct for nodepools
+type NodePoolDetailsFilter struct {
+	NodePoolDetails []DeviceGroup `json:"deviceGroup"`
+}

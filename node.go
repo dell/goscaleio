@@ -69,7 +69,7 @@ func (c *Client) GetNodeByFilters(key string, value string) ([]types.NodeDetails
 
 // GetNodePoolByID gets the nodepool details based on ID
 func (c *Client) GetNodePoolByID(id int) (*types.NodePoolDetails, error) {
-	defer TimeSpent("GetNodeByID", time.Now())
+	defer TimeSpent("GetNodePoolByID", time.Now())
 
 	path := fmt.Sprintf("/Api/V1/nodepool/%v", id)
 
@@ -78,5 +78,38 @@ func (c *Client) GetNodePoolByID(id int) (*types.NodePoolDetails, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &nodePool, nil
+}
+
+// GetNodePoolByName gets the nodepool details based on name
+func (c *Client) GetNodePoolByName(name string) (*types.NodePoolDetails, error) {
+	defer TimeSpent("GetNodePoolByName", time.Now())
+
+	nodePools, err := c.GetAllNodePools()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, nodePool := range nodePools.NodePoolDetails {
+		if nodePool.GroupName == name {
+			return c.GetNodePoolByID(nodePool.GroupSeqID)
+		}
+	}
+	return nil, errors.New("no node pool found with name " + name)
+}
+
+// GetAllNodePools gets all the nodepool details
+func (c *Client) GetAllNodePools() (*types.NodePoolDetailsFilter, error) {
+	defer TimeSpent("GetAllNodePools", time.Now())
+
+	path := fmt.Sprintf("/Api/V1/nodepool")
+
+	var nodePools types.NodePoolDetailsFilter
+	err := c.getJSONWithRetry(http.MethodGet, path, nil, &nodePools)
+	if err != nil {
+		return nil, err
+	}
+
+	return &nodePools, nil
 }
