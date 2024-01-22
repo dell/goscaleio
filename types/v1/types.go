@@ -449,18 +449,18 @@ type ProtectionDomainResp struct {
 
 // Sdc defines struct for PowerFlex Sdc
 type Sdc struct {
-	SystemID           string  `json:"systemId"`
-	SdcApproved        bool    `json:"sdcApproved"`
-	SdcIP              string  `json:"SdcIp"`
-	SdcIPs             []string  `json:"SdcIps"`
-	OnVMWare           bool    `json:"onVmWare"`
-	SdcGUID            string  `json:"sdcGuid"`
-	MdmConnectionState string  `json:"mdmConnectionState"`
-	Name               string  `json:"name"`
-	PerfProfile        string  `json:"perfProfile"`
-	OSType             string  `json:"osType"`
-	ID                 string  `json:"id"`
-	Links              []*Link `json:"links"`
+	SystemID           string   `json:"systemId"`
+	SdcApproved        bool     `json:"sdcApproved"`
+	SdcIP              string   `json:"SdcIp"`
+	SdcIPs             []string `json:"SdcIps"`
+	OnVMWare           bool     `json:"onVmWare"`
+	SdcGUID            string   `json:"sdcGuid"`
+	MdmConnectionState string   `json:"mdmConnectionState"`
+	Name               string   `json:"name"`
+	PerfProfile        string   `json:"perfProfile"`
+	OSType             string   `json:"osType"`
+	ID                 string   `json:"id"`
+	Links              []*Link  `json:"links"`
 }
 
 // SdsIP defines struct for SdsIP
@@ -1082,6 +1082,38 @@ type SnapshotPolicy struct {
 	Name                                  string  `json:"name"`
 	ID                                    string  `json:"id"`
 	Links                                 []*Link `json:"links"`
+}
+
+// SnapshotPolicyCreate defines the struct for creating a Snapshot Policy
+type SnapshotPolicyCreateParam struct {
+	AutoSnapshotCreationCadenceInMin string   `json:"autoSnapshotCreationCadenceInMin"`
+	NumOfRetainedSnapshotsPerLevel   []string `json:"numOfRetainedSnapshotsPerLevel"`
+	SnapshotAccessMode               string   `json:"snapshotAccessMode,omitempty"`
+	SecureSnapshots                  string   `json:"secureSnapshots,omitempty"`
+	Name                             string   `json:"name"`
+	Paused                           string   `json:"paused,omitempty"`
+}
+
+// SnapShotPolicyCreateResp defines struct for the response when snapshot policy is created successfully
+type SnapShotPolicyCreateResp struct {
+	ID string `json:"id"`
+}
+
+// SnapshotPolicyRenameParam defines the struct for renaming a Snapshot Policy
+type SnapshotPolicyRenameParam struct {
+	NewName string `json:"newName"`
+}
+
+// SnapshotPolicyModifyParam defines the struct for modifying a Snapshot Policy
+type SnapshotPolicyModifyParam struct {
+	AutoSnapshotCreationCadenceInMin string   `json:"autoSnapshotCreationCadenceInMin"`
+	NumOfRetainedSnapshotsPerLevel   []string `json:"numOfRetainedSnapshotsPerLevel"`
+}
+
+// AssignVolumeToSnapshotPolicyParam defines the struct for assigning volume to a Snapshot Policy
+type AssignVolumeToSnapshotPolicyParam struct {
+	SourceVolumeId            string `json:"sourceVolumeId"`
+	AutoSnapshotRemovalAction string `json:"autoSnapshotRemovalAction,omitempty"`
 }
 
 // SnapshotPolicyQueryIDByKeyParam defines struct for SnapshotPolicyQueryIDByKeyParam
