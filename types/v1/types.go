@@ -187,8 +187,10 @@ type RenameMdm struct {
 
 // Link defines struct of Link
 type Link struct {
-	Rel  string `json:"rel"`
-	HREF string `json:"href"`
+	Rel   string `json:"rel"`
+	HREF  string `json:"href"`
+	Title string `json:"title,omitempty"`
+	Type  string `json:"type,omitempty"`
 }
 
 // BWC defines struct of BWC
