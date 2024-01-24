@@ -53,7 +53,7 @@ func (c *Client) GetAllTemplates() ([]types.TemplateDetails, error) {
 func (c *Client) GetTemplateByFilters(key string, value string) ([]types.TemplateDetails, error) {
 	defer TimeSpent("GetTemplateByFilters", time.Now())
 
-	path := fmt.Sprintf("/Api/V1/template?filter=eq,%v,%v", key, value)
+	path := `/Api/V1/template?filter=`+key+`%20eq%20%22`+value+`%22`
 
 	var templates types.TemplateDetailsFilter
 	err := c.getJSONWithRetry(http.MethodGet, path, nil, &templates)
