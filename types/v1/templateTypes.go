@@ -677,10 +677,10 @@ type AccelerationPool struct {
 }
 type ProtectionDomainSettings struct {
 	General          General            `json:"general,omitempty"`
-	Statistics       Statistics         `json:"statistics,omitempty"`
+	Statistics       StatisticsDetails  `json:"statistics,omitempty"`
 	StoragePoolList  []StoragePoolList  `json:"storage_pool_list,omitempty"`
 	SdsList          []SdsListDetails   `json:"sds_list,omitempty"`
-	SdrList          []SdsListDetails   `json:"sdr_list,omitempty"`
+	SdrList          []SdrListDetails   `json:"sdr_list,omitempty"`
 	AccelerationPool []AccelerationPool `json:"acceleration_pool,omitempty"`
 }
 type FaultSetSettings struct {
