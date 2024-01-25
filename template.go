@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
@@ -53,7 +54,9 @@ func (c *Client) GetAllTemplates() ([]types.TemplateDetails, error) {
 func (c *Client) GetTemplateByFilters(key string, value string) ([]types.TemplateDetails, error) {
 	defer TimeSpent("GetTemplateByFilters", time.Now())
 
-	path := `/Api/V1/template?filter=`+key+`%20eq%20%22`+value+`%22`
+	encodedValue := url.QueryEscape(value)
+
+	path := `/Api/V1/template?filter=` + key + `%20eq%20%22` + encodedValue + `%22`
 
 	var templates types.TemplateDetailsFilter
 	err := c.getJSONWithRetry(http.MethodGet, path, nil, &templates)
