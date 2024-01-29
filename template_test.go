@@ -100,6 +100,43 @@ func TestGetTemplateByFilters(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestGetTemplateByIDNegative(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
+	}))
+	defer svr.Close()
+
+	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+	client.configConnect.Version = "4.5"
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	templates, err := client.GetTemplateByID("Test")
+	assert.Nil(t, templates)
+	assert.NotNil(t, err)
+}
+
+
+func TestGetTemplateByFiltersNegative(t *testing.T) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
+	}))
+	defer svr.Close()
+
+	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+	client.configConnect.Version = "4.5"
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	templates, err := client.GetTemplateByFilters("Name", "Test")
+	assert.Nil(t, templates)
+	assert.NotNil(t, err)
+}
+
 func TestGetAllTemplatesNegative(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -113,7 +150,7 @@ func TestGetAllTemplatesNegative(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nodes, err := client.GetAllTemplates()
-	assert.Nil(t, nodes)
+	templates, err := client.GetAllTemplates()
+	assert.Nil(t, templates)
 	assert.NotNil(t, err)
 }
