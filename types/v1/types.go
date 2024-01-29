@@ -1,4 +1,4 @@
-// Copyright © 2019 - 2023 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2019 - 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -187,8 +187,10 @@ type RenameMdm struct {
 
 // Link defines struct of Link
 type Link struct {
-	Rel  string `json:"rel"`
-	HREF string `json:"href"`
+	Rel   string `json:"rel"`
+	HREF  string `json:"href"`
+	Title string `json:"title,omitempty"`
+	Type  string `json:"type,omitempty"`
 }
 
 // BWC defines struct of BWC
