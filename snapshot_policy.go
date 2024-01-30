@@ -116,3 +116,15 @@ func (system *System) ResumeSnapshotPolicy(id string) error {
 	}
 	return nil
 }
+
+// GetSourceVolume returns a list of volumes assigned to snapshot policy
+func (system *System) GetSourceVolume(id string) ([]*types.Volume, error) {
+	var volumes []*types.Volume
+	path := fmt.Sprintf("/api/instances/SnapshotPolicy::%v/relationships/SourceVolume", id)
+	err := system.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &volumes)
+	if err != nil {
+		return nil, err
+	}
+	return volumes, nil
+}
