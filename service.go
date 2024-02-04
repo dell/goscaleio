@@ -181,9 +181,9 @@ func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string) (*types.Serv
 	}
 }
 
-func (gc *GatewayClient) GetServiceDetailsByName(value, filter string) (*types.ServiceResponse, error) {
+func (gc *GatewayClient) GetServiceDetailsByFilter(value, filter string) ([]types.ServiceResponse, error) {
 
-	defer TimeSpent("GetServiceDetailsByName", time.Now())
+	defer TimeSpent("GetServiceDetailsByFilter", time.Now())
 
 	encodedValue := url.QueryEscape(value)
 
@@ -223,7 +223,7 @@ func (gc *GatewayClient) GetServiceDetailsByName(value, filter string) (*types.S
 			return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
 		}
 
-		return &deploymentResponse[0], nil
+		return deploymentResponse, nil
 
 	} else {
 		var deploymentResponse types.ServiceFailedResponse

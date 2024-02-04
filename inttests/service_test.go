@@ -46,12 +46,12 @@ func TestGetDeployeServiceByName(t *testing.T) {
 	assert.NotNil(t, templates)
 
 	if len(templates) > 0 {
-		template, err := GC.GetServiceDetailsByName(templates[0].DeploymentName, "name")
+		template, err := GC.GetServiceDetailsByFilter(templates[0].DeploymentName, "name")
 		assert.Nil(t, err)
 		assert.NotNil(t, template)
 	}
 
-	template, err := GC.GetServiceDetailsByName("invalid", "invalid")
+	template, err := GC.GetServiceDetailsByFilter("invalid", "invalid")
 	assert.NotNil(t, err)
 	assert.Nil(t, template)
 }
