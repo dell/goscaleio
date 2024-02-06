@@ -66,11 +66,11 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 		}
 
 		deploymentPayload := map[string]interface{}{
-			"deploymentName":       deploymentName,
-			"deploymentDesc":       deploymentDesc,
-			"serviceTemplate":      templateData,
-			"updateServerFirmware": true,
-			"firmwareRepositoryId": firmwareRepositoryId, //TODO
+			"deploymentName":        deploymentName,
+			"deploymentDescription": deploymentDesc,
+			"serviceTemplate":       templateData,
+			"updateServerFirmware":  true,
+			"firmwareRepositoryId":  firmwareRepositoryId, //TODO
 		}
 
 		deploymentPayloadJson, _ := json.Marshal(deploymentPayload)
@@ -357,7 +357,7 @@ func (gc *GatewayClient) DeleteService(serviceId string) (*types.ServiceResponse
 
 	defer TimeSpent("DeleteService", time.Now())
 
-	req, httpError := http.NewRequest("DELETE", gc.host+"/Api/V1/Deployment/"+serviceId, nil)
+	req, httpError := http.NewRequest("DELETE", gc.host+"/Api/V1/Deployment/"+serviceId+"?serversInInventory=remove&resourceState=managed", nil)
 	if httpError != nil {
 		return nil, httpError
 	}
