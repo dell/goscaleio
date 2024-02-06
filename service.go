@@ -17,11 +17,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
+	log "github.com/sirupsen/logrus"
 )
 
 // DeployService used to deploy service
@@ -103,6 +105,8 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 
 			parseError := json.Unmarshal([]byte(responseString), &deploymentResponse)
 
+			deploymentResponse.StatusCode = 200
+
 			if parseError != nil {
 				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
 			}
@@ -113,6 +117,8 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 			var deploymentResponse types.ServiceFailedResponse
 
 			parseError := json.Unmarshal([]byte(responseString), &deploymentResponse)
+
+			deploymentResponse.StatusCode = 400
 
 			if parseError != nil {
 				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
@@ -126,9 +132,61 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 	return nil, nil
 }
 
-func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string) (*types.ServiceResponse, error) {
+func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken bool) (*types.ServiceResponse, error) {
 
 	defer TimeSpent("GetServiceDetailsByID", time.Now())
+
+	if newToken {
+		bodyData := map[string]interface{}{
+			"username": gc.username,
+			"password": gc.password,
+		}
+
+		body, _ := json.Marshal(bodyData)
+
+		req, err := http.NewRequest("POST", gc.host+"/rest/auth/login", bytes.NewBuffer(body))
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Add("Content-Type", "application/json")
+
+		resp, err := gc.http.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				doLog(log.WithError(err).Error, "")
+			}
+		}()
+
+		// parse the response
+		switch {
+		case resp == nil:
+			return nil, errNilReponse
+		case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
+			return nil, gc.api.ParseJSONError(resp)
+		}
+
+		bs, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		responseBody := string(bs)
+
+		result := make(map[string]interface{})
+		jsonErr := json.Unmarshal([]byte(responseBody), &result)
+		if err != nil {
+			return nil, fmt.Errorf("Error For Uploading Package: %s", jsonErr)
+		}
+
+		token := result["access_token"].(string)
+
+		gc.token = token
+	}
 
 	path := fmt.Sprintf("/Api/V1/Deployment/%v", deploymentID)
 
@@ -181,7 +239,7 @@ func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string) (*types.Serv
 	}
 }
 
-func (gc *GatewayClient) GetServiceDetailsByFilter(value, filter string) ([]types.ServiceResponse, error) {
+func (gc *GatewayClient) GetServiceDetailsByFilter(filter, value string) ([]types.ServiceResponse, error) {
 
 	defer TimeSpent("GetServiceDetailsByFilter", time.Now())
 
@@ -289,4 +347,44 @@ func (gc *GatewayClient) GetAllServiceDetails() ([]types.ServiceResponse, error)
 
 		return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", deploymentResponse.Messages[0].DisplayMessage)
 	}
+}
+
+func (gc *GatewayClient) DeleteService(serviceId string) (*types.ServiceResponse, error) {
+
+	var deploymentResponse types.ServiceResponse
+
+	deploymentResponse.StatusCode = 400
+
+	defer TimeSpent("DeleteService", time.Now())
+
+	req, httpError := http.NewRequest("DELETE", gc.host+"/Api/V1/Deployment/"+serviceId, nil)
+	if httpError != nil {
+		return nil, httpError
+	}
+
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+
+		setCookie(req.Header, gc.host)
+
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return nil, httpRespError
+	}
+
+	if httpResp.StatusCode == 204 {
+
+		deploymentResponse.StatusCode = 200
+
+		return &deploymentResponse, nil
+	}
+
+	return &deploymentResponse, nil
 }

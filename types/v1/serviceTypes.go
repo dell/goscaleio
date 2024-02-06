@@ -3,6 +3,7 @@ package goscaleio
 type ServiceFailedResponse struct {
 	DetailMessage string     `json:"detailMessage,omitempty"`
 	Status        int        `json:"status,omitempty"`
+	StatusCode    int        `json:"statusCode,omitempty"`
 	Timestamp     string     `json:"timestamp,omitempty"`
 	Error         string     `json:"error,omitempty"`
 	Path          string     `json:"path,omitempty"`
@@ -34,6 +35,7 @@ type ServiceResponse struct {
 	DeploymentScheduledDate      string                       `json:"deploymentScheduledDate,omitempty"`
 	DeploymentStartedDate        string                       `json:"deploymentStartedDate,omitempty"`
 	DeploymentFinishedDate       string                       `json:"deploymentFinishedDate,omitempty"`
+	ServiceTemplate              TemplateDetails              `json:"serviceTemplate"`
 	ScheduleDate                 string                       `json:"scheduleDate,omitempty"`
 	Status                       string                       `json:"status,omitempty"`
 	Compliant                    bool                         `json:"compliant,omitempty"`
@@ -84,4 +86,5 @@ type ServiceResponse struct {
 	Error                        string                       `json:"error,omitempty"`
 	Path                         string                       `json:"path,omitempty"`
 	Messages                     []Messages                   `json:"messages,omitempty"`
+	StatusCode                   int                          `json:"statusCode,omitempty"`
 }

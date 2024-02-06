@@ -67,7 +67,7 @@ func TestGetDeployeServiceByID(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err = GC.GetServiceDetailsByID(tc.id)
+			_, err = GC.GetServiceDetailsByID(tc.id,false)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Getting template by ID did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
@@ -109,7 +109,7 @@ func TestGetDeployeServiceByIDNegative(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	templates, err := client.GetServiceDetailsByID("Test")
+	templates, err := client.GetServiceDetailsByID("Test",false)
 	assert.Nil(t, templates)
 	assert.NotNil(t, err)
 }
