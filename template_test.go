@@ -118,7 +118,6 @@ func TestGetTemplateByIDNegative(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-
 func TestGetTemplateByFiltersNegative(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)

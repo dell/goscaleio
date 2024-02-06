@@ -1086,7 +1086,7 @@ type SnapshotPolicy struct {
 	Links                                 []*Link `json:"links"`
 }
 
-// SnapshotPolicyCreate defines the struct for creating a Snapshot Policy
+// SnapshotPolicyCreateParam defines the struct for creating a Snapshot Policy
 type SnapshotPolicyCreateParam struct {
 	AutoSnapshotCreationCadenceInMin string   `json:"autoSnapshotCreationCadenceInMin"`
 	NumOfRetainedSnapshotsPerLevel   []string `json:"numOfRetainedSnapshotsPerLevel"`

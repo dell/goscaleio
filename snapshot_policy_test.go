@@ -446,3 +446,48 @@ func TestDeleteSnapshotPolicy(t *testing.T) {
 		})
 	}
 }
+
+func TestGetSourceVolume(t *testing.T) {
+	type testCase struct {
+		id       string
+		expected error
+	}
+	cases := []testCase{
+		{
+			id:       ID2,
+			expected: nil,
+		},
+		{
+			id:       "Invalid",
+			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
+		},
+	}
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	}))
+	defer svr.Close()
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(ts *testing.T) {
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+			}
+
+			_, err2 := s.GetSourceVolume(tc.id)
+			if err2 != nil {
+				if tc.expected == nil {
+					t.Errorf("Assigning volume to snapshot policy did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
+				} else {
+					if err2.Error() != tc.expected.Error() {
+						t.Errorf("Assigning volume to snapshot policy did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
+					}
+				}
+			}
+		})
+	}
+}
