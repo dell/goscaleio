@@ -30,12 +30,15 @@ func TestGetAllDeployeService(t *testing.T) {
 	assert.NotNil(t, templates)
 
 	if len(templates) > 0 {
-		template, err := GC.GetServiceDetailsByID(templates[0].ID)
+		template, err := GC.GetServiceDetailsByID(templates[0].ID, false)
 		assert.Nil(t, err)
 		assert.NotNil(t, template)
+
+		_, err = GC.UpdateService(templates[0].ID, "Test-Update - Krunal", "Test-Update - Krunal", 1)
+		assert.Nil(t, err)
 	}
 
-	template, err := GC.GetServiceDetailsByID(invalidIdentifier)
+	template, err := GC.GetServiceDetailsByID(invalidIdentifier, false)
 	assert.NotNil(t, err)
 	assert.Nil(t, template)
 }

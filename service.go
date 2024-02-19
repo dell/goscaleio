@@ -23,11 +23,12 @@ import (
 	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 )
 
 // DeployService used to deploy service
-func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTemplateID, firmwareRepositoryId string) (*types.ServiceResponse, error) {
+func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTemplateID, firmwareRepositoryID string) (*types.ServiceResponse, error) {
 	defer TimeSpent("DeployService", time.Now())
 
 	path := fmt.Sprintf("/Api/V1/ServiceTemplate/%v?forDeployment=true", serviceTemplateID)
@@ -70,7 +71,7 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 			"deploymentDescription": deploymentDesc,
 			"serviceTemplate":       templateData,
 			"updateServerFirmware":  true,
-			"firmwareRepositoryId":  firmwareRepositoryId, //TODO
+			"firmwareRepositoryId":  firmwareRepositoryID, //TODO
 		}
 
 		deploymentPayloadJson, _ := json.Marshal(deploymentPayload)
@@ -130,6 +131,226 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 	}
 
 	return nil, nil
+}
+
+func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentDesc string, nodes int) (*types.ServiceResponse, error) {
+	defer TimeSpent("UpdateService", time.Now())
+
+	path := fmt.Sprintf("/Api/V1/Deployment/%v", deploymentID)
+
+	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	if httpError != nil {
+		return nil, httpError
+	}
+
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+
+		setCookie(req.Header, gc.host)
+
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return nil, httpRespError
+	}
+
+	responseString, _ := extractString(httpResp)
+
+	if httpResp.StatusCode == 200 {
+
+		var deploymentPayloadJson []byte
+
+		if nodes > 0 {
+
+			var deploymentData map[string]interface{}
+
+			uuid := uuid.New().String()
+
+			parseError := json.Unmarshal([]byte(responseString), &deploymentData)
+			if parseError != nil {
+				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
+			}
+
+			deploymentData["deploymentName"] = deploymentName
+
+			deploymentData["deploymentDescription"] = deploymentDesc
+
+			// Access the "components" field
+			serviceTemplate, ok := deploymentData["serviceTemplate"].(map[string]interface{})
+			if !ok {
+				fmt.Println("Error: serviceTemplate field not found or not a map[string]interface{}")
+				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", ok)
+			}
+
+			components, ok := serviceTemplate["components"].([]interface{})
+			if !ok {
+				fmt.Println("Error: components field not found or not a []interface{}")
+				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", ok)
+			}
+
+			// Find the component with type "SERVER"
+			var clonedComponent map[string]interface{}
+
+			for _, comp := range components {
+				comp := comp.(map[string]interface{})
+				if comp["type"].(string) == "SERVER" {
+					clonedComponent = comp
+					break
+				}
+			}
+
+			// Modify ID and GUID of the cloned component
+			clonedComponent["id"] = uuid
+			clonedComponent["name"] = uuid
+			clonedComponent["brownfield"] = false
+
+			clonedComponent["identifier"] = nil
+			clonedComponent["asmGUID"] = nil
+			clonedComponent["puppetCertName"] = nil
+			clonedComponent["osPuppetCertName"] = nil
+			clonedComponent["managementIpAddress"] = nil
+
+			resources, ok := clonedComponent["resources"].([]interface{})
+			if !ok {
+				fmt.Println("Error: components field not found or not a []interface{}")
+				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", ok)
+			}
+
+			excludeList := map[string]bool{
+				"razor_image":         true,
+				"scaleio_enabled":     true,
+				"scaleio_role":        true,
+				"compression_enabled": true,
+				"replication_enabled": true,
+			}
+
+			for _, comp := range resources {
+				comp := comp.(map[string]interface{})
+				if comp["id"].(string) == "asm::server" {
+
+					parameters, ok := comp["parameters"].([]interface{})
+					if !ok {
+						fmt.Println("Error: components field not found or not a []interface{}")
+						return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", ok)
+					}
+
+					for _, parameter := range parameters {
+						parameter := parameter.(map[string]interface{})
+						if !excludeList[parameter["id"].(string)] {
+							parameter["guid"] = nil
+							parameter["value"] = nil
+						}
+					}
+				}
+			}
+
+			clonedComponent["resources"] = resources
+
+			// Append the cloned component back to the components array
+			components = append(components, clonedComponent)
+
+			serviceTemplate["components"] = components
+
+			deploymentData["scaleUp"] = true
+			deploymentData["retry"] = true
+
+			deploymentPayloadJson, _ = json.Marshal(deploymentData)
+
+		} else {
+
+			deploymentResponse, jsonParseError := jsonToMap(responseString)
+			if jsonParseError != nil {
+				return nil, jsonParseError
+			}
+
+			deploymentResponse["deploymentName"] = deploymentName
+
+			deploymentResponse["deploymentDescription"] = deploymentDesc
+
+			deploymentPayloadJson, _ = json.Marshal(deploymentResponse)
+		}
+
+		req, httpError := http.NewRequest("PUT", gc.host+"/Api/V1/Deployment/"+deploymentID, bytes.NewBuffer(deploymentPayloadJson))
+		if httpError != nil {
+			return nil, httpError
+		}
+		if gc.version == "4.0" {
+			req.Header.Set("Authorization", "Bearer "+gc.token)
+
+			setCookie(req.Header, gc.host)
+		} else {
+			req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		client := gc.http
+		httpResp, httpRespError := client.Do(req)
+		if httpRespError != nil {
+			return nil, httpRespError
+		}
+
+		responseString, error := extractString(httpResp)
+		if error != nil {
+			return nil, fmt.Errorf("Error Extracting Response: %s", error)
+		}
+
+		if httpResp.StatusCode == 200 {
+
+			var deploymentResponse types.ServiceResponse
+
+			parseError := json.Unmarshal([]byte(responseString), &deploymentResponse)
+
+			deploymentResponse.StatusCode = 200
+
+			if parseError != nil {
+				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
+			}
+
+			return &deploymentResponse, nil
+
+		} else {
+			var deploymentResponse types.ServiceFailedResponse
+
+			parseError := json.Unmarshal([]byte(responseString), &deploymentResponse)
+
+			deploymentResponse.StatusCode = 400
+
+			if parseError != nil {
+				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
+			}
+
+			return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", deploymentResponse.Messages[0].DisplayMessage)
+		}
+
+		//return nil, fmt.Errorf("Error While Parsing Response Data For Deployment:")
+
+	} else {
+		var deploymentResponse types.ServiceFailedResponse
+
+		parseError := json.Unmarshal([]byte(responseString), &deploymentResponse)
+
+		if parseError != nil {
+			return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
+		}
+
+		return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", deploymentResponse.Messages[0].DisplayMessage)
+	}
+}
+
+// Function to check if string is not present in list
+func contains(list []string, str string) bool {
+	for _, s := range list {
+		if s == str {
+			return true
+		}
+	}
+	return false
 }
 
 func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken bool) (*types.ServiceResponse, error) {
