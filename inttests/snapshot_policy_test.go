@@ -65,6 +65,10 @@ func TestCreateModifyDeleteSnapshotPolicy(t *testing.T) {
 	err = system.AssignVolumeToSnapshotPolicy(assignVolume, snapID)
 	assert.Nil(t, err)
 
+	vol, err2 := system.GetSourceVolume(snapID)
+	assert.Nil(t, err2)
+	assert.NotNil(t, vol)
+
 	assignVolume = &types.AssignVolumeToSnapshotPolicyParam{
 		SourceVolumeId: "Invalid",
 	}
