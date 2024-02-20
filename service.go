@@ -164,9 +164,20 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 
 	if httpResp.StatusCode == 200 {
 
+		var deploymentResponse types.ServiceResponse
+
+		parseError := json.Unmarshal([]byte(responseString), &deploymentResponse)
+		if parseError != nil {
+			return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
+		}
+
+		deployedNodes := deploymentResponse.ServiceTemplate.ServerCount
+
 		var deploymentPayloadJson []byte
 
-		if nodes > 0 {
+		nodeDiff := nodes - deployedNodes
+
+		if nodeDiff > 0 && nodeDiff == 1 {
 
 			var deploymentData map[string]interface{}
 
@@ -184,14 +195,12 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 			// Access the "components" field
 			serviceTemplate, ok := deploymentData["serviceTemplate"].(map[string]interface{})
 			if !ok {
-				fmt.Println("Error: serviceTemplate field not found or not a map[string]interface{}")
-				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", ok)
+				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment")
 			}
 
 			components, ok := serviceTemplate["components"].([]interface{})
 			if !ok {
-				fmt.Println("Error: components field not found or not a []interface{}")
-				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", ok)
+				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment")
 			}
 
 			// Find the component with type "SERVER"
@@ -225,8 +234,7 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 			// Deep copy resources
 			resources, ok := clonedComponent["resources"].([]interface{})
 			if !ok {
-				fmt.Println("Error: resources field not found or not a []interface{}")
-				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", ok)
+				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment")
 			}
 
 			clonedResources := make([]interface{}, len(resources))
@@ -257,8 +265,7 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 
 					parameters, ok := comp["parameters"].([]interface{})
 					if !ok {
-						fmt.Println("Error: components field not found or not a []interface{}")
-						return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", ok)
+						return nil, fmt.Errorf("Error While Parsing Response Data For Deployment")
 					}
 
 					clonedParams := make([]interface{}, len(parameters))
@@ -306,7 +313,7 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 			// Marshal deploymentData to JSON
 			deploymentPayloadJson, _ = json.Marshal(deploymentData)
 
-		} else {
+		} else if nodeDiff == 0 {
 
 			deploymentResponse, jsonParseError := jsonToMap(responseString)
 			if jsonParseError != nil {
@@ -318,11 +325,9 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 			deploymentResponse["deploymentDescription"] = deploymentDesc
 
 			deploymentPayloadJson, _ = json.Marshal(deploymentResponse)
+		} else if nodeDiff > 1 || nodeDiff < 0 {
+			return nil, fmt.Errorf("node difference is more than 1")
 		}
-
-		fmt.Println("==================================")
-
-		fmt.Println(string(deploymentPayloadJson))
 
 		req, httpError := http.NewRequest("PUT", gc.host+"/Api/V1/Deployment/"+deploymentID, bytes.NewBuffer(deploymentPayloadJson))
 		if httpError != nil {
@@ -375,8 +380,6 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 
 			return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", deploymentResponse.Messages[0].DisplayMessage)
 		}
-
-		//return nil, fmt.Errorf("Error While Parsing Response Data For Deployment:")
 
 	} else {
 		var deploymentResponse types.ServiceFailedResponse

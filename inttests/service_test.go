@@ -19,22 +19,22 @@ import (
 )
 
 func TestDeployeService(t *testing.T) {
-	templates, err := GC.DeployService("Test-Create", "Test", "8150d563-639d-464e-80c4-a435ed10f132", "8aaaee208c8c467e018cd37813250614")
-	assert.Nil(t, err)
-	assert.NotNil(t, templates)
+	deployments, err := GC.DeployService("Test-Create", "Test", "8150d563-639d-464e-80c4-a435ed10f132", "8aaaee208c8c467e018cd37813250614")
+	assert.NotNil(t, err)
+	assert.Nil(t, deployments)
 }
 
 func TestGetAllDeployeService(t *testing.T) {
-	templates, err := GC.GetAllServiceDetails()
+	deployments, err := GC.GetAllServiceDetails()
 	assert.Nil(t, err)
-	assert.NotNil(t, templates)
+	assert.NotNil(t, deployments)
 
-	if len(templates) > 0 {
-		template, err := GC.GetServiceDetailsByID(templates[0].ID, false)
+	if len(deployments) > 0 {
+		template, err := GC.GetServiceDetailsByID(deployments[0].ID, false)
 		assert.Nil(t, err)
 		assert.NotNil(t, template)
 
-		_, err = GC.UpdateService(templates[0].ID, "Test-Update - Krunal", "Test-Update - Krunal", 1)
+		_, err = GC.UpdateService(deployments[0].ID, "Test-Update-K", "Test-Update-K", 1)
 		assert.Nil(t, err)
 	}
 
@@ -44,12 +44,12 @@ func TestGetAllDeployeService(t *testing.T) {
 }
 
 func TestGetDeployeServiceByName(t *testing.T) {
-	templates, err := GC.GetAllServiceDetails()
+	deployments, err := GC.GetAllServiceDetails()
 	assert.Nil(t, err)
-	assert.NotNil(t, templates)
+	assert.NotNil(t, deployments)
 
-	if len(templates) > 0 {
-		template, err := GC.GetServiceDetailsByFilter(templates[0].DeploymentName, "name")
+	if len(deployments) > 0 {
+		template, err := GC.GetServiceDetailsByFilter(deployments[0].DeploymentName, "name")
 		assert.Nil(t, err)
 		assert.NotNil(t, template)
 	}
