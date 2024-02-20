@@ -195,14 +195,20 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 			}
 
 			// Find the component with type "SERVER"
-			var clonedComponent map[string]interface{}
+			var serverComponent map[string]interface{}
 
 			for _, comp := range components {
 				comp := comp.(map[string]interface{})
 				if comp["type"].(string) == "SERVER" {
-					clonedComponent = comp
+					serverComponent = comp
 					break
 				}
+			}
+
+			// Deep copy the component
+			clonedComponent := make(map[string]interface{})
+			for key, value := range serverComponent {
+				clonedComponent[key] = value
 			}
 
 			// Modify ID and GUID of the cloned component
@@ -216,12 +222,24 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 			clonedComponent["osPuppetCertName"] = nil
 			clonedComponent["managementIpAddress"] = nil
 
+			// Deep copy resources
 			resources, ok := clonedComponent["resources"].([]interface{})
 			if !ok {
-				fmt.Println("Error: components field not found or not a []interface{}")
+				fmt.Println("Error: resources field not found or not a []interface{}")
 				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", ok)
 			}
 
+			clonedResources := make([]interface{}, len(resources))
+			for i, res := range resources {
+				resCopy := make(map[string]interface{})
+				for k, v := range res.(map[string]interface{}) {
+					resCopy[k] = v
+				}
+				clonedResources[i] = resCopy
+			}
+			clonedComponent["resources"] = clonedResources
+
+			// Exclude list of parameters to skip
 			excludeList := map[string]bool{
 				"razor_image":         true,
 				"scaleio_enabled":     true,
@@ -230,9 +248,12 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 				"replication_enabled": true,
 			}
 
-			for _, comp := range resources {
+			// Iterate over resources to modify parameters
+			for _, comp := range clonedResources {
 				comp := comp.(map[string]interface{})
 				if comp["id"].(string) == "asm::server" {
+
+					comp["guid"] = nil
 
 					parameters, ok := comp["parameters"].([]interface{})
 					if !ok {
@@ -240,26 +261,49 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 						return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", ok)
 					}
 
-					for _, parameter := range parameters {
+					clonedParams := make([]interface{}, len(parameters))
+					for i, param := range parameters {
+						paramCopy := make(map[string]interface{})
+						for k, v := range param.(map[string]interface{}) {
+							paramCopy[k] = v
+						}
+						clonedParams[i] = paramCopy
+					}
+
+					for _, parameter := range clonedParams {
 						parameter := parameter.(map[string]interface{})
 						if !excludeList[parameter["id"].(string)] {
-							parameter["guid"] = nil
-							parameter["value"] = nil
+
+							if parameter["id"].(string) == "scaleio_mdm_role" {
+								parameter["guid"] = nil
+								parameter["value"] = "standby_mdm"
+							} else {
+								parameter["guid"] = nil
+								parameter["value"] = nil
+							}
+
 						}
 					}
+
+					// Update parameters in the component
+					comp["parameters"] = clonedParams
 				}
 			}
-
-			clonedComponent["resources"] = resources
 
 			// Append the cloned component back to the components array
 			components = append(components, clonedComponent)
 
+			// Update serviceTemplate with modified components
 			serviceTemplate["components"] = components
 
+			// Update deploymentData with modified serviceTemplate
+			deploymentData["serviceTemplate"] = serviceTemplate
+
+			// Update other fields as needed
 			deploymentData["scaleUp"] = true
 			deploymentData["retry"] = true
 
+			// Marshal deploymentData to JSON
 			deploymentPayloadJson, _ = json.Marshal(deploymentData)
 
 		} else {
@@ -275,6 +319,10 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 
 			deploymentPayloadJson, _ = json.Marshal(deploymentResponse)
 		}
+
+		fmt.Println("==================================")
+
+		fmt.Println(string(deploymentPayloadJson))
 
 		req, httpError := http.NewRequest("PUT", gc.host+"/Api/V1/Deployment/"+deploymentID, bytes.NewBuffer(deploymentPayloadJson))
 		if httpError != nil {
