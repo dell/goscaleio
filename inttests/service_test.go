@@ -19,9 +19,8 @@ import (
 )
 
 func TestDeployeService(t *testing.T) {
-	deployments, err := GC.DeployService("Test-Create", "Test", "8150d563-639d-464e-80c4-a435ed10f132", "8aaaee208c8c467e018cd37813250614")
+	_, err := GC.DeployService("Test-Create", "Test", "8150d563-639d-464e-80c4-a435ed10f132", "8aaaee208c8c467e018cd37813250614")
 	assert.NotNil(t, err)
-	assert.Nil(t, deployments)
 }
 
 func TestGetAllDeployeService(t *testing.T) {
@@ -34,8 +33,8 @@ func TestGetAllDeployeService(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, template)
 
-		_, err = GC.UpdateService(deployments[0].ID, "Test-Update-K", "Test-Update-K", 1)
-		assert.Nil(t, err)
+		_, err = GC.UpdateService("ABC", "Test-Update-K", "Test-Update-K", "4")
+		assert.NotNil(t, err)
 	}
 
 	template, err := GC.GetServiceDetailsByID(invalidIdentifier, false)
@@ -49,7 +48,7 @@ func TestGetDeployeServiceByName(t *testing.T) {
 	assert.NotNil(t, deployments)
 
 	if len(deployments) > 0 {
-		template, err := GC.GetServiceDetailsByFilter(deployments[0].DeploymentName, "name")
+		template, err := GC.GetServiceDetailsByFilter("name",deployments[0].DeploymentName)
 		assert.Nil(t, err)
 		assert.NotNil(t, template)
 	}

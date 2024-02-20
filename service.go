@@ -20,6 +20,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
@@ -128,12 +129,12 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 			return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", deploymentResponse.Messages[0].DisplayMessage)
 		}
 
+	} else {
+		return nil, fmt.Errorf("Service Template Not Found")
 	}
-
-	return nil, nil
 }
 
-func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentDesc string, nodes int) (*types.ServiceResponse, error) {
+func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentDesc, nodes string) (*types.ServiceResponse, error) {
 	defer TimeSpent("UpdateService", time.Now())
 
 	path := fmt.Sprintf("/Api/V1/Deployment/%v", deploymentID)
@@ -174,6 +175,8 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 		deployedNodes := deploymentResponse.ServiceTemplate.ServerCount
 
 		var deploymentPayloadJson []byte
+
+		nodes, _ := strconv.Atoi(nodes)
 
 		nodeDiff := nodes - deployedNodes
 
@@ -326,7 +329,7 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 
 			deploymentPayloadJson, _ = json.Marshal(deploymentResponse)
 		} else if nodeDiff > 1 || nodeDiff < 0 {
-			return nil, fmt.Errorf("node difference is more than 1")
+			return nil, fmt.Errorf("node difference is more than 1 ::" + string(nodeDiff))
 		}
 
 		req, httpError := http.NewRequest("PUT", gc.host+"/Api/V1/Deployment/"+deploymentID, bytes.NewBuffer(deploymentPayloadJson))
