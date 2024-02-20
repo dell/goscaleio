@@ -29,7 +29,7 @@ import (
 )
 
 // DeployService used to deploy service
-func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTemplateID, firmwareRepositoryID string) (*types.ServiceResponse, error) {
+func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTemplateID, firmwareRepositoryID, nodes string) (*types.ServiceResponse, error) {
 	defer TimeSpent("DeployService", time.Now())
 
 	path := fmt.Sprintf("/Api/V1/ServiceTemplate/%v?forDeployment=true", serviceTemplateID)
@@ -42,7 +42,10 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
@@ -62,9 +65,20 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 		var templateData map[string]interface{}
 
 		parseError := json.Unmarshal([]byte(responseString), &templateData)
-
 		if parseError != nil {
 			return nil, fmt.Errorf("Error While Parsing Response Data For Template: %s", parseError)
+		}
+
+		configuredNode, _ := templateData["serverCount"].(int)
+
+		nodes, _ := strconv.Atoi(nodes)
+
+		if nodes > 0 {
+			nodeDiff := nodes - configuredNode
+
+			if nodeDiff != 0 {
+				return nil, fmt.Errorf("Node count is not matching with Service Template")
+			}
 		}
 
 		deploymentPayload := map[string]interface{}{
@@ -84,7 +98,10 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 		if gc.version == "4.0" {
 			req.Header.Set("Authorization", "Bearer "+gc.token)
 
-			setCookie(req.Header, gc.host)
+			err := setCookie(req.Header, gc.host)
+			if err != nil {
+				return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+			}
 		} else {
 			req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 		}
@@ -147,7 +164,10 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
@@ -339,7 +359,10 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 		if gc.version == "4.0" {
 			req.Header.Set("Authorization", "Bearer "+gc.token)
 
-			setCookie(req.Header, gc.host)
+			err := setCookie(req.Header, gc.host)
+			if err != nil {
+				return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+			}
 		} else {
 			req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 		}
@@ -473,7 +496,10 @@ func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken boo
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
@@ -530,7 +556,10 @@ func (gc *GatewayClient) GetServiceDetailsByFilter(filter, value string) ([]type
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
@@ -583,7 +612,10 @@ func (gc *GatewayClient) GetAllServiceDetails() ([]types.ServiceResponse, error)
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
@@ -640,7 +672,10 @@ func (gc *GatewayClient) DeleteService(serviceId string) (*types.ServiceResponse
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))

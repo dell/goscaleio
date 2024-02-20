@@ -236,7 +236,10 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -304,7 +307,10 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -363,7 +369,10 @@ func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
@@ -411,7 +420,10 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -473,7 +485,10 @@ func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJSONO
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -544,7 +559,10 @@ func (gc *GatewayClient) DeletePackage(packageName string) (*types.GatewayRespon
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -631,7 +649,10 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -677,7 +698,10 @@ func (gc *GatewayClient) MoveToNextPhase() (*types.GatewayResponse, error) {
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -727,7 +751,10 @@ func (gc *GatewayClient) RetryPhase() (*types.GatewayResponse, error) {
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -777,7 +804,10 @@ func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -827,7 +857,10 @@ func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -877,7 +910,10 @@ func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -927,7 +963,10 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -1047,7 +1086,10 @@ func (gc *GatewayClient) UninstallCluster(jsonStr, mdmUsername, mdmPassword, lia
 	if gc.version == "4.0" {
 		req.Header.Set("Authorization", "Bearer "+gc.token)
 
-		setCookie(req.Header, gc.host)
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}

@@ -15,7 +15,6 @@ package goscaleio
 import (
 	"errors"
 	"fmt"
-	"math"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -29,8 +28,8 @@ func TestGetTemplates(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, false)
+	client.version = "4.5"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +63,8 @@ func TestGetTemplateByID(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(ts *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewGateway(svr.URL, "", "", true, false)
+			client.version = "4.5"
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -89,8 +89,8 @@ func TestGetTemplateByFilters(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, false)
+	client.version = "4.5"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,8 +107,8 @@ func TestGetTemplateByIDNegative(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, false)
+	client.version = "4.5"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,8 +125,8 @@ func TestGetTemplateByFiltersNegative(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, false)
+	client.version = "4.5"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,8 +143,8 @@ func TestGetAllTemplatesNegative(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, false)
+	client.version = "4.5"
 	if err != nil {
 		t.Fatal(err)
 	}
