@@ -329,7 +329,7 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 
 			deploymentPayloadJson, _ = json.Marshal(deploymentResponse)
 		} else if nodeDiff > 1 || nodeDiff < 0 {
-			return nil, fmt.Errorf("node difference is more than 1 ::" + string(nodeDiff))
+			return nil, fmt.Errorf("node difference is more than 1")
 		}
 
 		req, httpError := http.NewRequest("PUT", gc.host+"/Api/V1/Deployment/"+deploymentID, bytes.NewBuffer(deploymentPayloadJson))
