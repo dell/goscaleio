@@ -13,40 +13,40 @@
 package goscaleio
 
 type TemplateDetails struct {
-	ID                        string                    `json:"id,omitempty"`
-	TemplateName              string                    `json:"templateName,omitempty"`
-	TemplateDescription       string                    `json:"templateDescription,omitempty"`
-	TemplateType              string                    `json:"templateType,omitempty"`
-	TemplateVersion           string                    `json:"templateVersion,omitempty"`
-	OriginalTemplateID        string                    `json:"originalTemplateId,omitempty"`
-	TemplateValid             TemplateValid             `json:"templateValid,omitempty"`
-	TemplateLocked            bool                      `json:"templateLocked,omitempty"`
-	InConfiguration           bool                      `json:"inConfiguration,omitempty"`
-	CreatedDate               string                    `json:"createdDate,omitempty"`
-	CreatedBy                 string                    `json:"createdBy,omitempty"`
-	UpdatedDate               string                    `json:"updatedDate,omitempty"`
-	LastDeployedDate          string                    `json:"lastDeployedDate,omitempty"`
-	UpdatedBy                 string                    `json:"updatedBy,omitempty"`
-	ManageFirmware            bool                      `json:"manageFirmware,omitempty"`
-	UseDefaultCatalog         bool                      `json:"useDefaultCatalog,omitempty"`
-	FirmwareRepository        FirmwareRepository        `json:"firmwareRepository,omitempty"`
-	LicenseRepository         LicenseRepository         `json:"licenseRepository,omitempty"`
-	AssignedUsers             []AssignedUsers           `json:"assignedUsers,omitempty"`
-	AllUsersAllowed           bool                      `json:"allUsersAllowed,omitempty"`
-	Category                  string                    `json:"category,omitempty"`
-	Components                []Components              `json:"components,omitempty"`
-	Configuration             ConfigurationDetails      `json:"configuration,omitempty"`
-	ServerCount               int                       `json:"serverCount,omitempty"`
-	StorageCount              int                       `json:"storageCount,omitempty"`
-	ClusterCount              int                       `json:"clusterCount,omitempty"`
-	ServiceCount              int                       `json:"serviceCount,omitempty"`
-	SwitchCount               int                       `json:"switchCount,omitempty"`
-	VMCount                   int                       `json:"vmCount,omitempty"`
-	SdnasCount                int                       `json:"sdnasCount,omitempty"`
-	BrownfieldTemplateType    string                    `json:"brownfieldTemplateType,omitempty"`
-	Networks                  []Networks                `json:"networks,omitempty"`
-	BlockServiceOperationsMap BlockServiceOperationsMap `json:"blockServiceOperationsMap,omitempty"`
-	Draft                     bool                      `json:"draft,omitempty"`
+	ID                     string               `json:"id,omitempty"`
+	TemplateName           string               `json:"templateName,omitempty"`
+	TemplateDescription    string               `json:"templateDescription,omitempty"`
+	TemplateType           string               `json:"templateType,omitempty"`
+	TemplateVersion        string               `json:"templateVersion,omitempty"`
+	OriginalTemplateID     string               `json:"originalTemplateId,omitempty"`
+	TemplateValid          TemplateValid        `json:"templateValid,omitempty"`
+	TemplateLocked         bool                 `json:"templateLocked,omitempty"`
+	InConfiguration        bool                 `json:"inConfiguration,omitempty"`
+	CreatedDate            string               `json:"createdDate,omitempty"`
+	CreatedBy              string               `json:"createdBy,omitempty"`
+	UpdatedDate            string               `json:"updatedDate,omitempty"`
+	LastDeployedDate       string               `json:"lastDeployedDate,omitempty"`
+	UpdatedBy              string               `json:"updatedBy,omitempty"`
+	ManageFirmware         bool                 `json:"manageFirmware,omitempty"`
+	UseDefaultCatalog      bool                 `json:"useDefaultCatalog,omitempty"`
+	FirmwareRepository     FirmwareRepository   `json:"firmwareRepository,omitempty"`
+	LicenseRepository      LicenseRepository    `json:"licenseRepository,omitempty"`
+	AssignedUsers          []AssignedUsers      `json:"assignedUsers,omitempty"`
+	AllUsersAllowed        bool                 `json:"allUsersAllowed,omitempty"`
+	Category               string               `json:"category,omitempty"`
+	Components             []Components         `json:"components,omitempty"`
+	Configuration          ConfigurationDetails `json:"configuration,omitempty"`
+	ServerCount            int                  `json:"serverCount,omitempty"`
+	StorageCount           int                  `json:"storageCount,omitempty"`
+	ClusterCount           int                  `json:"clusterCount,omitempty"`
+	ServiceCount           int                  `json:"serviceCount,omitempty"`
+	SwitchCount            int                  `json:"switchCount,omitempty"`
+	VMCount                int                  `json:"vmCount,omitempty"`
+	SdnasCount             int                  `json:"sdnasCount,omitempty"`
+	BrownfieldTemplateType string               `json:"brownfieldTemplateType,omitempty"`
+	Networks               []Networks           `json:"networks,omitempty"`
+	NetworksMap            map[string]Networks  `json:"networksMap,omitempty"`
+	Draft                  bool                 `json:"draft,omitempty"`
 }
 
 type Messages struct {
@@ -402,16 +402,14 @@ type NetworkConfiguration struct {
 }
 
 type ConfigurationDetails struct {
-	ID              string        `json:"id,omitempty"`
-	Disktype        string        `json:"disktype,omitempty"`
-	Comparator      string        `json:"comparator,omitempty"`
-	Numberofdisks   int           `json:"numberofdisks,omitempty"`
-	Raidlevel       string        `json:"raidlevel,omitempty"`
-	VirtualDiskFqdd string        `json:"virtualDiskFqdd,omitempty"`
-	ControllerFqdd  string        `json:"controllerFqdd,omitempty"`
-	Categories      []Categories  `json:"categories,omitempty"`
-	CategoriesMap   CategoriesMap `json:"categoriesMap,omitempty"`
-	SettingsMap     SettingsMap   `json:"settingsMap,omitempty"`
+	ID              string       `json:"id,omitempty"`
+	Disktype        string       `json:"disktype,omitempty"`
+	Comparator      string       `json:"comparator,omitempty"`
+	Numberofdisks   int          `json:"numberofdisks,omitempty"`
+	Raidlevel       string       `json:"raidlevel,omitempty"`
+	VirtualDiskFqdd string       `json:"virtualDiskFqdd,omitempty"`
+	ControllerFqdd  string       `json:"controllerFqdd,omitempty"`
+	Categories      []Categories `json:"categories,omitempty"`
 }
 
 type VirtualDisks struct {
@@ -899,34 +897,11 @@ type Parameters struct {
 	OptionsSortable  bool                  `json:"optionsSortable,omitempty"`
 }
 
-type ParameterMap struct {
-	AdditionalProp1 AdditionalPropDetails `json:"additionalProp1,omitempty"`
-	AdditionalProp2 AdditionalPropDetails `json:"additionalProp2,omitempty"`
-	AdditionalProp3 AdditionalPropDetails `json:"additionalProp3,omitempty"`
-}
 type Categories struct {
-	ID           string       `json:"id,omitempty"`
-	DisplayName  string       `json:"displayName,omitempty"`
-	DeviceType   string       `json:"deviceType,omitempty"`
-	Parameters   []Parameters `json:"parameters,omitempty"`
-	ParameterMap ParameterMap `json:"parameterMap,omitempty"`
-}
-
-type CategoriesMap struct {
-	AdditionalProp1 AdditionalPropDetails `json:"additionalProp1,omitempty"`
-	AdditionalProp2 AdditionalPropDetails `json:"additionalProp2,omitempty"`
-	AdditionalProp3 AdditionalPropDetails `json:"additionalProp3,omitempty"`
-}
-type SettingsMap struct {
-	AdditionalProp1 AdditionalPropDetails `json:"additionalProp1,omitempty"`
-	AdditionalProp2 AdditionalPropDetails `json:"additionalProp2,omitempty"`
-	AdditionalProp3 AdditionalPropDetails `json:"additionalProp3,omitempty"`
-}
-
-type BlockServiceOperationsMap struct {
-	AdditionalProp1 AdditionalPropDetails `json:"additionalProp1,omitempty"`
-	AdditionalProp2 AdditionalPropDetails `json:"additionalProp2,omitempty"`
-	AdditionalProp3 AdditionalPropDetails `json:"additionalProp3,omitempty"`
+	ID          string       `json:"id,omitempty"`
+	DisplayName string       `json:"displayName,omitempty"`
+	DeviceType  string       `json:"deviceType,omitempty"`
+	Parameters  []Parameters `json:"parameters,omitempty"`
 }
 
 // TemplateDetailsFilter defines struct for nodepools

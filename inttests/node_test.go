@@ -19,47 +19,46 @@ import (
 )
 
 func TestGetNodes(t *testing.T) {
-	allNodes, err := C.GetAllNodes()
+	allNodes, err := GC.GetAllNodes()
 	assert.Nil(t, err)
 	assert.NotNil(t, allNodes)
 }
 
 func TestGetNodeByID(t *testing.T) {
-	allNodes, err := C.GetAllNodes()
+	allNodes, err := GC.GetAllNodes()
 	assert.Nil(t, err)
 	assert.NotNil(t, allNodes)
 
 	if len(allNodes) > 0 {
-		node, err := C.GetNodeByID(allNodes[0].RefID)
+		node, err := GC.GetNodeByID(allNodes[0].RefID)
 		assert.Nil(t, err)
 		assert.NotNil(t, node)
 	}
 
-	node, err := C.GetNodeByID(invalidIdentifier)
+	node, err := GC.GetNodeByID(invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, node)
 }
 
 func TestGetNodeByFilters(t *testing.T) {
-	allNodes, err := C.GetNodeByFilters("invalid", "invalid")
+	allNodes, err := GC.GetNodeByFilters("invalid", "invalid")
 	assert.NotNil(t, err)
 	assert.Nil(t, allNodes)
 }
 
 func TestGetNodePoolByID(t *testing.T) {
-	nodePool, err := C.GetNodePoolByID(-2)
-	assert.Nil(t, err)
-	assert.Equal(t, nodePool.DeviceGroup.GroupName, "")
+	_, err := GC.GetNodePoolByID(-2)
+	assert.NotNil(t, err)
 }
 
 func TestGetNodePoolByName(t *testing.T) {
-	nodePool, err := C.GetNodePoolByName(invalidIdentifier)
+	nodePool, err := GC.GetNodePoolByName(invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, nodePool)
 }
 
 func TestGetAllNodePools(t *testing.T) {
-	allNodePools, err := C.GetAllNodePools()
+	allNodePools, err := GC.GetAllNodePools()
 	assert.Nil(t, err)
 	assert.NotNil(t, allNodePools)
 }

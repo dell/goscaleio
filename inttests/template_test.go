@@ -19,29 +19,29 @@ import (
 )
 
 func TestGetTemplates(t *testing.T) {
-	templates, err := C.GetAllTemplates()
+	templates, err := GC.GetAllTemplates()
 	assert.Nil(t, err)
 	assert.NotNil(t, templates)
 }
 
 func TestGetTemplateByID(t *testing.T) {
-	templates, err := C.GetAllTemplates()
+	templates, err := GC.GetAllTemplates()
 	assert.Nil(t, err)
 	assert.NotNil(t, templates)
 
 	if len(templates) > 0 {
-		template, err := C.GetTemplateByID(templates[0].ID)
+		template, err := GC.GetTemplateByID(templates[0].ID)
 		assert.Nil(t, err)
 		assert.NotNil(t, template)
 	}
 
-	template, err := C.GetTemplateByID(invalidIdentifier)
+	template, err := GC.GetTemplateByID(invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, template)
 }
 
 func TestGetTemplateByFilters(t *testing.T) {
-	templates, err := C.GetTemplateByFilters("invalid", "invalid")
+	templates, err := GC.GetTemplateByFilters("name", "invalid")
 	assert.NotNil(t, err)
 	assert.Nil(t, templates)
 }

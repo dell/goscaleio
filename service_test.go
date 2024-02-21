@@ -22,24 +22,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetTemplates(t *testing.T) {
+func TestGetAllDeployeService(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
 
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
+	GC, err := NewGateway(svr.URL, "", "", true, true)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	templateDetails, err := client.GetAllTemplates()
+	templateDetails, err := GC.GetAllServiceDetails()
 	assert.Equal(t, len(templateDetails), 0)
 	assert.Nil(t, err)
 }
 
-func TestGetTemplateByID(t *testing.T) {
+func TestGetDeployeServiceByID(t *testing.T) {
 	type testCase struct {
 		id       string
 		expected error
@@ -63,13 +62,12 @@ func TestGetTemplateByID(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(ts *testing.T) {
-			client, err := NewGateway(svr.URL, "", "", true, false)
-			client.version = "4.5"
+			GC, err := NewGateway(svr.URL, "", "", true, true)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			_, err = client.GetTemplateByID(tc.id)
+			_, err = GC.GetServiceDetailsByID(tc.id,false)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Getting template by ID did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
@@ -83,73 +81,69 @@ func TestGetTemplateByID(t *testing.T) {
 	}
 }
 
-func TestGetTemplateByFilters(t *testing.T) {
+func TestGetDeployeServiceByFilters(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
 
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, true)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	templates, err := client.GetTemplateByFilters("Name", "Test")
+	templates, err := client.GetServiceDetailsByFilter("Name", "Test")
 	assert.Equal(t, len(templates), 0)
 	assert.NotNil(t, err)
 }
 
-func TestGetTemplateByIDNegative(t *testing.T) {
+func TestGetDeployeServiceByIDNegative(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
 	}))
 	defer svr.Close()
 
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, true)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	templates, err := client.GetTemplateByID("Test")
+	templates, err := client.GetServiceDetailsByID("Test",false)
 	assert.Nil(t, templates)
 	assert.NotNil(t, err)
 }
 
-func TestGetTemplateByFiltersNegative(t *testing.T) {
+func TestGetDeployeServiceByFiltersNegative(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
 	}))
 	defer svr.Close()
 
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, true)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	templates, err := client.GetTemplateByFilters("Name", "Test")
+	templates, err := client.GetServiceDetailsByFilter("Name", "Test")
 	assert.Nil(t, templates)
 	assert.NotNil(t, err)
 }
 
-func TestGetAllTemplatesNegative(t *testing.T) {
+func TestGetAllDeployeServiceNegative(t *testing.T) {
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
 	}))
 	defer svr.Close()
 
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, true)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	templates, err := client.GetAllTemplates()
+	templates, err := client.GetAllServiceDetails()
 	assert.Nil(t, templates)
 	assert.NotNil(t, err)
 }

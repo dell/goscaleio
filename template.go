@@ -13,7 +13,8 @@
 package goscaleio
 
 import (
-	"errors"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -23,35 +24,99 @@ import (
 )
 
 // GetTemplateByID gets the node details based on ID
-func (c *Client) GetTemplateByID(id string) (*types.TemplateDetails, error) {
+func (gc *GatewayClient) GetTemplateByID(id string) (*types.TemplateDetails, error) {
 	defer TimeSpent("GetTemplateByID", time.Now())
 
 	path := fmt.Sprintf("/Api/V1/template/%v", id)
 
 	var template types.TemplateDetails
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &template)
-	if err != nil {
-		return nil, err
+	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	if httpError != nil {
+		return nil, httpError
 	}
-	return &template, nil
+
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
+
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return nil, httpRespError
+	}
+
+	responseString, _ := extractString(httpResp)
+
+	if httpResp.StatusCode == 200 {
+		parseError := json.Unmarshal([]byte(responseString), &template)
+
+		if parseError != nil {
+			return nil, fmt.Errorf("Error While Parsing Response Data For Template: %s", parseError)
+		}
+
+		return &template, nil
+	} else {
+		return nil, fmt.Errorf("Template not found")
+	}
 }
 
 // GetAllTemplates gets all the Template details
-func (c *Client) GetAllTemplates() ([]types.TemplateDetails, error) {
+func (gc *GatewayClient) GetAllTemplates() ([]types.TemplateDetails, error) {
 	defer TimeSpent("GetAllTemplates", time.Now())
 
 	path := fmt.Sprintf("/Api/V1/template")
 
 	var templates types.TemplateDetailsFilter
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &templates)
-	if err != nil {
-		return nil, err
+	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	if httpError != nil {
+		return nil, httpError
 	}
+
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
+
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return nil, httpRespError
+	}
+
+	responseString, _ := extractString(httpResp)
+
+	if httpResp.StatusCode == 200 {
+		parseError := json.Unmarshal([]byte(responseString), &templates)
+
+		if parseError != nil {
+			return nil, fmt.Errorf("Error While Parsing Response Data For Template: %s", parseError)
+		}
+	}
+
 	return templates.TemplateDetails, nil
 }
 
 // GetTemplateByFilters gets the Template details based on the provided filter
-func (c *Client) GetTemplateByFilters(key string, value string) ([]types.TemplateDetails, error) {
+func (gc *GatewayClient) GetTemplateByFilters(key string, value string) ([]types.TemplateDetails, error) {
 	defer TimeSpent("GetTemplateByFilters", time.Now())
 
 	encodedValue := url.QueryEscape(value)
@@ -59,13 +124,47 @@ func (c *Client) GetTemplateByFilters(key string, value string) ([]types.Templat
 	path := `/Api/V1/template?filter=` + key + `%20eq%20%22` + encodedValue + `%22`
 
 	var templates types.TemplateDetailsFilter
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &templates)
-	if err != nil {
-		return nil, err
+	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	if httpError != nil {
+		return nil, httpError
 	}
 
-	if len(templates.TemplateDetails) == 0 {
-		return nil, errors.New("Couldn't find templates with the given filter")
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
+
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return nil, httpRespError
+	}
+
+	responseString, _ := extractString(httpResp)
+
+	if httpResp.StatusCode == 200 {
+		parseError := json.Unmarshal([]byte(responseString), &templates)
+
+		if parseError != nil {
+			return nil, fmt.Errorf("Error While Parsing Response Data For Template: %s", parseError)
+		}
+
+		if len(templates.TemplateDetails) == 0 {
+			return nil, fmt.Errorf("Template not found")
+		}
+
+	} else {
+		return nil, fmt.Errorf("Template not found")
+	}
+
 	return templates.TemplateDetails, nil
 }
