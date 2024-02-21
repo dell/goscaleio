@@ -561,15 +561,7 @@ func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken boo
 		return &deploymentResponse, nil
 
 	} else {
-		var deploymentResponse types.ServiceFailedResponse
-
-		parseError := json.Unmarshal([]byte(responseString), &deploymentResponse)
-
-		if parseError != nil {
-			return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
-		}
-
-		return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", deploymentResponse.Messages[0].DisplayMessage)
+		return nil, fmt.Errorf("Couldn't find service with the given filter")
 	}
 }
 
@@ -618,18 +610,14 @@ func (gc *GatewayClient) GetServiceDetailsByFilter(filter, value string) ([]type
 			return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
 		}
 
+		if len(deploymentResponse) == 0 {
+			return nil, fmt.Errorf("Couldn't find service with the given filter")
+		}
+
 		return deploymentResponse, nil
 
 	} else {
-		var deploymentResponse types.ServiceFailedResponse
-
-		parseError := json.Unmarshal([]byte(responseString), &deploymentResponse)
-
-		if parseError != nil {
-			return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
-		}
-
-		return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", deploymentResponse.Messages[0].DisplayMessage)
+		return nil, fmt.Errorf("Couldn't find service with the given filter")
 	}
 }
 
@@ -677,15 +665,7 @@ func (gc *GatewayClient) GetAllServiceDetails() ([]types.ServiceResponse, error)
 		return deploymentResponse, nil
 
 	} else {
-		var deploymentResponse types.ServiceFailedResponse
-
-		parseError := json.Unmarshal([]byte(responseString), &deploymentResponse)
-
-		if parseError != nil {
-			return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
-		}
-
-		return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", deploymentResponse.Messages[0].DisplayMessage)
+		return nil, fmt.Errorf("Couldn't find service with the given filter")
 	}
 }
 
@@ -729,5 +709,5 @@ func (gc *GatewayClient) DeleteService(serviceId string) (*types.ServiceResponse
 		return &deploymentResponse, nil
 	}
 
-	return &deploymentResponse, nil
+	return nil, fmt.Errorf("Couldn't delete service")
 }
