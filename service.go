@@ -32,7 +32,7 @@ import (
 func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTemplateID, firmwareRepositoryID, nodes string) (*types.ServiceResponse, error) {
 	defer TimeSpent("DeployService", time.Now())
 
-	path := fmt.Sprintf("/Api/V1/ServiceTemplate/%v?forDeployment=true", serviceTemplateID)
+	path := fmt.Sprintf("/Api/V1/FirmwareRepository/%v", firmwareRepositoryID)
 
 	req, httpError := http.NewRequest("GET", gc.host+path, nil)
 	if httpError != nil {
@@ -61,7 +61,40 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 
 	responseString, _ := extractString(httpResp)
 
-	if httpResp.StatusCode == 200 {
+	if httpResp.StatusCode == 200 && responseString == "" {
+		return nil, fmt.Errorf("Firmware Repository Not Found")
+	}
+
+	path = fmt.Sprintf("/Api/V1/ServiceTemplate/%v?forDeployment=true", serviceTemplateID)
+
+	req, httpError = http.NewRequest("GET", gc.host+path, nil)
+	if httpError != nil {
+		return nil, httpError
+	}
+
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
+
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client = gc.http
+	httpResp, httpRespError = client.Do(req)
+	if httpRespError != nil {
+		return nil, httpRespError
+	}
+
+	responseString, _ = extractString(httpResp)
+
+	if httpResp.StatusCode == 200 && responseString != "" {
 		var templateData map[string]interface{}
 
 		parseError := json.Unmarshal([]byte(responseString), &templateData)
@@ -183,7 +216,7 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 
 	responseString, _ := extractString(httpResp)
 
-	if httpResp.StatusCode == 200 {
+	if httpResp.StatusCode == 200 && responseString != "" {
 
 		var deploymentResponse types.ServiceResponse
 

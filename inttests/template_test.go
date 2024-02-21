@@ -41,7 +41,7 @@ func TestGetTemplateByID(t *testing.T) {
 }
 
 func TestGetTemplateByFilters(t *testing.T) {
-	templates, err := GC.GetTemplateByFilters("invalid", "invalid")
+	templates, err := GC.GetTemplateByFilters("name", "invalid")
 	assert.NotNil(t, err)
 	assert.Nil(t, templates)
 }

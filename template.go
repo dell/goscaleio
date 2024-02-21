@@ -158,6 +158,10 @@ func (gc *GatewayClient) GetTemplateByFilters(key string, value string) ([]types
 			return nil, fmt.Errorf("Error While Parsing Response Data For Template: %s", parseError)
 		}
 
+		if len(templates.TemplateDetails) == 0 {
+			return nil, fmt.Errorf("Template not found")
+		}
+
 	} else {
 		return nil, fmt.Errorf("Template not found")
 	}

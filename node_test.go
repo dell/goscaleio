@@ -15,7 +15,6 @@ package goscaleio
 import (
 	"errors"
 	"fmt"
-	"math"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -29,8 +28,8 @@ func TestGetNodes(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, false)
+	client.version = "4.5"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +63,8 @@ func TestGetNodeByID(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(ts *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewGateway(svr.URL, "", "", true, false)
+			client.version = "4.5"
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -107,7 +107,8 @@ func TestGetNodePoolByID(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(ts *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewGateway(svr.URL, "", "", true, false)
+			client.version = "4.5"
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -132,8 +133,8 @@ func TestGetNodeByFilters(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, false)
+	client.version = "4.5"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,8 +150,8 @@ func TestGetNodePoolByName(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, false)
+	client.version = "4.5"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,8 +168,8 @@ func TestGetNodePoolByNameError(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, false)
+	client.version = "4.5"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -185,8 +186,8 @@ func TestGetNodePoolByIDNegative(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, false)
+	client.version = "4.5"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -203,8 +204,8 @@ func TestGetNodeByIDNegative(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, false)
+	client.version = "4.5"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -221,8 +222,8 @@ func TestGetAllNodesNegative(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.5"
+	client, err := NewGateway(svr.URL, "", "", true, false)
+	client.version = "4.5"
 	if err != nil {
 		t.Fatal(err)
 	}

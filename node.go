@@ -13,6 +13,8 @@
 package goscaleio
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,94 +24,252 @@ import (
 )
 
 // GetNodeByID gets the node details based on ID
-func (c *Client) GetNodeByID(id string) (*types.NodeDetails, error) {
+func (gc *GatewayClient) GetNodeByID(id string) (*types.NodeDetails, error) {
 	defer TimeSpent("GetNodeByID", time.Now())
 
 	path := fmt.Sprintf("/Api/V1/ManagedDevice/%v", id)
 
 	var node types.NodeDetails
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &node)
-	if err != nil {
-		return nil, err
+	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	if httpError != nil {
+		return nil, httpError
+	}
+
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
+
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return nil, httpRespError
+	}
+
+	responseString, _ := extractString(httpResp)
+
+	if httpResp.StatusCode == 200 {
+		parseError := json.Unmarshal([]byte(responseString), &node)
+
+		if parseError != nil {
+			return nil, fmt.Errorf("Error While Parsing Response Data For Node: %s", parseError)
+		}
+	} else {
+		return nil, fmt.Errorf("Couldn't find nodes with the given filter")
 	}
 	return &node, nil
 }
 
 // GetAllNodes gets all the node details
-func (c *Client) GetAllNodes() ([]types.NodeDetails, error) {
+func (gc *GatewayClient) GetAllNodes() ([]types.NodeDetails, error) {
 	defer TimeSpent("GetNodeByID", time.Now())
 
 	path := fmt.Sprintf("/Api/V1/ManagedDevice")
 
 	var nodes []types.NodeDetails
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &nodes)
-	if err != nil {
-		return nil, err
+	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	if httpError != nil {
+		return nil, httpError
+	}
+
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
+
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return nil, httpRespError
+	}
+
+	responseString, _ := extractString(httpResp)
+
+	if httpResp.StatusCode == 200 {
+		parseError := json.Unmarshal([]byte(responseString), &nodes)
+
+		if parseError != nil {
+			return nil, fmt.Errorf("Error While Parsing Response Data For Node: %s", parseError)
+		}
+	} else {
+		return nil, fmt.Errorf("Couldn't find nodes with the given filter")
 	}
 	return nodes, nil
 }
 
 // GetNodeByFilters gets the node details based on the provided filter
-func (c *Client) GetNodeByFilters(key string, value string) ([]types.NodeDetails, error) {
+func (gc *GatewayClient) GetNodeByFilters(key string, value string) ([]types.NodeDetails, error) {
 	defer TimeSpent("GetNodeByFilters", time.Now())
 
 	path := fmt.Sprintf("/Api/V1/ManagedDevice?filter=eq,%v,%v", key, value)
 
 	var nodes []types.NodeDetails
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &nodes)
-	if err != nil {
-		return nil, err
+	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	if httpError != nil {
+		return nil, httpError
 	}
 
-	if len(nodes) == 0 {
-		return nil, errors.New("Couldn't find nodes with the given filter")
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
+
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return nil, httpRespError
+	}
+
+	responseString, _ := extractString(httpResp)
+
+	if httpResp.StatusCode == 200 {
+		parseError := json.Unmarshal([]byte(responseString), &nodes)
+		if parseError != nil {
+			return nil, fmt.Errorf("Error While Parsing Response Data For Node: %s", parseError)
+		}
+
+		if len(nodes) == 0 {
+			return nil, errors.New("Couldn't find nodes with the given filter")
+		}
+	} else {
+		return nil, fmt.Errorf("Couldn't find nodes with the given filter")
 	}
 	return nodes, nil
 }
 
 // GetNodePoolByID gets the nodepool details based on ID
-func (c *Client) GetNodePoolByID(id int) (*types.NodePoolDetails, error) {
+func (gc *GatewayClient) GetNodePoolByID(id int) (*types.NodePoolDetails, error) {
 	defer TimeSpent("GetNodePoolByID", time.Now())
 
 	path := fmt.Sprintf("/Api/V1/nodepool/%v", id)
 
 	var nodePool types.NodePoolDetails
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &nodePool)
-	if err != nil {
-		return nil, err
+	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	if httpError != nil {
+		return nil, httpError
+	}
+
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
+
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return nil, httpRespError
+	}
+
+	responseString, _ := extractString(httpResp)
+
+	if httpResp.StatusCode == 200 && responseString != "" {
+		parseError := json.Unmarshal([]byte(responseString), &nodePool)
+		if parseError != nil {
+			return nil, fmt.Errorf("Error While Parsing Response Data For Nodepool: %s", parseError)
+		}
+
+	} else {
+		return nil, fmt.Errorf("Couldn't find nodes with the given filter")
 	}
 
 	return &nodePool, nil
 }
 
 // GetNodePoolByName gets the nodepool details based on name
-func (c *Client) GetNodePoolByName(name string) (*types.NodePoolDetails, error) {
+func (gc *GatewayClient) GetNodePoolByName(name string) (*types.NodePoolDetails, error) {
 	defer TimeSpent("GetNodePoolByName", time.Now())
 
-	nodePools, err := c.GetAllNodePools()
+	nodePools, err := gc.GetAllNodePools()
 	if err != nil {
 		return nil, err
 	}
 
 	for _, nodePool := range nodePools.NodePoolDetails {
 		if nodePool.GroupName == name {
-			return c.GetNodePoolByID(nodePool.GroupSeqID)
+			return gc.GetNodePoolByID(nodePool.GroupSeqID)
 		}
 	}
 	return nil, errors.New("no node pool found with name " + name)
 }
 
 // GetAllNodePools gets all the nodepool details
-func (c *Client) GetAllNodePools() (*types.NodePoolDetailsFilter, error) {
+func (gc *GatewayClient) GetAllNodePools() (*types.NodePoolDetailsFilter, error) {
 	defer TimeSpent("GetAllNodePools", time.Now())
 
 	path := fmt.Sprintf("/Api/V1/nodepool")
 
 	var nodePools types.NodePoolDetailsFilter
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &nodePools)
-	if err != nil {
-		return nil, err
+	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	if httpError != nil {
+		return nil, httpError
 	}
 
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
+		}
+
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return nil, httpRespError
+	}
+
+	responseString, _ := extractString(httpResp)
+
+	if httpResp.StatusCode == 200 {
+		parseError := json.Unmarshal([]byte(responseString), &nodePools)
+
+		if parseError != nil {
+			return nil, fmt.Errorf("Error While Parsing Response Data For Nodepool: %s", parseError)
+		}
+	} else {
+		return nil, fmt.Errorf("Couldn't find nodes with the given filter")
+	}
 	return &nodePools, nil
 }
