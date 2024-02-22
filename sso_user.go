@@ -19,6 +19,7 @@ import (
 	types "github.com/dell/goscaleio/types/v1"
 )
 
+// GetSSOUser retrieves the details of an SSO user by their ID.
 func (c *Client) GetSSOUser(userID string) (*types.SSOUserDetails, error) {
 	path := fmt.Sprintf("/rest/v1/users/%s", userID)
 	user := &types.SSOUserDetails{}
@@ -31,6 +32,7 @@ func (c *Client) GetSSOUser(userID string) (*types.SSOUserDetails, error) {
 	return user, nil
 }
 
+// CreateSSOUser creates a new SSO user with the given parameters.
 func (c *Client) CreateSSOUser(userParam *types.SSOUserCreateParam) (*types.SSOUserDetails, error) {
 	userResp := &types.SSOUserDetails{}
 	err := c.getJSONWithRetry(http.MethodPost, "/rest/v1/users", userParam, &userResp)
@@ -40,6 +42,7 @@ func (c *Client) CreateSSOUser(userParam *types.SSOUserCreateParam) (*types.SSOU
 	return userResp, nil
 }
 
+// ModifySSOUser modifies the details of an SSO user by their ID.
 func (c *Client) ModifySSOUser(userID string, userParam *types.SSOUserModifyParam) (*types.SSOUserDetails, error) {
 	path := fmt.Sprintf("/rest/v1/users/%s", userID)
 	err := c.getJSONWithRetry(http.MethodPatch, path, userParam, nil)
@@ -49,6 +52,7 @@ func (c *Client) ModifySSOUser(userID string, userParam *types.SSOUserModifyPara
 	return c.GetSSOUser(userID)
 }
 
+// ResetSSOUserPassword resets the password of an SSO user by their ID.
 func (c *Client) ResetSSOUserPassword(userID string, userParam *types.SSOUserModifyParam) error {
 	path := fmt.Sprintf("/rest/v1/users/%s/reset-password", userID)
 	err := c.getJSONWithRetry(http.MethodPost, path, userParam, nil)
@@ -58,6 +62,7 @@ func (c *Client) ResetSSOUserPassword(userID string, userParam *types.SSOUserMod
 	return nil
 }
 
+// DeleteSSOUser deletes an SSO user by their ID.
 func (c *Client) DeleteSSOUser(userID string) error {
 	path := fmt.Sprintf("/rest/v1/users/%s", userID)
 	err := c.getJSONWithRetry(http.MethodDelete, path, nil, nil)
