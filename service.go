@@ -184,7 +184,7 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 	}
 }
 
-func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentDesc, nodes string) (*types.ServiceResponse, error) {
+func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentDesc, nodes, nodename string) (*types.ServiceResponse, error) {
 	defer TimeSpent("UpdateService", time.Now())
 
 	path := fmt.Sprintf("/Api/V1/Deployment/%v", deploymentID)
@@ -237,8 +237,6 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 
 			var deploymentData map[string]interface{}
 
-			uuid := uuid.New().String()
-
 			parseError := json.Unmarshal([]byte(responseString), &deploymentData)
 			if parseError != nil {
 				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment: %s", parseError)
@@ -264,7 +262,7 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 
 			for _, comp := range components {
 				comp := comp.(map[string]interface{})
-				if comp["type"].(string) == "SERVER" {
+				if comp["type"].(string) == "SERVER" && comp["name"].(string) == nodename {
 					serverComponent = comp
 					break
 				}
@@ -276,88 +274,93 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 				clonedComponent[key] = value
 			}
 
-			// Modify ID and GUID of the cloned component
-			clonedComponent["id"] = uuid
-			clonedComponent["name"] = uuid
-			clonedComponent["brownfield"] = false
+			for numberOfNode := 1; numberOfNode <= nodeDiff; numberOfNode++ {
 
-			clonedComponent["identifier"] = nil
-			clonedComponent["asmGUID"] = nil
-			clonedComponent["puppetCertName"] = nil
-			clonedComponent["osPuppetCertName"] = nil
-			clonedComponent["managementIpAddress"] = nil
+				uuid := uuid.New().String()
 
-			// Deep copy resources
-			resources, ok := clonedComponent["resources"].([]interface{})
-			if !ok {
-				return nil, fmt.Errorf("Error While Parsing Response Data For Deployment")
-			}
+				// Modify ID and GUID of the cloned component
+				clonedComponent["id"] = uuid
+				clonedComponent["name"] = uuid
+				clonedComponent["brownfield"] = false
+				clonedComponent["identifier"] = nil
+				clonedComponent["asmGUID"] = nil
+				clonedComponent["puppetCertName"] = nil
+				clonedComponent["osPuppetCertName"] = nil
+				clonedComponent["managementIpAddress"] = nil
 
-			clonedResources := make([]interface{}, len(resources))
-			for i, res := range resources {
-				resCopy := make(map[string]interface{})
-				for k, v := range res.(map[string]interface{}) {
-					resCopy[k] = v
+				// Deep copy resources
+				resources, ok := clonedComponent["resources"].([]interface{})
+				if !ok {
+					return nil, fmt.Errorf("Error While Parsing Response Data For Deployment")
 				}
-				clonedResources[i] = resCopy
-			}
-			clonedComponent["resources"] = clonedResources
 
-			// Exclude list of parameters to skip
-			excludeList := map[string]bool{
-				"razor_image":         true,
-				"scaleio_enabled":     true,
-				"scaleio_role":        true,
-				"compression_enabled": true,
-				"replication_enabled": true,
-			}
-
-			// Iterate over resources to modify parameters
-			for _, comp := range clonedResources {
-				comp := comp.(map[string]interface{})
-				if comp["id"].(string) == "asm::server" {
-
-					comp["guid"] = nil
-
-					parameters, ok := comp["parameters"].([]interface{})
-					if !ok {
-						return nil, fmt.Errorf("Error While Parsing Response Data For Deployment")
+				clonedResources := make([]interface{}, len(resources))
+				for i, res := range resources {
+					resCopy := make(map[string]interface{})
+					for k, v := range res.(map[string]interface{}) {
+						resCopy[k] = v
 					}
+					clonedResources[i] = resCopy
+				}
+				clonedComponent["resources"] = clonedResources
 
-					clonedParams := make([]interface{}, len(parameters))
-					for i, param := range parameters {
-						paramCopy := make(map[string]interface{})
-						for k, v := range param.(map[string]interface{}) {
-							paramCopy[k] = v
+				// Exclude list of parameters to skip
+				excludeList := map[string]bool{
+					"razor_image":         true,
+					"scaleio_enabled":     true,
+					"scaleio_role":        true,
+					"compression_enabled": true,
+					"replication_enabled": true,
+				}
+
+				// Iterate over resources to modify parameters
+				for _, comp := range clonedResources {
+					comp := comp.(map[string]interface{})
+					if comp["id"].(string) == "asm::server" {
+
+						comp["guid"] = nil
+
+						parameters, ok := comp["parameters"].([]interface{})
+						if !ok {
+							return nil, fmt.Errorf("Error While Parsing Response Data For Deployment")
 						}
-						clonedParams[i] = paramCopy
-					}
 
-					for _, parameter := range clonedParams {
-						parameter := parameter.(map[string]interface{})
-						if !excludeList[parameter["id"].(string)] {
-
-							if parameter["id"].(string) == "scaleio_mdm_role" {
-								parameter["guid"] = nil
-								parameter["value"] = "standby_mdm"
-							} else {
-								parameter["guid"] = nil
-								parameter["value"] = nil
+						clonedParams := make([]interface{}, len(parameters))
+						for i, param := range parameters {
+							paramCopy := make(map[string]interface{})
+							for k, v := range param.(map[string]interface{}) {
+								paramCopy[k] = v
 							}
-
+							clonedParams[i] = paramCopy
 						}
+
+						for _, parameter := range clonedParams {
+							parameter := parameter.(map[string]interface{})
+							if !excludeList[parameter["id"].(string)] {
+
+								if parameter["id"].(string) == "scaleio_mdm_role" {
+									parameter["guid"] = nil
+									parameter["value"] = "standby_mdm"
+								} else {
+									parameter["guid"] = nil
+									parameter["value"] = nil
+								}
+
+							}
+						}
+
+						// Update parameters in the component
+						comp["parameters"] = clonedParams
 					}
-
-					// Update parameters in the component
-					comp["parameters"] = clonedParams
 				}
+
+				// Append the cloned component back to the components array
+				components = append(components, clonedComponent)
+
+				// Update serviceTemplate with modified components
+				serviceTemplate["components"] = components
+
 			}
-
-			// Append the cloned component back to the components array
-			components = append(components, clonedComponent)
-
-			// Update serviceTemplate with modified components
-			serviceTemplate["components"] = components
 
 			// Update deploymentData with modified serviceTemplate
 			deploymentData["serviceTemplate"] = serviceTemplate

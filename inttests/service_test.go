@@ -33,7 +33,7 @@ func TestGetAllDeployeService(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, template)
 
-		_, err = GC.UpdateService("ABC", "Test-Update-K", "Test-Update-K", "4")
+		_, err = GC.UpdateService(template.ID, "Test-Update-K", "Test-Update-K", "5", "pfmc-k8s-20230809-160")
 		assert.NotNil(t, err)
 	}
 
