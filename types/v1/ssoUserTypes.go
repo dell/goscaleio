@@ -26,6 +26,10 @@ type SSOUserDetails struct {
 	Permission       Permission `json:"permission"`
 }
 
+type SSOUserList struct {
+	SSOUsers []SSOUserDetails `json:"users"`
+}
+
 // Permission represents a permission that can be granted to an SSO user.
 type Permission struct {
 	Role   string  `json:"role"`

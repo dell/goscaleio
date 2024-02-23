@@ -105,6 +105,43 @@ func TestGetSSOUser(t *testing.T) {
 	}
 }
 
+func TestGetSSOUserByFilters(t *testing.T) {
+	type testCase struct {
+		username string
+		expected error
+	}
+	cases := []testCase{
+		{
+			username: "admin",
+			expected: nil,
+		},
+	}
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	}))
+	defer svr.Close()
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(ts *testing.T) {
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			_, err2 := client.GetSSOUserByFilters(tc.username, "admin")
+			if err2 != nil {
+				if tc.expected == nil {
+					t.Errorf("Getting user details did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
+				} else {
+					if err2.Error() != tc.expected.Error() {
+						t.Errorf("Getting user details did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
+					}
+				}
+			}
+		})
+	}
+}
+
 func TestModifySSOUser(t *testing.T) {
 	type testCase struct {
 		user     types.SSOUserModifyParam

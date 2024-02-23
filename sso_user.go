@@ -15,6 +15,7 @@ package goscaleio
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
@@ -30,6 +31,17 @@ func (c *Client) GetSSOUser(userID string) (*types.SSOUserDetails, error) {
 	}
 
 	return user, nil
+}
+
+func (c *Client) GetSSOUserByFilters(key string, value string) (*types.SSOUserList, error) {
+	encodedValue := url.QueryEscape(value)
+	path := `/rest/v1/users?filter=` + key + `%20eq%20%22` + encodedValue + `%22`
+	users := &types.SSOUserList{}
+	err := c.getJSONWithRetry(http.MethodGet, path, nil, &users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 // CreateSSOUser creates a new SSO user with the given parameters.
