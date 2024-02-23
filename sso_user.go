@@ -33,6 +33,7 @@ func (c *Client) GetSSOUser(userID string) (*types.SSOUserDetails, error) {
 	return user, nil
 }
 
+// GetSSOUserByFilters retrieves the details of an SSO user by filter.
 func (c *Client) GetSSOUserByFilters(key string, value string) (*types.SSOUserList, error) {
 	encodedValue := url.QueryEscape(value)
 	path := `/rest/v1/users?filter=` + key + `%20eq%20%22` + encodedValue + `%22`

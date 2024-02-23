@@ -26,6 +26,7 @@ type SSOUserDetails struct {
 	Permission       Permission `json:"permission"`
 }
 
+// SSOUserList represents the details of an SSO users.
 type SSOUserList struct {
 	SSOUsers []SSOUserDetails `json:"users"`
 }
