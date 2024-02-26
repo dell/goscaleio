@@ -233,7 +233,7 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 
 		nodeDiff := nodes - deployedNodes
 
-		if nodeDiff > 0 && nodeDiff == 1 {
+		if nodeDiff >= 1 {
 
 			var deploymentData map[string]interface{}
 
@@ -384,8 +384,8 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 			deploymentResponse["deploymentDescription"] = deploymentDesc
 
 			deploymentPayloadJson, _ = json.Marshal(deploymentResponse)
-		} else if nodeDiff > 1 || nodeDiff < 0 {
-			return nil, fmt.Errorf("node difference is more than 1")
+		} else if nodeDiff < 0 {
+			return nil, fmt.Errorf("node difference should be more than or equal 1")
 		}
 
 		req, httpError := http.NewRequest("PUT", gc.host+"/Api/V1/Deployment/"+deploymentID, bytes.NewBuffer(deploymentPayloadJson))
