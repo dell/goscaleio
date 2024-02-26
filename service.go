@@ -268,13 +268,13 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 				}
 			}
 
-			// Deep copy the component
-			clonedComponent := make(map[string]interface{})
-			for key, value := range serverComponent {
-				clonedComponent[key] = value
-			}
-
 			for numberOfNode := 1; numberOfNode <= nodeDiff; numberOfNode++ {
+
+				// Deep copy the component
+				clonedComponent := make(map[string]interface{})
+				for key, value := range serverComponent {
+					clonedComponent[key] = value
+				}
 
 				uuid := uuid.New().String()
 
