@@ -437,7 +437,7 @@ type RaidConfiguration struct {
 	SsdHotSpares         []string               `json:"ssdHotSpares,omitempty"`
 	ExternalHddHotSpares []string               `json:"externalHddHotSpares,omitempty"`
 	ExternalSsdHotSpares []string               `json:"externalSsdHotSpares,omitempty"`
-	SizeToDiskMap        map[string]string      `json:"sizeToDiskMap,omitempty"`
+	SizeToDiskMap        map[string]int         `json:"sizeToDiskMap,omitempty"`
 }
 
 type OptionsDetails struct {
