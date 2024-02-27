@@ -55,15 +55,15 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		password: password,
 	}
         // #nosec G402
-	if insecure { // #nosec G402
+	if insecure { 
 		gc.http.Transport = &http.Transport{ 
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true, // #nosec G402
+				InsecureSkipVerify: true, 
 			},
 		}
 	}
         // #nosec G402
-	if !insecure || useCerts { // #nosec G402
+	if !insecure || useCerts { 
 		pool, err := x509.SystemCertPool()
 		if err != nil {
 			return nil, errSysCerts
@@ -72,7 +72,7 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		gc.http.Transport = &http.Transport{  
 			TLSClientConfig: &tls.Config{ 
 				RootCAs:            pool,
-				InsecureSkipVerify: insecure, // #nosec G402
+				InsecureSkipVerify: insecure, 
 			},
 		}
 	}
