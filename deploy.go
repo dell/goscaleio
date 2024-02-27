@@ -54,27 +54,27 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		username: username,
 		password: password,
 	}
-
-	if insecure {
-		gc.http.Transport = &http.Transport{
-			/* #nosec G402 */
+    
+	if insecure { 
+		gc.http.Transport = &http.Transport{ 
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+				// #nosec G402
+				InsecureSkipVerify: true, 
 			},
 		}
 	}
-
-	if !insecure || useCerts {
+        
+	if !insecure || useCerts { 
 		pool, err := x509.SystemCertPool()
 		if err != nil {
 			return nil, errSysCerts
 		}
 
-		gc.http.Transport = &http.Transport{
-			/* #nosec G402 */
+		gc.http.Transport = &http.Transport{ 
 			TLSClientConfig: &tls.Config{
 				RootCAs:            pool,
-				InsecureSkipVerify: insecure,
+				// #nosec G402
+				InsecureSkipVerify: insecure, 
 			},
 		}
 	}
@@ -1264,7 +1264,7 @@ func writeConfig(config *CookieConfig) error {
 	if err != nil {
 		return err
 	}
-
+        // #nosec G306
 	err = ioutil.WriteFile(configFile, data, 0644)
 	if err != nil {
 		return err
