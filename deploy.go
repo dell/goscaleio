@@ -72,8 +72,8 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 
 		gc.http.Transport = &http.Transport{ 
 			TLSClientConfig: &tls.Config{
-				// #nosec G402
 				RootCAs:            pool,
+				// #nosec G402
 				InsecureSkipVerify: insecure, 
 			},
 		}
