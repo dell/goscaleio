@@ -89,7 +89,6 @@ func TestModifySnapshotPolicyName(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-
 			id:       ID2,
 			name:     "renameSnapshotPolicy",
 			expected: nil,

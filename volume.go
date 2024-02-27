@@ -56,7 +56,8 @@ func NewVolume(client *Client) *Volume {
 // GetVolume returns a volume
 func (sp *StoragePool) GetVolume(
 	volumehref, volumeid, ancestorvolumeid, volumename string,
-	getSnapshots bool) ([]*types.Volume, error) {
+	getSnapshots bool,
+) ([]*types.Volume, error) {
 	defer TimeSpent("GetVolume", time.Now())
 
 	var (
@@ -189,7 +190,8 @@ func getVolumeMapping(sysID string, volID string) (mappedVolumes []*SdcMappedVol
 
 // CreateVolume creates a volume
 func (sp *StoragePool) CreateVolume(
-	volume *types.VolumeParam) (*types.VolumeResp, error) {
+	volume *types.VolumeParam,
+) (*types.VolumeResp, error) {
 	defer TimeSpent("CreateVolume", time.Now())
 
 	path := "/api/types/Volume/instances"
@@ -269,7 +271,6 @@ func (v *Volume) RemoveVolume(removeMode string) error {
 
 // SetVolumeName sets a volume's name
 func (v *Volume) SetVolumeName(newName string) error {
-
 	path := fmt.Sprintf("/api/instances/Volume::%s/action/setVolumeName", v.Volume.ID)
 
 	payload := &types.SetVolumeNameParam{
@@ -282,7 +283,6 @@ func (v *Volume) SetVolumeName(newName string) error {
 
 // SetVolumeSize sets a volume's size
 func (v *Volume) SetVolumeSize(sizeInGB string) error {
-
 	link, err := GetLink(v.Volume.Links, "self")
 	if err != nil {
 		return err
@@ -440,7 +440,6 @@ func (v *Volume) SetCompressionMethod(compressionMethod string) error {
 
 // UnmarkForReplication Depricated Message (3.6)
 func (v *Volume) UnmarkForReplication() error {
-
 	path := fmt.Sprintf("/api/instances/Volume::%s/action/unmarkForReplication", v.Volume.ID)
 
 	payload := &types.EmptyPayload{}

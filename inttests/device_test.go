@@ -44,7 +44,6 @@ func getAllDevices(t *testing.T) []*goscaleio.Device {
 		assert.Equal(t, outDevice.Device.ID, tempDevice.Device.ID)
 	}
 	return allDevice
-
 }
 
 func getAllDevicesFromSystem(t *testing.T) []goscaleio.Device {
@@ -87,7 +86,6 @@ func getAllSdsDevices(t *testing.T) []*goscaleio.Device {
 		assert.Equal(t, outDevice.Device.ID, tempDevice.Device.ID)
 	}
 	return allDevice
-
 }
 
 // TestGetDevices will return all Device instances
@@ -181,7 +179,6 @@ func TestAddDeviceInvalid(t *testing.T) {
 	deviceID, err := pool.AttachDevice(dev)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", deviceID)
-
 }
 
 func getSdsID() string {
@@ -383,7 +380,6 @@ func TestDeviceUpdateOriginalPathways(t *testing.T) {
 }
 
 func TestGetDeviceByDeviceID(t *testing.T) {
-
 	system := getSystem()
 
 	device, _ := system.GetDevice("c7fc68a200000000")

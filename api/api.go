@@ -50,7 +50,6 @@ var (
 
 // Client is an API client.
 type Client interface {
-
 	// Do sends an HTTP request to the API.
 	Do(
 		ctx context.Context,
@@ -139,8 +138,8 @@ func New(
 	ctx context.Context,
 	host string,
 	opts ClientOptions,
-	debug bool) (Client, error) {
-
+	debug bool,
+) (Client, error) {
 	if host == "" {
 		return nil, errNewClient
 	}
@@ -173,9 +172,9 @@ func New(
 
 		c.http.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{
-				RootCAs:            pool,
+				RootCAs: pool,
 				// #nosec G402
-				InsecureSkipVerify: opts.Insecure, 
+				InsecureSkipVerify: opts.Insecure,
 			},
 		}
 	}
@@ -193,8 +192,8 @@ func (c *client) Get(
 	ctx context.Context,
 	path string,
 	headers map[string]string,
-	resp interface{}) error {
-
+	resp interface{},
+) error {
 	return c.DoWithHeaders(
 		ctx, http.MethodGet, path, headers, nil, resp, "")
 }
@@ -203,8 +202,8 @@ func (c *client) Post(
 	ctx context.Context,
 	path string,
 	headers map[string]string,
-	body, resp interface{}) error {
-
+	body, resp interface{},
+) error {
 	return c.DoWithHeaders(
 		ctx, http.MethodPost, path, headers, body, resp, "")
 }
@@ -213,8 +212,8 @@ func (c *client) Put(
 	ctx context.Context,
 	path string,
 	headers map[string]string,
-	body, resp interface{}) error {
-
+	body, resp interface{},
+) error {
 	return c.DoWithHeaders(
 		ctx, http.MethodPut, path, headers, body, resp, "")
 }
@@ -223,8 +222,8 @@ func (c *client) Delete(
 	ctx context.Context,
 	path string,
 	headers map[string]string,
-	resp interface{}) error {
-
+	resp interface{},
+) error {
 	return c.DoWithHeaders(
 		ctx, http.MethodDelete, path, headers, nil, resp, "")
 }
@@ -232,8 +231,8 @@ func (c *client) Delete(
 func (c *client) Do(
 	ctx context.Context,
 	method, path string,
-	body, resp interface{}) error {
-
+	body, resp interface{},
+) error {
 	return c.DoWithHeaders(ctx, method, path, nil, body, resp, "")
 }
 
@@ -249,8 +248,8 @@ func (c *client) DoWithHeaders(
 	ctx context.Context,
 	method, uri string,
 	headers map[string]string,
-	body, resp interface{}, version string) error {
-
+	body, resp interface{}, version string,
+) error {
 	res, err := c.DoAndGetResponseBody(
 		ctx, method, uri, headers, body, version)
 	if err != nil {
@@ -289,8 +288,8 @@ func (c *client) DoAndGetResponseBody(
 	ctx context.Context,
 	method, uri string,
 	headers map[string]string,
-	body interface{}, version string) (*http.Response, error) {
-
+	body interface{}, version string,
+) (*http.Response, error) {
 	var (
 		err                error
 		req                *http.Request
@@ -388,7 +387,6 @@ func (c *client) DoAndGetResponseBody(
 			} else {
 				req.SetBasicAuth("", c.token)
 			}
-
 		}
 
 	} else {
@@ -423,10 +421,9 @@ func (c *client) GetToken() string {
 }
 
 func (c *client) ParseJSONError(r *http.Response) error {
-
 	jsonError := &types.Error{}
 
-	//Starting in 4.0, response may be in html; so we cannot always use a json decoder
+	// Starting in 4.0, response may be in html; so we cannot always use a json decoder
 	if strings.Contains(r.Header.Get("Content-Type"), "html") {
 		jsonError.HTTPStatusCode = r.StatusCode
 		jsonError.Message = r.Status
@@ -447,8 +444,8 @@ func (c *client) ParseJSONError(r *http.Response) error {
 
 func (c *client) doLog(
 	l func(args ...interface{}),
-	msg string) {
-
+	msg string,
+) {
 	if c.debug {
 		l(msg)
 	}

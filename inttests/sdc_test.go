@@ -71,7 +71,6 @@ func TestGetSdcByAttribute(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, Sdc[0].Sdc.SdcGUID, found.Sdc.SdcGUID)
-
 }
 
 // TestGetSdcByAttributeInvalid fails to get a single specific Sdc by attribute
@@ -141,7 +140,6 @@ func TestFindSdcVolumes(t *testing.T) {
 
 // TestChangeSdcName function tests Change name functionality of SDC.
 func TestChangeSdcName(t *testing.T) {
-
 	system := getSystem()
 	assert.NotNil(t, system)
 
@@ -160,7 +158,6 @@ func TestChangeSdcName(t *testing.T) {
 
 // TestChangeSdcPerfProfile function tests Change PerfProfile functionality of SDC.
 func TestChangeSdcPerfProfile(t *testing.T) {
-
 	system := getSystem()
 	assert.NotNil(t, system)
 

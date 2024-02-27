@@ -122,7 +122,6 @@ func TestCreateSdsInvalid(t *testing.T) {
 	sdsID, err := pd.CreateSds(sdsName, sdsIPList)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", sdsID)
-
 }
 
 // TestCreateSdsInvalid will attempt to add an SDS, which results in failure
@@ -144,7 +143,6 @@ func TestCreateSdsParamsInvalid(t *testing.T) {
 	sdsID, err := pd.CreateSdsWithParams(sdsParam)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", sdsID)
-
 }
 
 // TestCompareSdsIDApi checks if all fields for the SDS are same for fetching by ID and Protection Domain

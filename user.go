@@ -15,9 +15,10 @@ package goscaleio
 import (
 	"errors"
 	"fmt"
-	types "github.com/dell/goscaleio/types/v1"
 	"net/http"
 	"time"
+
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 // GetUser returns user
@@ -40,9 +41,7 @@ func (s *System) GetUser() ([]types.User, error) {
 // GetUserByIDName returns a specific user based on it's user id
 func (s *System) GetUserByIDName(userID string, username string) (*types.User, error) {
 	if userID == "" && username == "" {
-
 		return nil, errors.New("user name or ID is mandatory, please enter a valid value")
-
 	} else if userID != "" {
 		path := fmt.Sprintf("/api/instances/User::%v",
 			userID)

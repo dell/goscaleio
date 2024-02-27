@@ -149,7 +149,7 @@ func TestRenameSdc(t *testing.T) {
 		},
 	}
 
-	//mock a powerflex endpoint
+	// mock a powerflex endpoint
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	}))
 	defer svr.Close()
@@ -162,7 +162,7 @@ func TestRenameSdc(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			//calling RenameSdc with mock value
+			// calling RenameSdc with mock value
 			err = client.RenameSdc(tc.sdcID, tc.name)
 			if err != nil {
 				if tc.expected == nil {
@@ -175,7 +175,6 @@ func TestRenameSdc(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestApproveSdc(t *testing.T) {
@@ -250,10 +249,8 @@ func TestApproveSdc(t *testing.T) {
 				}
 
 				http.Error(w, "The SDC is already approved.", http.StatusInternalServerError)
-
 			}))
 			return ts, &system, check(hasError)
-
 		},
 		"Invalid guid err": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
 			systemID := "0000aaabbbccc1111"
@@ -274,14 +271,12 @@ func TestApproveSdc(t *testing.T) {
 				}
 
 				http.Error(w, "The given GUID is invalid. Please specify GUID in the following format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", http.StatusInternalServerError)
-
 			}))
 			return ts, &system, check(hasError)
-
 		},
 	}
 
-	var testCaseGuids = map[string]string{
+	testCaseGuids := map[string]string{
 		"success":              "1aaabd94-9acd-11ed-a8fc-0242ac120002",
 		"Already Approved err": "1aaabd94-9acd-11ed-a8fc-0242ac120002",
 		"Invalid guid err":     "invald_guid",
@@ -306,8 +301,6 @@ func TestApproveSdc(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
-
 }

@@ -164,12 +164,12 @@ func TestGetFileSystemByIDName(t *testing.T) {
 		},
 	}
 
-	var testCaseFSNames = map[string]string{
+	testCaseFSNames := map[string]string{
 		"success":   "fs-test-2",
 		"not found": "fs-test-3",
 	}
 
-	var testCaseFSIds = map[string]string{
+	testCaseFSIds := map[string]string{
 		"success":   "64366a19-54e8-1544-f3d7-2a50fb1ccff3",
 		"not found": "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
 	}
@@ -243,7 +243,6 @@ func TestCreateFileSystem(t *testing.T) {
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/rest/v1/file-systems")
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -311,7 +310,6 @@ func TestCreateFileSystem(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 }
@@ -340,7 +338,6 @@ func TestCreateFileSystemSnapshot(t *testing.T) {
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/rest/v1/file-systems/%v/snapshot", "64366a19-54e8-1544-f3d7-2a50fb1ccff3")
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -407,7 +404,6 @@ func TestCreateFileSystemSnapshot(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 }
@@ -436,7 +432,6 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := "/rest/v1/file-systems"
 			var resp []types.FileSystem
 
@@ -465,7 +460,6 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 					t.Fatal(err)
 				}
 				fmt.Fprintln(w, string(respData))
-
 			}))
 			return ts, check(hasNoError, checkResp(len(resp)))
 		},
@@ -509,7 +503,6 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 }
@@ -538,7 +531,6 @@ func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"successNoContent": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/rest/v1/file-systems/%v/restore", "64366a19-54e8-1544-f3d7-2a50fb1ccff3")
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -556,7 +548,6 @@ func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 		},
 
 		"successWithContent": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/rest/v1/file-systems/%v/restore", "64366a19-54e8-1544-f3d7-2a50fb1ccff3")
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -631,7 +622,7 @@ func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 			}
 
 			fsID := "64366a19-54e8-1544-f3d7-2a50fb1ccff3"
-			var restoreSnapshotRequest = new(types.RestoreFsSnapParam)
+			restoreSnapshotRequest := new(types.RestoreFsSnapParam)
 			if name == "successWithContent" {
 				restoreSnapshotRequest = &types.RestoreFsSnapParam{
 					SnapshotID: "64366a19-54e8-1544-f3d7-2a50fb1ccdd3",
@@ -641,19 +632,17 @@ func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 				restoreSnapshotRequest = &types.RestoreFsSnapParam{
 					SnapshotID: "64366a19-54e8-1544-f3d7-2a50fb1ccdd3",
 				}
-
 			}
 
 			resp, err := s.RestoreFileSystemFromSnapshot(restoreSnapshotRequest, fsID)
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 }
-func TestDeleteFileSystem(t *testing.T) {
 
+func TestDeleteFileSystem(t *testing.T) {
 	name := "new-fs"
 
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

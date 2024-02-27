@@ -129,7 +129,6 @@ func TestModifyFaultSetName(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-
 			id:       ID,
 			name:     "renameFaultSet",
 			expected: nil,
@@ -177,19 +176,16 @@ func TestModifyFaultPerfProfile(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-
 			id:          ID,
 			perfProfile: "Compact",
 			expected:    nil,
 		},
 		{
-
 			id:          ID,
 			perfProfile: "HighPerformance",
 			expected:    nil,
 		},
 		{
-
 			id:          ID,
 			perfProfile: "Invalid",
 			expected:    errors.New("perfProfile should get one of the following values: Compact, HighPerformance, but its value is Invalid."),

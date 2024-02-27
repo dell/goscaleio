@@ -170,12 +170,12 @@ func TestGetNFSExportByIDName(t *testing.T) {
 		},
 	}
 
-	var testCaseFSNames = map[string]string{
+	testCaseFSNames := map[string]string{
 		"success":   "nfs-test-2",
 		"not found": "nfs-test-3",
 	}
 
-	var testCaseFSIds = map[string]string{
+	testCaseFSIds := map[string]string{
 		"success":   "64242c06-7a78-1773-50f4-2a50fb1ccff3",
 		"not found": "6433a2b2-6d60-f737-9f3b-2a50fb1ccff3",
 	}
@@ -226,10 +226,9 @@ func TestGetNFSExportByIDName(t *testing.T) {
 }
 
 func TestDeleteNFSExport(t *testing.T) {
-
 	id := "new-nas"
 
-	//mock a powerflex endpoint
+	// mock a powerflex endpoint
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
@@ -269,7 +268,6 @@ func TestCreateNFSExport(t *testing.T) {
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/rest/v1/nfs-exports")
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -330,7 +328,6 @@ func TestCreateNFSExport(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 }

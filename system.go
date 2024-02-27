@@ -47,7 +47,8 @@ func (c *Client) GetSystems() ([]*types.System, error) {
 
 // FindSystem returns a system based on ID or name
 func (c *Client) FindSystem(
-	instanceID, name, href string) (*System, error) {
+	instanceID, name, href string,
+) (*System, error) {
 	defer TimeSpent("FindSystem", time.Now())
 
 	systems, err := c.GetInstance(href)
@@ -87,7 +88,8 @@ func (s *System) GetStatistics() (*types.Statistics, error) {
 
 // CreateSnapshotConsistencyGroup creates a snapshot consistency group
 func (s *System) CreateSnapshotConsistencyGroup(
-	snapshotVolumesParam *types.SnapshotVolumesParam) (*types.SnapshotVolumesResp, error) {
+	snapshotVolumesParam *types.SnapshotVolumesParam,
+) (*types.SnapshotVolumesResp, error) {
 	defer TimeSpent("CreateSnapshotConsistencyGroup", time.Now())
 
 	link, err := GetLink(s.System.Links, "self")

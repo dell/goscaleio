@@ -98,7 +98,7 @@ func TestTreeQuotaByID(t *testing.T) {
 		},
 	}
 
-	var testCaseIds = map[string]string{
+	testCaseIds := map[string]string{
 		"success":   "00000003-006a-0000-0600-000000000000",
 		"not found": "00000003-006a-0000-0700-000000000000",
 	}
@@ -150,7 +150,6 @@ func TestCreateTreeQuota(t *testing.T) {
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/rest/v1/file-tree-quotas")
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -214,16 +213,14 @@ func TestCreateTreeQuota(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 }
 
 func TestDeleteTreeQuota(t *testing.T) {
-
 	id := "00000003-006a-0000-0600-000000000000"
 
-	//mock a powerflex endpoint
+	// mock a powerflex endpoint
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))

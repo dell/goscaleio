@@ -79,7 +79,8 @@ func (sp *StoragePool) GetDevice() ([]types.Device, error) {
 
 // FindDevice returns a Device
 func (sp *StoragePool) FindDevice(
-	field, value string) (*types.Device, error) {
+	field, value string,
+) (*types.Device, error) {
 	defer TimeSpent("FindDevice", time.Now())
 
 	devices, err := sp.GetDevice()
@@ -117,7 +118,8 @@ func (sds *Sds) GetDevice() ([]types.Device, error) {
 
 // FindDevice returns a Device
 func (sds *Sds) FindDevice(
-	field, value string) (*types.Device, error) {
+	field, value string,
+) (*types.Device, error) {
 	defer TimeSpent("FindDevice", time.Now())
 
 	devices, err := sds.GetDevice()
@@ -138,7 +140,6 @@ func (sds *Sds) FindDevice(
 
 // GetAllDevice returns all device in the system
 func (system *System) GetAllDevice() ([]types.Device, error) {
-
 	defer TimeSpent("GetAllDevice", time.Now())
 
 	path := "/api/types/Device/instances"
@@ -155,7 +156,8 @@ func (system *System) GetAllDevice() ([]types.Device, error) {
 
 // GetDeviceByField returns a Device list filter by the field
 func (system *System) GetDeviceByField(
-	field, value string) ([]types.Device, error) {
+	field, value string,
+) ([]types.Device, error) {
 	defer TimeSpent("GetDeviceByField", time.Now())
 
 	devices, err := system.GetAllDevice()
@@ -179,7 +181,6 @@ func (system *System) GetDeviceByField(
 
 // GetDevice returns a device using Device ID
 func (system *System) GetDevice(id string) (*types.Device, error) {
-
 	defer TimeSpent("GetDevice", time.Now())
 
 	path := fmt.Sprintf(

@@ -31,13 +31,11 @@ func (s *System) GetFileInterface(id string) (*types.FileInterface, error) {
 
 	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &resp)
-
 	if err != nil {
 		return nil, errors.New("could not find the File interface using id")
 	}
 
 	return resp, nil
-
 }
 
 // GetNASByIDName gets a NAS server by name or ID
@@ -46,7 +44,6 @@ func (s *System) GetNASByIDName(id string, name string) (*types.NAS, error) {
 
 	if name == "" && id == "" {
 		return nil, errors.New("NAS server name or ID is mandatory, please enter a valid value")
-
 	} else if id != "" {
 		path := fmt.Sprintf("/rest/v1/nas-servers/%s?select=*", id)
 
@@ -74,7 +71,6 @@ func (s *System) GetNASByIDName(id string, name string) (*types.NAS, error) {
 
 		return nil, errors.New("couldn't find given NAS server by name")
 	}
-
 }
 
 // CreateNAS creates a NAS server
@@ -89,7 +85,6 @@ func (s *System) CreateNAS(name string, protectionDomainID string) (*types.Creat
 	}
 
 	err := s.client.getJSONWithRetry(http.MethodPost, path, body, &resp)
-
 	if err != nil {
 		return nil, err
 	}
@@ -99,11 +94,9 @@ func (s *System) CreateNAS(name string, protectionDomainID string) (*types.Creat
 
 // DeleteNAS deletes a NAS server
 func (s *System) DeleteNAS(id string) error {
-
 	path := fmt.Sprintf("/rest/v1/nas-servers/%s", id)
 
 	err := s.client.getJSONWithRetry(http.MethodDelete, path, nil, nil)
-
 	if err != nil {
 		fmt.Println("err", err)
 		return err

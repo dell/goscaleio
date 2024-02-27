@@ -53,6 +53,7 @@ func TestNFSExportByIDName(t *testing.T) {
 		assert.Equal(t, nfsName, nfs.Name)
 	}
 }
+
 func TestNFSExportByIDNameInvalid(t *testing.T) {
 	nfs, err := C.GetNFSExportByIDName(invalidIdentifier, "")
 	assert.NotNil(t, err)
@@ -80,7 +81,7 @@ func TestCreateModifyDeleteNFSExport(t *testing.T) {
 		Path:         "/" + filesystemname,
 	}
 
-	//create nfs export
+	// create nfs export
 	nfs, err := C.CreateNFSExport(nfsexport)
 	fsID := nfs.ID
 	assert.Nil(t, err)
@@ -90,15 +91,14 @@ func TestCreateModifyDeleteNFSExport(t *testing.T) {
 	nfs, err = C.CreateNFSExport(nfsexport)
 	assert.NotNil(t, err)
 
-	//Modify NFS export proprties
+	// Modify NFS export proprties
 	nfsexportmodify := &types.NFSExportModify{
 		Description:           nfsmodify,
 		AddReadWriteRootHosts: []string{"192.168.100.10", "192.168.100.11"},
 	}
 	err = C.ModifyNFSExport(nfsexportmodify, fsID)
 
-	//delete the NFS export
+	// delete the NFS export
 	err = C.DeleteNFSExport(fsID)
 	assert.Nil(t, err)
-
 }

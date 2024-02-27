@@ -843,8 +843,7 @@ type StoragePoolUseRmCache struct {
 }
 
 // StoragePoolUseRfCache defines struct for StoragePoolUseRfCache
-type StoragePoolUseRfCache struct {
-}
+type StoragePoolUseRfCache struct{}
 
 // StoragePoolZeroPadEnabled defines struct for zero Pad Enablement
 type StoragePoolZeroPadEnabled struct {
@@ -895,8 +894,7 @@ type RebuildRebalanceParallelismParam struct {
 }
 
 // FragmentationParam defines struct for fragmentation
-type FragmentationParam struct {
-}
+type FragmentationParam struct{}
 
 // StoragePoolResp defines struct for StoragePoolResp
 type StoragePoolResp struct {
@@ -1059,8 +1057,7 @@ type RemoveVolumeParam struct {
 }
 
 // EmptyPayload defines struct for EmptyPayload
-type EmptyPayload struct {
-}
+type EmptyPayload struct{}
 
 // SnapshotPolicy defines the struct for SnapshotPolicy
 type SnapshotPolicy struct {
@@ -1262,7 +1259,7 @@ const (
 type NFSServerInstance struct {
 	// Unique identifier for NFS server
 	ID string `json:"id"`
-	//HostName will be used by NFS clients to connect to this NFS server.
+	// HostName will be used by NFS clients to connect to this NFS server.
 	HostName string `json:"host_name,omitempty"`
 	// IsNFSv4Enabled is set to true if nfsv4 is enabled on NAS server
 	IsNFSv4Enabled bool `json:"is_nfsv4_enabled,omitempty"`
@@ -1786,8 +1783,7 @@ type QuerySystemLimitsResponse struct {
 	SystemLimitEntryList []SystemLimits `json:"systemLimitEntryList"`
 }
 
-type QuerySystemLimitsParam struct {
-}
+type QuerySystemLimitsParam struct{}
 
 // FaultSetParam is the parameters required to create a fault set
 type FaultSetParam struct {
