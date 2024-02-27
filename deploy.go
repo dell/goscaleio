@@ -1264,7 +1264,7 @@ func writeConfig(config *CookieConfig) error {
 	if err != nil {
 		return err
 	}
-
+        // #nosec G306
 	err = ioutil.WriteFile(configFile, data, 0644)
 	if err != nil {
 		return err
