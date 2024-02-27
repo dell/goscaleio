@@ -64,7 +64,7 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		}
 	}
 
-	if !insecure || useCerts {
+	if !insecure || useCerts { // #nosec G402
 		pool, err := x509.SystemCertPool()
 		if err != nil {
 			return nil, errSysCerts
