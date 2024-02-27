@@ -330,12 +330,6 @@ type ComponentValid struct {
 	Messages []Messages `json:"messages,omitempty"`
 }
 
-type RelatedComponents struct {
-	AdditionalProp1 string `json:"additionalProp1,omitempty"`
-	AdditionalProp2 string `json:"additionalProp2,omitempty"`
-	AdditionalProp3 string `json:"additionalProp3,omitempty"`
-}
-
 type DependenciesDetails struct {
 	ID               string `json:"id,omitempty"`
 	DependencyTarget string `json:"dependencyTarget,omitempty"`
@@ -436,12 +430,6 @@ type ExternalVirtualDisks struct {
 	EncryptionType        string               `json:"encryptionType,omitempty"`
 }
 
-type SizeToDiskMap struct {
-	AdditionalProp1 int `json:"additionalProp1,omitempty"`
-	AdditionalProp2 int `json:"additionalProp2,omitempty"`
-	AdditionalProp3 int `json:"additionalProp3,omitempty"`
-}
-
 type RaidConfiguration struct {
 	VirtualDisks         []VirtualDisks         `json:"virtualDisks,omitempty"`
 	ExternalVirtualDisks []ExternalVirtualDisks `json:"externalVirtualDisks,omitempty"`
@@ -449,13 +437,7 @@ type RaidConfiguration struct {
 	SsdHotSpares         []string               `json:"ssdHotSpares,omitempty"`
 	ExternalHddHotSpares []string               `json:"externalHddHotSpares,omitempty"`
 	ExternalSsdHotSpares []string               `json:"externalSsdHotSpares,omitempty"`
-	SizeToDiskMap        SizeToDiskMap          `json:"sizeToDiskMap,omitempty"`
-}
-
-type Attributes struct {
-	AdditionalProp1 string `json:"additionalProp1,omitempty"`
-	AdditionalProp2 string `json:"additionalProp2,omitempty"`
-	AdditionalProp3 string `json:"additionalProp3,omitempty"`
+	SizeToDiskMap        map[string]int         `json:"sizeToDiskMap,omitempty"`
 }
 
 type OptionsDetails struct {
@@ -463,8 +445,9 @@ type OptionsDetails struct {
 	Name         string                `json:"name,omitempty"`
 	Value        string                `json:"value,omitempty"`
 	Dependencies []DependenciesDetails `json:"dependencies,omitempty"`
-	Attributes   Attributes            `json:"attributes,omitempty"`
+	Attributes   map[string]string     `json:"attributes,omitempty"`
 }
+
 type ScaleIOStoragePoolDisks struct {
 	ProtectionDomainID   string   `json:"protectionDomainId,omitempty"`
 	ProtectionDomainName string   `json:"protectionDomainName,omitempty"`
@@ -759,7 +742,7 @@ type ParametersDetails struct {
 	ScaleIODiskConfiguration ScaleIODiskConfiguration   `json:"scaleIODiskConfiguration,omitempty"`
 	ProtectionDomainSettings []ProtectionDomainSettings `json:"protectionDomainSettings,omitempty"`
 	FaultSetSettings         []FaultSetSettings         `json:"faultSetSettings,omitempty"`
-	Attributes               Attributes                 `json:"attributes,omitempty"`
+	Attributes               map[string]string          `json:"attributes,omitempty"`
 	VdsConfiguration         VdsConfiguration           `json:"vdsConfiguration,omitempty"`
 	NodeSelection            NodeSelection              `json:"nodeSelection,omitempty"`
 }
@@ -791,21 +774,17 @@ type AdditionalPropDetails struct {
 	ScaleIODiskConfiguration ScaleIODiskConfiguration   `json:"scaleIODiskConfiguration,omitempty"`
 	ProtectionDomainSettings []ProtectionDomainSettings `json:"protectionDomainSettings,omitempty"`
 	FaultSetSettings         []FaultSetSettings         `json:"faultSetSettings,omitempty"`
-	Attributes               Attributes                 `json:"attributes,omitempty"`
+	Attributes               map[string]string          `json:"attributes,omitempty"`
 	VdsConfiguration         VdsConfiguration           `json:"vdsConfiguration,omitempty"`
 	NodeSelection            NodeSelection              `json:"nodeSelection,omitempty"`
 }
-type ParametersMap struct {
-	AdditionalProp1 AdditionalPropDetails `json:"additionalProp1,omitempty"`
-	AdditionalProp2 AdditionalPropDetails `json:"additionalProp2,omitempty"`
-	AdditionalProp3 AdditionalPropDetails `json:"additionalProp3,omitempty"`
-}
+
 type Resources struct {
 	GUID          string              `json:"guid,omitempty"`
 	ID            string              `json:"id,omitempty"`
 	DisplayName   string              `json:"displayName,omitempty"`
 	Parameters    []ParametersDetails `json:"parameters,omitempty"`
-	ParametersMap ParametersMap       `json:"parametersMap,omitempty"`
+	ParametersMap map[string]string   `json:"parametersMap,omitempty"`
 }
 type Components struct {
 	ID                  string            `json:"id,omitempty"`
@@ -818,7 +797,7 @@ type Components struct {
 	Teardown            bool              `json:"teardown,omitempty"`
 	Type                string            `json:"type,omitempty"`
 	SubType             string            `json:"subType,omitempty"`
-	RelatedComponents   RelatedComponents `json:"relatedComponents,omitempty"`
+	RelatedComponents   map[string]string `json:"relatedComponents,omitempty"`
 	Resources           []Resources       `json:"resources,omitempty"`
 	Brownfield          bool              `json:"brownfield,omitempty"`
 	PuppetCertName      string            `json:"puppetCertName,omitempty"`
@@ -872,7 +851,7 @@ type Options struct {
 	ID           string                `json:"id,omitempty"`
 	Name         string                `json:"name,omitempty"`
 	Dependencies []DependenciesDetails `json:"dependencies,omitempty"`
-	Attributes   Attributes            `json:"attributes,omitempty"`
+	Attributes   map[string]string     `json:"attributes,omitempty"`
 }
 type Parameters struct {
 	ID               string                `json:"id,omitempty"`
