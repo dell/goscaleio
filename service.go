@@ -102,12 +102,14 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 			return nil, fmt.Errorf("Error While Parsing Response Data For Template: %s", parseError)
 		}
 
-		configuredNode, _ := templateData["serverCount"].(int)
+		configuredNode, _ := templateData["serverCount"].(float64)
+
+		configuredNodeCount := int(configuredNode)
 
 		nodes, _ := strconv.Atoi(nodes)
 
 		if nodes > 0 {
-			nodeDiff := nodes - configuredNode
+			nodeDiff := nodes - configuredNodeCount
 
 			if nodeDiff != 0 {
 				return nil, fmt.Errorf("Node count is not matching with Service Template")
@@ -260,12 +262,19 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 			// Find the component with type "SERVER"
 			var serverComponent map[string]interface{}
 
+			componentFound := false
+
 			for _, comp := range components {
 				comp := comp.(map[string]interface{})
 				if comp["type"].(string) == "SERVER" && comp["name"].(string) == nodename {
 					serverComponent = comp
+					componentFound = true
 					break
 				}
+			}
+
+			if !componentFound {
+				return nil, fmt.Errorf("Host to clone from not found")
 			}
 
 			for numberOfNode := 1; numberOfNode <= nodeDiff; numberOfNode++ {
@@ -385,7 +394,7 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 
 			deploymentPayloadJson, _ = json.Marshal(deploymentResponse)
 		} else if nodeDiff < 0 {
-			return nil, fmt.Errorf("node difference should be more than or equal 1")
+			return nil, fmt.Errorf("Removing node(s) is not supported")
 		}
 
 		req, httpError := http.NewRequest("PUT", gc.host+"/Api/V1/Deployment/"+deploymentID, bytes.NewBuffer(deploymentPayloadJson))
@@ -672,7 +681,7 @@ func (gc *GatewayClient) GetAllServiceDetails() ([]types.ServiceResponse, error)
 	}
 }
 
-func (gc *GatewayClient) DeleteService(serviceId string) (*types.ServiceResponse, error) {
+func (gc *GatewayClient) DeleteService(serviceId, serversInInventory, serversManagedState string) (*types.ServiceResponse, error) {
 
 	var deploymentResponse types.ServiceResponse
 
@@ -680,7 +689,7 @@ func (gc *GatewayClient) DeleteService(serviceId string) (*types.ServiceResponse
 
 	defer TimeSpent("DeleteService", time.Now())
 
-	req, httpError := http.NewRequest("DELETE", gc.host+"/Api/V1/Deployment/"+serviceId+"?serversInInventory=remove&resourceState=managed", nil)
+	req, httpError := http.NewRequest("DELETE", gc.host+"/Api/V1/Deployment/"+serviceId+"?serversInInventory="+serversInInventory+"&resourceState="+serversManagedState, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
