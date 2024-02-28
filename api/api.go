@@ -173,9 +173,9 @@ func New(
 
 		c.http.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{
-				RootCAs:            pool,
+				RootCAs: pool,
 				// #nosec G402
-				InsecureSkipVerify: opts.Insecure, 
+				InsecureSkipVerify: opts.Insecure,
 			},
 		}
 	}
