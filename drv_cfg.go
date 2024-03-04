@@ -84,7 +84,6 @@ func DrvCfgQueryGUID() (string, error) {
 	buf := [1]ioctlGUID{}
 	// #nosec CWE-242, validated buffer is large enough to hold data
 	err = ioctl(f.Fd(), opCode, uintptr(unsafe.Pointer(&buf[0])))
-
 	if err != nil {
 		return "", fmt.Errorf("QueryGUID error: %v", err)
 	}
@@ -116,7 +115,6 @@ func DrvCfgQueryRescan() (string, error) {
 	var rc int64
 	// #nosec CWE-242, validated buffer is large enough to hold data
 	err = ioctl(f.Fd(), opCode, uintptr(unsafe.Pointer(&rc)))
-
 	if err != nil {
 		return "", fmt.Errorf("Rescan error: %v", err)
 	}

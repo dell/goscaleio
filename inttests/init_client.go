@@ -73,7 +73,6 @@ func initClient2() bool {
 		math.MaxInt64,
 		os.Getenv("GOSCALEIO_INSECURE") == "true",
 		os.Getenv("GOSCALEIO_INSECURE") == "true")
-
 	if err != nil {
 		panic(err)
 	}

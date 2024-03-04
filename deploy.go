@@ -1008,7 +1008,6 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 		mdmCommands, _ := json.Marshal(commandList)
 
 		err = json.Unmarshal([]byte(mdmCommands), &mdmQueueCommandDetails)
-
 		if err != nil {
 			return mdmQueueCommandDetails, fmt.Errorf("Error For Get In Queue Commands: %s", err)
 		}
