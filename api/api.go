@@ -135,7 +135,7 @@ type ClientOptions struct {
 
 // New returns a new API client.
 func New(
-	ctx context.Context,
+	_ context.Context,
 	host string,
 	opts ClientOptions,
 	debug bool,
