@@ -121,7 +121,7 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 			"deploymentDescription": deploymentDesc,
 			"serviceTemplate":       templateData,
 			"updateServerFirmware":  true,
-			"firmwareRepositoryId":  firmwareRepositoryID, //TODO
+			"firmwareRepositoryId":  firmwareRepositoryID, // TODO
 		}
 
 		deploymentPayloadJson, _ := json.Marshal(deploymentPayload)
@@ -346,7 +346,6 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 						for _, parameter := range clonedParams {
 							parameter := parameter.(map[string]interface{})
 							if !excludeList[parameter["id"].(string)] {
-
 								if parameter["id"].(string) == "scaleio_mdm_role" {
 									parameter["guid"] = nil
 									parameter["value"] = "standby_mdm"
@@ -354,7 +353,6 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 									parameter["guid"] = nil
 									parameter["value"] = nil
 								}
-
 							}
 						}
 
@@ -476,7 +474,6 @@ func contains(list []string, str string) bool {
 }
 
 func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken bool) (*types.ServiceResponse, error) {
-
 	defer TimeSpent("GetServiceDetailsByID", time.Now())
 
 	if newToken {
@@ -578,7 +575,6 @@ func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken boo
 }
 
 func (gc *GatewayClient) GetServiceDetailsByFilter(filter, value string) ([]types.ServiceResponse, error) {
-
 	defer TimeSpent("GetServiceDetailsByFilter", time.Now())
 
 	encodedValue := url.QueryEscape(value)
@@ -634,7 +630,6 @@ func (gc *GatewayClient) GetServiceDetailsByFilter(filter, value string) ([]type
 }
 
 func (gc *GatewayClient) GetAllServiceDetails() ([]types.ServiceResponse, error) {
-
 	defer TimeSpent("DeploGetServiceDetailsByIDyService", time.Now())
 
 	req, httpError := http.NewRequest("GET", gc.host+"/Api/V1/Deployment/", nil)
@@ -682,7 +677,6 @@ func (gc *GatewayClient) GetAllServiceDetails() ([]types.ServiceResponse, error)
 }
 
 func (gc *GatewayClient) DeleteService(serviceId, serversInInventory, serversManagedState string) (*types.ServiceResponse, error) {
-
 	var deploymentResponse types.ServiceResponse
 
 	deploymentResponse.StatusCode = 400

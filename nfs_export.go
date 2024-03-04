@@ -54,7 +54,6 @@ func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NF
 
 	if id == "" && name == "" {
 		return nil, errors.New("NFS export name or ID is mandatory for fetching NFS export details, please enter a valid value")
-
 	} else if id != "" {
 		path := fmt.Sprintf("/rest/v1/nfs-exports/%s?select=*", id)
 
@@ -79,7 +78,6 @@ func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NF
 
 		return nil, errors.New("couldn't find NFS export by name")
 	}
-
 }
 
 // DeleteNFSExport deletes the NFS export

@@ -52,7 +52,8 @@ func (c *Client) GetInstance(systemhref string) ([]*types.System, error) {
 // GetVolume returns a volume
 func (c *Client) GetVolume(
 	volumehref, volumeid, ancestorvolumeid, volumename string,
-	getSnapshots bool) ([]*types.Volume, error) {
+	getSnapshots bool,
+) ([]*types.Volume, error) {
 	defer TimeSpent("GetVolume", time.Now())
 
 	var (
@@ -86,7 +87,6 @@ func (c *Client) GetVolume(
 	} else {
 		err = c.getJSONWithRetry(
 			http.MethodGet, path, nil, volume)
-
 	}
 	if err != nil {
 		return nil, err
@@ -129,7 +129,8 @@ func (c *Client) FindVolumeID(volumename string) (string, error) {
 // CreateVolume creates a volume
 func (c *Client) CreateVolume(
 	volume *types.VolumeParam,
-	storagePoolName, protectionDomain string) (*types.VolumeResp, error) {
+	storagePoolName, protectionDomain string,
+) (*types.VolumeResp, error) {
 	defer TimeSpent("CreateVolume", time.Now())
 
 	path := "/api/types/Volume/instances"
@@ -154,7 +155,8 @@ func (c *Client) CreateVolume(
 
 // GetStoragePool returns a storagepool
 func (c *Client) GetStoragePool(
-	storagepoolhref string) ([]*types.StoragePool, error) {
+	storagepoolhref string,
+) ([]*types.StoragePool, error) {
 	defer TimeSpent("GetStoragePool", time.Now())
 
 	var (
@@ -183,7 +185,8 @@ func (c *Client) GetStoragePool(
 
 // FindStoragePool returns a StoragePool
 func (c *Client) FindStoragePool(
-	id, name, href, protectionDomain string) (*types.StoragePool, error) {
+	id, name, href, protectionDomain string,
+) (*types.StoragePool, error) {
 	defer TimeSpent("FindStoragePool", time.Now())
 
 	storagePools, err := c.GetStoragePool(href)
@@ -237,7 +240,8 @@ func (c *Client) FindSnapshotPolicyID(spname string) (string, error) {
 
 // GetSnapshotPolicy returns a list of snapshot policy
 func (c *Client) GetSnapshotPolicy(
-	spname, spid string) ([]*types.SnapshotPolicy, error) {
+	spname, spid string,
+) ([]*types.SnapshotPolicy, error) {
 	defer TimeSpent("GetSnapshotPolicy", time.Now())
 
 	var (
@@ -269,7 +273,6 @@ func (c *Client) GetSnapshotPolicy(
 	} else {
 		err = c.getJSONWithRetry(
 			http.MethodGet, path, nil, sp)
-
 	}
 	if err != nil {
 		return nil, err

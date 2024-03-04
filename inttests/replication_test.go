@@ -408,7 +408,6 @@ func TestExecuteFailoverOnReplicationGroup(t *testing.T) {
 
 	err := rep.rcg.ExecuteFailoverOnReplicationGroup()
 	assert.Nil(t, err)
-
 }
 
 // Test ExecuteRestoreOnReplicationGroup

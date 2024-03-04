@@ -130,7 +130,6 @@ func TestGetNasByIDName(t *testing.T) {
 					t.Fatal(err)
 				}
 				fmt.Fprintln(w, string(respData))
-
 			}))
 			return ts, &system, check(hasError)
 		},
@@ -191,12 +190,12 @@ func TestGetNasByIDName(t *testing.T) {
 		},
 	}
 
-	var testCaseNasNames = map[string]string{
+	testCaseNasNames := map[string]string{
 		"success":   "test-nas1",
 		"not found": "test-nas3",
 	}
 
-	var testCaseNasIDs = map[string]string{
+	testCaseNasIDs := map[string]string{
 		"success":   "5e8d8e8e-671b-336f-db4e-cee0fbdc981e",
 		"not found": "6e8d8e8e-671b-336f-eb4e-dee0fbdc981f",
 	}
@@ -221,7 +220,6 @@ func TestGetNasByIDName(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 
@@ -245,10 +243,8 @@ func TestGetNasByIDName(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
-
 }
 
 func TestCreateNAS(t *testing.T) {
@@ -344,13 +340,11 @@ func TestCreateNAS(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 }
 
 func TestDeleteNAS(t *testing.T) {
-
 	id := "new-nas"
 	systemID := "0000aaacccddd1111"
 	system := types.System{
@@ -358,7 +352,7 @@ func TestDeleteNAS(t *testing.T) {
 	}
 	system1 := &system
 
-	//mock a powerflex endpoint
+	// mock a powerflex endpoint
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))

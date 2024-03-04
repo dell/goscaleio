@@ -55,9 +55,7 @@ func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSyste
 	defer TimeSpent("GetFileSystemByIDName", time.Now())
 
 	if id == "" && name == "" {
-
 		return nil, errors.New("file system name or ID is mandatory, please enter a valid value")
-
 	} else if id != "" {
 		path := fmt.Sprintf("/rest/v1/file-systems/%v?select=*", id)
 		var fs types.FileSystem
@@ -83,7 +81,6 @@ func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSyste
 
 		return nil, errors.New("couldn't find file system by name")
 	}
-
 }
 
 // CreateFileSystem creates a file system
@@ -199,5 +196,4 @@ func (s *System) ModifyFileSystem(modifyFsParam *types.FSModify, id string) erro
 	}
 
 	return nil
-
 }

@@ -101,7 +101,6 @@ func initGatewayClient() {
 	if err != nil {
 		panic(err)
 	}
-
 }
 
 func init() {

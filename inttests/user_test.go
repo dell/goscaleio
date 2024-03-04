@@ -13,10 +13,11 @@
 package inttests
 
 import (
-	siotypes "github.com/dell/goscaleio/types/v1"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	siotypes "github.com/dell/goscaleio/types/v1"
+	"github.com/stretchr/testify/assert"
 )
 
 // TestGetAllUsers will return all user instances
@@ -64,5 +65,4 @@ func TestCreateAndDeleteUser(t *testing.T) {
 	// Remove the user
 	err4 := system.RemoveUser(resp.ID)
 	assert.Nil(t, err4)
-
 }

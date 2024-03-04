@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"encoding/hex"
 	"fmt"
 	"os"
 	"os/exec"
@@ -21,8 +22,6 @@ import (
 	"strings"
 	"syscall"
 	"unsafe"
-
-	"encoding/hex"
 
 	"github.com/google/uuid"
 )
@@ -103,7 +102,6 @@ func DrvCfgQueryGUID() (string, error) {
 
 // DrvCfgQueryRescan preforms a rescan
 func DrvCfgQueryRescan() (string, error) {
-
 	f, err := os.Open(SDCDevice)
 	if err != nil {
 		return "", fmt.Errorf("Powerflex SDC is not installed")

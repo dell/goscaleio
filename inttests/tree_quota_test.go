@@ -41,7 +41,6 @@ func TestTreeQuotaByID(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, treequota.ID, quota.ID)
 	}
-
 }
 
 // TestCreateModifyDeleteTreeQuota will create , modify and delete a tree quota
@@ -61,9 +60,10 @@ func TestCreateModifyDeleteTreeQuota(t *testing.T) {
 	}
 
 	err = system.ModifyFileSystem(&types.FSModify{
-		IsQuotaEnabled: true}, filesystem.ID)
+		IsQuotaEnabled: true,
+	}, filesystem.ID)
 
-	//create tree quota
+	// create tree quota
 	quota, err := system.CreateTreeQuota(treequota)
 	quotaid := quota.ID
 	assert.Nil(t, err)
@@ -73,7 +73,7 @@ func TestCreateModifyDeleteTreeQuota(t *testing.T) {
 	quota, err = system.CreateTreeQuota(treequota)
 	assert.NotNil(t, err)
 
-	//Modify Tree Quota
+	// Modify Tree Quota
 	quotaModify := &types.TreeQuotaModify{
 		Description: treeQuotaModify,
 		SoftLimit:   900,
@@ -86,7 +86,7 @@ func TestCreateModifyDeleteTreeQuota(t *testing.T) {
 	err = system.ModifyTreeQuota(quotaModify, "")
 	assert.NotNil(t, err)
 
-	//Delete tree Quota
+	// Delete tree Quota
 	err = system.DeleteTreeQuota(quotaid)
 	assert.Nil(t, err)
 }
@@ -105,7 +105,8 @@ func TestGetTreeQuotaByFSID(t *testing.T) {
 
 	// enable quota for filesystem
 	err = system.ModifyFileSystem(&types.FSModify{
-		IsQuotaEnabled: true}, filesystem.ID)
+		IsQuotaEnabled: true,
+	}, filesystem.ID)
 
 	// set tree quota for filesystem
 	treequota := &types.TreeQuotaCreate{
@@ -131,8 +132,7 @@ func TestGetTreeQuotaByFSID(t *testing.T) {
 		assert.Equal(t, treequota.ID, quota.ID)
 	}
 
-	//Delete tree Quota
+	// Delete tree Quota
 	err = system.DeleteTreeQuota(treeQuota.ID)
 	assert.Nil(t, err)
-
 }

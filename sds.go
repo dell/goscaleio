@@ -54,7 +54,8 @@ func NewSdsEx(client *Client, sds *types.Sds) *Sds {
 
 // CreateSds creates a new Sds with automatically assigned roles to IPs
 func (pd *ProtectionDomain) CreateSds(
-	name string, ipList []string) (string, error) {
+	name string, ipList []string,
+) (string, error) {
 	defer TimeSpent("CreateSds", time.Now())
 
 	sdsParam := &types.SdsParam{
@@ -181,7 +182,8 @@ func (sys *System) GetAllSds() ([]types.Sds, error) {
 
 // FindSds returns a Sds
 func (pd *ProtectionDomain) FindSds(
-	field, value string) (*types.Sds, error) {
+	field, value string,
+) (*types.Sds, error) {
 	defer TimeSpent("FindSds", time.Now())
 
 	sdss, err := pd.GetSds()
@@ -410,7 +412,8 @@ func (pd *ProtectionDomain) SetSdsPerformanceProfile(id, perfProf string) error 
 
 // FindSds returns a Sds using system instance
 func (sys *System) FindSds(
-	field, value string) (*types.Sds, error) {
+	field, value string,
+) (*types.Sds, error) {
 	defer TimeSpent("FindSds", time.Now())
 
 	sdss, err := sys.GetAllSds()

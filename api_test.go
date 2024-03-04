@@ -122,7 +122,6 @@ func TestClientLogin(t *testing.T) {
 			default:
 				t.Fatal("Expecting endpoint /api/login got", req.RequestURI)
 			}
-
 		},
 	))
 	defer server.Close()
@@ -167,7 +166,7 @@ func (s stubTypeWithMetaData) MetaData() http.Header {
 }
 
 func Test_addMetaData(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		name           string
 		givenHeader    map[string]string
 		expectedHeader map[string]string

@@ -38,17 +38,14 @@ func (c *Client) GetSystemLimits() (systemLimits *types.QuerySystemLimitsRespons
 func (c *Client) GetMaxVol() (MaxVolumeSize string, err error) {
 	defer TimeSpent("GetMaxVol", time.Now())
 	sysLimit, err := c.GetSystemLimits()
-
 	if err != nil {
 		return "", err
 	}
 
 	for _, systemLimit := range sysLimit.SystemLimitEntryList {
-
 		if systemLimit.Type == "volumeSizeGb" {
 			return systemLimit.MaxVal, nil
 		}
-
 	}
 	return "", errors.New("couldn't get max vol size")
 }

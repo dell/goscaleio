@@ -12,7 +12,6 @@ import (
 )
 
 func TestModifyPerformanceProfile(t *testing.T) {
-
 	type testCase struct {
 		perfProfile string
 		expected    error
@@ -56,13 +55,11 @@ func TestModifyPerformanceProfile(t *testing.T) {
 					}
 				}
 			}
-
 		})
 	}
 }
 
 func TestAddStandByMDM(t *testing.T) {
-
 	type testCase struct {
 		ips      []string
 		role     string
@@ -107,10 +104,8 @@ func TestAddStandByMDM(t *testing.T) {
 					}
 				}
 			}
-
 		})
 	}
-
 }
 
 func TestRemoveStandByMDM(t *testing.T) {
@@ -157,10 +152,8 @@ func TestRemoveStandByMDM(t *testing.T) {
 					}
 				}
 			}
-
 		})
 	}
-
 }
 
 func TestChangeMDMOwnership(t *testing.T) {
@@ -207,7 +200,6 @@ func TestChangeMDMOwnership(t *testing.T) {
 					}
 				}
 			}
-
 		})
 	}
 }
@@ -267,7 +259,6 @@ func TestSwitchClusterMode(t *testing.T) {
 					}
 				}
 			}
-
 		})
 	}
 }
@@ -321,7 +312,6 @@ func TestRenameMdm(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(ts *testing.T) {
-
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			client.configConnect.Version = "3.6"
 			if err != nil {
