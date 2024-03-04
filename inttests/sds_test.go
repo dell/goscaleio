@@ -44,11 +44,11 @@ func getAllSds(t *testing.T) []*goscaleio.Sds {
 		assert.NotZero(t, len(sds))
 		for _, s := range sds {
 			// create an SDS via NewSdsEx to the caller (appending to the allSds slice)
-			outSDS := goscaleio.NewSdsEx(C, &s)
+			outSDS := goscaleio.NewSdsEx(C, &s) // #nosec G601
 			allSds = append(allSds, outSDS)
 			// create an SDS via NewSds that we will through away
 			tempSDS := goscaleio.NewSds(C)
-			tempSDS.Sds = &s
+			tempSDS.Sds = &s // #nosec G601
 			assert.Equal(t, outSDS.Sds.Name, tempSDS.Sds.Name)
 		}
 		return allSds

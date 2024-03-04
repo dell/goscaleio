@@ -53,7 +53,7 @@ func getAllFileSystems(t *testing.T) []*goscaleio.FileSystem {
 	assert.Nil(t, err)
 	assert.NotZero(t, len(fs))
 	for _, f := range fs {
-		outFs := goscaleio.NewFileSystem(C, &f)
+		outFs := goscaleio.NewFileSystem(C, &f) // #nosec G601
 		allFs = append(allFs, outFs)
 	}
 	return allFs

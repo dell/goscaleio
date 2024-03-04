@@ -32,7 +32,7 @@ func getAllSdc(t *testing.T) []*goscaleio.Sdc {
 	assert.Nil(t, err)
 	assert.NotZero(t, len(sdc))
 	for _, s := range sdc {
-		outSdc := goscaleio.NewSdc(C, &s)
+		outSdc := goscaleio.NewSdc(C, &s) // #nosec G601
 		allSdc = append(allSdc, outSdc)
 	}
 	return allSdc

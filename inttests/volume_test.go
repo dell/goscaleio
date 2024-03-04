@@ -62,7 +62,7 @@ func createVolume(t *testing.T, useName string) (string, error) {
 	return createResp.ID, nil
 }
 
-func deleteVolume(t *testing.T, volID string) error {
+func deleteVolume(_ *testing.T, volID string) error {
 	existingVol, err := getVolByID(volID)
 	if err != nil {
 		return err
