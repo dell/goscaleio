@@ -24,6 +24,6 @@ type VTreeMigrationInfo struct {
 }
 
 // VTreeQueryBySelectedIdsParam defines struct for specifying Vtree IDs
-type VTreeQueryBySelectedIdsParam struct {
+type VTreeQueryBySelectedIDsParam struct {
 	IDs []string `json:"ids"`
 }

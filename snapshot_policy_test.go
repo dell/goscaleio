@@ -192,21 +192,21 @@ func TestAssignSnapshotPolicy(t *testing.T) {
 		{
 			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId: "edba1bff00000001",
+				SourceVolumeID: "edba1bff00000001",
 			},
 			expected: nil,
 		},
 		{
 			id: "Invalid",
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId: "edba1bff00000001",
+				SourceVolumeID: "edba1bff00000001",
 			},
 			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
 		},
 		{
 			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId: "edba1bff000000",
+				SourceVolumeID: "edba1bff000000",
 			},
 			expected: errors.New("Invalid volume. Please try again with a valid ID or name."),
 		},
@@ -251,7 +251,7 @@ func TestUnassignSnapshotPolicy(t *testing.T) {
 		{
 			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId:            "edba1bff00000001",
+				SourceVolumeID:            "edba1bff00000001",
 				AutoSnapshotRemovalAction: "Remove",
 			},
 			expected: nil,
@@ -259,7 +259,7 @@ func TestUnassignSnapshotPolicy(t *testing.T) {
 		{
 			id: "Invalid",
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId:            "edba1bff00000001",
+				SourceVolumeID:            "edba1bff00000001",
 				AutoSnapshotRemovalAction: "Remove",
 			},
 			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
@@ -267,7 +267,7 @@ func TestUnassignSnapshotPolicy(t *testing.T) {
 		{
 			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId:            "edba1bff000000",
+				SourceVolumeID:            "edba1bff000000",
 				AutoSnapshotRemovalAction: "Remove",
 			},
 			expected: errors.New("Invalid volume. Please try again with a valid ID or name."),
@@ -275,7 +275,7 @@ func TestUnassignSnapshotPolicy(t *testing.T) {
 		{
 			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId:            "edba1bff000000",
+				SourceVolumeID:            "edba1bff000000",
 				AutoSnapshotRemovalAction: "Invalid",
 			},
 			expected: errors.New("autoSnapshotRemovalAction should get one of the following values: Remove, Detach, but its value is Invalid."),

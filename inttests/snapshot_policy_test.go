@@ -58,7 +58,7 @@ func TestCreateModifyDeleteSnapshotPolicy(t *testing.T) {
 
 	volID, err := createVolume(t, "")
 	assignVolume := &types.AssignVolumeToSnapshotPolicyParam{
-		SourceVolumeId: volID,
+		SourceVolumeID: volID,
 	}
 
 	// Assign and unassign volume to Snapshot Policy
@@ -70,20 +70,20 @@ func TestCreateModifyDeleteSnapshotPolicy(t *testing.T) {
 	assert.NotNil(t, vol)
 
 	assignVolume = &types.AssignVolumeToSnapshotPolicyParam{
-		SourceVolumeId: "Invalid",
+		SourceVolumeID: "Invalid",
 	}
 	err = system.AssignVolumeToSnapshotPolicy(assignVolume, snapID)
 	assert.NotNil(t, err)
 
 	unassignVolume := &types.AssignVolumeToSnapshotPolicyParam{
-		SourceVolumeId:            volID,
+		SourceVolumeID:            volID,
 		AutoSnapshotRemovalAction: "Remove",
 	}
 	err = system.UnassignVolumeFromSnapshotPolicy(unassignVolume, snapID)
 	assert.Nil(t, err)
 
 	unassignVolume = &types.AssignVolumeToSnapshotPolicyParam{
-		SourceVolumeId:            volID,
+		SourceVolumeID:            volID,
 		AutoSnapshotRemovalAction: "Invalid",
 	}
 	err = system.UnassignVolumeFromSnapshotPolicy(unassignVolume, snapID)

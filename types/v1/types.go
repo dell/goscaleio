@@ -291,7 +291,7 @@ type SdcStatistics struct {
 	UserDataSdcReadLatency  BWC      `json:"userDataSdcReadLatency"`
 	UserDataSdcWriteLatency BWC      `json:"userDataSdcWriteLatency"`
 	UserDataSdcTrimLatency  BWC      `json:"userDataSdcTrimLatency"`
-	VolumeIds               []string `json:"volumeIds"`
+	VolumeIDs               []string `json:"volumeIds"`
 	NumOfMappedVolumes      int      `json:"numOfMappedVolumes"`
 }
 
@@ -303,7 +303,7 @@ type VolumeStatistics struct {
 	UserDataSdcReadLatency  BWC      `json:"userDataSdcReadLatency"`
 	UserDataSdcWriteLatency BWC      `json:"userDataSdcWriteLatency"`
 	UserDataSdcTrimLatency  BWC      `json:"userDataSdcTrimLatency"`
-	MappedSdcIds            []string `json:"mappedSdcIds"`
+	MappedSdcIDs            []string `json:"mappedSdcIds"`
 	NumOfMappedSdcs         int      `json:"numOfMappedSdcs"`
 }
 
@@ -986,7 +986,7 @@ type VolumeQeryIDByKeyParam struct {
 }
 
 // VolumeQeryBySelectedIdsParam defines struct for VolumeQeryBySelectedIdsParam
-type VolumeQeryBySelectedIdsParam struct {
+type VolumeQeryBySelectedIDsParam struct {
 	IDs []string `json:"ids"`
 }
 
@@ -1111,7 +1111,7 @@ type SnapshotPolicyModifyParam struct {
 
 // AssignVolumeToSnapshotPolicyParam defines the struct for assigning volume to a Snapshot Policy
 type AssignVolumeToSnapshotPolicyParam struct {
-	SourceVolumeId            string `json:"sourceVolumeId"`
+	SourceVolumeID            string `json:"sourceVolumeId"`
 	AutoSnapshotRemovalAction string `json:"autoSnapshotRemovalAction,omitempty"`
 }
 
@@ -1800,7 +1800,7 @@ type FaultSetResp struct {
 type FaultSet struct {
 	ID                 string  `json:"id"`
 	Name               string  `json:"name"`
-	ProtectionDomainId string  `json:"protectionDomainId"`
+	ProtectionDomainID string  `json:"protectionDomainId"`
 	Links              []*Link `json:"links"`
 }
 
