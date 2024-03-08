@@ -44,7 +44,10 @@ func (s *System) GetNASByIDName(id string, name string) (*types.NAS, error) {
 
 	if name == "" && id == "" {
 		return nil, errors.New("NAS server name or ID is mandatory, please enter a valid value")
-	} else if id != "" {
+	}
+
+	// Get NAS server by id
+	if id != "" {
 		path := fmt.Sprintf("/rest/v1/nas-servers/%s?select=*", id)
 
 		var resp *types.NAS
@@ -55,29 +58,30 @@ func (s *System) GetNASByIDName(id string, name string) (*types.NAS, error) {
 		}
 		return resp, nil
 
-	} else {
-		path := fmt.Sprintf("/rest/v1/nas-servers?select=*")
-		err := s.client.getJSONWithRetry(
-			http.MethodGet, path, nil, &nasList)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, nas := range nasList {
-			if nas.Name == name {
-				return &nas, nil
-			}
-		}
-
-		return nil, errors.New("couldn't find given NAS server by name")
 	}
+
+	// Get NAS server by name
+	path := "/rest/v1/nas-servers?select=*"
+	err := s.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &nasList)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, nas := range nasList {
+		if nas.Name == name {
+			return &nas, nil
+		}
+	}
+
+	return nil, errors.New("couldn't find given NAS server by name")
 }
 
 // CreateNAS creates a NAS server
 func (s *System) CreateNAS(name string, protectionDomainID string) (*types.CreateNASResponse, error) {
 	var resp types.CreateNASResponse
 
-	path := fmt.Sprintf("/rest/v1/nas-servers")
+	path := "/rest/v1/nas-servers"
 
 	var body types.CreateNASParam = types.CreateNASParam{
 		Name:               name,

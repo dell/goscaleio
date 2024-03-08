@@ -34,26 +34,26 @@ func TestGetNFSExportByIDName(t *testing.T) {
 	type checkFn func(*testing.T, *types.NFSExport, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.NFSExport, err error) {
+	hasNoError := func(t *testing.T, _ *types.NFSExport, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.NFSExport, err error) {
+	hasError := func(t *testing.T, _ *types.NFSExport, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkRespName := func(nfsName string) func(t *testing.T, resp *types.NFSExport, err error) {
-		return func(t *testing.T, resp *types.NFSExport, err error) {
+		return func(t *testing.T, resp *types.NFSExport, _ error) {
 			assert.Equal(t, nfsName, resp.Name)
 		}
 	}
 
 	checkRespID := func(nfsID string) func(t *testing.T, resp *types.NFSExport, err error) {
-		return func(t *testing.T, resp *types.NFSExport, err error) {
+		return func(t *testing.T, resp *types.NFSExport, _ error) {
 			assert.Equal(t, nfsID, resp.ID)
 		}
 	}
@@ -229,7 +229,7 @@ func TestDeleteNFSExport(t *testing.T) {
 	id := "new-nas"
 
 	// mock a powerflex endpoint
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -248,27 +248,27 @@ func TestCreateNFSExport(t *testing.T) {
 	type checkFn func(*testing.T, *types.NFSExportCreateResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.NFSExportCreateResponse, err error) {
+	hasNoError := func(t *testing.T, _ *types.NFSExportCreateResponse, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.NFSExportCreateResponse, err error) {
+	hasError := func(t *testing.T, _ *types.NFSExportCreateResponse, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkResp := func(nfsId string) func(t *testing.T, resp *types.NFSExportCreateResponse, err error) {
-		return func(t *testing.T, resp *types.NFSExportCreateResponse, err error) {
+		return func(t *testing.T, resp *types.NFSExportCreateResponse, _ error) {
 			assert.Equal(t, nfsId, resp.ID)
 		}
 	}
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-			href := fmt.Sprintf("/rest/v1/nfs-exports")
+			href := "/rest/v1/nfs-exports"
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {
@@ -292,7 +292,7 @@ func TestCreateNFSExport(t *testing.T) {
 			return ts, check(hasNoError, checkResp("64385158-97a1-bb86-4fd9-2a50fb1ccff3"))
 		},
 		"bad request": func(t *testing.T) (*httptest.Server, []checkFn) {
-			href := fmt.Sprintf("/rest/v1/nfs-exports")
+			href := "/rest/v1/nfs-exports"
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {

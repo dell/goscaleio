@@ -24,7 +24,7 @@ import (
 // GetNFSExport lists NFS Exports.
 func (c *Client) GetNFSExport() (nfsList []types.NFSExport, err error) {
 	defer TimeSpent("GetNfsExport", time.Now())
-	path := fmt.Sprintf("/rest/v1/nfs-exports?select=*")
+	path := "/rest/v1/nfs-exports?select=*"
 
 	err = c.getJSONWithRetry(
 		http.MethodGet, path, nil, &nfsList)
@@ -37,7 +37,7 @@ func (c *Client) GetNFSExport() (nfsList []types.NFSExport, err error) {
 
 // CreateNFSExport create an NFS Export for a File System.
 func (c *Client) CreateNFSExport(createParams *types.NFSExportCreate) (respnfs *types.NFSExportCreateResponse, err error) {
-	path := fmt.Sprintf("/rest/v1/nfs-exports")
+	path := "/rest/v1/nfs-exports"
 
 	var body *types.NFSExportCreate = createParams
 	err = c.getJSONWithRetry(http.MethodPost, path, body, &respnfs)
@@ -54,7 +54,10 @@ func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NF
 
 	if id == "" && name == "" {
 		return nil, errors.New("NFS export name or ID is mandatory for fetching NFS export details, please enter a valid value")
-	} else if id != "" {
+	}
+
+	//	Get NFS export by id
+	if id != "" {
 		path := fmt.Sprintf("/rest/v1/nfs-exports/%s?select=*", id)
 
 		err = c.getJSONWithRetry(
@@ -64,20 +67,21 @@ func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NF
 		}
 		return respnfs, nil
 
-	} else {
-		nfsList, err := c.GetNFSExport()
-		if err != nil {
-			return nil, err
-		}
-
-		for _, nfs := range nfsList {
-			if nfs.Name == name {
-				return &nfs, nil
-			}
-		}
-
-		return nil, errors.New("couldn't find NFS export by name")
 	}
+
+	//	Get NFS export by name
+	nfsList, err := c.GetNFSExport()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, nfs := range nfsList {
+		if nfs.Name == name {
+			return &nfs, nil
+		}
+	}
+
+	return nil, errors.New("couldn't find NFS export by name")
 }
 
 // DeleteNFSExport deletes the NFS export

@@ -29,26 +29,26 @@ func TestGetFileSystemByIDName(t *testing.T) {
 	type checkFn func(*testing.T, *types.FileSystem, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.FileSystem, err error) {
+	hasNoError := func(t *testing.T, _ *types.FileSystem, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.FileSystem, err error) {
+	hasError := func(t *testing.T, _ *types.FileSystem, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkRespName := func(fsName string) func(t *testing.T, resp *types.FileSystem, err error) {
-		return func(t *testing.T, resp *types.FileSystem, err error) {
+		return func(t *testing.T, resp *types.FileSystem, _ error) {
 			assert.Equal(t, fsName, resp.Name)
 		}
 	}
 
 	checkRespID := func(fsID string) func(t *testing.T, resp *types.FileSystem, err error) {
-		return func(t *testing.T, resp *types.FileSystem, err error) {
+		return func(t *testing.T, resp *types.FileSystem, _ error) {
 			assert.Equal(t, fsID, resp.ID)
 		}
 	}
@@ -223,27 +223,27 @@ func TestCreateFileSystem(t *testing.T) {
 	type checkFn func(*testing.T, *types.FileSystemResp, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.FileSystemResp, err error) {
+	hasNoError := func(t *testing.T, _ *types.FileSystemResp, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.FileSystemResp, err error) {
+	hasError := func(t *testing.T, _ *types.FileSystemResp, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkResp := func(fsId string) func(t *testing.T, resp *types.FileSystemResp, err error) {
-		return func(t *testing.T, resp *types.FileSystemResp, err error) {
+		return func(t *testing.T, resp *types.FileSystemResp, _ error) {
 			assert.Equal(t, fsId, resp.ID)
 		}
 	}
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-			href := fmt.Sprintf("/rest/v1/file-systems")
+			href := "/rest/v1/file-systems"
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {
@@ -267,7 +267,7 @@ func TestCreateFileSystem(t *testing.T) {
 			return ts, check(hasNoError, checkResp("64366a19-54e8-1544-f3d7-2a50fb1ccff3"))
 		},
 		"bad request": func(t *testing.T) (*httptest.Server, []checkFn) {
-			href := fmt.Sprintf("/rest/v1/file-systems")
+			href := "/rest/v1/file-systems"
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {
@@ -318,20 +318,20 @@ func TestCreateFileSystemSnapshot(t *testing.T) {
 	type checkFn func(*testing.T, *types.CreateFileSystemSnapshotResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.CreateFileSystemSnapshotResponse, err error) {
+	hasNoError := func(t *testing.T, _ *types.CreateFileSystemSnapshotResponse, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.CreateFileSystemSnapshotResponse, err error) {
+	hasError := func(t *testing.T, _ *types.CreateFileSystemSnapshotResponse, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkResp := func(snapId string) func(t *testing.T, resp *types.CreateFileSystemSnapshotResponse, err error) {
-		return func(t *testing.T, resp *types.CreateFileSystemSnapshotResponse, err error) {
+		return func(t *testing.T, resp *types.CreateFileSystemSnapshotResponse, _ error) {
 			assert.Equal(t, snapId, resp.ID)
 		}
 	}
@@ -412,20 +412,20 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 	type checkFn func(*testing.T, []types.FileSystem, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp []types.FileSystem, err error) {
+	hasNoError := func(t *testing.T, _ []types.FileSystem, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp []types.FileSystem, err error) {
+	hasError := func(t *testing.T, _ []types.FileSystem, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkResp := func(snapLength int) func(t *testing.T, resp []types.FileSystem, err error) {
-		return func(t *testing.T, resp []types.FileSystem, err error) {
+		return func(t *testing.T, resp []types.FileSystem, _ error) {
 			assert.Equal(t, snapLength, len(resp))
 		}
 	}
@@ -511,20 +511,20 @@ func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 	type checkFn func(*testing.T, *types.RestoreFsSnapResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.RestoreFsSnapResponse, err error) {
+	hasNoError := func(t *testing.T, _ *types.RestoreFsSnapResponse, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.RestoreFsSnapResponse, err error) {
+	hasError := func(t *testing.T, _ *types.RestoreFsSnapResponse, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkResp := func(snapId string) func(t *testing.T, resp *types.RestoreFsSnapResponse, err error) {
-		return func(t *testing.T, resp *types.RestoreFsSnapResponse, err error) {
+		return func(t *testing.T, resp *types.RestoreFsSnapResponse, _ error) {
 			assert.Equal(t, snapId, resp.ID)
 		}
 	}
@@ -645,7 +645,7 @@ func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 func TestDeleteFileSystem(t *testing.T) {
 	name := "new-fs"
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -686,13 +686,13 @@ func TestModifyFileSystem(t *testing.T) {
 		},
 	}
 	// mock a powerflex endpoint
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
