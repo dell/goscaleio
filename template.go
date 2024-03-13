@@ -42,7 +42,6 @@ func (gc *GatewayClient) GetTemplateByID(id string) (*types.TemplateDetails, err
 		if err != nil {
 			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
 		}
-
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -55,26 +54,23 @@ func (gc *GatewayClient) GetTemplateByID(id string) (*types.TemplateDetails, err
 		return nil, httpRespError
 	}
 
-	responseString, _ := extractString(httpResp)
-
-	if httpResp.StatusCode == 200 {
-		parseError := json.Unmarshal([]byte(responseString), &template)
-
-		if parseError != nil {
-			return nil, fmt.Errorf("Error While Parsing Response Data For Template: %s", parseError)
-		}
-
-		return &template, nil
-	} else {
+	if httpResp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("Template not found")
 	}
+
+	responseString, _ := extractString(httpResp)
+	err := json.Unmarshal([]byte(responseString), &template)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing response data for template: %s", err)
+	}
+	return &template, nil
 }
 
 // GetAllTemplates gets all the Template details
 func (gc *GatewayClient) GetAllTemplates() ([]types.TemplateDetails, error) {
 	defer TimeSpent("GetAllTemplates", time.Now())
 
-	path := fmt.Sprintf("/Api/V1/template")
+	path := "/Api/V1/template"
 
 	var templates types.TemplateDetailsFilter
 	req, httpError := http.NewRequest("GET", gc.host+path, nil)
@@ -89,7 +85,6 @@ func (gc *GatewayClient) GetAllTemplates() ([]types.TemplateDetails, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Error While Handling Cookie: %s", err)
 		}
-
 	} else {
 		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
 	}
@@ -102,9 +97,8 @@ func (gc *GatewayClient) GetAllTemplates() ([]types.TemplateDetails, error) {
 		return nil, httpRespError
 	}
 
-	responseString, _ := extractString(httpResp)
-
 	if httpResp.StatusCode == 200 {
+		responseString, _ := extractString(httpResp)
 		parseError := json.Unmarshal([]byte(responseString), &templates)
 
 		if parseError != nil {
@@ -149,20 +143,17 @@ func (gc *GatewayClient) GetTemplateByFilters(key string, value string) ([]types
 		return nil, httpRespError
 	}
 
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Template not found")
+	}
+
 	responseString, _ := extractString(httpResp)
+	parseError := json.Unmarshal([]byte(responseString), &templates)
+	if parseError != nil {
+		return nil, fmt.Errorf("Error While Parsing Response Data For Template: %s", parseError)
+	}
 
-	if httpResp.StatusCode == 200 {
-		parseError := json.Unmarshal([]byte(responseString), &templates)
-
-		if parseError != nil {
-			return nil, fmt.Errorf("Error While Parsing Response Data For Template: %s", parseError)
-		}
-
-		if len(templates.TemplateDetails) == 0 {
-			return nil, fmt.Errorf("Template not found")
-		}
-
-	} else {
+	if len(templates.TemplateDetails) == 0 {
 		return nil, fmt.Errorf("Template not found")
 	}
 
