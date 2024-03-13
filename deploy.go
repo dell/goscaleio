@@ -379,9 +379,9 @@ func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 		return packageParam, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return packageParam, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return packageParam, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode == 200 {
@@ -430,9 +430,9 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
@@ -458,7 +458,7 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 
 	var mdmTopologyDetails types.MDMTopologyDetails
 
-	err := json.Unmarshal([]byte(responseString), &mdmTopologyDetails)
+	err = json.Unmarshal([]byte(responseString), &mdmTopologyDetails)
 	if err != nil {
 		return &gatewayResponse, fmt.Errorf("Error Validating MDM Details: %s", err)
 	}
@@ -496,9 +496,9 @@ func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJSONO
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
@@ -532,7 +532,7 @@ func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJSONO
 
 	var mdmTopologyDetails types.MDMTopologyDetails
 
-	err := json.Unmarshal([]byte(responseString), &mdmTopologyDetails)
+	err = json.Unmarshal([]byte(responseString), &mdmTopologyDetails)
 	if err != nil {
 		return &gatewayResponse, fmt.Errorf("Error For Get Cluster Details: %s", err)
 	}
@@ -570,9 +570,9 @@ func (gc *GatewayClient) DeletePackage(packageName string) (*types.GatewayRespon
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
@@ -664,12 +664,12 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 
 	if httpResp.StatusCode != 202 {
 
-		responseString, error := extractString(httpResp)
-		if error != nil {
-			return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+		responseString, err := extractString(httpResp)
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 		}
 
-		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+		err = json.Unmarshal([]byte(responseString), &gatewayResponse)
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error For Begin Installation: %s", err)
 		}
@@ -709,9 +709,9 @@ func (gc *GatewayClient) MoveToNextPhase() (*types.GatewayResponse, error) {
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
@@ -763,9 +763,9 @@ func (gc *GatewayClient) RetryPhase() (*types.GatewayResponse, error) {
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
@@ -817,9 +817,9 @@ func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
@@ -871,9 +871,9 @@ func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
@@ -925,9 +925,9 @@ func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
@@ -978,9 +978,9 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 		return mdmQueueCommandDetails, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return mdmQueueCommandDetails, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return mdmQueueCommandDetails, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode == 200 {
@@ -1053,7 +1053,7 @@ func (gc *GatewayClient) CheckForCompletionQueueCommands(currentPhase string) (*
 }
 
 // UninstallCluster used for uninstallation of cluster
-func (gc *GatewayClient) UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword string, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, expansion bool) (*types.GatewayResponse, error) {
+func (gc *GatewayClient) UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword string, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, _ bool) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
 	clusterData, jsonParseError := jsonToMap(jsonStr)
@@ -1102,12 +1102,12 @@ func (gc *GatewayClient) UninstallCluster(jsonStr, mdmUsername, mdmPassword, lia
 
 	if httpResp.StatusCode != 202 {
 
-		responseString, error := extractString(httpResp)
-		if error != nil {
-			return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+		responseString, err := extractString(httpResp)
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 		}
 
-		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
+		err = json.Unmarshal([]byte(responseString), &gatewayResponse)
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error For Uninstall Cluster: %s", err)
 		}

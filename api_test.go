@@ -200,7 +200,7 @@ func Test_addMetaData(t *testing.T) {
 	}
 }
 
-func Test_updateHeaders(t *testing.T) {
+func Test_updateHeaders(_ *testing.T) {
 	var wg sync.WaitGroup
 	for i := 0; i < 3; i++ {
 		wg.Add(1)

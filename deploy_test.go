@@ -31,13 +31,13 @@ func TestMoveToNextPhase(t *testing.T) {
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			GC, err := NewGateway(svr.URL, "", "", true, true)
 			if err != nil {
 				t.Fatal(err)
@@ -76,13 +76,13 @@ func TestUninstallCluster(t *testing.T) {
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			GC, err := NewGateway(svr.URL, "", "", true, true)
 			if err != nil {
 				t.Fatal(err)
@@ -117,13 +117,13 @@ func TestGetClusterDetails(t *testing.T) {
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			GC, err := NewGateway(svr.URL, "", "", true, true)
 			if err != nil {
 				t.Fatal(err)
