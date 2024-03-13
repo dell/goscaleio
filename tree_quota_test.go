@@ -35,13 +35,13 @@ func TestTreeQuotaByID(t *testing.T) {
 	type checkFn func(*testing.T, *types.TreeQuota, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, _ *types.TreeQuota, _ error) {
+	hasNoError := func(t *testing.T, _ *types.TreeQuota, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, _ *types.TreeQuota, _ error) {
+	hasError := func(t *testing.T, _ *types.TreeQuota, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
