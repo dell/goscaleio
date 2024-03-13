@@ -11,7 +11,7 @@ import (
 )
 
 func TestGetVTrees(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -44,13 +44,13 @@ func TestGetVTreeByID(t *testing.T) {
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -87,13 +87,13 @@ func TestGetVTreeInstances(t *testing.T) {
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -130,13 +130,13 @@ func TestGetVTreeByVolumeID(t *testing.T) {
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
