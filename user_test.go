@@ -33,13 +33,13 @@ func TestCreateUser(t *testing.T) {
 			expected: errors.New("userRole should get on Monitor, Configure, Administrator, Security, FrontendConfig, BackendConfig, but its value is Role"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -80,13 +80,13 @@ func TestGetUserByIDName(t *testing.T) {
 			expected: errors.New("user name or ID is mandatory, please enter a valid value"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -124,13 +124,13 @@ func TestRemoveUser(t *testing.T) {
 			expected: errors.New("User not found. Please check that you have the correct user name"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -175,13 +175,13 @@ func TestSetRole(t *testing.T) {
 			expected: errors.New("userRole should get one of the following values: Monitor, Configure, Administrator, Security, FrontendConfig, BackendConfig, but its value is any"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
