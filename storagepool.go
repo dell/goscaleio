@@ -419,13 +419,13 @@ func (sp *StoragePool) GetSDSStoragePool() ([]types.Sds, error) {
 }
 
 // GetStoragePoolByID returns a Storagepool by ID
-func (sys *System) GetStoragePoolByID(id string) (*types.StoragePool, error) {
+func (s *System) GetStoragePoolByID(id string) (*types.StoragePool, error) {
 	defer TimeSpent("GetStoragePoolByID", time.Now())
 
 	path := fmt.Sprintf("/api/instances/StoragePool::%s", id)
 
 	var storagepool *types.StoragePool
-	err := sys.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &storagepool)
 	if err != nil {
 		return nil, err
@@ -435,12 +435,12 @@ func (sys *System) GetStoragePoolByID(id string) (*types.StoragePool, error) {
 }
 
 // GetAllStoragePools returns all Storage pools on the system
-func (sys *System) GetAllStoragePools() ([]types.StoragePool, error) {
+func (s *System) GetAllStoragePools() ([]types.StoragePool, error) {
 	defer TimeSpent("GetStoragepool", time.Now())
 	path := "/api/types/StoragePool/instances"
 
 	var storagepools []types.StoragePool
-	err := sys.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &storagepools)
 	if err != nil {
 		return nil, err
