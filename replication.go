@@ -250,7 +250,7 @@ func (rcg *ReplicationConsistencyGroup) ExecuteFailoverOnReplicationGroup() erro
 }
 
 // ExecuteSwitchoverOnReplicationGroup sets the ReplicationconsistencyGroup into a switchover state.
-func (rcg *ReplicationConsistencyGroup) ExecuteSwitchoverOnReplicationGroup(force bool) error {
+func (rcg *ReplicationConsistencyGroup) ExecuteSwitchoverOnReplicationGroup(_ bool) error {
 	defer TimeSpent("ExecuteSwitchoverOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/switchoverReplicationConsistencyGroup"
