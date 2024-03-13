@@ -46,16 +46,16 @@ func TestCreateFaultSet(t *testing.T) {
 				Name:               "testFaultSet",
 				ProtectionDomainID: "202a0466000000",
 			},
-			expected: errors.New("Invalid Protection Domain. Please try again with the correct ID or name."),
+			expected: errors.New("invalid Protection Domain. Please try again with the correct ID or name"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -89,16 +89,16 @@ func TestGetFaultByID(t *testing.T) {
 		},
 		{
 			id:       "1234",
-			expected: errors.New("Invalid Fault Set. Please try again with the correct ID or name."),
+			expected: errors.New("invalid Fault Set. Please try again with the correct ID or name"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -136,16 +136,16 @@ func TestModifyFaultSetName(t *testing.T) {
 		{
 			id:       "1234",
 			name:     "renameFaultSet",
-			expected: errors.New("Invalid Fault Set. Please try again with the correct ID or name."),
+			expected: errors.New("invalid Fault Set. Please try again with the correct ID or name"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -188,16 +188,16 @@ func TestModifyFaultPerfProfile(t *testing.T) {
 		{
 			id:          ID,
 			perfProfile: "Invalid",
-			expected:    errors.New("perfProfile should get one of the following values: Compact, HighPerformance, but its value is Invalid."),
+			expected:    errors.New("perfProfile should get one of the following values: Compact, HighPerformance, but its value is Invalid"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -232,16 +232,16 @@ func TestDeleteFaultSet(t *testing.T) {
 		},
 		{
 			id:       "1234",
-			expected: errors.New("Invalid Fault Set. Please try again with the correct ID or name."),
+			expected: errors.New("invalid Fault Set. Please try again with the correct ID or name"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -265,7 +265,7 @@ func TestDeleteFaultSet(t *testing.T) {
 }
 
 func TestGetAllFaultSets(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -300,13 +300,13 @@ func TestGetAllFaultSetsSds(t *testing.T) {
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
