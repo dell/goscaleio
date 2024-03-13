@@ -35,20 +35,20 @@ func TestTreeQuotaByID(t *testing.T) {
 	type checkFn func(*testing.T, *types.TreeQuota, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.TreeQuota, err error) {
+	hasNoError := func(t *testing.T, _ *types.TreeQuota, _ error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.TreeQuota, err error) {
+	hasError := func(t *testing.T, _ *types.TreeQuota, _ error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkRespID := func(quotaID string) func(t *testing.T, resp *types.TreeQuota, err error) {
-		return func(t *testing.T, resp *types.TreeQuota, err error) {
+		return func(t *testing.T, resp *types.TreeQuota, _ error) {
 			assert.Equal(t, quotaID, resp.ID)
 		}
 	}
@@ -98,7 +98,7 @@ func TestTreeQuotaByID(t *testing.T) {
 		},
 	}
 
-	testCaseIds := map[string]string{
+	testCaseIDs := map[string]string{
 		"success":   "00000003-006a-0000-0600-000000000000",
 		"not found": "00000003-006a-0000-0700-000000000000",
 	}
@@ -118,7 +118,7 @@ func TestTreeQuotaByID(t *testing.T) {
 				client: client,
 			}
 
-			resp, err := s.GetTreeQuotaByID(testCaseIds[id])
+			resp, err := s.GetTreeQuotaByID(testCaseIDs[id])
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -130,20 +130,20 @@ func TestCreateTreeQuota(t *testing.T) {
 	type checkFn func(*testing.T, *types.TreeQuotaCreateResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.TreeQuotaCreateResponse, err error) {
+	hasNoError := func(t *testing.T, _ *types.TreeQuotaCreateResponse, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.TreeQuotaCreateResponse, err error) {
+	hasError := func(t *testing.T, _ *types.TreeQuotaCreateResponse, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkResp := func(quotaId string) func(t *testing.T, resp *types.TreeQuotaCreateResponse, err error) {
-		return func(t *testing.T, resp *types.TreeQuotaCreateResponse, err error) {
+		return func(t *testing.T, resp *types.TreeQuotaCreateResponse, _ error) {
 			assert.Equal(t, quotaId, resp.ID)
 		}
 	}
@@ -221,7 +221,7 @@ func TestDeleteTreeQuota(t *testing.T) {
 	id := "00000003-006a-0000-0600-000000000000"
 
 	// mock a powerflex endpoint
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -262,13 +262,13 @@ func TestModifyTreeQuota(t *testing.T) {
 		},
 	}
 	// mock a powerflex endpoint
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
