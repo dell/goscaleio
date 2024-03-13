@@ -29,19 +29,19 @@ func Test_FindVolumes(t *testing.T) {
 	type checkFn func(*testing.T, []*Volume, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, vols []*Volume, err error) {
+	hasNoError := func(t *testing.T, _ []*Volume, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
 	checkLength := func(length int) func(t *testing.T, vols []*Volume, err error) {
-		return func(t *testing.T, vols []*Volume, err error) {
+		return func(t *testing.T, vols []*Volume, _ error) {
 			assert.Equal(t, length, len(vols))
 		}
 	}
 
-	hasError := func(t *testing.T, vols []*Volume, err error) {
+	hasError := func(t *testing.T, _ []*Volume, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
@@ -150,13 +150,13 @@ func TestRenameSdc(t *testing.T) {
 	}
 
 	// mock a powerflex endpoint
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -181,20 +181,20 @@ func TestApproveSdc(t *testing.T) {
 	type checkFn func(*testing.T, *types.ApproveSdcByGUIDResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.ApproveSdcByGUIDResponse, err error) {
+	hasNoError := func(t *testing.T, _ *types.ApproveSdcByGUIDResponse, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.ApproveSdcByGUIDResponse, err error) {
+	hasError := func(t *testing.T, _ *types.ApproveSdcByGUIDResponse, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkResp := func(sdcId string) func(t *testing.T, resp *types.ApproveSdcByGUIDResponse, err error) {
-		return func(t *testing.T, resp *types.ApproveSdcByGUIDResponse, err error) {
+		return func(t *testing.T, resp *types.ApproveSdcByGUIDResponse, _ error) {
 			assert.Equal(t, sdcId, resp.SdcID)
 		}
 	}

@@ -166,12 +166,12 @@ func (pd *ProtectionDomain) GetSds() ([]types.Sds, error) {
 }
 
 // GetAllSds returns all SDS on the system
-func (sys *System) GetAllSds() ([]types.Sds, error) {
+func (s *System) GetAllSds() ([]types.Sds, error) {
 	defer TimeSpent("GetSds", time.Now())
 	path := "/api/types/Sds/instances"
 
 	var sdss []types.Sds
-	err := sys.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &sdss)
 	if err != nil {
 		return nil, err
@@ -203,13 +203,13 @@ func (pd *ProtectionDomain) FindSds(
 }
 
 // GetSdsByID returns a Sds by ID
-func (sys *System) GetSdsByID(id string) (types.Sds, error) {
+func (s *System) GetSdsByID(id string) (types.Sds, error) {
 	defer TimeSpent("GetSdsByID", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sds::%s", id)
 
 	var sds types.Sds
-	err := sys.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &sds)
 
 	return sds, err
@@ -411,12 +411,12 @@ func (pd *ProtectionDomain) SetSdsPerformanceProfile(id, perfProf string) error 
 }
 
 // FindSds returns a Sds using system instance
-func (sys *System) FindSds(
+func (s *System) FindSds(
 	field, value string,
 ) (*types.Sds, error) {
 	defer TimeSpent("FindSds", time.Now())
 
-	sdss, err := sys.GetAllSds()
+	sdss, err := s.GetAllSds()
 	if err != nil {
 		return nil, err
 	}
