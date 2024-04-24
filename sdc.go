@@ -328,3 +328,55 @@ func (s *System) GetSdcIDByIP(ip string) (string, error) {
 
 	return sdcID, nil
 }
+
+func (s *System) SetRestrictedMode(mode string) error {
+	defer TimeSpent("SetRestrictedMode", time.Now())
+
+	path := fmt.Sprintf("/api/instances/System::%v/action/setRestrictedSdcMode", s.System.ID)
+	sdcParam := &types.SetRestrictedMode{
+		RestrictedSdcMode: mode,
+	}
+	err := s.client.getJSONWithRetry(http.MethodPost, path, sdcParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *System) SetApprovedIps(sdcId string, sdcApprovedIps []string) error {
+	defer TimeSpent("SetApprovedIps", time.Now())
+
+	path := fmt.Sprintf("/api/instances/System::%v/action/setApprovedSdcIps", s.System.ID)
+	sdcParam := &types.SetApprovedIps{
+		SdcID:          sdcId,
+		SdcApprovedIps: sdcApprovedIps,
+	}
+
+	err := s.client.getJSONWithRetry(http.MethodPost, path, sdcParam, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *System) ApproveSdc(approveSdcParam *types.ApproveSdcParam) (*types.ApproveSdcByGUIDResponse, error) {
+	defer TimeSpent("ApproveSdc", time.Now())
+	var resp types.ApproveSdcByGUIDResponse
+
+	path := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", s.System.ID)
+	sdcParam := &types.ApproveSdcParam{
+		SdcGUID: approveSdcParam.SdcGUID,
+		SdcIp:   approveSdcParam.SdcIp,
+		SdcIps:  approveSdcParam.SdcIps,
+		Name:    approveSdcParam.Name,
+	}
+
+	err := s.client.getJSONWithRetry(http.MethodPost, path, sdcParam, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, err
+}

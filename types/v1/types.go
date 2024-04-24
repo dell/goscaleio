@@ -155,6 +155,16 @@ type StandByMdm struct {
 	AllowAsymmetricIps string   `json:"allowAsymmetricIps,omitempty"`
 }
 
+// SetRestrictedMode defines struct for setting restricted mode
+type SetRestrictedMode struct {
+	RestrictedSdcMode string `json:"restrictedSdcMode"`
+}
+
+type SetApprovedIps struct {
+	SdcID          string   `json:"sdcId"`
+	SdcApprovedIps []string `json:"sdcApprovedIps"`
+}
+
 // RemoveStandByMdmParam defines struct for removing standby MDM
 type RemoveStandByMdmParam struct {
 	ID string `json:"id"`
@@ -436,7 +446,10 @@ type ChangeSdcPerfProfile struct {
 
 // ApproveSdcParam defines struct for ApproveSdcParam
 type ApproveSdcParam struct {
-	SdcGUID string `json:"sdcGuid"`
+	SdcGUID string   `json:"sdcGuid,,omitempty"`
+	SdcIp   string   `json:"sdcIp,omitempty"`
+	SdcIps  []string `json:"sdcIps,omitempty"`
+	Name    string   `json:"name,omitempty"`
 }
 
 // ApproveSdcByGUIDResponse defines struct for ApproveSdcByGUIDResponse
