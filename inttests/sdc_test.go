@@ -16,6 +16,7 @@ import (
 	"testing"
 
 	"github.com/dell/goscaleio"
+	types "github.com/dell/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -200,5 +201,26 @@ func TestGetSdcIdByIP(t *testing.T) {
 	sdsIP := firstSdc.SdcIP
 	sdcID, err := system.GetSdcIDByIP(sdsIP)
 	assert.NotNil(t, sdcID)
+	assert.Nil(t, err)
+}
+
+func TestSdcRestrictedMode(t *testing.T) {
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	err := system.SetRestrictedMode("Guid")
+	assert.Nil(t, err)
+
+	param := &types.ApproveSdcParam{
+		SdcIp: "10.10.10.10",
+	}
+
+	_, err = system.ApproveSdc(param)
+	assert.NotNil(t, err)
+
+	err = system.SetApprovedIps("62276a432d28538a", []string{"10.10.10.10"})
+	assert.NotNil(t, err)
+
+	err = system.SetRestrictedMode("None")
 	assert.Nil(t, err)
 }
