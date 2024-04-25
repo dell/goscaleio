@@ -72,7 +72,7 @@ type TemplateValid struct {
 	Messages []Messages `json:"messages,omitempty"`
 }
 
-// SoftwareComponent defines the details of a software component.
+// SoftwareComponents defines the details of a software component.
 type SoftwareComponents struct {
 	ID                  string   `json:"id,omitempty"`
 	PackageID           string   `json:"packageId,omitempty"`
@@ -474,7 +474,7 @@ type OptionsDetails struct {
 	Attributes   map[string]string     `json:"attributes,omitempty"`
 }
 
-// ScaleIODiskConfiguration defines the scaleio disk configuration.
+// ScaleIOStoragePoolDisks defines the scaleio storage pool disks.
 type ScaleIOStoragePoolDisks struct {
 	ProtectionDomainID   string   `json:"protectionDomainId,omitempty"`
 	ProtectionDomainName string   `json:"protectionDomainName,omitempty"`
@@ -509,7 +509,7 @@ type LongWindow struct {
 	WindowSizeInSec int `json:"windowSizeInSec,omitempty"`
 }
 
-// SdsCounterParameters defines the sds counter parameters.
+// SdsDecoupledCounterParameters defines the decoupled parameters for sds counter.
 type SdsDecoupledCounterParameters struct {
 	ShortWindow  ShortWindow  `json:"shortWindow,omitempty"`
 	MediumWindow MediumWindow `json:"mediumWindow,omitempty"`
@@ -930,7 +930,7 @@ type StaticNetworkConfiguration struct {
 	StaticRoute  []StaticRoute `json:"staticRoute,omitempty"`
 }
 
-// Network defines the details of a network.
+// Networks defines the details of a network.
 type Networks struct {
 	ID                         string                     `json:"id,omitempty"`
 	Name                       string                     `json:"name,omitempty"`
