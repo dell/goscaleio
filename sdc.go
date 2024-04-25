@@ -330,6 +330,7 @@ func (s *System) GetSdcIDByIP(ip string) (string, error) {
 	return sdcID, nil
 }
 
+// SetRestrictedMode sets the restricted mode for the system
 func (s *System) SetRestrictedMode(mode string) error {
 	defer TimeSpent("SetRestrictedMode", time.Now())
 
@@ -345,12 +346,13 @@ func (s *System) SetRestrictedMode(mode string) error {
 	return nil
 }
 
-func (s *System) SetApprovedIps(sdcId string, sdcApprovedIps []string) error {
+// SetApprovedIps sets the approved IPs for a specific SDC in the system.
+func (s *System) SetApprovedIps(sdcID string, sdcApprovedIps []string) error {
 	defer TimeSpent("SetApprovedIps", time.Now())
 
 	path := fmt.Sprintf("/api/instances/System::%v/action/setApprovedSdcIps", s.System.ID)
 	sdcParam := &types.SetApprovedIps{
-		SdcID:          sdcId,
+		SdcID:          sdcID,
 		SdcApprovedIps: sdcApprovedIps,
 	}
 
@@ -362,6 +364,7 @@ func (s *System) SetApprovedIps(sdcId string, sdcApprovedIps []string) error {
 	return nil
 }
 
+// ApproveSdc approves an SDC
 func (s *System) ApproveSdc(approveSdcParam *types.ApproveSdcParam) (*types.ApproveSdcByGUIDResponse, error) {
 	defer TimeSpent("ApproveSdc", time.Now())
 	var resp types.ApproveSdcByGUIDResponse
@@ -369,7 +372,7 @@ func (s *System) ApproveSdc(approveSdcParam *types.ApproveSdcParam) (*types.Appr
 	path := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", s.System.ID)
 	sdcParam := &types.ApproveSdcParam{
 		SdcGUID: approveSdcParam.SdcGUID,
-		SdcIp:   approveSdcParam.SdcIp,
+		SdcIP:   approveSdcParam.SdcIP,
 		SdcIps:  approveSdcParam.SdcIps,
 		Name:    approveSdcParam.Name,
 	}

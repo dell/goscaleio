@@ -212,7 +212,7 @@ func TestSdcRestrictedMode(t *testing.T) {
 	assert.Nil(t, err)
 
 	param := &types.ApproveSdcParam{
-		SdcIp: "10.10.10.10",
+		SdcIP: "10.10.10.10",
 	}
 
 	_, err = system.ApproveSdc(param)
