@@ -985,7 +985,7 @@ type VolumeQeryIDByKeyParam struct {
 	Name string `json:"name"`
 }
 
-// VolumeQeryBySelectedIdsParam defines struct for VolumeQeryBySelectedIdsParam
+// VolumeQeryBySelectedIDsParam defines struct for VolumeQeryBySelectedIDsParam
 type VolumeQeryBySelectedIDsParam struct {
 	IDs []string `json:"ids"`
 }
@@ -1778,11 +1778,12 @@ type SystemLimits struct {
 	MaxVal      string `json:"maxVal,omitempty"`
 }
 
-// SystemLimitEntryList defines struct for system limit entryList
+// QuerySystemLimitsResponse defines struct for system limit response
 type QuerySystemLimitsResponse struct {
 	SystemLimitEntryList []SystemLimits `json:"systemLimitEntryList"`
 }
 
+// QuerySystemLimitsParam is the parameters required to query system limits
 type QuerySystemLimitsParam struct{}
 
 // FaultSetParam is the parameters required to create a fault set

@@ -173,6 +173,7 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 	return &deploymentResponse, nil
 }
 
+// UpdateService updates an existing service in the ScaleIO Gateway.
 func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentDesc, nodes, nodename string) (*types.ServiceResponse, error) {
 	defer TimeSpent("UpdateService", time.Now())
 
@@ -433,6 +434,7 @@ func contains(list []string, str string) bool {
 	return false
 }
 
+// GetServiceDetailsByID retrieves service details by deployment ID.
 func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken bool) (*types.ServiceResponse, error) {
 	defer TimeSpent("GetServiceDetailsByID", time.Now())
 
@@ -525,6 +527,7 @@ func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken boo
 	return &deploymentResponse, nil
 }
 
+// GetServiceDetailsByFilter retrieves service details based on a filter and value.
 func (gc *GatewayClient) GetServiceDetailsByFilter(filter, value string) ([]types.ServiceResponse, error) {
 	defer TimeSpent("GetServiceDetailsByFilter", time.Now())
 
@@ -572,6 +575,7 @@ func (gc *GatewayClient) GetServiceDetailsByFilter(filter, value string) ([]type
 	return deploymentResponse, nil
 }
 
+// GetAllServiceDetails retrieves all service details from the GatewayClient.
 func (gc *GatewayClient) GetAllServiceDetails() ([]types.ServiceResponse, error) {
 	defer TimeSpent("DeploGetServiceDetailsByIDyService", time.Now())
 
@@ -611,6 +615,7 @@ func (gc *GatewayClient) GetAllServiceDetails() ([]types.ServiceResponse, error)
 	return deploymentResponse, nil
 }
 
+// DeleteService deletes a service by its ID, along with servers in inventory and managed state.
 func (gc *GatewayClient) DeleteService(serviceID, serversInInventory, serversManagedState string) (*types.ServiceResponse, error) {
 	var deploymentResponse types.ServiceResponse
 

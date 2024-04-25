@@ -23,7 +23,7 @@ type VTreeMigrationInfo struct {
 	ThicknessConversionType  string `json:"thicknessConversionType"`
 }
 
-// VTreeQueryBySelectedIdsParam defines struct for specifying Vtree IDs
+// VTreeQueryBySelectedIDsParam defines struct for specifying Vtree IDs
 type VTreeQueryBySelectedIDsParam struct {
 	IDs []string `json:"ids"`
 }

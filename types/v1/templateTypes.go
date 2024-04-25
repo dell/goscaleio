@@ -12,6 +12,7 @@
 
 package goscaleio
 
+// TemplateDetails defines the details of a template.
 type TemplateDetails struct {
 	ID                     string               `json:"id,omitempty"`
 	TemplateName           string               `json:"templateName,omitempty"`
@@ -49,6 +50,7 @@ type TemplateDetails struct {
 	Draft                  bool                 `json:"draft,omitempty"`
 }
 
+// Messages defines a struct for messages.
 type Messages struct {
 	ID              string `json:"id,omitempty"`
 	MessageCode     string `json:"messageCode,omitempty"`
@@ -64,11 +66,13 @@ type Messages struct {
 	SequenceNumber  int    `json:"sequenceNumber,omitempty"`
 }
 
+// TemplateValid defines the validity of a template.
 type TemplateValid struct {
 	Valid    bool       `json:"valid,omitempty"`
 	Messages []Messages `json:"messages,omitempty"`
 }
 
+// SoftwareComponent defines the details of a software component.
 type SoftwareComponents struct {
 	ID                  string   `json:"id,omitempty"`
 	PackageID           string   `json:"packageId,omitempty"`
@@ -98,6 +102,7 @@ type SoftwareComponents struct {
 	FirmwareRepoName    string   `json:"firmwareRepoName,omitempty"`
 }
 
+// SoftwareBundles defines a struct for software bundles.
 type SoftwareBundles struct {
 	ID                 string               `json:"id,omitempty"`
 	Name               string               `json:"name,omitempty"`
@@ -122,11 +127,13 @@ type SoftwareBundles struct {
 	SoftwareComponents []SoftwareComponents `json:"softwareComponents,omitempty"`
 }
 
+// DeploymentValid defines the validity of a deployment.
 type DeploymentValid struct {
 	Valid    bool       `json:"valid,omitempty"`
 	Messages []Messages `json:"messages,omitempty"`
 }
 
+// DeploymentDevice defines the details of a device in a deployment.
 type DeploymentDevice struct {
 	RefID            string `json:"refId,omitempty"`
 	RefType          string `json:"refType,omitempty"`
@@ -153,6 +160,7 @@ type DeploymentDevice struct {
 	Brownfield       bool   `json:"brownfield,omitempty"`
 }
 
+// Vms defines a struct for virtual machines.
 type Vms struct {
 	CertificateName string `json:"certificateName,omitempty"`
 	VMModel         string `json:"vmModel,omitempty"`
@@ -161,6 +169,7 @@ type Vms struct {
 	VMServiceTag    string `json:"vmServiceTag,omitempty"`
 }
 
+// LicenseRepository defines the details of a license repository.
 type LicenseRepository struct {
 	ID           string `json:"id,omitempty"`
 	Name         string `json:"name,omitempty"`
@@ -176,6 +185,7 @@ type LicenseRepository struct {
 	LicenseData  string `json:"licenseData,omitempty"`
 }
 
+// AssignedUsers defines a struct for assigned users.
 type AssignedUsers struct {
 	UserSeqID      int      `json:"userSeqId,omitempty"`
 	UserName       string   `json:"userName,omitempty"`
@@ -201,6 +211,7 @@ type AssignedUsers struct {
 	Roles          []string `json:"roles,omitempty"`
 }
 
+// JobDetails defines the details of a job.
 type JobDetails struct {
 	Level       string `json:"level,omitempty"`
 	Message     string `json:"message,omitempty"`
@@ -209,6 +220,7 @@ type JobDetails struct {
 	ComponentID string `json:"componentId,omitempty"`
 }
 
+// DeploymentValidationResponse defines the response of deployment validation.
 type DeploymentValidationResponse struct {
 	Nodes                  int      `json:"nodes,omitempty"`
 	StoragePools           int      `json:"storagePools,omitempty"`
@@ -227,6 +239,7 @@ type DeploymentValidationResponse struct {
 	DiskTypeMismatch       bool     `json:"diskTypeMismatch,omitempty"`
 }
 
+// Deployments defines the details of a deployment.
 type Deployments struct {
 	ID                           string                       `json:"id,omitempty"`
 	DeploymentName               string                       `json:"deploymentName,omitempty"`
@@ -289,6 +302,7 @@ type Deployments struct {
 	CanMigratevCLSVMs            bool                         `json:"canMigratevCLSVMs,omitempty"`
 }
 
+// FirmwareRepository defines the details of a firmware repository.
 type FirmwareRepository struct {
 	ID                      string               `json:"id,omitempty"`
 	Name                    string               `json:"name,omitempty"`
@@ -325,22 +339,26 @@ type FirmwareRepository struct {
 	Rcmapproved             bool                 `json:"rcmapproved,omitempty"`
 }
 
+// ComponentValid defines the validity of a component.
 type ComponentValid struct {
 	Valid    bool       `json:"valid,omitempty"`
 	Messages []Messages `json:"messages,omitempty"`
 }
 
+// DependenciesDetails defines the details of a dependency.
 type DependenciesDetails struct {
 	ID               string `json:"id,omitempty"`
 	DependencyTarget string `json:"dependencyTarget,omitempty"`
 	DependencyValue  string `json:"dependencyValue,omitempty"`
 }
 
+// NetworkIPAddressList defines the details of a network IP address.
 type NetworkIPAddressList struct {
 	ID        string `json:"id,omitempty"`
 	IPAddress string `json:"ipAddress,omitempty"`
 }
 
+// Partitions defines the details of a partition.
 type Partitions struct {
 	ID                   string                 `json:"id,omitempty"`
 	Name                 string                 `json:"name,omitempty"`
@@ -361,6 +379,7 @@ type Partitions struct {
 	PartitionIndex       int                    `json:"partition_index,omitempty"`
 }
 
+// Interfaces defines an interface.
 type Interfaces struct {
 	ID            string       `json:"id,omitempty"`
 	Name          string       `json:"name,omitempty"`
@@ -374,6 +393,7 @@ type Interfaces struct {
 	AllNetworks   []string     `json:"allNetworks,omitempty"`
 }
 
+// InterfacesDetails defines the details of an interface.
 type InterfacesDetails struct {
 	ID            string       `json:"id,omitempty"`
 	Name          string       `json:"name,omitempty"`
@@ -389,12 +409,14 @@ type InterfacesDetails struct {
 	NictypeSource string       `json:"nictypeSource,omitempty"`
 }
 
+// NetworkConfiguration defines the network configuration.
 type NetworkConfiguration struct {
 	ID           string              `json:"id,omitempty"`
 	Interfaces   []InterfacesDetails `json:"interfaces,omitempty"`
 	SoftwareOnly bool                `json:"softwareOnly,omitempty"`
 }
 
+// ConfigurationDetails defines the details of a configuration.
 type ConfigurationDetails struct {
 	ID              string       `json:"id,omitempty"`
 	Disktype        string       `json:"disktype,omitempty"`
@@ -406,6 +428,7 @@ type ConfigurationDetails struct {
 	Categories      []Categories `json:"categories,omitempty"`
 }
 
+// VirtualDisks defines the details of a virtual disk.
 type VirtualDisks struct {
 	PhysicalDisks         []string             `json:"physicalDisks,omitempty"`
 	VirtualDiskFqdd       string               `json:"virtualDiskFqdd,omitempty"`
@@ -418,6 +441,7 @@ type VirtualDisks struct {
 	EncryptionType        string               `json:"encryptionType,omitempty"`
 }
 
+// ExternalVirtualDisks defines the details of an external virtual disk.
 type ExternalVirtualDisks struct {
 	PhysicalDisks         []string             `json:"physicalDisks,omitempty"`
 	VirtualDiskFqdd       string               `json:"virtualDiskFqdd,omitempty"`
@@ -430,6 +454,7 @@ type ExternalVirtualDisks struct {
 	EncryptionType        string               `json:"encryptionType,omitempty"`
 }
 
+// RaidConfiguration defines the raid configuration.
 type RaidConfiguration struct {
 	VirtualDisks         []VirtualDisks         `json:"virtualDisks,omitempty"`
 	ExternalVirtualDisks []ExternalVirtualDisks `json:"externalVirtualDisks,omitempty"`
@@ -440,6 +465,7 @@ type RaidConfiguration struct {
 	SizeToDiskMap        map[string]int         `json:"sizeToDiskMap,omitempty"`
 }
 
+// OptionsDetails defines the details of an option.
 type OptionsDetails struct {
 	ID           string                `json:"id,omitempty"`
 	Name         string                `json:"name,omitempty"`
@@ -448,6 +474,7 @@ type OptionsDetails struct {
 	Attributes   map[string]string     `json:"attributes,omitempty"`
 }
 
+// ScaleIODiskConfiguration defines the scaleio disk configuration.
 type ScaleIOStoragePoolDisks struct {
 	ProtectionDomainID   string   `json:"protectionDomainId,omitempty"`
 	ProtectionDomainName string   `json:"protectionDomainName,omitempty"`
@@ -458,46 +485,66 @@ type ScaleIOStoragePoolDisks struct {
 	VirtualDiskFqdds     []string `json:"virtualDiskFqdds,omitempty"`
 	SoftwareOnlyDisks    []string `json:"softwareOnlyDisks,omitempty"`
 }
+
+// ScaleIODiskConfiguration defines the scaleio disk configuration.
 type ScaleIODiskConfiguration struct {
 	ScaleIOStoragePoolDisks []ScaleIOStoragePoolDisks `json:"scaleIOStoragePoolDisks,omitempty"`
 }
+
+// ShortWindow defines a short window.
 type ShortWindow struct {
 	Threshold       int `json:"threshold,omitempty"`
 	WindowSizeInSec int `json:"windowSizeInSec,omitempty"`
 }
+
+// MediumWindow defines a medium window.
 type MediumWindow struct {
 	Threshold       int `json:"threshold,omitempty"`
 	WindowSizeInSec int `json:"windowSizeInSec,omitempty"`
 }
+
+// LongWindow defines a long window.
 type LongWindow struct {
 	Threshold       int `json:"threshold,omitempty"`
 	WindowSizeInSec int `json:"windowSizeInSec,omitempty"`
 }
+
+// SdsCounterParameters defines the sds counter parameters.
 type SdsDecoupledCounterParameters struct {
 	ShortWindow  ShortWindow  `json:"shortWindow,omitempty"`
 	MediumWindow MediumWindow `json:"mediumWindow,omitempty"`
 	LongWindow   LongWindow   `json:"longWindow,omitempty"`
 }
+
+// SdsConfigurationFailureCounterParameters defines the sds configuration failure counter parameters.
 type SdsConfigurationFailureCounterParameters struct {
 	ShortWindow  ShortWindow  `json:"shortWindow,omitempty"`
 	MediumWindow MediumWindow `json:"mediumWindow,omitempty"`
 	LongWindow   LongWindow   `json:"longWindow,omitempty"`
 }
+
+// MdmSdsCounterParameters defines the mdm sds counter parameters.
 type MdmSdsCounterParameters struct {
 	ShortWindow  ShortWindow  `json:"shortWindow,omitempty"`
 	MediumWindow MediumWindow `json:"mediumWindow,omitempty"`
 	LongWindow   LongWindow   `json:"longWindow,omitempty"`
 }
+
+// SdsSdsCounterParameters defines the sds sds counter parameters.
 type SdsSdsCounterParameters struct {
 	ShortWindow  ShortWindow  `json:"shortWindow,omitempty"`
 	MediumWindow MediumWindow `json:"mediumWindow,omitempty"`
 	LongWindow   LongWindow   `json:"longWindow,omitempty"`
 }
+
+// SdsReceiveBufferAllocationFailuresCounterParameters defines the sds receive buffer allocation failures counter parameters.
 type SdsReceiveBufferAllocationFailuresCounterParameters struct {
 	ShortWindow  ShortWindow  `json:"shortWindow,omitempty"`
 	MediumWindow MediumWindow `json:"mediumWindow,omitempty"`
 	LongWindow   LongWindow   `json:"longWindow,omitempty"`
 }
+
+// General defines the general.
 type General struct {
 	ID                                                  string                                              `json:"id,omitempty"`
 	Name                                                string                                              `json:"name,omitempty"`
@@ -520,6 +567,7 @@ type General struct {
 	RfcacheEnabled                                      bool                                                `json:"rfcacheEnabled,omitempty"`
 }
 
+// StatisticsDetails defines the statistics details.
 type StatisticsDetails struct {
 	NumOfDevices                             int `json:"numOfDevices,omitempty"`
 	UnusedCapacityInKb                       int `json:"unusedCapacityInKb,omitempty"`
@@ -541,6 +589,8 @@ type StatisticsDetails struct {
 	ThinCapacityInUseInKb  int `json:"thinCapacityInUseInKb,omitempty"`
 	ThickCapacityInUseInKb int `json:"thickCapacityInUseInKb,omitempty"`
 }
+
+// DiskList defines the disk list.
 type DiskList struct {
 	ID                     string `json:"id,omitempty"`
 	Name                   string `json:"name,omitempty"`
@@ -557,6 +607,7 @@ type DiskList struct {
 	ModelName              string `json:"modelName,omitempty"`
 }
 
+// MappedSdcInfoDetails defines the mapped sdc info details.
 type MappedSdcInfoDetails struct {
 	SdcIP         string `json:"sdcIp,omitempty"`
 	SdcID         string `json:"sdcId,omitempty"`
@@ -564,6 +615,7 @@ type MappedSdcInfoDetails struct {
 	LimitIops     int    `json:"limitIops,omitempty"`
 }
 
+// VolumeList defines the volume list.
 type VolumeList struct {
 	ID                string                 `json:"id,omitempty"`
 	Name              string                 `json:"name,omitempty"`
@@ -576,6 +628,7 @@ type VolumeList struct {
 	VolumeClass       string                 `json:"volumeClass,omitempty"`
 }
 
+// StoragePoolList defines the storage pool list.
 type StoragePoolList struct {
 	ID                                               string            `json:"id,omitempty"`
 	Name                                             string            `json:"name,omitempty"`
@@ -615,11 +668,13 @@ type StoragePoolList struct {
 	FglAccpID                                        string            `json:"fglAccpId,omitempty"`
 }
 
+// IPList defines the ip list.
 type IPList struct {
 	IP   string `json:"ip,omitempty"`
 	Role string `json:"role,omitempty"`
 }
 
+// SdsListDetails defines the sds list.
 type SdsListDetails struct {
 	ID                  string   `json:"id,omitempty"`
 	Name                string   `json:"name,omitempty"`
@@ -636,6 +691,8 @@ type SdsListDetails struct {
 	OnVMWare            bool     `json:"onVmWare,omitempty"`
 	IPList              []IPList `json:"ipList,omitempty"`
 }
+
+// SdrListDetails defines the sdr list.
 type SdrListDetails struct {
 	ID                  string   `json:"id,omitempty"`
 	Name                string   `json:"name,omitempty"`
@@ -649,6 +706,8 @@ type SdrListDetails struct {
 	PerfProfile         string   `json:"perfProfile,omitempty"`
 	IPList              []IPList `json:"ipList,omitempty"`
 }
+
+// AccelerationPool defines the acceleration pool.
 type AccelerationPool struct {
 	ID                 string `json:"id,omitempty"`
 	Name               string `json:"name,omitempty"`
@@ -656,6 +715,8 @@ type AccelerationPool struct {
 	MediaType          string `json:"mediaType,omitempty"`
 	Rfcache            bool   `json:"rfcache,omitempty"`
 }
+
+// ProtectionDomainSettings defines the protection domain settings.
 type ProtectionDomainSettings struct {
 	General          General            `json:"general,omitempty"`
 	Statistics       StatisticsDetails  `json:"statistics,omitempty"`
@@ -664,20 +725,28 @@ type ProtectionDomainSettings struct {
 	SdrList          []SdrListDetails   `json:"sdr_list,omitempty"`
 	AccelerationPool []AccelerationPool `json:"acceleration_pool,omitempty"`
 }
+
+// FaultSetSettings defines the fault set settings.
 type FaultSetSettings struct {
 	ProtectionDomainID string `json:"protectionDomainId,omitempty"`
 	Name               string `json:"name,omitempty"`
 	ID                 string `json:"id,omitempty"`
 }
+
+// Datacenter defines the datacenter.
 type Datacenter struct {
 	VcenterID      string `json:"vcenterId,omitempty"`
 	DatacenterID   string `json:"datacenterId,omitempty"`
 	DatacenterName string `json:"datacenterName,omitempty"`
 }
+
+// PortGroupOptions defines the port group options.
 type PortGroupOptions struct {
 	ID   string `json:"id,omitempty"`
 	Name string `json:"name,omitempty"`
 }
+
+// PortGroups defines the port groups.
 type PortGroups struct {
 	ID               string             `json:"id,omitempty"`
 	DisplayName      string             `json:"displayName,omitempty"`
@@ -686,6 +755,8 @@ type PortGroups struct {
 	Value            string             `json:"value,omitempty"`
 	PortGroupOptions []PortGroupOptions `json:"portGroupOptions,omitempty"`
 }
+
+// VdsSettings defines the vds settings.
 type VdsSettings struct {
 	ID          string       `json:"id,omitempty"`
 	DisplayName string       `json:"displayName,omitempty"`
@@ -693,14 +764,20 @@ type VdsSettings struct {
 	Value       string       `json:"value,omitempty"`
 	PortGroups  []PortGroups `json:"portGroups,omitempty"`
 }
+
+// VdsNetworkMtuSizeConfiguration defines the vds network mtu size configuration.
 type VdsNetworkMtuSizeConfiguration struct {
 	ID    string `json:"id,omitempty"`
 	Value string `json:"value,omitempty"`
 }
+
+// VdsNetworkMTUSizeConfiguration defines the vds network mtu size configuration.
 type VdsNetworkMTUSizeConfiguration struct {
 	ID    string `json:"id,omitempty"`
 	Value string `json:"value,omitempty"`
 }
+
+// VdsConfiguration defines the vds configuration.
 type VdsConfiguration struct {
 	Datacenter                     Datacenter                       `json:"datacenter,omitempty"`
 	PortGroupOption                string                           `json:"portGroupOption,omitempty"`
@@ -709,11 +786,15 @@ type VdsConfiguration struct {
 	VdsNetworkMtuSizeConfiguration []VdsNetworkMtuSizeConfiguration `json:"vdsNetworkMtuSizeConfiguration,omitempty"`
 	VdsNetworkMTUSizeConfiguration []VdsNetworkMTUSizeConfiguration `json:"vdsNetworkMTUSizeConfiguration,omitempty"`
 }
+
+// NodeSelection defines the node selection.
 type NodeSelection struct {
 	ID            string `json:"id,omitempty"`
 	ServiceTag    string `json:"serviceTag,omitempty"`
 	MgmtIPAddress string `json:"mgmtIpAddress,omitempty"`
 }
+
+// ParametersDetails defines the parameters details.
 type ParametersDetails struct {
 	GUID                     string                     `json:"guid,omitempty"`
 	ID                       string                     `json:"id,omitempty"`
@@ -746,6 +827,8 @@ type ParametersDetails struct {
 	VdsConfiguration         VdsConfiguration           `json:"vdsConfiguration,omitempty"`
 	NodeSelection            NodeSelection              `json:"nodeSelection,omitempty"`
 }
+
+// AdditionalPropDetails defines the additional prop details.
 type AdditionalPropDetails struct {
 	GUID                     string                     `json:"guid,omitempty"`
 	ID                       string                     `json:"id,omitempty"`
@@ -779,6 +862,7 @@ type AdditionalPropDetails struct {
 	NodeSelection            NodeSelection              `json:"nodeSelection,omitempty"`
 }
 
+// Resources defines the resources.
 type Resources struct {
 	GUID          string              `json:"guid,omitempty"`
 	ID            string              `json:"id,omitempty"`
@@ -786,6 +870,8 @@ type Resources struct {
 	Parameters    []ParametersDetails `json:"parameters,omitempty"`
 	ParametersMap map[string]string   `json:"parametersMap,omitempty"`
 }
+
+// Components defines the components.
 type Components struct {
 	ID                  string            `json:"id,omitempty"`
 	ComponentID         string            `json:"componentID,omitempty"`
@@ -814,12 +900,16 @@ type Components struct {
 	Changed             bool              `json:"changed,omitempty"`
 	IP                  string            `json:"ip,omitempty"`
 }
+
+// IPRange defines the ip range.
 type IPRange struct {
 	ID         string `json:"id,omitempty"`
 	StartingIP string `json:"startingIp,omitempty"`
 	EndingIP   string `json:"endingIp,omitempty"`
 	Role       string `json:"role,omitempty"`
 }
+
+// StaticRoute defines the static route.
 type StaticRoute struct {
 	StaticRouteSourceNetworkID      string `json:"staticRouteSourceNetworkId,omitempty"`
 	StaticRouteDestinationNetworkID string `json:"staticRouteDestinationNetworkId,omitempty"`
@@ -827,6 +917,8 @@ type StaticRoute struct {
 	SubnetMask                      string `json:"subnetMask,omitempty"`
 	DestinationIPAddress            string `json:"destinationIpAddress,omitempty"`
 }
+
+// StaticNetworkConfiguration defines the static network configuration.
 type StaticNetworkConfiguration struct {
 	Gateway      string        `json:"gateway,omitempty"`
 	Subnet       string        `json:"subnet,omitempty"`
@@ -837,6 +929,8 @@ type StaticNetworkConfiguration struct {
 	IPAddress    string        `json:"ipAddress,omitempty"`
 	StaticRoute  []StaticRoute `json:"staticRoute,omitempty"`
 }
+
+// Network defines the details of a network.
 type Networks struct {
 	ID                         string                     `json:"id,omitempty"`
 	Name                       string                     `json:"name,omitempty"`
@@ -847,12 +941,16 @@ type Networks struct {
 	Static                     bool                       `json:"static,omitempty"`
 	Type                       string                     `json:"type,omitempty"`
 }
+
+// Options defines the options.
 type Options struct {
 	ID           string                `json:"id,omitempty"`
 	Name         string                `json:"name,omitempty"`
 	Dependencies []DependenciesDetails `json:"dependencies,omitempty"`
 	Attributes   map[string]string     `json:"attributes,omitempty"`
 }
+
+// Parameters defines the parameters details.
 type Parameters struct {
 	ID               string                `json:"id,omitempty"`
 	Value            string                `json:"value,omitempty"`
@@ -876,6 +974,7 @@ type Parameters struct {
 	OptionsSortable  bool                  `json:"optionsSortable,omitempty"`
 }
 
+// Categories defines the details of a category.
 type Categories struct {
 	ID          string       `json:"id,omitempty"`
 	DisplayName string       `json:"displayName,omitempty"`
