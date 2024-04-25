@@ -618,7 +618,7 @@ func (gc *GatewayClient) DeleteService(serviceID, serversInInventory, serversMan
 
 	defer TimeSpent("DeleteService", time.Now())
 
-	req, httpError := http.NewRequest("DELETE", gc.host+"/Api/V1/Deployment/"+serviceID+"?serversInInventory="+serversInInventory+"&resourceState="+serversManagedState, nil)
+	req, httpError := http.NewRequest("DELETE", gc.host+"/Api/V1/Deployment/"+serviceId+"?serversInInventory="+serversInInventory+"&serversManagedState="+serversManagedState, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
