@@ -160,6 +160,7 @@ type SetRestrictedMode struct {
 	RestrictedSdcMode string `json:"restrictedSdcMode"`
 }
 
+// SetApprovedIps defines struct for setting approved ips
 type SetApprovedIps struct {
 	SdcID          string   `json:"sdcId"`
 	SdcApprovedIps []string `json:"sdcApprovedIps"`
@@ -447,7 +448,7 @@ type ChangeSdcPerfProfile struct {
 // ApproveSdcParam defines struct for ApproveSdcParam
 type ApproveSdcParam struct {
 	SdcGUID string   `json:"sdcGuid,,omitempty"`
-	SdcIp   string   `json:"sdcIp,omitempty"`
+	SdcIP   string   `json:"sdcIp,omitempty"`
 	SdcIps  []string `json:"sdcIps,omitempty"`
 	Name    string   `json:"name,omitempty"`
 }

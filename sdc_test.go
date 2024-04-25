@@ -331,7 +331,7 @@ func TestSetRestrictedMode(t *testing.T) {
 		},
 		{
 			mode:     "random",
-			expected: errors.New("restrictedSdcMode should get one of the following values: None, Guid, ApprovedIp, but its value is random."),
+			expected: errors.New("restrictedSdcMode should get one of the following values: None, Guid, ApprovedIp, but its value is random"),
 		},
 	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -380,7 +380,7 @@ func TestApproveSdcbyIP(t *testing.T) {
 	cases := []testCase{
 		{
 			param: types.ApproveSdcParam{
-				SdcIp: "10.10.10.10",
+				SdcIP: "10.10.10.10",
 			},
 			expected: nil,
 		},
@@ -425,7 +425,7 @@ func TestApproveSdcbyIP(t *testing.T) {
 
 func TestSetApprovedIps(t *testing.T) {
 	type testCase struct {
-		SdcId    string
+		SdcID    string
 		SdcIps   []string
 		expected error
 	}
@@ -438,7 +438,7 @@ func TestSetApprovedIps(t *testing.T) {
 
 	cases := []testCase{
 		{
-			SdcId:    "5e662b1700000000",
+			SdcID:    "5e662b1700000000",
 			SdcIps:   []string{"10.10.10.10"},
 			expected: nil,
 		},
@@ -464,7 +464,7 @@ func TestSetApprovedIps(t *testing.T) {
 				System: &system,
 			}
 
-			err2 := s.SetApprovedIps(tc.SdcId, tc.SdcIps)
+			err2 := s.SetApprovedIps(tc.SdcID, tc.SdcIps)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Approving SDC IPs did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
