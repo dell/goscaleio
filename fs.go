@@ -55,10 +55,11 @@ func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSyste
 	defer TimeSpent("GetFileSystemByIDName", time.Now())
 
 	if id == "" && name == "" {
-
 		return nil, errors.New("file system name or ID is mandatory, please enter a valid value")
+	}
 
-	} else if id != "" {
+	// Get filesystem by id
+	if id != "" {
 		path := fmt.Sprintf("/rest/v1/file-systems/%v?select=*", id)
 		var fs types.FileSystem
 		err := s.client.getJSONWithRetry(
@@ -68,22 +69,21 @@ func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSyste
 		}
 
 		return &fs, nil
-
-	} else {
-		filesystems, err := s.GetAllFileSystems()
-		if err != nil {
-			return nil, err
-		}
-
-		for _, fs := range filesystems {
-			if fs.Name == name {
-				return &fs, nil
-			}
-		}
-
-		return nil, errors.New("couldn't find file system by name")
 	}
 
+	// Get filesystem by name
+	filesystems, err := s.GetAllFileSystems()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, fs := range filesystems {
+		if fs.Name == name {
+			return &fs, nil
+		}
+	}
+
+	return nil, errors.New("couldn't find file system by name")
 }
 
 // CreateFileSystem creates a file system
@@ -199,5 +199,4 @@ func (s *System) ModifyFileSystem(modifyFsParam *types.FSModify, id string) erro
 	}
 
 	return nil
-
 }

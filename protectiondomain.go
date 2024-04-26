@@ -122,7 +122,8 @@ func (pd *ProtectionDomain) Delete() error {
 
 // GetProtectionDomain returns a ProtectionDomain
 func (s *System) GetProtectionDomain(
-	pdhref string) ([]*types.ProtectionDomain, error) {
+	pdhref string,
+) ([]*types.ProtectionDomain, error) {
 	defer TimeSpent("GetprotectionDomain", time.Now())
 
 	var (
@@ -158,7 +159,8 @@ func (s *System) GetProtectionDomain(
 
 // FindProtectionDomain returns a ProtectionDomain
 func (s *System) FindProtectionDomain(
-	id, name, href string) (*types.ProtectionDomain, error) {
+	id, name, href string,
+) (*types.ProtectionDomain, error) {
 	defer TimeSpent("FindProtectionDomain", time.Now())
 
 	pds, err := s.GetProtectionDomain(href)

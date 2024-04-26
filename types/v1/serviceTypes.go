@@ -1,5 +1,6 @@
 package goscaleio
 
+// ServiceFailedResponse represents the response when a service fails.
 type ServiceFailedResponse struct {
 	DetailMessage string     `json:"detailMessage,omitempty"`
 	Status        int        `json:"status,omitempty"`
@@ -10,6 +11,7 @@ type ServiceFailedResponse struct {
 	Messages      []Messages `json:"messages,omitempty"`
 }
 
+// DeploymentPayload represents the payload for deploying a service.
 type DeploymentPayload struct {
 	DeploymentName        string          `json:"deploymentName,omitempty"`
 	DeploymentDescription string          `json:"deploymentDescription,omitempty"`
@@ -19,6 +21,7 @@ type DeploymentPayload struct {
 	Status                string          `json:"status,omitempty"`
 }
 
+// ServiceResponse represents the response from a service operation.
 type ServiceResponse struct {
 	ID                           string                       `json:"id,omitempty"`
 	DeploymentName               string                       `json:"deploymentName,omitempty"`

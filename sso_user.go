@@ -25,7 +25,6 @@ func (c *Client) GetSSOUser(userID string) (*types.SSOUserDetails, error) {
 	path := fmt.Sprintf("/rest/v1/users/%s", userID)
 	user := &types.SSOUserDetails{}
 	err := c.getJSONWithRetry(http.MethodGet, path, nil, &user)
-
 	if err != nil {
 		return nil, err
 	}

@@ -23,7 +23,7 @@ import (
 )
 
 func TestGetNodes(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -56,13 +56,13 @@ func TestGetNodeByID(t *testing.T) {
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewGateway(svr.URL, "", "", true, false)
 			client.version = "4.5"
 			if err != nil {
@@ -100,13 +100,13 @@ func TestGetNodePoolByID(t *testing.T) {
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewGateway(svr.URL, "", "", true, false)
 			client.version = "4.5"
 			if err != nil {
@@ -128,7 +128,7 @@ func TestGetNodePoolByID(t *testing.T) {
 }
 
 func TestGetNodeByFilters(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -145,7 +145,7 @@ func TestGetNodeByFilters(t *testing.T) {
 }
 
 func TestGetNodePoolByName(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -162,7 +162,7 @@ func TestGetNodePoolByName(t *testing.T) {
 }
 
 func TestGetNodePoolByNameError(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintln(w, `{"error":"Resource not found"}`)
 	}))
@@ -180,7 +180,7 @@ func TestGetNodePoolByNameError(t *testing.T) {
 }
 
 func TestGetNodePoolByIDNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintln(w, `{"error":"Resource not found"}`)
 	}))
@@ -198,7 +198,7 @@ func TestGetNodePoolByIDNegative(t *testing.T) {
 }
 
 func TestGetNodeByIDNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintln(w, `{"error":"Resource not found"}`)
 	}))
@@ -216,7 +216,7 @@ func TestGetNodeByIDNegative(t *testing.T) {
 }
 
 func TestGetAllNodesNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
 	}))

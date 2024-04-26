@@ -43,7 +43,6 @@ type GatewayClient struct {
 
 // NewGateway returns a new gateway client.
 func NewGateway(host string, username, password string, insecure, useCerts bool) (*GatewayClient, error) {
-
 	if host == "" {
 		return nil, errNewClient
 	}
@@ -86,7 +85,7 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 
 	if version == "3.5" {
 		gc.version = version
-		//No need to create token
+		// No need to create token
 	} else {
 		bodyData := map[string]interface{}{
 			"username": username,
@@ -150,7 +149,6 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 
 // GetVersion returns version
 func (gc *GatewayClient) GetVersion() (string, error) {
-
 	req, httpError := http.NewRequest("GET", gc.host+"/api/version", nil)
 	if httpError != nil {
 		return "", httpError
@@ -198,7 +196,6 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 	for _, filePath := range filePaths {
 
 		info, err := os.Stat(filePath)
-
 		if err != nil {
 			return &gatewayResponse, err
 		}
@@ -254,7 +251,6 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 		responseString, _ := extractString(response)
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
-
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error For Uploading Package: %s", err)
 		}
@@ -328,7 +324,6 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 		var parseCSVData map[string]interface{}
 
 		err := json.Unmarshal([]byte(responseString), &parseCSVData)
-
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error While Parsing Response Data For CSV: %s", err)
 		}
@@ -348,7 +343,6 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 	}
 
 	err := json.Unmarshal([]byte(responseString), &gatewayResponse)
-
 	if err != nil {
 		return &gatewayResponse, fmt.Errorf("Error While Parsing Response Data For CSV: %s", err)
 	}
@@ -358,7 +352,6 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 
 // GetPackageDetails used for get package details
 func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
-
 	var packageParam []*types.PackageDetails
 
 	req, httpError := http.NewRequest("GET", gc.host+"/im/types/installationPackages/instances?onlyLatest=false&_search=false", nil)
@@ -386,9 +379,9 @@ func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 		return packageParam, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return packageParam, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return packageParam, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode == 200 {
@@ -401,7 +394,6 @@ func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 		}
 
 		err := json.Unmarshal([]byte(responseString), &packageParam)
-
 		if err != nil {
 			return packageParam, fmt.Errorf("Error For Get Package Details: %s", err)
 		}
@@ -438,15 +430,14 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
-
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error Validating MDM Details: %s", err)
 		}
@@ -467,8 +458,7 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 
 	var mdmTopologyDetails types.MDMTopologyDetails
 
-	err := json.Unmarshal([]byte(responseString), &mdmTopologyDetails)
-
+	err = json.Unmarshal([]byte(responseString), &mdmTopologyDetails)
 	if err != nil {
 		return &gatewayResponse, fmt.Errorf("Error Validating MDM Details: %s", err)
 	}
@@ -506,15 +496,14 @@ func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJSONO
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
-
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error Validating MDM Details: %s", err)
 		}
@@ -543,8 +532,7 @@ func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJSONO
 
 	var mdmTopologyDetails types.MDMTopologyDetails
 
-	err := json.Unmarshal([]byte(responseString), &mdmTopologyDetails)
-
+	err = json.Unmarshal([]byte(responseString), &mdmTopologyDetails)
 	if err != nil {
 		return &gatewayResponse, fmt.Errorf("Error For Get Cluster Details: %s", err)
 	}
@@ -558,7 +546,6 @@ func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJSONO
 
 // DeletePackage used for delete packages from gateway server
 func (gc *GatewayClient) DeletePackage(packageName string) (*types.GatewayResponse, error) {
-
 	var gatewayResponse types.GatewayResponse
 
 	req, httpError := http.NewRequest("DELETE", gc.host+"/im/types/installationPackages/instances/actions/delete::"+packageName, nil)
@@ -583,15 +570,14 @@ func (gc *GatewayClient) DeletePackage(packageName string) (*types.GatewayRespon
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
-
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error For Delete Package: %s", err)
 		}
@@ -613,7 +599,6 @@ func (gc *GatewayClient) DeletePackage(packageName string) (*types.GatewayRespon
 
 // BeginInstallation used for start installation
 func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, liaPassword string, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, expansion bool) (*types.GatewayResponse, error) {
-
 	var gatewayResponse types.GatewayResponse
 
 	mapData, jsonParseError := jsonToMap(jsonStr)
@@ -679,13 +664,12 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 
 	if httpResp.StatusCode != 202 {
 
-		responseString, error := extractString(httpResp)
-		if error != nil {
-			return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+		responseString, err := extractString(httpResp)
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 		}
 
-		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
-
+		err = json.Unmarshal([]byte(responseString), &gatewayResponse)
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error For Begin Installation: %s", err)
 		}
@@ -700,7 +684,6 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 
 // MoveToNextPhase used for move to next phases in installation
 func (gc *GatewayClient) MoveToNextPhase() (*types.GatewayResponse, error) {
-
 	var gatewayResponse types.GatewayResponse
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/ProcessPhase/actions/moveToNextPhase", nil)
@@ -726,15 +709,14 @@ func (gc *GatewayClient) MoveToNextPhase() (*types.GatewayResponse, error) {
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
-
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error For Move To Next Phase: %s", err)
 		}
@@ -756,7 +738,6 @@ func (gc *GatewayClient) MoveToNextPhase() (*types.GatewayResponse, error) {
 
 // RetryPhase used for re run to failed phases in installation
 func (gc *GatewayClient) RetryPhase() (*types.GatewayResponse, error) {
-
 	var gatewayResponse types.GatewayResponse
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Command/instances/actions/retry/", nil)
@@ -782,15 +763,14 @@ func (gc *GatewayClient) RetryPhase() (*types.GatewayResponse, error) {
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
-
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error For Retry Phase: %s", err)
 		}
@@ -812,7 +792,6 @@ func (gc *GatewayClient) RetryPhase() (*types.GatewayResponse, error) {
 
 // AbortOperation used for abort installation operation
 func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
-
 	var gatewayResponse types.GatewayResponse
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Command/instances/actions/abort", nil)
@@ -838,15 +817,14 @@ func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
-
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error For Abort Operation: %s", err)
 		}
@@ -868,7 +846,6 @@ func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
 
 // ClearQueueCommand used for clear all commands in queue
 func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
-
 	var gatewayResponse types.GatewayResponse
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Command/instances/actions/clear", nil)
@@ -894,15 +871,14 @@ func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
-
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error For Clear Queue Commands: %s", err)
 		}
@@ -924,7 +900,6 @@ func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
 
 // MoveToIdlePhase used for move gateway installer to idle state
 func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
-
 	var gatewayResponse types.GatewayResponse
 
 	req, httpError := http.NewRequest("POST", gc.host+"/im/types/ProcessPhase/actions/moveToIdlePhase", nil)
@@ -950,15 +925,14 @@ func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 		return &gatewayResponse, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode != 200 {
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
-
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error For Move To Ideal Phase: %s", err)
 		}
@@ -980,7 +954,6 @@ func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 
 // GetInQueueCommand used for get in queue commands
 func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, error) {
-
 	var mdmQueueCommandDetails []types.MDMQueueCommandDetails
 
 	req, httpError := http.NewRequest("GET", gc.host+"/im/types/Command/instances", nil)
@@ -1005,9 +978,9 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 		return mdmQueueCommandDetails, httpRespError
 	}
 
-	responseString, error := extractString(httpResp)
-	if error != nil {
-		return mdmQueueCommandDetails, fmt.Errorf("Error Extracting Response: %s", error)
+	responseString, err := extractString(httpResp)
+	if err != nil {
+		return mdmQueueCommandDetails, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
 	if httpResp.StatusCode == 200 {
@@ -1022,7 +995,6 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 		var queueCommandDetails map[string][]interface{}
 
 		err := json.Unmarshal([]byte(responseString), &queueCommandDetails)
-
 		if err != nil {
 			return mdmQueueCommandDetails, fmt.Errorf("Error For Get In Queue Commands: %s", err)
 		}
@@ -1036,7 +1008,6 @@ func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, er
 		mdmCommands, _ := json.Marshal(commandList)
 
 		err = json.Unmarshal([]byte(mdmCommands), &mdmQueueCommandDetails)
-
 		if err != nil {
 			return mdmQueueCommandDetails, fmt.Errorf("Error For Get In Queue Commands: %s", err)
 		}
@@ -1052,7 +1023,6 @@ func (gc *GatewayClient) CheckForCompletionQueueCommands(currentPhase string) (*
 	var gatewayResponse types.GatewayResponse
 
 	mdmQueueCommandDetails, err := gc.GetInQueueCommand()
-
 	if err != nil {
 		return &gatewayResponse, err
 	}
@@ -1062,7 +1032,6 @@ func (gc *GatewayClient) CheckForCompletionQueueCommands(currentPhase string) (*
 	var errMsg bytes.Buffer
 
 	for _, mdmQueueCommandDetail := range mdmQueueCommandDetails {
-
 		if currentPhase == mdmQueueCommandDetail.AllowedPhase && (mdmQueueCommandDetail.CommandState == "pending" || mdmQueueCommandDetail.CommandState == "running") {
 			checkCompleted = "Running"
 			break
@@ -1084,8 +1053,7 @@ func (gc *GatewayClient) CheckForCompletionQueueCommands(currentPhase string) (*
 }
 
 // UninstallCluster used for uninstallation of cluster
-func (gc *GatewayClient) UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword string, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, expansion bool) (*types.GatewayResponse, error) {
-
+func (gc *GatewayClient) UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword string, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, _ bool) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
 	clusterData, jsonParseError := jsonToMap(jsonStr)
@@ -1134,13 +1102,12 @@ func (gc *GatewayClient) UninstallCluster(jsonStr, mdmUsername, mdmPassword, lia
 
 	if httpResp.StatusCode != 202 {
 
-		responseString, error := extractString(httpResp)
-		if error != nil {
-			return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", error)
+		responseString, err := extractString(httpResp)
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error Extracting Response: %s", err)
 		}
 
-		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
-
+		err = json.Unmarshal([]byte(responseString), &gatewayResponse)
 		if err != nil {
 			return &gatewayResponse, fmt.Errorf("Error For Uninstall Cluster: %s", err)
 		}
@@ -1218,7 +1185,6 @@ func storeCookie(header http.Header, host string) error {
 }
 
 func setCookie(header http.Header, host string) error {
-
 	if globalCookie != "" {
 		header.Set("Cookie", "LEGACYGWCOOKIE="+strings.ReplaceAll(globalCookie, "_", "|"))
 	} else {
@@ -1265,7 +1231,7 @@ func writeConfig(config *CookieConfig) error {
 		return err
 	}
 	// #nosec G306
-	err = ioutil.WriteFile(configFile, data, 0644)
+	err = ioutil.WriteFile(configFile, data, 0o644)
 	if err != nil {
 		return err
 	}

@@ -55,7 +55,7 @@ func (c *Client) GetVTreeInstances(ids []string) ([]types.VTreeDetails, error) {
 
 	path := "/api/types/VTree/instances/action/queryBySelectedIds"
 
-	payload := types.VTreeQueryBySelectedIdsParam{
+	payload := types.VTreeQueryBySelectedIDsParam{
 		IDs: ids,
 	}
 	var vTree []types.VTreeDetails

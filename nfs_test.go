@@ -34,26 +34,26 @@ func TestGetNasByIDName(t *testing.T) {
 	type checkFn func(*testing.T, *types.NAS, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.NAS, err error) {
+	hasNoError := func(t *testing.T, _ *types.NAS, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.NAS, err error) {
+	hasError := func(t *testing.T, _ *types.NAS, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkRespName := func(nasName string) func(t *testing.T, resp *types.NAS, err error) {
-		return func(t *testing.T, resp *types.NAS, err error) {
+		return func(t *testing.T, resp *types.NAS, _ error) {
 			assert.Equal(t, nasName, resp.Name)
 		}
 	}
 
 	checkRespID := func(nasId string) func(t *testing.T, resp *types.NAS, err error) {
-		return func(t *testing.T, resp *types.NAS, err error) {
+		return func(t *testing.T, resp *types.NAS, _ error) {
 			assert.Equal(t, nasId, resp.ID)
 		}
 	}
@@ -130,7 +130,6 @@ func TestGetNasByIDName(t *testing.T) {
 					t.Fatal(err)
 				}
 				fmt.Fprintln(w, string(respData))
-
 			}))
 			return ts, &system, check(hasError)
 		},
@@ -191,12 +190,12 @@ func TestGetNasByIDName(t *testing.T) {
 		},
 	}
 
-	var testCaseNasNames = map[string]string{
+	testCaseNasNames := map[string]string{
 		"success":   "test-nas1",
 		"not found": "test-nas3",
 	}
 
-	var testCaseNasIDs = map[string]string{
+	testCaseNasIDs := map[string]string{
 		"success":   "5e8d8e8e-671b-336f-db4e-cee0fbdc981e",
 		"not found": "6e8d8e8e-671b-336f-eb4e-dee0fbdc981f",
 	}
@@ -221,7 +220,6 @@ func TestGetNasByIDName(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 
@@ -245,30 +243,28 @@ func TestGetNasByIDName(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
-
 }
 
 func TestCreateNAS(t *testing.T) {
 	type checkFn func(*testing.T, *types.CreateNASResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.CreateNASResponse, err error) {
+	hasNoError := func(t *testing.T, _ *types.CreateNASResponse, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.CreateNASResponse, err error) {
+	hasError := func(t *testing.T, _ *types.CreateNASResponse, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkResp := func(nasId string) func(t *testing.T, resp *types.CreateNASResponse, err error) {
-		return func(t *testing.T, resp *types.CreateNASResponse, err error) {
+		return func(t *testing.T, resp *types.CreateNASResponse, _ error) {
 			assert.Equal(t, nasId, resp.ID)
 		}
 	}
@@ -276,7 +272,7 @@ func TestCreateNAS(t *testing.T) {
 	tests := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
 			systemID := "0000aaacccddd1111"
-			href := fmt.Sprintf("/rest/v1/nas-servers")
+			href := "/rest/v1/nas-servers"
 			system := types.System{
 				ID: systemID,
 			}
@@ -303,7 +299,7 @@ func TestCreateNAS(t *testing.T) {
 			return ts, &system, check(hasNoError, checkResp("5e8d8e8e-671b-336f-db4e-cee0fbdc981e"))
 		},
 		"bad request": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
-			href := fmt.Sprintf("/rest/v1/nas-servers")
+			href := "/rest/v1/nas-servers"
 			systemID := "0000aaacccddd1111"
 			system := types.System{
 				ID: systemID,
@@ -344,13 +340,11 @@ func TestCreateNAS(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 }
 
 func TestDeleteNAS(t *testing.T) {
-
 	id := "new-nas"
 	systemID := "0000aaacccddd1111"
 	system := types.System{
@@ -358,8 +352,8 @@ func TestDeleteNAS(t *testing.T) {
 	}
 	system1 := &system
 
-	//mock a powerflex endpoint
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// mock a powerflex endpoint
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()

@@ -21,12 +21,12 @@ import (
 )
 
 // CreateSnapshotPolicy creates a snapshot policy on the PowerFlex array
-func (system *System) CreateSnapshotPolicy(snapPolicy *types.SnapshotPolicyCreateParam) (string, error) {
+func (s *System) CreateSnapshotPolicy(snapPolicy *types.SnapshotPolicyCreateParam) (string, error) {
 	defer TimeSpent("crate snapshot policy", time.Now())
 
 	path := fmt.Sprintf("/api/types/SnapshotPolicy/instances")
 	snapResp := types.SnapShotPolicyCreateResp{}
-	err := system.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, snapPolicy, &snapResp)
 	if err != nil {
 		return "", err
@@ -35,10 +35,10 @@ func (system *System) CreateSnapshotPolicy(snapPolicy *types.SnapshotPolicyCreat
 }
 
 // RemoveSnapshotPolicy removes a snapshot policy from the PowerFlex array
-func (system *System) RemoveSnapshotPolicy(id string) error {
+func (s *System) RemoveSnapshotPolicy(id string) error {
 	path := fmt.Sprintf("/api/instances/SnapshotPolicy::%v/action/removeSnapshotPolicy", id)
 	removeParam := &types.EmptyPayload{}
-	err := system.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, removeParam, nil)
 	if err != nil {
 		return err
@@ -47,12 +47,12 @@ func (system *System) RemoveSnapshotPolicy(id string) error {
 }
 
 // RenameSnapshotPolicy renames a snapshot policy
-func (system *System) RenameSnapshotPolicy(id, name string) error {
+func (s *System) RenameSnapshotPolicy(id, name string) error {
 	path := fmt.Sprintf("/api/instances/SnapshotPolicy::%v/action/renameSnapshotPolicy", id)
 	renameSnap := &types.SnapshotPolicyRenameParam{
 		NewName: name,
 	}
-	err := system.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, renameSnap, nil)
 	if err != nil {
 		return err
@@ -61,9 +61,9 @@ func (system *System) RenameSnapshotPolicy(id, name string) error {
 }
 
 // ModifySnapshotPolicy modifies a snapshot policy
-func (system *System) ModifySnapshotPolicy(modifysnapPolicy *types.SnapshotPolicyModifyParam, id string) error {
+func (s *System) ModifySnapshotPolicy(modifysnapPolicy *types.SnapshotPolicyModifyParam, id string) error {
 	path := fmt.Sprintf("/api/instances/SnapshotPolicy::%v/action/modifySnapshotPolicy", id)
-	err := system.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, modifysnapPolicy, nil)
 	if err != nil {
 		return err
@@ -72,9 +72,9 @@ func (system *System) ModifySnapshotPolicy(modifysnapPolicy *types.SnapshotPolic
 }
 
 // AssignVolumeToSnapshotPolicy assigns volume to a snapshot policy
-func (system *System) AssignVolumeToSnapshotPolicy(assignVoltoSnap *types.AssignVolumeToSnapshotPolicyParam, id string) error {
+func (s *System) AssignVolumeToSnapshotPolicy(assignVoltoSnap *types.AssignVolumeToSnapshotPolicyParam, id string) error {
 	path := fmt.Sprintf("/api/instances/SnapshotPolicy::%v/action/addSourceVolumeToSnapshotPolicy", id)
-	err := system.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, assignVoltoSnap, nil)
 	if err != nil {
 		return err
@@ -83,9 +83,9 @@ func (system *System) AssignVolumeToSnapshotPolicy(assignVoltoSnap *types.Assign
 }
 
 // UnassignVolumeFromSnapshotPolicy unassigns volume from a snapshot policy
-func (system *System) UnassignVolumeFromSnapshotPolicy(UnassignVolFromSnap *types.AssignVolumeToSnapshotPolicyParam, id string) error {
+func (s *System) UnassignVolumeFromSnapshotPolicy(UnassignVolFromSnap *types.AssignVolumeToSnapshotPolicyParam, id string) error {
 	path := fmt.Sprintf("/api/instances/SnapshotPolicy::%v/action/removeSourceVolumeFromSnapshotPolicy", id)
-	err := system.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, UnassignVolFromSnap, nil)
 	if err != nil {
 		return err
@@ -94,10 +94,10 @@ func (system *System) UnassignVolumeFromSnapshotPolicy(UnassignVolFromSnap *type
 }
 
 // PauseSnapshotPolicy pause a snapshot policy
-func (system *System) PauseSnapshotPolicy(id string) error {
+func (s *System) PauseSnapshotPolicy(id string) error {
 	path := fmt.Sprintf("/api/instances/SnapshotPolicy::%v/action/pauseSnapshotPolicy", id)
 	pauseParam := &types.EmptyPayload{}
-	err := system.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, pauseParam, nil)
 	if err != nil {
 		return err
@@ -106,10 +106,10 @@ func (system *System) PauseSnapshotPolicy(id string) error {
 }
 
 // ResumeSnapshotPolicy resume a snapshot policy which was paused
-func (system *System) ResumeSnapshotPolicy(id string) error {
+func (s *System) ResumeSnapshotPolicy(id string) error {
 	path := fmt.Sprintf("/api/instances/SnapshotPolicy::%v/action/resumeSnapshotPolicy", id)
 	resumeParam := &types.EmptyPayload{}
-	err := system.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodPost, path, resumeParam, nil)
 	if err != nil {
 		return err
@@ -118,10 +118,10 @@ func (system *System) ResumeSnapshotPolicy(id string) error {
 }
 
 // GetSourceVolume returns a list of volumes assigned to snapshot policy
-func (system *System) GetSourceVolume(id string) ([]*types.Volume, error) {
+func (s *System) GetSourceVolume(id string) ([]*types.Volume, error) {
 	var volumes []*types.Volume
 	path := fmt.Sprintf("/api/instances/SnapshotPolicy::%v/relationships/SourceVolume", id)
-	err := system.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &volumes)
 	if err != nil {
 		return nil, err

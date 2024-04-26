@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/dell/goscaleio"
-	//log "github.com/sirupsen/logrus"
+	// log "github.com/sirupsen/logrus"
 	types "github.com/dell/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
 )
@@ -53,7 +53,7 @@ func getAllFileSystems(t *testing.T) []*goscaleio.FileSystem {
 	assert.Nil(t, err)
 	assert.NotZero(t, len(fs))
 	for _, f := range fs {
-		outFs := goscaleio.NewFileSystem(C, &f)
+		outFs := goscaleio.NewFileSystem(C, &f) // #nosec G601
 		allFs = append(allFs, outFs)
 	}
 	return allFs
@@ -123,7 +123,6 @@ func TestCreateFileSystemSnapshot(t *testing.T) {
 	assert.Nil(t, err)
 	err = system.DeleteFileSystem(fs.Name)
 	assert.Nil(t, err)
-
 }
 
 func TestRestoreFileSystemSnapshot(t *testing.T) {
@@ -207,7 +206,6 @@ func TestRestoreFileSystemSnapshot(t *testing.T) {
 	assert.Nil(t, err)
 	err = system.DeleteFileSystem(fs.Name)
 	assert.Nil(t, err)
-
 }
 
 func TestGetFsSnapshotsByVolumeID(t *testing.T) {
@@ -275,7 +273,6 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 
 // TestGetFileSystemByIDName will return specific filesystem by name or ID
 func TestGetFileSystemByIDName(t *testing.T) {
-
 	system := getSystem()
 	assert.NotNil(t, system)
 
@@ -367,7 +364,6 @@ func TestCreateDeleteFileSystem(t *testing.T) {
 	// delete the file system
 	err = system.DeleteFileSystem(fsName)
 	assert.NotNil(t, err)
-
 }
 
 // TestModifyFileSystem attempts to create then delete a file system
@@ -423,5 +419,4 @@ func TestModifyFileSystem(t *testing.T) {
 	// negative case
 	err = system.ModifyFileSystem(modifyParam, "")
 	assert.NotNil(t, err)
-
 }

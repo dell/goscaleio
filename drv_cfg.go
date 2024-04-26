@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"encoding/hex"
 	"fmt"
 	"os"
 	"os/exec"
@@ -21,8 +22,6 @@ import (
 	"strings"
 	"syscall"
 	"unsafe"
-
-	"encoding/hex"
 
 	"github.com/google/uuid"
 )
@@ -85,7 +84,6 @@ func DrvCfgQueryGUID() (string, error) {
 	buf := [1]ioctlGUID{}
 	// #nosec CWE-242, validated buffer is large enough to hold data
 	err = ioctl(f.Fd(), opCode, uintptr(unsafe.Pointer(&buf[0])))
-
 	if err != nil {
 		return "", fmt.Errorf("QueryGUID error: %v", err)
 	}
@@ -103,7 +101,6 @@ func DrvCfgQueryGUID() (string, error) {
 
 // DrvCfgQueryRescan preforms a rescan
 func DrvCfgQueryRescan() (string, error) {
-
 	f, err := os.Open(SDCDevice)
 	if err != nil {
 		return "", fmt.Errorf("Powerflex SDC is not installed")
@@ -118,7 +115,6 @@ func DrvCfgQueryRescan() (string, error) {
 	var rc int64
 	// #nosec CWE-242, validated buffer is large enough to hold data
 	err = ioctl(f.Fd(), opCode, uintptr(unsafe.Pointer(&rc)))
-
 	if err != nil {
 		return "", fmt.Errorf("Rescan error: %v", err)
 	}

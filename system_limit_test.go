@@ -28,13 +28,13 @@ func TestGetSystemLimits(t *testing.T) {
 	type checkFn func(*testing.T, *types.QuerySystemLimitsResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, syslimit *types.QuerySystemLimitsResponse, err error) {
+	hasNoError := func(t *testing.T, _ *types.QuerySystemLimitsResponse, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, syslimit *types.QuerySystemLimitsResponse, err error) {
+	hasError := func(t *testing.T, _ *types.QuerySystemLimitsResponse, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
@@ -125,7 +125,7 @@ func TestGetSystemLimits(t *testing.T) {
 			defer ts.Close()
 
 			// Create a test client and call GetSystemLimits.
-			//client := NewTestClient(ts.URL) // Replace with your own client creation logic.
+			// client := NewTestClient(ts.URL) // Replace with your own client creation logic.
 			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
 			client.configConnect.Version = "4.0"
 			if err != nil {

@@ -48,16 +48,16 @@ func TestCreateSnapshotPolicy(t *testing.T) {
 				NumOfRetainedSnapshotsPerLevel:   []string{"1"},
 				SnapshotAccessMode:               "Invalid",
 			},
-			expected: errors.New("accessMode should get one of the following values: ReadWrite, ReadOnly, but its value is Invalid."),
+			expected: errors.New("accessMode should get one of the following values: ReadWrite, ReadOnly, but its value is Invalid"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -89,7 +89,6 @@ func TestModifySnapshotPolicyName(t *testing.T) {
 	}
 	cases := []testCase{
 		{
-
 			id:       ID2,
 			name:     "renameSnapshotPolicy",
 			expected: nil,
@@ -97,16 +96,16 @@ func TestModifySnapshotPolicyName(t *testing.T) {
 		{
 			id:       "1234",
 			name:     "renameSnapshotPolicy",
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
+			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -150,16 +149,16 @@ func TestModifySnapshotPolicy(t *testing.T) {
 				AutoSnapshotCreationCadenceInMin: "6",
 				NumOfRetainedSnapshotsPerLevel:   []string{"2", "3"},
 			},
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
+			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -193,32 +192,32 @@ func TestAssignSnapshotPolicy(t *testing.T) {
 		{
 			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId: "edba1bff00000001",
+				SourceVolumeID: "edba1bff00000001",
 			},
 			expected: nil,
 		},
 		{
 			id: "Invalid",
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId: "edba1bff00000001",
+				SourceVolumeID: "edba1bff00000001",
 			},
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
+			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
 		},
 		{
 			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId: "edba1bff000000",
+				SourceVolumeID: "edba1bff000000",
 			},
-			expected: errors.New("Invalid volume. Please try again with a valid ID or name."),
+			expected: errors.New("Invalid volume. Please try again with a valid ID or name"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -252,7 +251,7 @@ func TestUnassignSnapshotPolicy(t *testing.T) {
 		{
 			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId:            "edba1bff00000001",
+				SourceVolumeID:            "edba1bff00000001",
 				AutoSnapshotRemovalAction: "Remove",
 			},
 			expected: nil,
@@ -260,35 +259,35 @@ func TestUnassignSnapshotPolicy(t *testing.T) {
 		{
 			id: "Invalid",
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId:            "edba1bff00000001",
+				SourceVolumeID:            "edba1bff00000001",
 				AutoSnapshotRemovalAction: "Remove",
 			},
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
+			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
 		},
 		{
 			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId:            "edba1bff000000",
+				SourceVolumeID:            "edba1bff000000",
 				AutoSnapshotRemovalAction: "Remove",
 			},
-			expected: errors.New("Invalid volume. Please try again with a valid ID or name."),
+			expected: errors.New("Invalid volume. Please try again with a valid ID or name"),
 		},
 		{
 			id: ID2,
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeId:            "edba1bff000000",
+				SourceVolumeID:            "edba1bff000000",
 				AutoSnapshotRemovalAction: "Invalid",
 			},
-			expected: errors.New("autoSnapshotRemovalAction should get one of the following values: Remove, Detach, but its value is Invalid."),
+			expected: errors.New("autoSnapshotRemovalAction should get one of the following values: Remove, Detach, but its value is Invalid"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -324,16 +323,16 @@ func TestPauseSnapshotPolicy(t *testing.T) {
 		},
 		{
 			id:       "Invalid",
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
+			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -369,16 +368,16 @@ func TestResumeSnapshotPolicy(t *testing.T) {
 		},
 		{
 			id:       "Invalid",
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
+			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -414,16 +413,16 @@ func TestDeleteSnapshotPolicy(t *testing.T) {
 		},
 		{
 			id:       "Invalid",
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
+			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
@@ -459,16 +458,16 @@ func TestGetSourceVolume(t *testing.T) {
 		},
 		{
 			id:       "Invalid",
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)."),
+			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)

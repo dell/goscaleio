@@ -53,8 +53,7 @@ type Client struct {
 }
 
 // Cluster defines struct for Cluster
-type Cluster struct {
-}
+type Cluster struct{}
 
 // ConfigConnect defines struct for ConfigConnect
 type ConfigConnect struct {
@@ -73,7 +72,6 @@ type ClientPersistent struct {
 
 // GetVersion returns version
 func (c *Client) GetVersion() (string, error) {
-
 	resp, err := c.api.DoAndGetResponseBody(
 		context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
 	if err != nil {
@@ -108,7 +106,6 @@ func (c *Client) GetVersion() (string, error) {
 
 // updateVersion updates version
 func (c *Client) updateVersion() error {
-
 	version, err := c.GetVersion()
 	if err != nil {
 		return err
@@ -132,7 +129,6 @@ func updateHeaders(version string) {
 
 // Authenticate controls authentication to client
 func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
-
 	configConnect.Version = c.configConnect.Version
 	c.configConnect = configConnect
 
@@ -187,8 +183,8 @@ func basicAuth(username, password string) string {
 
 func (c *Client) getJSONWithRetry(
 	method, uri string,
-	body, resp interface{}) error {
-
+	body, resp interface{},
+) error {
 	headers := make(map[string]string, 2)
 	headers[api.HeaderKeyAccept] = accHeader
 	headers[api.HeaderKeyContentType] = conHeader
@@ -240,8 +236,8 @@ func extractString(resp *http.Response) (string, error) {
 
 func (c *Client) getStringWithRetry(
 	method, uri string,
-	body interface{}) (string, error) {
-
+	body interface{},
+) (string, error) {
 	headers := make(map[string]string, 2)
 	headers[api.HeaderKeyAccept] = accHeader
 	headers[api.HeaderKeyContentType] = conHeader
@@ -333,8 +329,8 @@ func NewClientWithArgs(
 	version string,
 	timeout int64,
 	insecure,
-	useCerts bool) (client *Client, err error) {
-
+	useCerts bool,
+) (client *Client, err error) {
 	if showHTTP {
 		debug = true
 	}
@@ -401,8 +397,8 @@ func withFields(fields map[string]interface{}, message string) error {
 }
 
 func withFieldsE(
-	fields map[string]interface{}, message string, inner error) error {
-
+	fields map[string]interface{}, message string, inner error,
+) error {
 	if fields == nil {
 		fields = make(map[string]interface{})
 	}
@@ -429,8 +425,8 @@ func withFieldsE(
 
 func doLog(
 	l func(args ...interface{}),
-	msg string) {
-
+	msg string,
+) {
 	if debug {
 		l(msg)
 	}

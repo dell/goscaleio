@@ -44,11 +44,11 @@ func getAllSds(t *testing.T) []*goscaleio.Sds {
 		assert.NotZero(t, len(sds))
 		for _, s := range sds {
 			// create an SDS via NewSdsEx to the caller (appending to the allSds slice)
-			outSDS := goscaleio.NewSdsEx(C, &s)
+			outSDS := goscaleio.NewSdsEx(C, &s) // #nosec G601
 			allSds = append(allSds, outSDS)
 			// create an SDS via NewSds that we will through away
 			tempSDS := goscaleio.NewSds(C)
-			tempSDS.Sds = &s
+			tempSDS.Sds = &s // #nosec G601
 			assert.Equal(t, outSDS.Sds.Name, tempSDS.Sds.Name)
 		}
 		return allSds
@@ -122,7 +122,6 @@ func TestCreateSdsInvalid(t *testing.T) {
 	sdsID, err := pd.CreateSds(sdsName, sdsIPList)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", sdsID)
-
 }
 
 // TestCreateSdsInvalid will attempt to add an SDS, which results in failure
@@ -144,7 +143,6 @@ func TestCreateSdsParamsInvalid(t *testing.T) {
 	sdsID, err := pd.CreateSdsWithParams(sdsParam)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", sdsID)
-
 }
 
 // TestCompareSdsIDApi checks if all fields for the SDS are same for fetching by ID and Protection Domain

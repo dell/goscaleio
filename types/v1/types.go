@@ -291,7 +291,7 @@ type SdcStatistics struct {
 	UserDataSdcReadLatency  BWC      `json:"userDataSdcReadLatency"`
 	UserDataSdcWriteLatency BWC      `json:"userDataSdcWriteLatency"`
 	UserDataSdcTrimLatency  BWC      `json:"userDataSdcTrimLatency"`
-	VolumeIds               []string `json:"volumeIds"`
+	VolumeIDs               []string `json:"volumeIds"`
 	NumOfMappedVolumes      int      `json:"numOfMappedVolumes"`
 }
 
@@ -303,7 +303,7 @@ type VolumeStatistics struct {
 	UserDataSdcReadLatency  BWC      `json:"userDataSdcReadLatency"`
 	UserDataSdcWriteLatency BWC      `json:"userDataSdcWriteLatency"`
 	UserDataSdcTrimLatency  BWC      `json:"userDataSdcTrimLatency"`
-	MappedSdcIds            []string `json:"mappedSdcIds"`
+	MappedSdcIDs            []string `json:"mappedSdcIds"`
 	NumOfMappedSdcs         int      `json:"numOfMappedSdcs"`
 }
 
@@ -843,8 +843,7 @@ type StoragePoolUseRmCache struct {
 }
 
 // StoragePoolUseRfCache defines struct for StoragePoolUseRfCache
-type StoragePoolUseRfCache struct {
-}
+type StoragePoolUseRfCache struct{}
 
 // StoragePoolZeroPadEnabled defines struct for zero Pad Enablement
 type StoragePoolZeroPadEnabled struct {
@@ -895,8 +894,7 @@ type RebuildRebalanceParallelismParam struct {
 }
 
 // FragmentationParam defines struct for fragmentation
-type FragmentationParam struct {
-}
+type FragmentationParam struct{}
 
 // StoragePoolResp defines struct for StoragePoolResp
 type StoragePoolResp struct {
@@ -987,8 +985,8 @@ type VolumeQeryIDByKeyParam struct {
 	Name string `json:"name"`
 }
 
-// VolumeQeryBySelectedIdsParam defines struct for VolumeQeryBySelectedIdsParam
-type VolumeQeryBySelectedIdsParam struct {
+// VolumeQeryBySelectedIDsParam defines struct for VolumeQeryBySelectedIDsParam
+type VolumeQeryBySelectedIDsParam struct {
 	IDs []string `json:"ids"`
 }
 
@@ -1059,8 +1057,7 @@ type RemoveVolumeParam struct {
 }
 
 // EmptyPayload defines struct for EmptyPayload
-type EmptyPayload struct {
-}
+type EmptyPayload struct{}
 
 // SnapshotPolicy defines the struct for SnapshotPolicy
 type SnapshotPolicy struct {
@@ -1114,7 +1111,7 @@ type SnapshotPolicyModifyParam struct {
 
 // AssignVolumeToSnapshotPolicyParam defines the struct for assigning volume to a Snapshot Policy
 type AssignVolumeToSnapshotPolicyParam struct {
-	SourceVolumeId            string `json:"sourceVolumeId"`
+	SourceVolumeID            string `json:"sourceVolumeId"`
 	AutoSnapshotRemovalAction string `json:"autoSnapshotRemovalAction,omitempty"`
 }
 
@@ -1262,7 +1259,7 @@ const (
 type NFSServerInstance struct {
 	// Unique identifier for NFS server
 	ID string `json:"id"`
-	//HostName will be used by NFS clients to connect to this NFS server.
+	// HostName will be used by NFS clients to connect to this NFS server.
 	HostName string `json:"host_name,omitempty"`
 	// IsNFSv4Enabled is set to true if nfsv4 is enabled on NAS server
 	IsNFSv4Enabled bool `json:"is_nfsv4_enabled,omitempty"`
@@ -1781,13 +1778,13 @@ type SystemLimits struct {
 	MaxVal      string `json:"maxVal,omitempty"`
 }
 
-// SystemLimitEntryList defines struct for system limit entryList
+// QuerySystemLimitsResponse defines struct for system limit response
 type QuerySystemLimitsResponse struct {
 	SystemLimitEntryList []SystemLimits `json:"systemLimitEntryList"`
 }
 
-type QuerySystemLimitsParam struct {
-}
+// QuerySystemLimitsParam is the parameters required to query system limits
+type QuerySystemLimitsParam struct{}
 
 // FaultSetParam is the parameters required to create a fault set
 type FaultSetParam struct {
@@ -1804,7 +1801,7 @@ type FaultSetResp struct {
 type FaultSet struct {
 	ID                 string  `json:"id"`
 	Name               string  `json:"name"`
-	ProtectionDomainId string  `json:"protectionDomainId"`
+	ProtectionDomainID string  `json:"protectionDomainId"`
 	Links              []*Link `json:"links"`
 }
 

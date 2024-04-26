@@ -33,5 +33,4 @@ func TestGetMaxVol(t *testing.T) {
 	fmt.Println("max vol size", maxvolsize)
 	assert.NotNil(t, maxvolsize)
 	assert.Nil(t, err)
-
 }
