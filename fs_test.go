@@ -29,26 +29,26 @@ func TestGetFileSystemByIDName(t *testing.T) {
 	type checkFn func(*testing.T, *types.FileSystem, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.FileSystem, err error) {
+	hasNoError := func(t *testing.T, _ *types.FileSystem, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.FileSystem, err error) {
+	hasError := func(t *testing.T, _ *types.FileSystem, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkRespName := func(fsName string) func(t *testing.T, resp *types.FileSystem, err error) {
-		return func(t *testing.T, resp *types.FileSystem, err error) {
+		return func(t *testing.T, resp *types.FileSystem, _ error) {
 			assert.Equal(t, fsName, resp.Name)
 		}
 	}
 
 	checkRespID := func(fsID string) func(t *testing.T, resp *types.FileSystem, err error) {
-		return func(t *testing.T, resp *types.FileSystem, err error) {
+		return func(t *testing.T, resp *types.FileSystem, _ error) {
 			assert.Equal(t, fsID, resp.ID)
 		}
 	}
@@ -164,12 +164,12 @@ func TestGetFileSystemByIDName(t *testing.T) {
 		},
 	}
 
-	var testCaseFSNames = map[string]string{
+	testCaseFSNames := map[string]string{
 		"success":   "fs-test-2",
 		"not found": "fs-test-3",
 	}
 
-	var testCaseFSIds = map[string]string{
+	testCaseFSIds := map[string]string{
 		"success":   "64366a19-54e8-1544-f3d7-2a50fb1ccff3",
 		"not found": "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
 	}
@@ -223,28 +223,27 @@ func TestCreateFileSystem(t *testing.T) {
 	type checkFn func(*testing.T, *types.FileSystemResp, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.FileSystemResp, err error) {
+	hasNoError := func(t *testing.T, _ *types.FileSystemResp, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.FileSystemResp, err error) {
+	hasError := func(t *testing.T, _ *types.FileSystemResp, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkResp := func(fsId string) func(t *testing.T, resp *types.FileSystemResp, err error) {
-		return func(t *testing.T, resp *types.FileSystemResp, err error) {
+		return func(t *testing.T, resp *types.FileSystemResp, _ error) {
 			assert.Equal(t, fsId, resp.ID)
 		}
 	}
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-
-			href := fmt.Sprintf("/rest/v1/file-systems")
+			href := "/rest/v1/file-systems"
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {
@@ -268,7 +267,7 @@ func TestCreateFileSystem(t *testing.T) {
 			return ts, check(hasNoError, checkResp("64366a19-54e8-1544-f3d7-2a50fb1ccff3"))
 		},
 		"bad request": func(t *testing.T) (*httptest.Server, []checkFn) {
-			href := fmt.Sprintf("/rest/v1/file-systems")
+			href := "/rest/v1/file-systems"
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {
@@ -311,7 +310,6 @@ func TestCreateFileSystem(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 }
@@ -320,27 +318,26 @@ func TestCreateFileSystemSnapshot(t *testing.T) {
 	type checkFn func(*testing.T, *types.CreateFileSystemSnapshotResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.CreateFileSystemSnapshotResponse, err error) {
+	hasNoError := func(t *testing.T, _ *types.CreateFileSystemSnapshotResponse, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.CreateFileSystemSnapshotResponse, err error) {
+	hasError := func(t *testing.T, _ *types.CreateFileSystemSnapshotResponse, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkResp := func(snapId string) func(t *testing.T, resp *types.CreateFileSystemSnapshotResponse, err error) {
-		return func(t *testing.T, resp *types.CreateFileSystemSnapshotResponse, err error) {
+		return func(t *testing.T, resp *types.CreateFileSystemSnapshotResponse, _ error) {
 			assert.Equal(t, snapId, resp.ID)
 		}
 	}
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/rest/v1/file-systems/%v/snapshot", "64366a19-54e8-1544-f3d7-2a50fb1ccff3")
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -407,7 +404,6 @@ func TestCreateFileSystemSnapshot(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 }
@@ -416,27 +412,26 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 	type checkFn func(*testing.T, []types.FileSystem, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp []types.FileSystem, err error) {
+	hasNoError := func(t *testing.T, _ []types.FileSystem, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp []types.FileSystem, err error) {
+	hasError := func(t *testing.T, _ []types.FileSystem, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkResp := func(snapLength int) func(t *testing.T, resp []types.FileSystem, err error) {
-		return func(t *testing.T, resp []types.FileSystem, err error) {
+		return func(t *testing.T, resp []types.FileSystem, _ error) {
 			assert.Equal(t, snapLength, len(resp))
 		}
 	}
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := "/rest/v1/file-systems"
 			var resp []types.FileSystem
 
@@ -465,7 +460,6 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 					t.Fatal(err)
 				}
 				fmt.Fprintln(w, string(respData))
-
 			}))
 			return ts, check(hasNoError, checkResp(len(resp)))
 		},
@@ -509,7 +503,6 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 }
@@ -518,27 +511,26 @@ func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 	type checkFn func(*testing.T, *types.RestoreFsSnapResponse, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
-	hasNoError := func(t *testing.T, resp *types.RestoreFsSnapResponse, err error) {
+	hasNoError := func(t *testing.T, _ *types.RestoreFsSnapResponse, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	hasError := func(t *testing.T, resp *types.RestoreFsSnapResponse, err error) {
+	hasError := func(t *testing.T, _ *types.RestoreFsSnapResponse, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
 	}
 
 	checkResp := func(snapId string) func(t *testing.T, resp *types.RestoreFsSnapResponse, err error) {
-		return func(t *testing.T, resp *types.RestoreFsSnapResponse, err error) {
+		return func(t *testing.T, resp *types.RestoreFsSnapResponse, _ error) {
 			assert.Equal(t, snapId, resp.ID)
 		}
 	}
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"successNoContent": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/rest/v1/file-systems/%v/restore", "64366a19-54e8-1544-f3d7-2a50fb1ccff3")
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -556,7 +548,6 @@ func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 		},
 
 		"successWithContent": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/rest/v1/file-systems/%v/restore", "64366a19-54e8-1544-f3d7-2a50fb1ccff3")
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -631,7 +622,7 @@ func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 			}
 
 			fsID := "64366a19-54e8-1544-f3d7-2a50fb1ccff3"
-			var restoreSnapshotRequest = new(types.RestoreFsSnapParam)
+			restoreSnapshotRequest := new(types.RestoreFsSnapParam)
 			if name == "successWithContent" {
 				restoreSnapshotRequest = &types.RestoreFsSnapParam{
 					SnapshotID: "64366a19-54e8-1544-f3d7-2a50fb1ccdd3",
@@ -641,22 +632,20 @@ func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 				restoreSnapshotRequest = &types.RestoreFsSnapParam{
 					SnapshotID: "64366a19-54e8-1544-f3d7-2a50fb1ccdd3",
 				}
-
 			}
 
 			resp, err := s.RestoreFileSystemFromSnapshot(restoreSnapshotRequest, fsID)
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
-
 		})
 	}
 }
-func TestDeleteFileSystem(t *testing.T) {
 
+func TestDeleteFileSystem(t *testing.T) {
 	name := "new-fs"
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -697,13 +686,13 @@ func TestModifyFileSystem(t *testing.T) {
 		},
 	}
 	// mock a powerflex endpoint
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)

@@ -23,7 +23,7 @@ import (
 )
 
 func TestGetTemplates(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -56,13 +56,13 @@ func TestGetTemplateByID(t *testing.T) {
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			client, err := NewGateway(svr.URL, "", "", true, false)
 			client.version = "4.5"
 			if err != nil {
@@ -84,7 +84,7 @@ func TestGetTemplateByID(t *testing.T) {
 }
 
 func TestGetTemplateByFilters(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -101,7 +101,7 @@ func TestGetTemplateByFilters(t *testing.T) {
 }
 
 func TestGetTemplateByIDNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
 	}))
@@ -119,7 +119,7 @@ func TestGetTemplateByIDNegative(t *testing.T) {
 }
 
 func TestGetTemplateByFiltersNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
 	}))
@@ -137,7 +137,7 @@ func TestGetTemplateByFiltersNegative(t *testing.T) {
 }
 
 func TestGetAllTemplatesNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
 	}))

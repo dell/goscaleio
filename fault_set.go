@@ -75,11 +75,11 @@ func (pd *ProtectionDomain) ModifyFaultSetPerfProfile(id, perfProfile string) er
 }
 
 // GetFaultSetByID will read the fault set using the ID.
-func (system *System) GetFaultSetByID(id string) (*types.FaultSet, error) {
+func (s *System) GetFaultSetByID(id string) (*types.FaultSet, error) {
 	fs := &types.FaultSet{}
 	path := fmt.Sprintf("/api/instances/FaultSet::%v", id)
 
-	err := system.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, fs)
 	if err != nil {
 		return nil, err
@@ -88,12 +88,12 @@ func (system *System) GetFaultSetByID(id string) (*types.FaultSet, error) {
 }
 
 // GetAllFaultSets returns all fault sets on the system
-func (sys *System) GetAllFaultSets() ([]types.FaultSet, error) {
+func (s *System) GetAllFaultSets() ([]types.FaultSet, error) {
 	defer TimeSpent("FaultSet", time.Now())
 	path := "/api/types/FaultSet/instances"
 
 	var faultsets []types.FaultSet
-	err := sys.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &faultsets)
 	if err != nil {
 		return nil, err
@@ -103,12 +103,12 @@ func (sys *System) GetAllFaultSets() ([]types.FaultSet, error) {
 }
 
 // GetAllSDSByFaultSetID returns SDS details associated with fault set
-func (sys *System) GetAllSDSByFaultSetID(faultsetid string) ([]types.Sds, error) {
+func (s *System) GetAllSDSByFaultSetID(faultsetid string) ([]types.Sds, error) {
 	defer TimeSpent("FaultSet", time.Now())
 	path := fmt.Sprintf("/api/instances/FaultSet::%v/relationships/Sds", faultsetid)
 
 	var faultsets []types.Sds
-	err := sys.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &faultsets)
 	if err != nil {
 		return nil, err
@@ -118,8 +118,8 @@ func (sys *System) GetAllSDSByFaultSetID(faultsetid string) ([]types.Sds, error)
 }
 
 // GetFaultSetByName will read the fault set using the name
-func (sys *System) GetFaultSetByName(name string) (*types.FaultSet, error) {
-	allFaultSets, err := sys.GetAllFaultSets()
+func (s *System) GetFaultSetByName(name string) (*types.FaultSet, error) {
+	allFaultSets, err := s.GetAllFaultSets()
 	if err != nil {
 		return nil, err
 	}

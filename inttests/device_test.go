@@ -36,15 +36,14 @@ func getAllDevices(t *testing.T) []*goscaleio.Device {
 	assert.NotZero(t, len(devices))
 	for _, d := range devices {
 		// create a device to return to the caller
-		outDevice := goscaleio.NewDeviceEx(C, &d)
+		outDevice := goscaleio.NewDeviceEx(C, &d) // #nosec G601
 		allDevice = append(allDevice, outDevice)
 		// create a device via NewDevice for testing purposes
 		tempDevice := goscaleio.NewDevice(C)
-		tempDevice.Device = &d
+		tempDevice.Device = &d // #nosec G601
 		assert.Equal(t, outDevice.Device.ID, tempDevice.Device.ID)
 	}
 	return allDevice
-
 }
 
 func getAllDevicesFromSystem(t *testing.T) []goscaleio.Device {
@@ -55,11 +54,11 @@ func getAllDevicesFromSystem(t *testing.T) []goscaleio.Device {
 	assert.NotZero(t, len(devices))
 	for _, d := range devices {
 		// create a device to return to the caller
-		outDevice := goscaleio.NewDeviceEx(C, &d)
+		outDevice := goscaleio.NewDeviceEx(C, &d) // #nosec G601
 		allDevice = append(allDevice, *outDevice)
 		// create a device via NewDevice for testing purposes
 		tempDevice := goscaleio.NewDevice(C)
-		tempDevice.Device = &d
+		tempDevice.Device = &d // #nosec G601
 		assert.Equal(t, outDevice.Device.ID, tempDevice.Device.ID)
 	}
 	return allDevice
@@ -79,15 +78,14 @@ func getAllSdsDevices(t *testing.T) []*goscaleio.Device {
 	assert.NotZero(t, len(devices))
 	for _, d := range devices {
 		// create a device to return to the caller
-		outDevice := goscaleio.NewDeviceEx(C, &d)
+		outDevice := goscaleio.NewDeviceEx(C, &d) // #nosec G601
 		allDevice = append(allDevice, outDevice)
 		// create a device via NewDevice for testing purposes
 		tempDevice := goscaleio.NewDevice(C)
-		tempDevice.Device = &d
+		tempDevice.Device = &d // #nosec G601
 		assert.Equal(t, outDevice.Device.ID, tempDevice.Device.ID)
 	}
 	return allDevice
-
 }
 
 // TestGetDevices will return all Device instances
@@ -181,7 +179,6 @@ func TestAddDeviceInvalid(t *testing.T) {
 	deviceID, err := pool.AttachDevice(dev)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", deviceID)
-
 }
 
 func getSdsID() string {
@@ -383,7 +380,6 @@ func TestDeviceUpdateOriginalPathways(t *testing.T) {
 }
 
 func TestGetDeviceByDeviceID(t *testing.T) {
-
 	system := getSystem()
 
 	device, _ := system.GetDevice("c7fc68a200000000")

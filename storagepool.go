@@ -58,7 +58,6 @@ func (pd *ProtectionDomain) CreateStoragePool(sp *types.StoragePoolParam) (strin
 
 // ModifyStoragePoolName Modifies Storagepool Name
 func (pd *ProtectionDomain) ModifyStoragePoolName(ID, name string) (string, error) {
-
 	storagePoolParam := &types.ModifyStoragePoolName{
 		Name: name,
 	}
@@ -77,7 +76,6 @@ func (pd *ProtectionDomain) ModifyStoragePoolName(ID, name string) (string, erro
 
 // ModifyStoragePoolMedia Modifies Storagepool Media Type
 func (pd *ProtectionDomain) ModifyStoragePoolMedia(ID, mediaType string) (string, error) {
-
 	storagePool := &types.StoragePoolMediaType{
 		MediaType: mediaType,
 	}
@@ -96,7 +94,6 @@ func (pd *ProtectionDomain) ModifyStoragePoolMedia(ID, mediaType string) (string
 
 // ModifyRMCache Sets Read RAM Cache
 func (sp *StoragePool) ModifyRMCache(useRmcache string) error {
-
 	link, err := GetLink(sp.StoragePool.Links, "self")
 	if err != nil {
 		return err
@@ -112,7 +109,6 @@ func (sp *StoragePool) ModifyRMCache(useRmcache string) error {
 
 // EnableRFCache Enables RFCache
 func (pd *ProtectionDomain) EnableRFCache(ID string) (string, error) {
-
 	storagePoolParam := &types.StoragePoolUseRfCache{}
 
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/enableRfcache", ID)
@@ -129,7 +125,6 @@ func (pd *ProtectionDomain) EnableRFCache(ID string) (string, error) {
 
 // EnableOrDisableZeroPadding Enables / disables zero padding
 func (pd *ProtectionDomain) EnableOrDisableZeroPadding(ID string, zeroPadValue string) error {
-
 	zeroPaddedParam := &types.StoragePoolZeroPadEnabled{
 		ZeroPadEnabled: zeroPadValue,
 	}
@@ -144,7 +139,6 @@ func (pd *ProtectionDomain) EnableOrDisableZeroPadding(ID string, zeroPadValue s
 
 // SetReplicationJournalCapacity Sets replication journal capacity
 func (pd *ProtectionDomain) SetReplicationJournalCapacity(ID string, replicationJournalCapacity string) error {
-
 	replicationJournalCapacityParam := &types.ReplicationJournalCapacityParam{
 		ReplicationJournalCapacityMaxRatio: replicationJournalCapacity,
 	}
@@ -296,7 +290,6 @@ func (pd *ProtectionDomain) Fragmentation(ID string, value bool) error {
 
 // DisableRFCache Disables RFCache
 func (pd *ProtectionDomain) DisableRFCache(ID string) (string, error) {
-
 	payload := &types.StoragePoolUseRfCache{}
 
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/disableRfcache", ID)
@@ -340,8 +333,8 @@ func (pd *ProtectionDomain) DeleteStoragePool(name string) error {
 
 // GetStoragePool returns a storage pool
 func (pd *ProtectionDomain) GetStoragePool(
-	storagepoolhref string) ([]*types.StoragePool, error) {
-
+	storagepoolhref string,
+) ([]*types.StoragePool, error) {
 	var (
 		err error
 		sp  = &types.StoragePool{}
@@ -373,8 +366,8 @@ func (pd *ProtectionDomain) GetStoragePool(
 
 // FindStoragePool returns a storagepool based on id or name
 func (pd *ProtectionDomain) FindStoragePool(
-	id, name, href string) (*types.StoragePool, error) {
-
+	id, name, href string,
+) (*types.StoragePool, error) {
 	sps, err := pd.GetStoragePool(href)
 	if err != nil {
 		return nil, fmt.Errorf("Error getting protection domains %s", err)
@@ -387,12 +380,10 @@ func (pd *ProtectionDomain) FindStoragePool(
 	}
 
 	return nil, errors.New("Couldn't find storage pool")
-
 }
 
 // GetStatistics returns statistics
 func (sp *StoragePool) GetStatistics() (*types.Statistics, error) {
-
 	link, err := GetLink(sp.StoragePool.Links,
 		"/api/StoragePool/relationship/Statistics")
 	if err != nil {
@@ -428,13 +419,13 @@ func (sp *StoragePool) GetSDSStoragePool() ([]types.Sds, error) {
 }
 
 // GetStoragePoolByID returns a Storagepool by ID
-func (sys *System) GetStoragePoolByID(id string) (*types.StoragePool, error) {
+func (s *System) GetStoragePoolByID(id string) (*types.StoragePool, error) {
 	defer TimeSpent("GetStoragePoolByID", time.Now())
 
 	path := fmt.Sprintf("/api/instances/StoragePool::%s", id)
 
 	var storagepool *types.StoragePool
-	err := sys.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &storagepool)
 	if err != nil {
 		return nil, err
@@ -444,12 +435,12 @@ func (sys *System) GetStoragePoolByID(id string) (*types.StoragePool, error) {
 }
 
 // GetAllStoragePools returns all Storage pools on the system
-func (sys *System) GetAllStoragePools() ([]types.StoragePool, error) {
+func (s *System) GetAllStoragePools() ([]types.StoragePool, error) {
 	defer TimeSpent("GetStoragepool", time.Now())
 	path := "/api/types/StoragePool/instances"
 
 	var storagepools []types.StoragePool
-	err := sys.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &storagepools)
 	if err != nil {
 		return nil, err

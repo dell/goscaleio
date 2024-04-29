@@ -30,10 +30,10 @@ func isBinOctetBody(h http.Header) bool {
 }
 
 func logRequest(
-	ctx context.Context,
+	_ context.Context,
 	req *http.Request,
-	lf func(func(args ...interface{}), string)) {
-
+	lf func(func(args ...interface{}), string),
+) {
 	log.SetLevel(log.DebugLevel)
 
 	w := &bytes.Buffer{}
@@ -44,7 +44,6 @@ func logRequest(
 	fmt.Fprintln(w, " -------------------------")
 
 	buf, err := dumpRequest(req, !isBinOctetBody(req.Header))
-
 	if err != nil {
 		return
 	}
@@ -59,10 +58,10 @@ func logRequest(
 }
 
 func logResponse(
-	ctx context.Context,
+	_ context.Context,
 	res *http.Response,
-	lf func(func(args ...interface{}), string)) {
-
+	_ func(func(args ...interface{}), string),
+) {
 	log.SetLevel(log.DebugLevel)
 
 	w := &bytes.Buffer{}

@@ -145,13 +145,11 @@ func (s *System) ApproveSdcByGUID(sdcGUID string) (*types.ApproveSdcByGUIDRespon
 	}
 
 	err := s.client.getJSONWithRetry(http.MethodPost, path, body, &resp)
-
 	if err != nil {
 		return nil, err
 	}
 
 	return &resp, nil
-
 }
 
 // GetStatistics returns a Sdc statistcs
@@ -231,7 +229,8 @@ func GetSdcLocalGUID() (string, error) {
 
 // MapVolumeSdc maps a volume to Sdc
 func (v *Volume) MapVolumeSdc(
-	mapVolumeSdcParam *types.MapVolumeSdcParam) error {
+	mapVolumeSdcParam *types.MapVolumeSdcParam,
+) error {
 	defer TimeSpent("MapVolumeSdc", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Volume::%s/action/addMappedSdc",
@@ -248,7 +247,8 @@ func (v *Volume) MapVolumeSdc(
 
 // UnmapVolumeSdc unmaps a volume from Sdc
 func (v *Volume) UnmapVolumeSdc(
-	unmapVolumeSdcParam *types.UnmapVolumeSdcParam) error {
+	unmapVolumeSdcParam *types.UnmapVolumeSdcParam,
+) error {
 	defer TimeSpent("UnmapVolumeSdc", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Volume::%s/action/removeMappedSdc",
@@ -265,7 +265,8 @@ func (v *Volume) UnmapVolumeSdc(
 
 // SetMappedSdcLimits sets Sdc mapped limits
 func (v *Volume) SetMappedSdcLimits(
-	setMappedSdcLimitsParam *types.SetMappedSdcLimitsParam) error {
+	setMappedSdcLimitsParam *types.SetMappedSdcLimitsParam,
+) error {
 	defer TimeSpent("SetMappedSdcLimits", time.Now())
 
 	path := fmt.Sprintf(

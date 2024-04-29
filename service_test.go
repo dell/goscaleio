@@ -23,7 +23,7 @@ import (
 )
 
 func TestGetAllDeployeService(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -55,13 +55,13 @@ func TestGetDeployeServiceByID(t *testing.T) {
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 	}))
 	defer svr.Close()
 
 	for _, tc := range cases {
 		tc := tc
-		t.Run("", func(ts *testing.T) {
+		t.Run("", func(_ *testing.T) {
 			GC, err := NewGateway(svr.URL, "", "", true, true)
 			if err != nil {
 				t.Fatal(err)
@@ -82,7 +82,7 @@ func TestGetDeployeServiceByID(t *testing.T) {
 }
 
 func TestGetDeployeServiceByFilters(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer svr.Close()
@@ -98,7 +98,7 @@ func TestGetDeployeServiceByFilters(t *testing.T) {
 }
 
 func TestGetDeployeServiceByIDNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
 	}))
@@ -115,7 +115,7 @@ func TestGetDeployeServiceByIDNegative(t *testing.T) {
 }
 
 func TestGetDeployeServiceByFiltersNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
 	}))
@@ -132,7 +132,7 @@ func TestGetDeployeServiceByFiltersNegative(t *testing.T) {
 }
 
 func TestGetAllDeployeServiceNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
 	}))

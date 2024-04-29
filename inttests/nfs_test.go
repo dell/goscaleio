@@ -73,8 +73,8 @@ func TestGetNasByIDNameInvalid(t *testing.T) {
 	nasName, err := system.GetNASByIDName("", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, nasName)
-
 }
+
 func TestCreateDeleteNAS(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
@@ -109,7 +109,6 @@ func TestCreateDeleteNAS(t *testing.T) {
 	// try to delete non-existent NAS Server
 	err = system.DeleteNAS(nasID.ID)
 	assert.NotNil(t, err)
-
 }
 
 func TestGetFileInterfaceById(t *testing.T) {

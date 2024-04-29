@@ -24,12 +24,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	createdVolumes = make([]string, 0)
-)
+var createdVolumes = make([]string, 0)
 
 func getVolByID(id string) (*siotypes.Volume, error) {
-
 	// The `GetVolume` API returns a slice of volumes, but when only passing
 	// in a volume ID, the response will be just the one volume
 	vols, err := C.GetVolume("", strings.TrimSpace(id), "", "", false)
@@ -65,7 +62,7 @@ func createVolume(t *testing.T, useName string) (string, error) {
 	return createResp.ID, nil
 }
 
-func deleteVolume(t *testing.T, volID string) error {
+func deleteVolume(_ *testing.T, volID string) error {
 	existingVol, err := getVolByID(volID)
 	if err != nil {
 		return err
@@ -447,7 +444,6 @@ func TestMapQueryUnmapSnapshot(t *testing.T) {
 	assert.Nil(t, err)
 	err = deleteVolume(t, volID)
 	assert.Nil(t, err)
-
 }
 
 func TestCreateInstanceVolume(t *testing.T) {

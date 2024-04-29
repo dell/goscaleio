@@ -33,7 +33,7 @@ func getAllSdc(t *testing.T) []*goscaleio.Sdc {
 	assert.Nil(t, err)
 	assert.NotZero(t, len(sdc))
 	for _, s := range sdc {
-		outSdc := goscaleio.NewSdc(C, &s)
+		outSdc := goscaleio.NewSdc(C, &s) // #nosec G601
 		allSdc = append(allSdc, outSdc)
 	}
 	return allSdc
@@ -72,7 +72,6 @@ func TestGetSdcByAttribute(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, Sdc[0].Sdc.SdcGUID, found.Sdc.SdcGUID)
-
 }
 
 // TestGetSdcByAttributeInvalid fails to get a single specific Sdc by attribute
@@ -142,7 +141,6 @@ func TestFindSdcVolumes(t *testing.T) {
 
 // TestChangeSdcName function tests Change name functionality of SDC.
 func TestChangeSdcName(t *testing.T) {
-
 	system := getSystem()
 	assert.NotNil(t, system)
 
@@ -161,7 +159,6 @@ func TestChangeSdcName(t *testing.T) {
 
 // TestChangeSdcPerfProfile function tests Change PerfProfile functionality of SDC.
 func TestChangeSdcPerfProfile(t *testing.T) {
-
 	system := getSystem()
 	assert.NotNil(t, system)
 

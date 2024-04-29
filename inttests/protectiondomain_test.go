@@ -164,7 +164,6 @@ func TestCreateDeleteProtectionDomain(t *testing.T) {
 	// delete the pool
 	err = system.DeleteProtectionDomain(domainName)
 	assert.NotNil(t, err)
-
 }
 
 func TestCRUDProtectionDomain(t *testing.T) {
