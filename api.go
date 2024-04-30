@@ -317,7 +317,8 @@ func NewClient() (client *Client, err error) {
 		os.Getenv("GOSCALEIO_VERSION"),
 		math.MaxInt64,
 		os.Getenv("GOSCALEIO_INSECURE") == "true",
-		os.Getenv("GOSCALEIO_USECERTS") == "true")
+		os.Getenv("GOSCALEIO_USECERTS") == "true",
+		strings.Split(os.Getenv("GOSCALEIO_CIPHER_SUITES"), ","))
 }
 
 // ClientConnectTimeout is used for unit testing to set the connection timeout much lower
@@ -330,18 +331,20 @@ func NewClientWithArgs(
 	timeout int64,
 	insecure,
 	useCerts bool,
+	cipherSuites []string,
 ) (client *Client, err error) {
 	if showHTTP {
 		debug = true
 	}
 
 	fields := map[string]interface{}{
-		"endpoint": endpoint,
-		"insecure": insecure,
-		"useCerts": useCerts,
-		"version":  version,
-		"debug":    debug,
-		"showHTTP": showHTTP,
+		"endpoint":     endpoint,
+		"insecure":     insecure,
+		"useCerts":     useCerts,
+		"version":      version,
+		"debug":        debug,
+		"showHTTP":     showHTTP,
+		"cipherSuites": cipherSuites,
 	}
 
 	doLog(log.WithFields(fields).Debug, "goscaleio client init")
@@ -353,10 +356,11 @@ func NewClientWithArgs(
 	}
 
 	opts := api.ClientOptions{
-		Insecure: insecure,
-		UseCerts: useCerts,
-		ShowHTTP: showHTTP,
-		Timeout:  time.Duration(timeout) * time.Second,
+		Insecure:     insecure,
+		UseCerts:     useCerts,
+		ShowHTTP:     showHTTP,
+		Timeout:      time.Duration(timeout) * time.Second,
+		CipherSuites: cipherSuites,
 	}
 
 	if ClientConnectTimeout != 0 {

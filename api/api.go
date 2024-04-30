@@ -131,6 +131,9 @@ type ClientOptions struct {
 	// ShowHTTP is a flag that indicates whether or not HTTP requests and
 	// responses should be logged to stdout
 	ShowHTTP bool
+
+	// CipherSuites
+	CipherSuites []string
 }
 
 // New returns a new API client.
@@ -155,9 +158,40 @@ func New(
 		c.http.Timeout = opts.Timeout
 	}
 
+	// Gather list of all secure and insecure TLS ciphers
+	// and add into tls cipher list for the tls client config
+	secureCipherSuites := tls.CipherSuites()
+	insecureCipherSuites := tls.InsecureCipherSuites()
+
+	var tlsCiphers []uint16
+	for _, userCipher := range opts.CipherSuites {
+		foundCipher := false
+		for _, secureCipher := range secureCipherSuites {
+			if secureCipher.Name == userCipher {
+				foundCipher = true
+				tlsCiphers = append(tlsCiphers, secureCipher.ID)
+				break
+			}
+		}
+
+		// Cipher not found in secure ciphers, further search in insecure ciphers
+		if !foundCipher {
+			for _, insecureCipher := range insecureCipherSuites {
+				if insecureCipher.Name == userCipher {
+					tlsCiphers = append(tlsCiphers, insecureCipher.ID)
+					break
+				}
+			}
+		}
+	}
+
+	// sample cipher log
+	log.Info("computed cipher id", tlsCiphers)
+
 	if opts.Insecure {
 		c.http.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{
+				CipherSuites: tlsCiphers,
 				// #nosec G402
 				InsecureSkipVerify: true, // #nosec G402
 			},
@@ -172,7 +206,8 @@ func New(
 
 		c.http.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{
-				RootCAs: pool,
+				RootCAs:      pool,
+				CipherSuites: tlsCiphers,
 				// #nosec G402
 				InsecureSkipVerify: opts.Insecure,
 			},
