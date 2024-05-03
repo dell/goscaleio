@@ -155,9 +155,16 @@ func New(
 		c.http.Timeout = opts.Timeout
 	}
 
+	var cipherSuites []uint16
+	secureCipherSuites := tls.CipherSuites()
+	for _, secureCipher := range secureCipherSuites {
+		cipherSuites = append(cipherSuites, secureCipher.ID)
+	}
+
 	if opts.Insecure {
 		c.http.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{
+				CipherSuites: cipherSuites,
 				// #nosec G402
 				InsecureSkipVerify: true, // #nosec G402
 			},
@@ -172,7 +179,8 @@ func New(
 
 		c.http.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{
-				RootCAs: pool,
+				RootCAs:      pool,
+				CipherSuites: cipherSuites,
 				// #nosec G402
 				InsecureSkipVerify: opts.Insecure,
 			},
