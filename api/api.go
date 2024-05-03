@@ -157,8 +157,12 @@ func New(
 
 	var cipherSuites []uint16
 	secureCipherSuites := tls.CipherSuites()
+	insecureCipherSuites := tls.InsecureCipherSuites()
 	for _, secureCipher := range secureCipherSuites {
 		cipherSuites = append(cipherSuites, secureCipher.ID)
+	}
+	for _, insecureCipher := range insecureCipherSuites {
+		cipherSuites = append(cipherSuites, insecureCipher.ID)
 	}
 
 	if opts.Insecure {
