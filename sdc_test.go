@@ -413,7 +413,6 @@ func TestApproveSdcbyIP(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestSetApprovedIps(t *testing.T) {
@@ -469,5 +468,4 @@ func TestSetApprovedIps(t *testing.T) {
 			}
 		})
 	}
-
 }
