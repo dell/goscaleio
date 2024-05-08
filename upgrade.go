@@ -17,22 +17,23 @@ import (
 
 	"encoding/json"
 	"fmt"
-	"net/http"
 	types "github.com/dell/goscaleio/types/v1"
+	"net/http"
 )
 
-func (gc *GatewayClient) UploadCompliance(uploadComplianceParam *types.UploadComplianceParam) (*types.UploadComplianceTopologyDetails,error) {
+// UploadCompliance function is used for uploading the compliance file.
+func (gc *GatewayClient) UploadCompliance(uploadComplianceParam *types.UploadComplianceParam) (*types.UploadComplianceTopologyDetails, error) {
 	var uploadResponse types.UploadComplianceTopologyDetails
 	jsonData, err := json.Marshal(uploadComplianceParam)
 	if err != nil {
 		return &uploadResponse, err
-	} 
+	}
 
-	req, httpError := http.NewRequest("POST", gc.host+"/Api/V1/FirmwareRepository",bytes.NewBuffer(jsonData))	
+	req, httpError := http.NewRequest("POST", gc.host+"/Api/V1/FirmwareRepository", bytes.NewBuffer(jsonData))
 	if httpError != nil {
 		return &uploadResponse, httpError
 	}
-	
+
 	req.Header.Set("Authorization", "Bearer "+gc.token)
 	setCookieError := setCookie(req.Header, gc.host)
 	if setCookieError != nil {
@@ -54,7 +55,7 @@ func (gc *GatewayClient) UploadCompliance(uploadComplianceParam *types.UploadCom
 	if httpResp.StatusCode != 201 {
 		//err := json.Unmarshal([]byte(responseString), &uploadResponse)
 		//if err != nil {
-			return &uploadResponse, fmt.Errorf("Error while uploading Compliance File")
+		return &uploadResponse, fmt.Errorf("Error while uploading Compliance File")
 		//}
 		//return &uploadResponse, nil
 	}
@@ -76,14 +77,15 @@ func (gc *GatewayClient) UploadCompliance(uploadComplianceParam *types.UploadCom
 	return &uploadResponse, nil
 }
 
-func (gc *GatewayClient) GetUploadComplianceDetails(id string) (*types.UploadComplianceTopologyDetails,error) {
+// GetUploadComplianceDetails function is used for getting the details of the compliance upload
+func (gc *GatewayClient) GetUploadComplianceDetails(id string) (*types.UploadComplianceTopologyDetails, error) {
 	var getUploadCompResponse types.UploadComplianceTopologyDetails
 
-	req, httpError := http.NewRequest("GET", gc.host+"/Api/V1/FirmwareRepository/"+id, nil)	
+	req, httpError := http.NewRequest("GET", gc.host+"/Api/V1/FirmwareRepository/"+id, nil)
 	if httpError != nil {
 		return &getUploadCompResponse, httpError
 	}
-	
+
 	req.Header.Set("Authorization", "Bearer "+gc.token)
 	setCookieError := setCookie(req.Header, gc.host)
 	if setCookieError != nil {
@@ -105,7 +107,7 @@ func (gc *GatewayClient) GetUploadComplianceDetails(id string) (*types.UploadCom
 	if httpResp.StatusCode != 200 {
 		//err := json.Unmarshal([]byte(responseString), &uploadResponse)
 		//if err != nil {
-			return &getUploadCompResponse, fmt.Errorf("Error while getting Compliance details")
+		return &getUploadCompResponse, fmt.Errorf("Error while getting Compliance details")
 		//}
 		//return &uploadResponse, nil
 	}
@@ -127,15 +129,15 @@ func (gc *GatewayClient) GetUploadComplianceDetails(id string) (*types.UploadCom
 	return &getUploadCompResponse, nil
 }
 
-func (gc *GatewayClient) ApproveUnsignedFile(id string) (error) {
+// ApproveUnsignedFile is used for approving the unsigned file to upload
+func (gc *GatewayClient) ApproveUnsignedFile(id string) error {
 	jsonData := []byte(`{}`)
 
-
-	req, httpError := http.NewRequest("PUT", gc.host+"/Api/V1/FirmwareRepository/"+id+"/allowunsignedfile", bytes.NewBuffer(jsonData))	
+	req, httpError := http.NewRequest("PUT", gc.host+"/Api/V1/FirmwareRepository/"+id+"/allowunsignedfile", bytes.NewBuffer(jsonData))
 	if httpError != nil {
 		return httpError
 	}
-	
+
 	req.Header.Set("Authorization", "Bearer "+gc.token)
 	setCookieError := setCookie(req.Header, gc.host)
 	if setCookieError != nil {
@@ -152,7 +154,7 @@ func (gc *GatewayClient) ApproveUnsignedFile(id string) (error) {
 	if httpResp.StatusCode != 204 {
 		//err := json.Unmarshal([]byte(responseString), &uploadResponse)
 		//if err != nil {
-			return fmt.Errorf("Error while approving the unsigned Compliance file" )
+		return fmt.Errorf("Error while approving the unsigned Compliance file")
 		//}
 		//return &uploadResponse, nil
 	}

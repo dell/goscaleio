@@ -1810,23 +1810,22 @@ type FaultSetRename struct {
 	NewName string `json:"newName"`
 }
 
+// UploadComplianceParam defines struct for uploading the compliance file
 type UploadComplianceParam struct {
-	SourceLocation string `json:sourceLocation`
-	Username       string `json:username,omitempty`
-	Password       string `json:password,omitempty`
+	SourceLocation string `json:"sourceLocation"`
+	Username       string `json:"username,omitempty"`
+	Password       string `json:"password,omitempty"`
 }
 
+// UploadComplianceTopologyDetails defines struct which will hold the details of the compliance file upload
 type UploadComplianceTopologyDetails struct {
-	ID string `json:id`
-	name string `json:name`
-	SourceLocation string `json:sourceLocation`
-	DiskLocation string `json:diskLocation`
-	Filename string `json:filename`
-	Username string `json:username`
-	Password string `json:password`
-	DefaultCatalog bool`json:defaultCatalog`
-	State string `json:state`
-
-
-	
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	SourceLocation string `json:"sourceLocation"`
+	DiskLocation   string `json:"diskLocation"`
+	Filename       string `json:"filename"`
+	Username       string `json:"username"`
+	Password       string `json:"password"`
+	DefaultCatalog bool   `json:"defaultCatalog"`
+	State          string `json:"state"`
 }
