@@ -1809,3 +1809,24 @@ type FaultSet struct {
 type FaultSetRename struct {
 	NewName string `json:"newName"`
 }
+
+type UploadComplianceParam struct {
+	SourceLocation string `json:sourceLocation`
+	Username       string `json:username,omitempty`
+	Password       string `json:password,omitempty`
+}
+
+type UploadComplianceTopologyDetails struct {
+	ID string `json:id`
+	name string `json:name`
+	SourceLocation string `json:sourceLocation`
+	DiskLocation string `json:diskLocation`
+	Filename string `json:filename`
+	Username string `json:username`
+	Password string `json:password`
+	DefaultCatalog bool`json:defaultCatalog`
+	State string `json:state`
+
+
+	
+}
