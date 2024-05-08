@@ -14,11 +14,11 @@ package goscaleio
 
 import (
 	"bytes"
-
 	"encoding/json"
 	"fmt"
-	types "github.com/dell/goscaleio/types/v1"
 	"net/http"
+
+	types "github.com/dell/goscaleio/types/v1"
 )
 
 // UploadCompliance function is used for uploading the compliance file.
@@ -53,11 +53,7 @@ func (gc *GatewayClient) UploadCompliance(uploadComplianceParam *types.UploadCom
 	}
 
 	if httpResp.StatusCode != 201 {
-		//err := json.Unmarshal([]byte(responseString), &uploadResponse)
-		//if err != nil {
 		return &uploadResponse, fmt.Errorf("Error while uploading Compliance File")
-		//}
-		//return &uploadResponse, nil
 	}
 
 	if responseString == "" {
@@ -105,11 +101,7 @@ func (gc *GatewayClient) GetUploadComplianceDetails(id string) (*types.UploadCom
 	}
 
 	if httpResp.StatusCode != 200 {
-		//err := json.Unmarshal([]byte(responseString), &uploadResponse)
-		//if err != nil {
 		return &getUploadCompResponse, fmt.Errorf("Error while getting Compliance details")
-		//}
-		//return &uploadResponse, nil
 	}
 
 	if responseString == "" {
@@ -152,11 +144,7 @@ func (gc *GatewayClient) ApproveUnsignedFile(id string) error {
 	}
 
 	if httpResp.StatusCode != 204 {
-		//err := json.Unmarshal([]byte(responseString), &uploadResponse)
-		//if err != nil {
 		return fmt.Errorf("Error while approving the unsigned Compliance file")
-		//}
-		//return &uploadResponse, nil
 	}
 
 	err3 := storeCookie(httpResp.Header, gc.host)
