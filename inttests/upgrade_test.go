@@ -1,6 +1,7 @@
 package inttests
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -10,8 +11,12 @@ import (
 
 // TestDeployUploadPackage function to test upload packge with dummy path of packages
 func TestUploadCompliance(t *testing.T) {
+	var sourceLocation string
+	if os.Getenv("GOSCALEIO_COMPLIANCE_ENDPOINT") != "" {
+		sourceLocation = os.Getenv("GOSCALEIO_COMPLIANCE_ENDPOINT")
+	}
 	ucParam := &types.UploadComplianceParam{
-		SourceLocation: "https://100.65.27.72/artifactory/vxfm-yum-release/pfmp20/RCM/Denver/RCMs/SoftwareOnly/PowerFlex_Software_4.5.0.0_287_r1.zip",
+		SourceLocation: sourceLocation,
 	}
 	details, err := GC.UploadCompliance(ucParam)
 	assert.Nil(t, err)
@@ -25,6 +30,10 @@ func TestUploadCompliance(t *testing.T) {
 }
 
 func TestApproveUnsignedFile(t *testing.T) {
-	err := GC.ApproveUnsignedFile("8aaa3fd38f4c78eb018f4dad3781001d")
+	var unsigned string
+	if os.Getenv("GOSCALEIO_UNSIGNED_COMPLIANCE_FILE_ID") != "" {
+		unsigned = os.Getenv("GOSCALEIO_UNSIGNED_COMPLIANCE_FILE_ID")
+	}
+	err := GC.ApproveUnsignedFile(unsigned)
 	assert.Nil(t, err)
 }
