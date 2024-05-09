@@ -52,7 +52,7 @@ func (gc *GatewayClient) UploadCompliance(uploadComplianceParam *types.UploadCom
 		return &uploadResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
-	if httpResp.StatusCode != 201 {
+	if httpResp.StatusCode != http.StatusCreated {
 		return &uploadResponse, fmt.Errorf("Error while uploading Compliance File")
 	}
 
@@ -100,7 +100,7 @@ func (gc *GatewayClient) GetUploadComplianceDetails(id string) (*types.UploadCom
 		return &getUploadCompResponse, fmt.Errorf("Error Extracting Response: %s", err)
 	}
 
-	if httpResp.StatusCode != 200 {
+	if httpResp.StatusCode != http.StatusOK {
 		return &getUploadCompResponse, fmt.Errorf("Error while getting Compliance details")
 	}
 
@@ -143,7 +143,7 @@ func (gc *GatewayClient) ApproveUnsignedFile(id string) error {
 		return httpRespError
 	}
 
-	if httpResp.StatusCode != 204 {
+	if httpResp.StatusCode != http.StatusNoContent {
 		return fmt.Errorf("Error while approving the unsigned Compliance file")
 	}
 
