@@ -1,4 +1,4 @@
-// Copyright © 2020 - 2022 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2020 - 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -300,6 +300,171 @@ func TestApproveSdc(t *testing.T) {
 			resp, err := s.ApproveSdcByGUID(testCaseGuids[name])
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
+			}
+		})
+	}
+}
+
+func TestSetRestrictedMode(t *testing.T) {
+	type testCase struct {
+		mode     string
+		expected error
+	}
+
+	system := types.System{
+		ID:                       "0000aaabbbccc1111",
+		RestrictedSdcModeEnabled: true,
+		RestrictedSdcMode:        "Guid",
+	}
+
+	cases := []testCase{
+		{
+			mode:     "Guid",
+			expected: nil,
+		},
+		{
+			mode:     "random",
+			expected: errors.New("restrictedSdcMode should get one of the following values: None, Guid, ApprovedIp, but its value is random"),
+		},
+	}
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	}))
+	defer svr.Close()
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(_ *testing.T) {
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+				System: &system,
+			}
+
+			err2 := s.SetRestrictedMode(tc.mode)
+			if err2 != nil {
+				if tc.expected == nil {
+					t.Errorf("Modifying restricted mode did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
+				} else {
+					if err2.Error() != tc.expected.Error() {
+						t.Errorf("Modifying restricted mode did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestApproveSdcbyIP(t *testing.T) {
+	type testCase struct {
+		param    types.ApproveSdcParam
+		expected error
+	}
+
+	system := types.System{
+		ID:                       "0000aaabbbccc1111",
+		RestrictedSdcModeEnabled: true,
+		RestrictedSdcMode:        "Guid",
+	}
+
+	cases := []testCase{
+		{
+			param: types.ApproveSdcParam{
+				SdcIP: "10.10.10.10",
+			},
+			expected: nil,
+		},
+		{
+			param: types.ApproveSdcParam{
+				Name: "sdc_test",
+			},
+			expected: errors.New("Request message is not valid: One of the parameter(s) must be part of the request body: sdcIp, sdcIps, sdcGuid"),
+		},
+	}
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	}))
+	defer svr.Close()
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(_ *testing.T) {
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+				System: &system,
+			}
+
+			_, err2 := s.ApproveSdc(&tc.param)
+			if err2 != nil {
+				if tc.expected == nil {
+					t.Errorf("Approving SDC did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
+				} else {
+					if err2.Error() != tc.expected.Error() {
+						t.Errorf("Approving SDC did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestSetApprovedIps(t *testing.T) {
+	type testCase struct {
+		SdcID    string
+		SdcIps   []string
+		expected error
+	}
+
+	system := types.System{
+		ID:                       "0000aaabbbccc1111",
+		RestrictedSdcModeEnabled: true,
+		RestrictedSdcMode:        "Guid",
+	}
+
+	cases := []testCase{
+		{
+			SdcID:    "5e662b1700000000",
+			SdcIps:   []string{"10.10.10.10"},
+			expected: nil,
+		},
+		{
+			SdcIps:   []string{"10.10.10.10"},
+			expected: errors.New("Request message is not valid: The following parameter(s) must be part of the request body: sdcId"),
+		},
+	}
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	}))
+	defer svr.Close()
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(_ *testing.T) {
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+				System: &system,
+			}
+
+			err2 := s.SetApprovedIps(tc.SdcID, tc.SdcIps)
+			if err2 != nil {
+				if tc.expected == nil {
+					t.Errorf("Approving SDC IPs did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
+				} else {
+					if err2.Error() != tc.expected.Error() {
+						t.Errorf("Approving SDC IPs did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
+					}
+				}
 			}
 		})
 	}
