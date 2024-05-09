@@ -48,7 +48,6 @@ func TestGetTemplateByID(t *testing.T) {
 	templateID := "453c41eb-d72a-4ed1-ad16-bacdffbdd766"
 
 	templateResponse, err := gc.GetTemplateByID(templateID)
-
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -56,7 +55,6 @@ func TestGetTemplateByID(t *testing.T) {
 	if templateResponse == nil {
 		t.Error("Template response is nil")
 	}
-
 }
 
 func TestGetTemplateByFilters(t *testing.T) {
