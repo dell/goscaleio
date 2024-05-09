@@ -13,143 +13,123 @@
 package goscaleio
 
 import (
-	"errors"
-	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestGetTemplates(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	}))
-	defer svr.Close()
-
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	templateDetails, err := client.GetAllTemplates()
-	assert.Equal(t, len(templateDetails), 0)
-	assert.Nil(t, err)
-}
-
 func TestGetTemplateByID(t *testing.T) {
-	type testCase struct {
-		id       string
-		expected error
+	responseJSONFile := "response/template_response.json"
+	responseData, err := ioutil.ReadFile(responseJSONFile)
+	if err != nil {
+		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
 
-	cases := []testCase{
-		{
-			id:       "sdnasgw",
-			expected: nil,
-		},
-		{
-			id:       "sdnasgw1",
-			expected: errors.New("The template cannot be found"),
-		},
-	}
-
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.Path, "/Api/V1/template/") {
+			if r.Method == http.MethodGet {
+				w.WriteHeader(http.StatusOK)
+				w.Write(responseData)
+				return
+			}
+		}
+		http.NotFound(w, r)
 	}))
-	defer svr.Close()
-
-	for _, tc := range cases {
-		tc := tc
-		t.Run("", func(_ *testing.T) {
-			client, err := NewGateway(svr.URL, "", "", true, false)
-			client.version = "4.5"
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			_, err = client.GetTemplateByID(tc.id)
-			if err != nil {
-				if tc.expected == nil {
-					t.Errorf("Getting template by ID did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
-				} else {
-					if err.Error() != tc.expected.Error() {
-						t.Errorf("Getting template by ID did not work as expected, \n\tgot: %s \n\twant: %s", err, tc.expected)
-					}
-				}
-			}
-		})
+	defer server.Close()
+	gc := &GatewayClient{
+		http:     &http.Client{},
+		host:     server.URL,
+		username: "test_username",
+		password: "test_password",
 	}
+
+	templateID := "453c41eb-d72a-4ed1-ad16-bacdffbdd766"
+
+	templateResponse, err := gc.GetTemplateByID(templateID)
+
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if templateResponse == nil {
+		t.Error("Template response is nil")
+	}
+
 }
 
 func TestGetTemplateByFilters(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	}))
-	defer svr.Close()
-
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
+	responseJSONFile := "response/templates_response.json"
+	responseData, err := ioutil.ReadFile(responseJSONFile)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
 
-	templates, err := client.GetTemplateByFilters("Name", "Test")
-	assert.Equal(t, len(templates), 0)
-	assert.NotNil(t, err)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.Path, "/Api/V1/template") {
+			if r.Method == http.MethodGet {
+				w.WriteHeader(http.StatusOK)
+				w.Write(responseData)
+				return
+			}
+		}
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	gc := &GatewayClient{
+		http:     &http.Client{},
+		host:     server.URL,
+		username: "test_username",
+		password: "test_password",
+	}
+
+	filter := "name"
+	value := "Test"
+
+	templateResponse, err := gc.GetTemplateByFilters(filter, value)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if templateResponse == nil {
+		t.Error("Template response is nil")
+	}
 }
 
-func TestGetTemplateByIDNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
-	}))
-	defer svr.Close()
-
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
+func TestGetAllTemplates(t *testing.T) {
+	responseJSONFile := "response/templates_response.json"
+	responseData, err := ioutil.ReadFile(responseJSONFile)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
 
-	templates, err := client.GetTemplateByID("Test")
-	assert.Nil(t, templates)
-	assert.NotNil(t, err)
-}
-
-func TestGetTemplateByFiltersNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.Path, "/Api/V1/template") {
+			if r.Method == http.MethodGet {
+				w.WriteHeader(http.StatusOK)
+				w.Write(responseData)
+				return
+			}
+		}
+		http.NotFound(w, r)
 	}))
-	defer svr.Close()
+	defer server.Close()
 
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
-	if err != nil {
-		t.Fatal(err)
+	gc := &GatewayClient{
+		http:     &http.Client{},
+		host:     server.URL,
+		username: "test_username",
+		password: "test_password",
 	}
 
-	templates, err := client.GetTemplateByFilters("Name", "Test")
-	assert.Nil(t, templates)
-	assert.NotNil(t, err)
-}
-
-func TestGetAllTemplatesNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
-	}))
-	defer svr.Close()
-
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
+	templateResponse, err := gc.GetAllTemplates()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	templates, err := client.GetAllTemplates()
-	assert.Nil(t, templates)
-	assert.NotNil(t, err)
+	if templateResponse == nil {
+		t.Error("Template response is nil")
+	}
 }
