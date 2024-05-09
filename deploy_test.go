@@ -22,9 +22,7 @@ import (
 
 // TestNewGateway tests the NewGateway function.
 func TestNewGateway(t *testing.T) {
-
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		if r.Method == "POST" && r.URL.Path == "/rest/auth/login" {
 
 			w.Header().Set("Content-Type", "application/json")
@@ -249,7 +247,6 @@ func TestDeletePackage(t *testing.T) {
 }
 
 func TestBeginInstallation(t *testing.T) {
-
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" && strings.HasPrefix(r.URL.Path, "/im/types/Configuration/actions/install") {
 			w.WriteHeader(http.StatusAccepted)
@@ -414,7 +411,6 @@ func TestMoveToIdlePhase(t *testing.T) {
 }
 
 func TestCheckForCompletionQueueCommands(t *testing.T) {
-
 	responseJSON := `{
 		"MDM Commands": []
 	}`
