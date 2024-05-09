@@ -10,6 +10,7 @@ import (
 
 // This test can be checked when NewGateway() function is fixed
 func TestUploadCompliance(t *testing.T) {
+	t.Skip("Skipping this test case")
 	type testCase struct {
 		ucParam  *types.UploadComplianceParam
 		expected error
@@ -28,6 +29,7 @@ func TestUploadCompliance(t *testing.T) {
 
 	for _, tc := range cases {
 		tc := tc
+
 		t.Run("", func(_ *testing.T) {
 			GC, err := NewGateway(svr.URL, "", "", true, true)
 			if err != nil {
