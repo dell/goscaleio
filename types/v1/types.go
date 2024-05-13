@@ -465,18 +465,19 @@ type ProtectionDomainResp struct {
 
 // Sdc defines struct for PowerFlex Sdc
 type Sdc struct {
-	SystemID           string   `json:"systemId"`
-	SdcApproved        bool     `json:"sdcApproved"`
-	SdcIP              string   `json:"SdcIp"`
-	SdcIPs             []string `json:"SdcIps"`
-	OnVMWare           bool     `json:"onVmWare"`
-	SdcGUID            string   `json:"sdcGuid"`
-	MdmConnectionState string   `json:"mdmConnectionState"`
-	Name               string   `json:"name"`
-	PerfProfile        string   `json:"perfProfile"`
-	OSType             string   `json:"osType"`
-	ID                 string   `json:"id"`
-	Links              []*Link  `json:"links"`
+	SystemID           string    `json:"systemId"`
+	SdcApproved        bool      `json:"sdcApproved"`
+	SdcIP              string    `json:"SdcIp"`
+	SdcIPs             []string  `json:"SdcIps"`
+	OnVMWare           bool      `json:"onVmWare"`
+	SdcGUID            string    `json:"sdcGuid"`
+	MdmConnectionState string    `json:"mdmConnectionState"`
+	Name               string    `json:"name"`
+	PerfProfile        string    `json:"perfProfile"`
+	OSType             string    `json:"osType"`
+	ID                 string    `json:"id"`
+	Links              []*Link   `json:"links"`
+	SdcApprovedIPs     []string  `json:"sdcApprovedIps"`
 }
 
 // SdsIP defines struct for SdsIP
