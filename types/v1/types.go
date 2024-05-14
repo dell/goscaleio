@@ -477,6 +477,7 @@ type Sdc struct {
 	OSType             string   `json:"osType"`
 	ID                 string   `json:"id"`
 	Links              []*Link  `json:"links"`
+	SdcApprovedIPs     []string `json:"sdcApprovedIps"`
 }
 
 // SdsIP defines struct for SdsIP
