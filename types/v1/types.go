@@ -155,6 +155,17 @@ type StandByMdm struct {
 	AllowAsymmetricIps string   `json:"allowAsymmetricIps,omitempty"`
 }
 
+// SetRestrictedMode defines struct for setting restricted mode
+type SetRestrictedMode struct {
+	RestrictedSdcMode string `json:"restrictedSdcMode"`
+}
+
+// SetApprovedIps defines struct for setting approved ips
+type SetApprovedIps struct {
+	SdcID          string   `json:"sdcId"`
+	SdcApprovedIps []string `json:"sdcApprovedIps"`
+}
+
 // RemoveStandByMdmParam defines struct for removing standby MDM
 type RemoveStandByMdmParam struct {
 	ID string `json:"id"`
@@ -436,7 +447,10 @@ type ChangeSdcPerfProfile struct {
 
 // ApproveSdcParam defines struct for ApproveSdcParam
 type ApproveSdcParam struct {
-	SdcGUID string `json:"sdcGuid"`
+	SdcGUID string   `json:"sdcGuid,,omitempty"`
+	SdcIP   string   `json:"sdcIp,omitempty"`
+	SdcIps  []string `json:"sdcIps,omitempty"`
+	Name    string   `json:"name,omitempty"`
 }
 
 // ApproveSdcByGUIDResponse defines struct for ApproveSdcByGUIDResponse
@@ -463,6 +477,7 @@ type Sdc struct {
 	OSType             string   `json:"osType"`
 	ID                 string   `json:"id"`
 	Links              []*Link  `json:"links"`
+	SdcApprovedIPs     []string `json:"sdcApprovedIps"`
 }
 
 // SdsIP defines struct for SdsIP
@@ -1808,4 +1823,24 @@ type FaultSet struct {
 // FaultSetRename defines struct for renaming the fault set
 type FaultSetRename struct {
 	NewName string `json:"newName"`
+}
+
+// UploadComplianceParam defines struct for uploading the compliance file
+type UploadComplianceParam struct {
+	SourceLocation string `json:"sourceLocation"`
+	Username       string `json:"username,omitempty"`
+	Password       string `json:"password,omitempty"`
+}
+
+// UploadComplianceTopologyDetails defines struct which will hold the details of the compliance file upload
+type UploadComplianceTopologyDetails struct {
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	SourceLocation string `json:"sourceLocation"`
+	DiskLocation   string `json:"diskLocation"`
+	Filename       string `json:"filename"`
+	Username       string `json:"username"`
+	Password       string `json:"password"`
+	DefaultCatalog bool   `json:"defaultCatalog"`
+	State          string `json:"state"`
 }
