@@ -284,3 +284,18 @@ func (c *Client) GetSnapshotPolicy(
 	sps = append(sps, sp)
 	return sps, nil
 }
+
+// GetStoragePoolVolumes returns list of volumes connected to storage pool Storagepool by ID
+func (c *Client) GetStoragePoolVolumes(id string) ([]*types.Volume, error) {
+	defer TimeSpent("GetStoragePoolByID", time.Now())
+
+	path := fmt.Sprintf("/api/instances/StoragePool::%s/relationships/Volume", id)
+	var storagepoolVolumes []*types.Volume
+	err := c.getJSONWithRetry(
+		http.MethodGet, path, nil, &storagepoolVolumes)
+	if err != nil {
+		return nil, err
+	}
+
+	return storagepoolVolumes, err
+}

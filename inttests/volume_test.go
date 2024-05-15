@@ -779,3 +779,29 @@ func TestSetCompressionMethod(t *testing.T) {
 	err = deleteVolume(t, volID)
 	assert.Nil(t, err)
 }
+
+func TestGetStoragePoolVolumes(t *testing.T) {
+	name := fmt.Sprintf("%s-%s", testPrefix, "instanceCreated")
+
+	poolName := getStoragePoolName(t)
+	assert.NotNil(t, poolName)
+
+	pool := getStoragePool(t)
+	size := fmt.Sprintf("%d", defaultVolumeSize)
+
+	volParams := siotypes.VolumeParam{
+		VolumeSizeInKb: size,
+		VolumeType:     "ThinProvisioned",
+		Name:           name,
+	}
+
+	volResp, err := C.CreateVolume(&volParams, poolName, "")
+	assert.Nil(t, err)
+	assert.NotNil(t, volResp)
+
+	volumes, err := C.GetStoragePoolVolumes(pool.StoragePool.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, volumes)
+
+	deleteVolume(t, volResp.ID)
+}
