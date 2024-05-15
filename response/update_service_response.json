@@ -1105,17 +1105,17 @@
                     "valid": true,
                     "messages": []
                 },
-                "puppetCertName": "sles-10.247.103.160",
-                "osPuppetCertName": "sles-10.247.103.160",
+                "puppetCertName": "sles-10.10.10.6",
+                "osPuppetCertName": "sles-10.10.10.6",
                 "name": "pfmc-k8s-20230809-160-1",
                 "type": "SERVER",
                 "subType": null,
                 "teardown": false,
                 "helpText": null,
-                "managementIpAddress": "10.247.103.160",
+                "managementIpAddress": "10.10.10.6",
                 "configFile": null,
                 "serialNumber": null,
-                "asmGUID": "softwareOnlyServer-10.247.103.160",
+                "asmGUID": "softwareOnlyServer-10.10.10.6",
                 "relatedComponents": {
                     "0d52b1ad-fd82-45d0-8b0b-f4bfe5f2cb11": "PowerFlex Cluster"
                 },
@@ -1829,7 +1829,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fab03b8",
                                 "id": "scaleio_inventory_mdm_management_ips",
-                                "value": "10.247.103.160",
+                                "value": "10.10.10.6",
                                 "type": "STRING",
                                 "displayName": "PowerFlex Inventory MDM Management IP Addresses",
                                 "required": true,
@@ -2318,7 +2318,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fae03e0",
                                 "id": "title",
-                                "value": "sles-10.247.103.160",
+                                "value": "sles-10.10.10.6",
                                 "type": "STRING",
                                 "displayName": null,
                                 "required": false,
@@ -2476,7 +2476,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fae03d8",
                                 "id": "static_ip_value:PFlexManagement",
-                                "value": "10.247.103.160",
+                                "value": "10.10.10.6",
                                 "type": "STRING",
                                 "displayName": "PFlexManagement IP Address",
                                 "required": true,
@@ -2832,7 +2832,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12faf03eb",
                                 "id": "title",
-                                "value": "sles-10.247.103.160",
+                                "value": "sles-10.10.10.6",
                                 "type": "STRING",
                                 "displayName": null,
                                 "required": false,
@@ -2874,7 +2874,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12faf03ed",
                                 "id": "software_network_configuration",
-                                "value": "{\"id\":\"2c4c68b4-8e0b-4f34-bc32-e76c46fb29cd\",\"interfaces\":[{\"id\":\"b89b43b6-09e8-435d-a141-1e3a2f82ffa7\",\"name\":\"Interface 1\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"3f53bc68-c0d2-4e11-a679-f6e350cb8a79\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"257002da-ab12-4a45-99a4-8039ec911695\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018ccf1aae270000\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018ccf1aae270000\",\"ipAddress\":\"10.247.103.160\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"},{\"id\":\"420d29e5-ae05-4300-a121-4ebd62812b4b\",\"name\":\"Interface 2\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"a4c8f222-3529-428c-a408-41164f467a15\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"b6fa332b-d7bf-44f1-b17d-3c8bfd897fc8\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018cd3defc590004\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018cd3defc590004\",\"ipAddress\":\"10.247.39.124\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"}],\"isSoftwareOnly\":true}",
+                                "value": "{\"id\":\"2c4c68b4-8e0b-4f34-bc32-e76c46fb29cd\",\"interfaces\":[{\"id\":\"b89b43b6-09e8-435d-a141-1e3a2f82ffa7\",\"name\":\"Interface 1\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"3f53bc68-c0d2-4e11-a679-f6e350cb8a79\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"257002da-ab12-4a45-99a4-8039ec911695\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018ccf1aae270000\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018ccf1aae270000\",\"ipAddress\":\"10.10.10.6\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"},{\"id\":\"420d29e5-ae05-4300-a121-4ebd62812b4b\",\"name\":\"Interface 2\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"a4c8f222-3529-428c-a408-41164f467a15\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"b6fa332b-d7bf-44f1-b17d-3c8bfd897fc8\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018cd3defc590004\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018cd3defc590004\",\"ipAddress\":\"10.247.39.124\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"}],\"isSoftwareOnly\":true}",
                                 "type": "SOFTWARENETWORKCONFIGURATION",
                                 "displayName": "Network Config",
                                 "required": false,
@@ -2912,7 +2912,7 @@
                                                             "networkIpAddressList": [
                                                                 {
                                                                     "id": "8aaaee038c939c14018ccf1aae270000",
-                                                                    "ipAddress": "10.247.103.160"
+                                                                    "ipAddress": "10.10.10.6"
                                                                 }
                                                             ],
                                                             "networkObjects": null,
@@ -3197,7 +3197,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fb003f4",
                                 "id": "title",
-                                "value": "sles-10.247.103.160",
+                                "value": "sles-10.10.10.6",
                                 "type": "STRING",
                                 "displayName": null,
                                 "required": false,
@@ -3274,7 +3274,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fb103f7",
                                 "id": "title",
-                                "value": "sles-10.247.103.160",
+                                "value": "sles-10.10.10.6",
                                 "type": "STRING",
                                 "displayName": null,
                                 "required": false,
@@ -3326,17 +3326,17 @@
                     "valid": true,
                     "messages": []
                 },
-                "puppetCertName": "sles-10.247.103.161",
-                "osPuppetCertName": "sles-10.247.103.161",
+                "puppetCertName": "sles-10.10.10.7",
+                "osPuppetCertName": "sles-10.10.10.7",
                 "name": "pfmc-k8s-20230809-160",
                 "type": "SERVER",
                 "subType": null,
                 "teardown": false,
                 "helpText": null,
-                "managementIpAddress": "10.247.103.161",
+                "managementIpAddress": "10.10.10.7",
                 "configFile": null,
                 "serialNumber": null,
-                "asmGUID": "softwareOnlyServer-10.247.103.161",
+                "asmGUID": "softwareOnlyServer-10.10.10.7",
                 "relatedComponents": {
                     "0d52b1ad-fd82-45d0-8b0b-f4bfe5f2cb11": "PowerFlex Cluster"
                 },
@@ -4050,7 +4050,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fb70420",
                                 "id": "scaleio_inventory_mdm_management_ips",
-                                "value": "10.247.103.161",
+                                "value": "10.10.10.7",
                                 "type": "STRING",
                                 "displayName": "PowerFlex Inventory MDM Management IP Addresses",
                                 "required": true,
@@ -4539,7 +4539,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fba0448",
                                 "id": "title",
-                                "value": "sles-10.247.103.161",
+                                "value": "sles-10.10.10.7",
                                 "type": "STRING",
                                 "displayName": null,
                                 "required": false,
@@ -4697,7 +4697,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fb90440",
                                 "id": "static_ip_value:PFlexManagement",
-                                "value": "10.247.103.161",
+                                "value": "10.10.10.7",
                                 "type": "STRING",
                                 "displayName": "PFlexManagement IP Address",
                                 "required": true,
@@ -5053,7 +5053,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fbb0453",
                                 "id": "title",
-                                "value": "sles-10.247.103.161",
+                                "value": "sles-10.10.10.7",
                                 "type": "STRING",
                                 "displayName": null,
                                 "required": false,
@@ -5095,7 +5095,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fbb0455",
                                 "id": "software_network_configuration",
-                                "value": "{\"id\":\"2c4c68b4-8e0b-4f34-bc32-e76c46fb29cd\",\"interfaces\":[{\"id\":\"b89b43b6-09e8-435d-a141-1e3a2f82ffa7\",\"name\":\"Interface 1\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"3f53bc68-c0d2-4e11-a679-f6e350cb8a79\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"257002da-ab12-4a45-99a4-8039ec911695\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018ccf1aae270000\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018ccf1aae270000\",\"ipAddress\":\"10.247.103.161\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"},{\"id\":\"420d29e5-ae05-4300-a121-4ebd62812b4b\",\"name\":\"Interface 2\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"a4c8f222-3529-428c-a408-41164f467a15\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"b6fa332b-d7bf-44f1-b17d-3c8bfd897fc8\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018cd3defc590004\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018cd3defc590004\",\"ipAddress\":\"10.247.39.122\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"}],\"isSoftwareOnly\":true}",
+                                "value": "{\"id\":\"2c4c68b4-8e0b-4f34-bc32-e76c46fb29cd\",\"interfaces\":[{\"id\":\"b89b43b6-09e8-435d-a141-1e3a2f82ffa7\",\"name\":\"Interface 1\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"3f53bc68-c0d2-4e11-a679-f6e350cb8a79\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"257002da-ab12-4a45-99a4-8039ec911695\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018ccf1aae270000\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018ccf1aae270000\",\"ipAddress\":\"10.10.10.7\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"},{\"id\":\"420d29e5-ae05-4300-a121-4ebd62812b4b\",\"name\":\"Interface 2\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"a4c8f222-3529-428c-a408-41164f467a15\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"b6fa332b-d7bf-44f1-b17d-3c8bfd897fc8\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018cd3defc590004\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018cd3defc590004\",\"ipAddress\":\"10.247.39.122\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"}],\"isSoftwareOnly\":true}",
                                 "type": "SOFTWARENETWORKCONFIGURATION",
                                 "displayName": "Network Config",
                                 "required": false,
@@ -5133,7 +5133,7 @@
                                                             "networkIpAddressList": [
                                                                 {
                                                                     "id": "8aaaee038c939c14018ccf1aae270000",
-                                                                    "ipAddress": "10.247.103.161"
+                                                                    "ipAddress": "10.10.10.7"
                                                                 }
                                                             ],
                                                             "networkObjects": null,
@@ -5418,7 +5418,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fbb045c",
                                 "id": "title",
-                                "value": "sles-10.247.103.161",
+                                "value": "sles-10.10.10.7",
                                 "type": "STRING",
                                 "displayName": null,
                                 "required": false,
@@ -5495,7 +5495,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fbc045f",
                                 "id": "title",
-                                "value": "sles-10.247.103.161",
+                                "value": "sles-10.10.10.7",
                                 "type": "STRING",
                                 "displayName": null,
                                 "required": false,
@@ -5547,17 +5547,17 @@
                     "valid": true,
                     "messages": []
                 },
-                "puppetCertName": "sles-10.247.103.162",
-                "osPuppetCertName": "sles-10.247.103.162",
+                "puppetCertName": "sles-10.10.10.8",
+                "osPuppetCertName": "sles-10.10.10.8",
                 "name": "pfmc-k8s-20230809-162",
                 "type": "SERVER",
                 "subType": null,
                 "teardown": false,
                 "helpText": null,
-                "managementIpAddress": "10.247.103.162",
+                "managementIpAddress": "10.10.10.8",
                 "configFile": null,
                 "serialNumber": null,
-                "asmGUID": "softwareOnlyServer-10.247.103.162",
+                "asmGUID": "softwareOnlyServer-10.10.10.8",
                 "relatedComponents": {
                     "0d52b1ad-fd82-45d0-8b0b-f4bfe5f2cb11": "PowerFlex Cluster"
                 },
@@ -6271,7 +6271,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fc00488",
                                 "id": "scaleio_inventory_mdm_management_ips",
-                                "value": "10.247.103.162",
+                                "value": "10.10.10.8",
                                 "type": "STRING",
                                 "displayName": "PowerFlex Inventory MDM Management IP Addresses",
                                 "required": true,
@@ -6760,7 +6760,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fc304b0",
                                 "id": "title",
-                                "value": "sles-10.247.103.162",
+                                "value": "sles-10.10.10.8",
                                 "type": "STRING",
                                 "displayName": null,
                                 "required": false,
@@ -6918,7 +6918,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fc304a8",
                                 "id": "static_ip_value:PFlexManagement",
-                                "value": "10.247.103.162",
+                                "value": "10.10.10.8",
                                 "type": "STRING",
                                 "displayName": "PFlexManagement IP Address",
                                 "required": true,
@@ -7274,7 +7274,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fc404bb",
                                 "id": "title",
-                                "value": "sles-10.247.103.162",
+                                "value": "sles-10.10.10.8",
                                 "type": "STRING",
                                 "displayName": null,
                                 "required": false,
@@ -7316,7 +7316,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fc404bd",
                                 "id": "software_network_configuration",
-                                "value": "{\"id\":\"2c4c68b4-8e0b-4f34-bc32-e76c46fb29cd\",\"interfaces\":[{\"id\":\"b89b43b6-09e8-435d-a141-1e3a2f82ffa7\",\"name\":\"Interface 1\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"3f53bc68-c0d2-4e11-a679-f6e350cb8a79\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"257002da-ab12-4a45-99a4-8039ec911695\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018ccf1aae270000\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018ccf1aae270000\",\"ipAddress\":\"10.247.103.162\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"},{\"id\":\"420d29e5-ae05-4300-a121-4ebd62812b4b\",\"name\":\"Interface 2\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"a4c8f222-3529-428c-a408-41164f467a15\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"b6fa332b-d7bf-44f1-b17d-3c8bfd897fc8\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018cd3defc590004\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018cd3defc590004\",\"ipAddress\":\"10.247.39.130\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"}],\"isSoftwareOnly\":true}",
+                                "value": "{\"id\":\"2c4c68b4-8e0b-4f34-bc32-e76c46fb29cd\",\"interfaces\":[{\"id\":\"b89b43b6-09e8-435d-a141-1e3a2f82ffa7\",\"name\":\"Interface 1\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"3f53bc68-c0d2-4e11-a679-f6e350cb8a79\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"257002da-ab12-4a45-99a4-8039ec911695\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018ccf1aae270000\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018ccf1aae270000\",\"ipAddress\":\"10.10.10.8\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"},{\"id\":\"420d29e5-ae05-4300-a121-4ebd62812b4b\",\"name\":\"Interface 2\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"a4c8f222-3529-428c-a408-41164f467a15\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"b6fa332b-d7bf-44f1-b17d-3c8bfd897fc8\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018cd3defc590004\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018cd3defc590004\",\"ipAddress\":\"10.247.39.130\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"}],\"isSoftwareOnly\":true}",
                                 "type": "SOFTWARENETWORKCONFIGURATION",
                                 "displayName": "Network Config",
                                 "required": false,
@@ -7354,7 +7354,7 @@
                                                             "networkIpAddressList": [
                                                                 {
                                                                     "id": "8aaaee038c939c14018ccf1aae270000",
-                                                                    "ipAddress": "10.247.103.162"
+                                                                    "ipAddress": "10.10.10.8"
                                                                 }
                                                             ],
                                                             "networkObjects": null,
@@ -7639,7 +7639,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fc504c4",
                                 "id": "title",
-                                "value": "sles-10.247.103.162",
+                                "value": "sles-10.10.10.8",
                                 "type": "STRING",
                                 "displayName": null,
                                 "required": false,
@@ -7716,7 +7716,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fc504c7",
                                 "id": "title",
-                                "value": "sles-10.247.103.162",
+                                "value": "sles-10.10.10.8",
                                 "type": "STRING",
                                 "displayName": null,
                                 "required": false,
@@ -7820,8 +7820,8 @@
                     "ipRange": [
                         {
                             "id": "8aaaee328cfd27d1018d59effa9c0a41",
-                            "startingIp": "10.247.103.140",
-                            "endingIp": "10.247.103.167",
+                            "startingIp": "10.10.10.14",
+                            "endingIp": "10.10.10.9",
                             "role": null
                         }
                     ],
@@ -7842,7 +7842,7 @@
     "compliant": true,
     "deploymentDevice": [
         {
-            "refId": "softwareOnlyServer-10.247.103.160",
+            "refId": "softwareOnlyServer-10.10.10.6",
             "refType": "SERVER",
             "logDump": null,
             "status": "complete",
@@ -7854,8 +7854,8 @@
             "brownfieldStatus": "NOT_APPLICABLE",
             "deviceType": "SoftwareOnlyServer",
             "deviceGroupName": "Global",
-            "ipAddress": "10.247.103.160",
-            "currentIpAddress": "10.247.103.160",
+            "ipAddress": "10.10.10.6",
+            "currentIpAddress": "10.10.10.6",
             "serviceTag": "VMware-42 05 91 07 5e 68 df 65-fa ed cf 0b b4 9c 21 c3-SW",
             "componentId": "65908332-807b-4a70-9236-c19b857e73d4",
             "statusMessage": "The preprocessing for component pfmc-k8s-20230809-160-1 is complete.",
@@ -7863,11 +7863,11 @@
             "cloudLink": false,
             "dasCache": false,
             "deviceState": "DEPLOYED",
-            "puppetCertName": "sles-10.247.103.160",
+            "puppetCertName": "sles-10.10.10.6",
             "brownfield": false
         },
         {
-            "refId": "softwareOnlyServer-10.247.103.162",
+            "refId": "softwareOnlyServer-10.10.10.8",
             "refType": "SERVER",
             "logDump": null,
             "status": "complete",
@@ -7879,8 +7879,8 @@
             "brownfieldStatus": "NOT_APPLICABLE",
             "deviceType": "SoftwareOnlyServer",
             "deviceGroupName": "Global",
-            "ipAddress": "10.247.103.162",
-            "currentIpAddress": "10.247.103.162",
+            "ipAddress": "10.10.10.8",
+            "currentIpAddress": "10.10.10.8",
             "serviceTag": "VMware-42 05 04 e0 df dc 65 87-42 a9 76 5d b5 df 65 10-SW",
             "componentId": "809d95bd-7de6-4911-8886-c3a9b70d04f5",
             "statusMessage": "The preprocessing for component pfmc-k8s-20230809-162 is complete.",
@@ -7888,7 +7888,7 @@
             "cloudLink": false,
             "dasCache": false,
             "deviceState": "DEPLOYED",
-            "puppetCertName": "sles-10.247.103.162",
+            "puppetCertName": "sles-10.10.10.8",
             "brownfield": false
         },
         {
@@ -7917,7 +7917,7 @@
             "brownfield": false
         },
         {
-            "refId": "softwareOnlyServer-10.247.103.161",
+            "refId": "softwareOnlyServer-10.10.10.7",
             "refType": "SERVER",
             "logDump": null,
             "status": "complete",
@@ -7929,8 +7929,8 @@
             "brownfieldStatus": "NOT_APPLICABLE",
             "deviceType": "SoftwareOnlyServer",
             "deviceGroupName": "Global",
-            "ipAddress": "10.247.103.161",
-            "currentIpAddress": "10.247.103.161",
+            "ipAddress": "10.10.10.7",
+            "currentIpAddress": "10.10.10.7",
             "serviceTag": "VMware-42 05 52 ec e0 01 3d b0-7c a3 be 63 2c 91 c0 21-SW",
             "componentId": "84baccb7-70f5-4107-b426-7924aeb879ff",
             "statusMessage": "The preprocessing for component pfmc-k8s-20230809-160 is complete.",
@@ -7938,7 +7938,7 @@
             "cloudLink": false,
             "dasCache": false,
             "deviceState": "DEPLOYED",
-            "puppetCertName": "sles-10.247.103.161",
+            "puppetCertName": "sles-10.10.10.7",
             "brownfield": false
         }
     ],

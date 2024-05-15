@@ -2977,8 +2977,8 @@
                         "ipRange": [
                             {
                                 "id": "8aaaee328cfd27d1018d59effa9c0a41",
-                                "startingIp": "10.247.103.140",
-                                "endingIp": "10.247.103.167",
+                                "startingIp": "10.10.10.14",
+                                "endingIp": "10.10.10.9",
                                 "role": null
                             }
                         ],
