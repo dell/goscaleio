@@ -35,10 +35,19 @@ func TestUploadCompliance(t *testing.T) {
 	assert.NotNil(t, details.ID)
 	assert.NotNil(t, details.State)
 	time.Sleep(5 * time.Second)
-	indepthDetails, err := GC.GetUploadComplianceDetails(details.ID)
+	indepthDetails, err := GC.GetUploadComplianceDetails(details.ID, false)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, indepthDetails.ID)
 	assert.NotEmpty(t, indepthDetails.State)
+
+	details2, err2 := GC.GetUploadComplianceDetailsUsingID(details.ID)
+	assert.Nil(t, err2)
+	assert.NotNil(t, details2.ID)
+	assert.NotNil(t, details2.State)
+	details3, err3 := GC.GetFirmwareRepositoryDetailsUsingName(details.Name)
+	assert.Nil(t, err3)
+	assert.NotNil(t, details3.ID)
+	assert.NotNil(t, details3.State)
 }
 
 func TestApproveUnsignedFile(t *testing.T) {
