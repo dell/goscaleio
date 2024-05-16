@@ -14,10 +14,8 @@ package goscaleio
 
 import (
 	"fmt"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"strings"
 	"testing"
 
@@ -422,5 +420,5 @@ func TestUninstallCluster(t *testing.T) {
 
 	gatewayResponse, err := gc.UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, false)
 	assert.NoError(t, err)
-	assert.Equal(t, http.StatusAccepted, gatewayResponse.StatusCode)
+	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 }

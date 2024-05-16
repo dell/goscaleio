@@ -14,10 +14,8 @@ package goscaleio
 
 import (
 	"io/ioutil"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"strings"
 	"testing"
 
@@ -72,19 +70,6 @@ func TestDeployService(t *testing.T) {
 	nodes := "3"
 
 	serviceResponse, err := gc.DeployService(deploymentName, deploymentDesc, serviceTemplateID, firmwareRepositoryID, nodes)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if serviceResponse == nil {
-		t.Error("Service response is nil")
-	}
-
-	if serviceResponse.StatusCode != 200 {
-		t.Errorf("Expected status code 200, got %d", serviceResponse.StatusCode)
-	}
-
 	assert.NotNil(t, serviceResponse, "Expected non-nil response")
 	assert.Equal(t, 200, serviceResponse.StatusCode, "Expected status code 200")
 	assert.Equal(t, "Service deployed successfully", serviceResponse.Messages[0].DisplayMessage, "Expected message 'Service deployed successfully'")
@@ -165,38 +150,7 @@ func TestGetServiceDetailsByID(t *testing.T) {
 		http.NotFound(w, r)
 	}))
 	defer server.Close()
-func TestGetServiceDetailsByID(t *testing.T) {
-	responseJSONFile := "response/update_service_response.json"
-	responseData, err := ioutil.ReadFile(responseJSONFile)
-	if err != nil {
-		t.Fatalf("Failed to read response JSON file: %v", err)
-	}
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/rest/auth/login" && r.Method == http.MethodPost {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"access_token": "mock_access_token"}`))
-			return
-		} else if strings.Contains(r.URL.Path, "/Api/V1/Deployment/") && r.Method == http.MethodGet {
-			w.WriteHeader(http.StatusOK)
-			w.Write(responseData)
-			return
-		}
-		http.NotFound(w, r)
-	}))
-	defer server.Close()
-
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
-	}
-
-	deploymentID := "12345"
-	newToken := true
-
-	serviceResponse, err := gc.GetServiceDetailsByID(deploymentID, newToken)
 	gc := &GatewayClient{
 		http:     &http.Client{},
 		host:     server.URL,
@@ -234,19 +188,7 @@ func TestGetServiceDetailsByFilter(t *testing.T) {
 		http.NotFound(w, r)
 	}))
 	defer server.Close()
-	defer server.Close()
 
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
-	}
-
-	filter := "name"
-	value := "TestCreate"
-
-	serviceResponse, err := gc.GetServiceDetailsByFilter(filter, value)
 	gc := &GatewayClient{
 		http:     &http.Client{},
 		host:     server.URL,
@@ -269,24 +211,10 @@ func TestGetServiceDetailsByFilter(t *testing.T) {
 func TestGetAllServiceDetails(t *testing.T) {
 	responseJSONFile := "response/services_response.json"
 	responseData, err := ioutil.ReadFile(responseJSONFile)
-func TestGetAllServiceDetails(t *testing.T) {
-	responseJSONFile := "response/services_response.json"
-	responseData, err := ioutil.ReadFile(responseJSONFile)
 	if err != nil {
 		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
-		t.Fatalf("Failed to read response JSON file: %v", err)
-	}
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "/Api/V1/Deployment") {
-			if r.Method == http.MethodGet {
-				w.WriteHeader(http.StatusOK)
-				w.Write(responseData)
-				return
-			}
-		}
-		http.NotFound(w, r)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.URL.Path, "/Api/V1/Deployment") {
 			if r.Method == http.MethodGet {
@@ -308,19 +236,7 @@ func TestGetAllServiceDetails(t *testing.T) {
 	}
 
 	serviceResponse, err := gc.GetAllServiceDetails()
-	defer server.Close()
-
-	// Creating a GatewayClient with the mocked server's URL
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
-	}
-
-	serviceResponse, err := gc.GetAllServiceDetails()
 	if err != nil {
-		t.Fatalf("Error while getting service details: %v", err)
 		t.Fatalf("Error while getting service details: %v", err)
 	}
 
