@@ -169,7 +169,6 @@ func TestGetPackageDetails(t *testing.T) {
 			_, err := w.Write([]byte(responseJSON))
 			if err != nil {
 				t.Fatalf("Error writing response: %v", err)
-				t.Fatalf("Error writing response: %v", err)
 			}
 			return
 		}
