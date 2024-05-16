@@ -17,11 +17,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	types "github.com/dell/goscaleio/types/v1"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"net/url"
+
+	types "github.com/dell/goscaleio/types/v1"
+	log "github.com/sirupsen/logrus"
 )
 
 // UploadCompliance function is used for uploading the compliance file.
@@ -253,12 +254,10 @@ func (gc *GatewayClient) GetAllUploadComplianceDetails() (*[]types.UploadComplia
 	}
 
 	return &getUploadCompResponse, nil
-
 }
 
 // GetUploadComplianceDetailsUsingFilter filters the firmware repository based on name
 func (gc *GatewayClient) GetUploadComplianceDetailsUsingFilter(name string) (*types.UploadComplianceTopologyDetails, error) {
-
 	frDetails, err := gc.GetAllUploadComplianceDetails()
 	if err != nil {
 		return nil, err
@@ -268,7 +267,6 @@ func (gc *GatewayClient) GetUploadComplianceDetailsUsingFilter(name string) (*ty
 		if fr.Name == name {
 			return &fr, nil
 		}
-
 	}
 	return nil, errors.New("couldn't find the firmware repository")
 }
