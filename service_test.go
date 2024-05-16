@@ -18,6 +18,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDeployService(t *testing.T) {
@@ -80,10 +82,9 @@ func TestDeployService(t *testing.T) {
 		t.Errorf("Expected status code 200, got %d", serviceResponse.StatusCode)
 	}
 
-	expectedMessage := "Service deployed successfully"
-	if serviceResponse.Messages[0].DisplayMessage != expectedMessage {
-		t.Errorf("Expected message '%s', got '%s'", expectedMessage, serviceResponse.Messages[0].DisplayMessage)
-	}
+	assert.NotNil(t, serviceResponse, "Expected non-nil response")
+	assert.Equal(t, 200, serviceResponse.StatusCode, "Expected status code 200")
+	assert.Equal(t, "Service deployed successfully", serviceResponse.Messages[0].DisplayMessage, "Expected message 'Service deployed successfully'")
 }
 
 func TestUpdateService(t *testing.T) {
@@ -136,10 +137,9 @@ func TestUpdateService(t *testing.T) {
 		t.Errorf("Expected status code 200, got %d", serviceResponse.StatusCode)
 	}
 
-	expectedMessage := "Service updated successfully"
-	if serviceResponse.Messages[0].DisplayMessage != expectedMessage {
-		t.Errorf("Expected message '%s', got '%s'", expectedMessage, serviceResponse.Messages[0].DisplayMessage)
-	}
+	assert.NotNil(t, serviceResponse, "Expected non-nil response")
+	assert.Equal(t, 200, serviceResponse.StatusCode, "Expected status code 200")
+	assert.Equal(t, "Service updated successfully", serviceResponse.Messages[0].DisplayMessage, "Expected message 'Service updated successfully'")
 }
 
 func TestGetServiceDetailsByID(t *testing.T) {
@@ -178,9 +178,8 @@ func TestGetServiceDetailsByID(t *testing.T) {
 		t.Fatalf("Error while getting service details: %v", err)
 	}
 
-	if serviceResponse == nil {
-		t.Fatalf("Expected non-nil response, got nil")
-	}
+	assert.NotNil(t, serviceResponse, "Expected non-nil response")
+	assert.EqualValues(t, serviceResponse.ID, "12345")
 }
 
 func TestGetServiceDetailsByFilter(t *testing.T) {
@@ -217,9 +216,8 @@ func TestGetServiceDetailsByFilter(t *testing.T) {
 		t.Fatalf("Error while getting service details: %v", err)
 	}
 
-	if serviceResponse == nil {
-		t.Fatalf("Expected non-nil response, got nil")
-	}
+	assert.NotNil(t, serviceResponse, "Expected non-nil response")
+	assert.EqualValues(t, serviceResponse[0].DeploymentName, "TestCreate")
 }
 
 func TestGetAllServiceDetails(t *testing.T) {
@@ -254,7 +252,6 @@ func TestGetAllServiceDetails(t *testing.T) {
 		t.Fatalf("Error while getting service details: %v", err)
 	}
 
-	if serviceResponse == nil {
-		t.Fatalf("Expected non-nil response, got nil")
-	}
+	assert.NotNil(t, serviceResponse, "Expected non-nil response")
+	assert.EqualValues(t, serviceResponse[0].DeploymentName, "TestCreate")
 }

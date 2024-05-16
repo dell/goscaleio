@@ -18,6 +18,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetTemplateByID(t *testing.T) {
@@ -45,16 +47,15 @@ func TestGetTemplateByID(t *testing.T) {
 		password: "test_password",
 	}
 
-	templateID := "453c41eb-d72a-4ed1-ad16-bacdffbdd766"
+	templateID := "12345"
 
 	templateResponse, err := gc.GetTemplateByID(templateID)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if templateResponse == nil {
-		t.Error("Template response is nil")
-	}
+	assert.NotNil(t, templateResponse, "Expected non-nil response")
+	assert.EqualValues(t, templateResponse.ID, "12345")
 }
 
 func TestGetTemplateByFilters(t *testing.T) {
@@ -91,9 +92,8 @@ func TestGetTemplateByFilters(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if templateResponse == nil {
-		t.Error("Template response is nil")
-	}
+	assert.NotNil(t, templateResponse, "Expected non-nil response")
+	assert.EqualValues(t, templateResponse[0].ID, "12345")
 }
 
 func TestGetAllTemplates(t *testing.T) {
@@ -127,7 +127,6 @@ func TestGetAllTemplates(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if templateResponse == nil {
-		t.Error("Template response is nil")
-	}
+	assert.NotNil(t, templateResponse, "Expected non-nil response")
+	assert.EqualValues(t, templateResponse[0].ID, "12345")
 }

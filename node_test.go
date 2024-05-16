@@ -17,6 +17,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetNodeByID(t *testing.T) {
@@ -48,9 +50,8 @@ func TestGetNodeByID(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if nodeDetails == nil {
-		t.Error("Node details are nil")
-	}
+	assert.NotNil(t, nodeDetails, "Expected non-nil response")
+	assert.EqualValues(t, nodeDetails.RefID, "softwareOnlyServer-1.1.1.1")
 }
 
 func TestGetAllNodes(t *testing.T) {
@@ -81,9 +82,8 @@ func TestGetAllNodes(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if nodes == nil {
-		t.Error("Nodes are nil")
-	}
+	assert.NotNil(t, nodes, "Expected non-nil response")
+	assert.EqualValues(t, nodes[0].RefID, "softwareOnlyServer-1.1.1.1")
 }
 
 func TestGetNodeByFilters(t *testing.T) {
@@ -116,9 +116,8 @@ func TestGetNodeByFilters(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if nodes == nil {
-		t.Error("Nodes are nil")
-	}
+	assert.NotNil(t, nodes, "Expected non-nil response")
+	assert.EqualValues(t, nodes[0].RefID, "softwareOnlyServer-1.1.1.1")
 }
 
 func TestGetNodePoolByID(t *testing.T) {
@@ -150,9 +149,8 @@ func TestGetNodePoolByID(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if nodePoolDetails == nil {
-		t.Error("Node pool details are nil")
-	}
+	assert.NotNil(t, nodePoolDetails, "Expected non-nil response")
+	assert.EqualValues(t, nodePoolDetails.ManagedDeviceList.ManagedDevices[0].RefID, "softwareOnlyServer-1.1.1.1")
 }
 
 func TestGetNodePoolByName(t *testing.T) {
@@ -194,9 +192,8 @@ func TestGetNodePoolByName(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if nodePoolDetails == nil {
-		t.Error("Node pool details are nil")
-	}
+	assert.NotNil(t, nodePoolDetails, "Expected non-nil response")
+	assert.GreaterOrEqual(t, len(nodePoolDetails.ManagedDeviceList.ManagedDevices), 1)
 }
 
 func TestGetAllNodePools(t *testing.T) {
@@ -227,7 +224,6 @@ func TestGetAllNodePools(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if nodePoolDetails == nil {
-		t.Error("Node pool details are nil")
-	}
+	assert.NotNil(t, nodePoolDetails, "Expected non-nil response")
+	assert.GreaterOrEqual(t, len(nodePoolDetails.NodePoolDetails), 1)
 }

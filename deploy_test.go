@@ -18,6 +18,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // TestNewGateway tests the NewGateway function.
@@ -46,15 +48,10 @@ func TestNewGateway(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if gc == nil {
-		t.Fatal("GatewayClient is nil")
-	}
-	if gc.token != "mock_access_token" {
-		t.Errorf("Unexpected access token: %s", gc.token)
-	}
-	if gc.version != "4.0" {
-		t.Errorf("Unexpected version: %s", gc.version)
-	}
+	assert.Nil(t, err, "Unexpected error")
+	assert.NotNil(t, gc, "GatewayClient is nil")
+	assert.Equal(t, "mock_access_token", gc.token, "Unexpected access token")
+	assert.Equal(t, "4.0", gc.version, "Unexpected version")
 }
 
 // TestGetVersion tests the GetVersion function.
@@ -79,13 +76,8 @@ func TestGetVersion(t *testing.T) {
 	}
 
 	version, err := gc.GetVersion()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if version != "4.0" {
-		t.Errorf("Unexpected version: %s", version)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, "4.0", version)
 }
 
 // TestUploadPackages tests the UploadPackages function.
@@ -108,14 +100,10 @@ func TestUploadPackages(t *testing.T) {
 	}
 
 	_, err := gc.UploadPackages([]string{"mock_file.tar"})
-	if err == nil {
-		t.Fatal("Expected error, got nil")
-	}
+	assert.Error(t, err)
 
 	expectedErrorMsg := "stat mock_file.tar: no such file or directory"
-	if err.Error() != expectedErrorMsg {
-		t.Errorf("Unexpected error message: %s", err.Error())
-	}
+	assert.EqualError(t, err, expectedErrorMsg)
 }
 
 func TestParseCSV(t *testing.T) {
@@ -137,14 +125,10 @@ func TestParseCSV(t *testing.T) {
 	}
 
 	_, err := gc.ParseCSV("test_file.csv")
-	if err == nil {
-		t.Fatal("Expected error, got nil")
-	}
+	assert.Error(t, err)
 
 	expectedErrorMsg := "open test_file.csv: no such file or directory"
-	if err.Error() != expectedErrorMsg {
-		t.Errorf("Unexpected error message: %s", err.Error())
-	}
+	assert.EqualError(t, err, expectedErrorMsg)
 }
 
 func TestGetPackageDetails(t *testing.T) {
@@ -201,13 +185,8 @@ func TestGetPackageDetails(t *testing.T) {
 	}
 
 	packageDetails, err := gc.GetPackageDetails()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if packageDetails == nil {
-		t.Error("Package details are nil")
-	}
+	assert.NoError(t, err)
+	assert.NotNil(t, packageDetails)
 }
 
 func TestDeletePackage(t *testing.T) {
@@ -237,13 +216,8 @@ func TestDeletePackage(t *testing.T) {
 	}
 
 	packageResponse, err := gc.DeletePackage("test_package")
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if packageResponse.StatusCode != 200 {
-		t.Errorf("Unexpected status code: %d", packageResponse.StatusCode)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, 200, packageResponse.StatusCode)
 }
 
 func TestBeginInstallation(t *testing.T) {
@@ -265,14 +239,10 @@ func TestBeginInstallation(t *testing.T) {
 	}
 
 	_, err := gc.BeginInstallation("", "mdm_user", "mdm_password", "lia_password", true, true, true, false)
-	if err == nil {
-		t.Fatal("Expected error, got nil")
-	}
+	assert.Error(t, err)
 
 	expectedErrorMsg := "unexpected end of JSON input"
-	if err.Error() != expectedErrorMsg {
-		t.Errorf("Unexpected error message: %s", err.Error())
-	}
+	assert.EqualError(t, err, expectedErrorMsg)
 }
 
 func TestMoveToNextPhase(t *testing.T) {
@@ -293,13 +263,8 @@ func TestMoveToNextPhase(t *testing.T) {
 	}
 
 	gatewayResponse, err := gc.MoveToNextPhase()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if gatewayResponse.StatusCode != http.StatusOK {
-		t.Errorf("Unexpected status code: %d", gatewayResponse.StatusCode)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 }
 
 func TestRetryPhase(t *testing.T) {
@@ -320,13 +285,8 @@ func TestRetryPhase(t *testing.T) {
 	}
 
 	gatewayResponse, err := gc.RetryPhase()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if gatewayResponse.StatusCode != http.StatusOK {
-		t.Errorf("Unexpected status code: %d", gatewayResponse.StatusCode)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 }
 
 func TestAbortOperation(t *testing.T) {
@@ -347,13 +307,8 @@ func TestAbortOperation(t *testing.T) {
 	}
 
 	gatewayResponse, err := gc.AbortOperation()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if gatewayResponse.StatusCode != http.StatusOK {
-		t.Errorf("Unexpected status code: %d", gatewayResponse.StatusCode)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 }
 
 func TestClearQueueCommand(t *testing.T) {
@@ -374,13 +329,8 @@ func TestClearQueueCommand(t *testing.T) {
 	}
 
 	gatewayResponse, err := gc.ClearQueueCommand()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if gatewayResponse.StatusCode != http.StatusOK {
-		t.Errorf("Unexpected status code: %d", gatewayResponse.StatusCode)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 }
 
 func TestMoveToIdlePhase(t *testing.T) {
@@ -401,13 +351,8 @@ func TestMoveToIdlePhase(t *testing.T) {
 	}
 
 	gatewayResponse, err := gc.MoveToIdlePhase()
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if gatewayResponse.StatusCode != http.StatusOK {
-		t.Errorf("Unexpected status code: %d", gatewayResponse.StatusCode)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 }
 
 func TestCheckForCompletionQueueCommands(t *testing.T) {
@@ -436,17 +381,9 @@ func TestCheckForCompletionQueueCommands(t *testing.T) {
 	}
 
 	gatewayResponse, err := gc.CheckForCompletionQueueCommands("Query")
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if gatewayResponse == nil {
-		t.Error("Gateway response is nil")
-	}
-
-	if gatewayResponse.StatusCode != http.StatusOK {
-		t.Errorf("Unexpected status code: %d", gatewayResponse.StatusCode)
-	}
+	assert.NoError(t, err)
+	assert.NotNil(t, gatewayResponse)
+	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 }
 
 func TestUninstallCluster(t *testing.T) {
@@ -481,11 +418,6 @@ func TestUninstallCluster(t *testing.T) {
 	disableNonMgmtComponentsAuth := true
 
 	gatewayResponse, err := gc.UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, false)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-
-	if gatewayResponse.StatusCode != http.StatusOK {
-		t.Errorf("Unexpected status code: %d", gatewayResponse.StatusCode)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusAccepted, gatewayResponse.StatusCode)
 }
