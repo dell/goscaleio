@@ -14,8 +14,10 @@ package goscaleio
 
 import (
 	"fmt"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"strings"
 	"testing"
 
@@ -168,6 +170,7 @@ func TestGetPackageDetails(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 			_, err := w.Write([]byte(responseJSON))
 			if err != nil {
+				t.Fatalf("Error writing response: %v", err)
 				t.Fatalf("Error writing response: %v", err)
 			}
 			return

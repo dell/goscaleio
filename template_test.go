@@ -14,21 +14,34 @@ package goscaleio
 
 import (
 	"io/ioutil"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"strings"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestGetTemplateByID(t *testing.T) {
 	responseJSONFile := "response/template_response.json"
 	responseData, err := ioutil.ReadFile(responseJSONFile)
+func TestGetTemplateByID(t *testing.T) {
+	responseJSONFile := "response/template_response.json"
+	responseData, err := ioutil.ReadFile(responseJSONFile)
 	if err != nil {
+		t.Fatalf("Failed to read response JSON file: %v", err)
 		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
 
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.Path, "/Api/V1/template/") {
+			if r.Method == http.MethodGet {
+				w.WriteHeader(http.StatusOK)
+				w.Write(responseData)
+				return
+			}
+		}
+		http.NotFound(w, r)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.URL.Path, "/Api/V1/template/") {
 			if r.Method == http.MethodGet {
@@ -61,10 +74,23 @@ func TestGetTemplateByID(t *testing.T) {
 func TestGetTemplateByFilters(t *testing.T) {
 	responseJSONFile := "response/templates_response.json"
 	responseData, err := ioutil.ReadFile(responseJSONFile)
+	responseJSONFile := "response/templates_response.json"
+	responseData, err := ioutil.ReadFile(responseJSONFile)
 	if err != nil {
 		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
+		t.Fatalf("Failed to read response JSON file: %v", err)
+	}
 
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.Path, "/Api/V1/template") {
+			if r.Method == http.MethodGet {
+				w.WriteHeader(http.StatusOK)
+				w.Write(responseData)
+				return
+			}
+		}
+		http.NotFound(w, r)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.URL.Path, "/Api/V1/template") {
 			if r.Method == http.MethodGet {
@@ -88,7 +114,21 @@ func TestGetTemplateByFilters(t *testing.T) {
 	value := "Test"
 
 	templateResponse, err := gc.GetTemplateByFilters(filter, value)
+	defer server.Close()
+
+	gc := &GatewayClient{
+		http:     &http.Client{},
+		host:     server.URL,
+		username: "test_username",
+		password: "test_password",
+	}
+
+	filter := "name"
+	value := "Test"
+
+	templateResponse, err := gc.GetTemplateByFilters(filter, value)
 	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
@@ -99,10 +139,24 @@ func TestGetTemplateByFilters(t *testing.T) {
 func TestGetAllTemplates(t *testing.T) {
 	responseJSONFile := "response/templates_response.json"
 	responseData, err := ioutil.ReadFile(responseJSONFile)
+func TestGetAllTemplates(t *testing.T) {
+	responseJSONFile := "response/templates_response.json"
+	responseData, err := ioutil.ReadFile(responseJSONFile)
 	if err != nil {
 		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
+		t.Fatalf("Failed to read response JSON file: %v", err)
+	}
 
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.Path, "/Api/V1/template") {
+			if r.Method == http.MethodGet {
+				w.WriteHeader(http.StatusOK)
+				w.Write(responseData)
+				return
+			}
+		}
+		http.NotFound(w, r)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.URL.Path, "/Api/V1/template") {
 			if r.Method == http.MethodGet {
@@ -123,7 +177,18 @@ func TestGetAllTemplates(t *testing.T) {
 	}
 
 	templateResponse, err := gc.GetAllTemplates()
+	defer server.Close()
+
+	gc := &GatewayClient{
+		http:     &http.Client{},
+		host:     server.URL,
+		username: "test_username",
+		password: "test_password",
+	}
+
+	templateResponse, err := gc.GetAllTemplates()
 	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
