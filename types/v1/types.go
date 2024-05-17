@@ -1913,20 +1913,17 @@ type Bundle struct {
 	ID                 string      `json:"id"`
 	Name               string      `json:"name"`
 	Version            string      `json:"version"`
-	BundleDate         time.Time   `json:"bundleDate"`
-	CreatedDate        any         `json:"createdDate"`
-	CreatedBy          any         `json:"createdBy"`
-	UpdatedDate        any         `json:"updatedDate"`
-	UpdatedBy          any         `json:"updatedBy"`
-	Description        any         `json:"description"`
+	BundleDate         string      `json:"bundleDate"`
+	CreatedDate        string      `json:"createdDate"`
+	CreatedBy          string      `json:"createdBy"`
+	UpdatedDate        string      `json:"updatedDate"`
+	UpdatedBy          string      `json:"updatedBy"`
+	Description        string      `json:"description"`
 	UserBundle         bool        `json:"userBundle"`
-	UserBundlePath     any         `json:"userBundlePath"`
-	UserBundleHashMd5  any         `json:"userBundleHashMd5"`
-	DeviceType         any         `json:"deviceType"`
-	DeviceModel        any         `json:"deviceModel"`
-	Criticality        any         `json:"criticality"`
-	FwRepositoryID     any         `json:"fwRepositoryId"`
-	Link               any         `json:"link"`
+	UserBundlePath     string      `json:"userBundlePath"`
+	DeviceType         string      `json:"deviceType"`
+	DeviceModel        string      `json:"deviceModel"`
+	FwRepositoryID     string      `json:"fwRepositoryId"`
 	BundleType         string      `json:"bundleType"`
 	Custom             bool        `json:"custom"`
 	NeedsAttention     bool        `json:"needsAttention"`
