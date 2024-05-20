@@ -172,7 +172,7 @@ func dumpRequest(req *http.Request, body bool) ([]byte, error) {
 		reqURI = req.URL.RequestURI()
 	}
 
-	method := "GET"
+	method := http.MethodGet
 	if req.Method != "" {
 		method = req.Method
 	}

@@ -1,3 +1,15 @@
+// Copyright © 2023 - 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//      http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package goscaleio
 
 import (
@@ -19,7 +31,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dell/goscaleio/api"
 	types "github.com/dell/goscaleio/types/v1"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
@@ -33,7 +44,6 @@ var (
 // GatewayClient is client for Gateway server
 type GatewayClient struct {
 	http     *http.Client
-	api      api.Client
 	host     string
 	username string
 	password string
@@ -94,7 +104,7 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 
 		body, _ := json.Marshal(bodyData)
 
-		req, err := http.NewRequest("POST", host+"/rest/auth/login", bytes.NewBuffer(body))
+		req, err := http.NewRequest(http.MethodPost, host+"/rest/auth/login", bytes.NewBuffer(body))
 		if err != nil {
 			return nil, err
 		}
@@ -117,7 +127,7 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		case resp == nil:
 			return nil, errNilReponse
 		case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
-			return nil, gc.api.ParseJSONError(resp)
+			return nil, ParseJSONError(resp)
 		}
 
 		bs, err := io.ReadAll(resp.Body)
@@ -149,7 +159,7 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 
 // GetVersion returns version
 func (gc *GatewayClient) GetVersion() (string, error) {
-	req, httpError := http.NewRequest("GET", gc.host+"/api/version", nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+"/api/version", nil)
 	if httpError != nil {
 		return "", httpError
 	}
@@ -225,7 +235,7 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 		return &gatewayResponse, fileWriterError
 	}
 
-	req, httpError := http.NewRequest("POST", gc.host+"/im/types/installationPackages/instances/actions/uploadPackages", body)
+	req, httpError := http.NewRequest(http.MethodPost, gc.host+"/im/types/installationPackages/instances/actions/uploadPackages", body)
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
@@ -295,7 +305,7 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 		return &gatewayResponse, fileWriterError
 	}
 
-	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/instances/actions/parseFromCSV", body)
+	req, httpError := http.NewRequest(http.MethodPost, gc.host+"/im/types/Configuration/instances/actions/parseFromCSV", body)
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
@@ -354,7 +364,7 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 	var packageParam []*types.PackageDetails
 
-	req, httpError := http.NewRequest("GET", gc.host+"/im/types/installationPackages/instances?onlyLatest=false&_search=false", nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+"/im/types/installationPackages/instances?onlyLatest=false&_search=false", nil)
 	if httpError != nil {
 		return packageParam, httpError
 	}
@@ -408,7 +418,7 @@ func (gc *GatewayClient) GetPackageDetails() ([]*types.PackageDetails, error) {
 func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
-	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/instances", bytes.NewBuffer(mdmTopologyParam))
+	req, httpError := http.NewRequest(http.MethodPost, gc.host+"/im/types/Configuration/instances", bytes.NewBuffer(mdmTopologyParam))
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
@@ -474,7 +484,7 @@ func (gc *GatewayClient) ValidateMDMDetails(mdmTopologyParam []byte) (*types.Gat
 func (gc *GatewayClient) GetClusterDetails(mdmTopologyParam []byte, requireJSONOutput bool) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
-	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Configuration/instances", bytes.NewBuffer(mdmTopologyParam))
+	req, httpError := http.NewRequest(http.MethodPost, gc.host+"/im/types/Configuration/instances", bytes.NewBuffer(mdmTopologyParam))
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
@@ -639,7 +649,7 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 
 	u.RawQuery = q.Encode()
 
-	req, httpError := http.NewRequest("POST", u.String(), bytes.NewBuffer(finalJSON))
+	req, httpError := http.NewRequest(http.MethodPost, u.String(), bytes.NewBuffer(finalJSON))
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
@@ -686,7 +696,7 @@ func (gc *GatewayClient) BeginInstallation(jsonStr, mdmUsername, mdmPassword, li
 func (gc *GatewayClient) MoveToNextPhase() (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
-	req, httpError := http.NewRequest("POST", gc.host+"/im/types/ProcessPhase/actions/moveToNextPhase", nil)
+	req, httpError := http.NewRequest(http.MethodPost, gc.host+"/im/types/ProcessPhase/actions/moveToNextPhase", nil)
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
@@ -740,7 +750,7 @@ func (gc *GatewayClient) MoveToNextPhase() (*types.GatewayResponse, error) {
 func (gc *GatewayClient) RetryPhase() (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
-	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Command/instances/actions/retry/", nil)
+	req, httpError := http.NewRequest(http.MethodPost, gc.host+"/im/types/Command/instances/actions/retry/", nil)
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
@@ -794,7 +804,7 @@ func (gc *GatewayClient) RetryPhase() (*types.GatewayResponse, error) {
 func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
-	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Command/instances/actions/abort", nil)
+	req, httpError := http.NewRequest(http.MethodPost, gc.host+"/im/types/Command/instances/actions/abort", nil)
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
@@ -848,7 +858,7 @@ func (gc *GatewayClient) AbortOperation() (*types.GatewayResponse, error) {
 func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
-	req, httpError := http.NewRequest("POST", gc.host+"/im/types/Command/instances/actions/clear", nil)
+	req, httpError := http.NewRequest(http.MethodPost, gc.host+"/im/types/Command/instances/actions/clear", nil)
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
@@ -902,7 +912,7 @@ func (gc *GatewayClient) ClearQueueCommand() (*types.GatewayResponse, error) {
 func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
-	req, httpError := http.NewRequest("POST", gc.host+"/im/types/ProcessPhase/actions/moveToIdlePhase", nil)
+	req, httpError := http.NewRequest(http.MethodPost, gc.host+"/im/types/ProcessPhase/actions/moveToIdlePhase", nil)
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
@@ -956,7 +966,7 @@ func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, error) {
 	var mdmQueueCommandDetails []types.MDMQueueCommandDetails
 
-	req, httpError := http.NewRequest("GET", gc.host+"/im/types/Command/instances", nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+"/im/types/Command/instances", nil)
 	if httpError != nil {
 		return mdmQueueCommandDetails, httpError
 	}
@@ -1077,7 +1087,7 @@ func (gc *GatewayClient) UninstallCluster(jsonStr, mdmUsername, mdmPassword, lia
 
 	u, _ := url.Parse(gc.host + "/im/types/Configuration/actions/uninstall")
 
-	req, httpError := http.NewRequest("POST", u.String(), bytes.NewBuffer(finalJSON))
+	req, httpError := http.NewRequest(http.MethodPost, u.String(), bytes.NewBuffer(finalJSON))
 	if httpError != nil {
 		return &gatewayResponse, httpError
 	}
@@ -1237,4 +1247,26 @@ func writeConfig(config *CookieConfig) error {
 	}
 
 	return nil
+}
+
+func ParseJSONError(r *http.Response) error {
+	jsonError := &types.Error{}
+
+	// Starting in 4.0, response may be in html; so we cannot always use a json decoder
+	if strings.Contains(r.Header.Get("Content-Type"), "html") {
+		jsonError.HTTPStatusCode = r.StatusCode
+		jsonError.Message = r.Status
+		return jsonError
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(jsonError); err != nil {
+		return err
+	}
+
+	jsonError.HTTPStatusCode = r.StatusCode
+	if jsonError.Message == "" {
+		jsonError.Message = r.Status
+	}
+
+	return jsonError
 }

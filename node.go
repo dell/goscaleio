@@ -30,7 +30,7 @@ func (gc *GatewayClient) GetNodeByID(id string) (*types.NodeDetails, error) {
 	path := fmt.Sprintf("/Api/V1/ManagedDevice/%v", id)
 
 	var node types.NodeDetails
-	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
@@ -76,7 +76,7 @@ func (gc *GatewayClient) GetAllNodes() ([]types.NodeDetails, error) {
 	path := fmt.Sprintf("/Api/V1/ManagedDevice")
 
 	var nodes []types.NodeDetails
-	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
@@ -122,7 +122,7 @@ func (gc *GatewayClient) GetNodeByFilters(key string, value string) ([]types.Nod
 	path := fmt.Sprintf("/Api/V1/ManagedDevice?filter=eq,%v,%v", key, value)
 
 	var nodes []types.NodeDetails
-	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
@@ -171,7 +171,7 @@ func (gc *GatewayClient) GetNodePoolByID(id int) (*types.NodePoolDetails, error)
 	path := fmt.Sprintf("/Api/V1/nodepool/%v", id)
 
 	var nodePool types.NodePoolDetails
-	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
@@ -235,7 +235,7 @@ func (gc *GatewayClient) GetAllNodePools() (*types.NodePoolDetailsFilter, error)
 	path := fmt.Sprintf("/Api/V1/nodepool")
 
 	var nodePools types.NodePoolDetailsFilter
-	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}

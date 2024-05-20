@@ -30,7 +30,7 @@ func (gc *GatewayClient) GetTemplateByID(id string) (*types.TemplateDetails, err
 	path := fmt.Sprintf("/Api/V1/template/%v", id)
 
 	var template types.TemplateDetails
-	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
@@ -73,7 +73,7 @@ func (gc *GatewayClient) GetAllTemplates() ([]types.TemplateDetails, error) {
 	path := "/Api/V1/template"
 
 	var templates types.TemplateDetailsFilter
-	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
@@ -118,7 +118,7 @@ func (gc *GatewayClient) GetTemplateByFilters(key string, value string) ([]types
 	path := `/Api/V1/template?filter=` + key + `%20eq%20%22` + encodedValue + `%22`
 
 	var templates types.TemplateDetailsFilter
-	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}

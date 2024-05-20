@@ -2943,7 +2943,7 @@
                     "vlanId": 1,
                     "static": true,
                     "staticNetworkConfiguration": {
-                        "gateway": "10.247.39.1",
+                        "gateway": "10.1039.1",
                         "subnet": "255.255.255.0",
                         "primaryDns": "10.244.53.108",
                         "secondaryDns": null,
@@ -2951,15 +2951,15 @@
                         "ipRange": [
                             {
                                 "id": "8aaaee328cfd27d1018d5953e3380a0d",
-                                "startingIp": "10.247.39.122",
-                                "endingIp": "10.247.39.132",
+                                "startingIp": "10.1039.122",
+                                "endingIp": "10.1039.132",
                                 "role": null
                             }
                         ],
                         "ipAddress": null,
                         "staticRoute": null
                     },
-                    "destinationIpAddress": "10.247.39.0"
+                    "destinationIpAddress": "10.1039.0"
                 },
                 {
                     "id": "8aaaee038c939c14018ccf1aae270000",
@@ -2969,7 +2969,7 @@
                     "vlanId": 1,
                     "static": true,
                     "staticNetworkConfiguration": {
-                        "gateway": "10.247.96.1",
+                        "gateway": "10.10.96.1",
                         "subnet": "255.255.248.0",
                         "primaryDns": "10.244.53.108",
                         "secondaryDns": null,
@@ -2985,7 +2985,7 @@
                         "ipAddress": null,
                         "staticRoute": null
                     },
-                    "destinationIpAddress": "10.247.96.0"
+                    "destinationIpAddress": "10.1096.0"
                 }
             ],
             "blockServiceOperationsMap": {}

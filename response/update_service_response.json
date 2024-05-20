@@ -609,7 +609,7 @@
                                 "networkIpAddressList": [
                                     {
                                         "id": "8aaaee038c939c14018cd3defc590004",
-                                        "ipAddress": "10.247.39.125"
+                                        "ipAddress": "10.1039.125"
                                     }
                                 ],
                                 "networkConfiguration": null,
@@ -935,7 +935,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fa5037e",
                                 "id": "static_ip_value:LGLOU",
-                                "value": "10.247.39.125",
+                                "value": "10.1039.125",
                                 "type": "STRING",
                                 "displayName": "LGLOU IP Address",
                                 "required": true,
@@ -1870,7 +1870,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fab03ba",
                                 "id": "scaleio_inventory_mdm_data_ips",
-                                "value": "10.247.39.124",
+                                "value": "10.1039.124",
                                 "type": "STRING",
                                 "displayName": "PowerFlex Inventory MDM Data IP Addresses",
                                 "required": true,
@@ -2577,7 +2577,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fae03de",
                                 "id": "static_ip_value:LGLOU",
-                                "value": "10.247.39.124",
+                                "value": "10.1039.124",
                                 "type": "STRING",
                                 "displayName": "LGLOU IP Address",
                                 "required": true,
@@ -2874,7 +2874,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12faf03ed",
                                 "id": "software_network_configuration",
-                                "value": "{\"id\":\"2c4c68b4-8e0b-4f34-bc32-e76c46fb29cd\",\"interfaces\":[{\"id\":\"b89b43b6-09e8-435d-a141-1e3a2f82ffa7\",\"name\":\"Interface 1\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"3f53bc68-c0d2-4e11-a679-f6e350cb8a79\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"257002da-ab12-4a45-99a4-8039ec911695\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018ccf1aae270000\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018ccf1aae270000\",\"ipAddress\":\"10.10.10.6\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"},{\"id\":\"420d29e5-ae05-4300-a121-4ebd62812b4b\",\"name\":\"Interface 2\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"a4c8f222-3529-428c-a408-41164f467a15\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"b6fa332b-d7bf-44f1-b17d-3c8bfd897fc8\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018cd3defc590004\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018cd3defc590004\",\"ipAddress\":\"10.247.39.124\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"}],\"isSoftwareOnly\":true}",
+                                "value": "{\"id\":\"2c4c68b4-8e0b-4f34-bc32-e76c46fb29cd\",\"interfaces\":[{\"id\":\"b89b43b6-09e8-435d-a141-1e3a2f82ffa7\",\"name\":\"Interface 1\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"3f53bc68-c0d2-4e11-a679-f6e350cb8a79\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"257002da-ab12-4a45-99a4-8039ec911695\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018ccf1aae270000\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018ccf1aae270000\",\"ipAddress\":\"10.10.10.6\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"},{\"id\":\"420d29e5-ae05-4300-a121-4ebd62812b4b\",\"name\":\"Interface 2\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"a4c8f222-3529-428c-a408-41164f467a15\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"b6fa332b-d7bf-44f1-b17d-3c8bfd897fc8\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018cd3defc590004\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018cd3defc590004\",\"ipAddress\":\"10.1039.124\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"}],\"isSoftwareOnly\":true}",
                                 "type": "SOFTWARENETWORKCONFIGURATION",
                                 "displayName": "Network Config",
                                 "required": false,
@@ -2961,7 +2961,7 @@
                                                             "networkIpAddressList": [
                                                                 {
                                                                     "id": "8aaaee038c939c14018cd3defc590004",
-                                                                    "ipAddress": "10.247.39.124"
+                                                                    "ipAddress": "10.1039.124"
                                                                 }
                                                             ],
                                                             "networkObjects": null,
@@ -4091,7 +4091,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fb70422",
                                 "id": "scaleio_inventory_mdm_data_ips",
-                                "value": "10.247.39.122",
+                                "value": "10.1039.122",
                                 "type": "STRING",
                                 "displayName": "PowerFlex Inventory MDM Data IP Addresses",
                                 "required": true,
@@ -4798,7 +4798,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fba0446",
                                 "id": "static_ip_value:LGLOU",
-                                "value": "10.247.39.122",
+                                "value": "10.1039.122",
                                 "type": "STRING",
                                 "displayName": "LGLOU IP Address",
                                 "required": true,
@@ -5095,7 +5095,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fbb0455",
                                 "id": "software_network_configuration",
-                                "value": "{\"id\":\"2c4c68b4-8e0b-4f34-bc32-e76c46fb29cd\",\"interfaces\":[{\"id\":\"b89b43b6-09e8-435d-a141-1e3a2f82ffa7\",\"name\":\"Interface 1\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"3f53bc68-c0d2-4e11-a679-f6e350cb8a79\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"257002da-ab12-4a45-99a4-8039ec911695\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018ccf1aae270000\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018ccf1aae270000\",\"ipAddress\":\"10.10.10.7\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"},{\"id\":\"420d29e5-ae05-4300-a121-4ebd62812b4b\",\"name\":\"Interface 2\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"a4c8f222-3529-428c-a408-41164f467a15\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"b6fa332b-d7bf-44f1-b17d-3c8bfd897fc8\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018cd3defc590004\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018cd3defc590004\",\"ipAddress\":\"10.247.39.122\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"}],\"isSoftwareOnly\":true}",
+                                "value": "{\"id\":\"2c4c68b4-8e0b-4f34-bc32-e76c46fb29cd\",\"interfaces\":[{\"id\":\"b89b43b6-09e8-435d-a141-1e3a2f82ffa7\",\"name\":\"Interface 1\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"3f53bc68-c0d2-4e11-a679-f6e350cb8a79\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"257002da-ab12-4a45-99a4-8039ec911695\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018ccf1aae270000\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018ccf1aae270000\",\"ipAddress\":\"10.10.10.7\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"},{\"id\":\"420d29e5-ae05-4300-a121-4ebd62812b4b\",\"name\":\"Interface 2\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"a4c8f222-3529-428c-a408-41164f467a15\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"b6fa332b-d7bf-44f1-b17d-3c8bfd897fc8\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018cd3defc590004\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018cd3defc590004\",\"ipAddress\":\"10.1039.122\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"}],\"isSoftwareOnly\":true}",
                                 "type": "SOFTWARENETWORKCONFIGURATION",
                                 "displayName": "Network Config",
                                 "required": false,
@@ -5182,7 +5182,7 @@
                                                             "networkIpAddressList": [
                                                                 {
                                                                     "id": "8aaaee038c939c14018cd3defc590004",
-                                                                    "ipAddress": "10.247.39.122"
+                                                                    "ipAddress": "10.1039.122"
                                                                 }
                                                             ],
                                                             "networkObjects": null,
@@ -6312,7 +6312,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fc0048a",
                                 "id": "scaleio_inventory_mdm_data_ips",
-                                "value": "10.247.39.130",
+                                "value": "10.1039.130",
                                 "type": "STRING",
                                 "displayName": "PowerFlex Inventory MDM Data IP Addresses",
                                 "required": true,
@@ -7019,7 +7019,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fc304ae",
                                 "id": "static_ip_value:LGLOU",
-                                "value": "10.247.39.130",
+                                "value": "10.1039.130",
                                 "type": "STRING",
                                 "displayName": "LGLOU IP Address",
                                 "required": true,
@@ -7316,7 +7316,7 @@
                             {
                                 "guid": "8aaa3fda8f5c2609018f5cd12fc404bd",
                                 "id": "software_network_configuration",
-                                "value": "{\"id\":\"2c4c68b4-8e0b-4f34-bc32-e76c46fb29cd\",\"interfaces\":[{\"id\":\"b89b43b6-09e8-435d-a141-1e3a2f82ffa7\",\"name\":\"Interface 1\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"3f53bc68-c0d2-4e11-a679-f6e350cb8a79\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"257002da-ab12-4a45-99a4-8039ec911695\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018ccf1aae270000\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018ccf1aae270000\",\"ipAddress\":\"10.10.10.8\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"},{\"id\":\"420d29e5-ae05-4300-a121-4ebd62812b4b\",\"name\":\"Interface 2\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"a4c8f222-3529-428c-a408-41164f467a15\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"b6fa332b-d7bf-44f1-b17d-3c8bfd897fc8\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018cd3defc590004\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018cd3defc590004\",\"ipAddress\":\"10.247.39.130\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"}],\"isSoftwareOnly\":true}",
+                                "value": "{\"id\":\"2c4c68b4-8e0b-4f34-bc32-e76c46fb29cd\",\"interfaces\":[{\"id\":\"b89b43b6-09e8-435d-a141-1e3a2f82ffa7\",\"name\":\"Interface 1\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"3f53bc68-c0d2-4e11-a679-f6e350cb8a79\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"257002da-ab12-4a45-99a4-8039ec911695\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018ccf1aae270000\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018ccf1aae270000\",\"ipAddress\":\"10.10.10.8\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"},{\"id\":\"420d29e5-ae05-4300-a121-4ebd62812b4b\",\"name\":\"Interface 2\",\"redundancy\":false,\"enabled\":true,\"partitioned\":false,\"nictype\":\"ni_sw_only\",\"interfaces\":[{\"id\":\"a4c8f222-3529-428c-a408-41164f467a15\",\"name\":\"Port 1\",\"partitioned\":false,\"partitions\":[{\"id\":\"b6fa332b-d7bf-44f1-b17d-3c8bfd897fc8\",\"name\":\"1\",\"networks\":[\"8aaaee038c939c14018cd3defc590004\"],\"networkIpAddressList\":[{\"id\":\"8aaaee038c939c14018cd3defc590004\",\"ipAddress\":\"10.1039.130\"}],\"networkObjects\":null,\"minimum\":0,\"maximum\":100,\"lanMacAddress\":null,\"iscsiMacAddress\":null,\"iscsiIQN\":null,\"wwnn\":null,\"wwpn\":null,\"port_no\":0,\"partition_no\":0,\"partition_index\":0,\"fqdd\":null,\"mac_address\":null,\"mirroredPort\":\"\"}],\"enabled\":false,\"redundancy\":false,\"nictype\":\"ni_sw_only\",\"fqdd\":null}],\"fabrictype\":\"ethernet\"}],\"isSoftwareOnly\":true}",
                                 "type": "SOFTWARENETWORKCONFIGURATION",
                                 "displayName": "Network Config",
                                 "required": false,
@@ -7403,7 +7403,7 @@
                                                             "networkIpAddressList": [
                                                                 {
                                                                     "id": "8aaaee038c939c14018cd3defc590004",
-                                                                    "ipAddress": "10.247.39.130"
+                                                                    "ipAddress": "10.1039.130"
                                                                 }
                                                             ],
                                                             "networkObjects": null,
@@ -7786,7 +7786,7 @@
                 "vlanId": 1,
                 "static": true,
                 "staticNetworkConfiguration": {
-                    "gateway": "10.247.39.1",
+                    "gateway": "10.1039.1",
                     "subnet": "255.255.255.0",
                     "primaryDns": "10.244.53.108",
                     "secondaryDns": null,
@@ -7794,15 +7794,15 @@
                     "ipRange": [
                         {
                             "id": "8aaaee328cfd27d1018d5953e3380a0d",
-                            "startingIp": "10.247.39.122",
-                            "endingIp": "10.247.39.132",
+                            "startingIp": "10.1039.122",
+                            "endingIp": "10.1039.132",
                             "role": null
                         }
                     ],
                     "ipAddress": null,
                     "staticRoute": null
                 },
-                "destinationIpAddress": "10.247.39.0"
+                "destinationIpAddress": "10.1039.0"
             },
             {
                 "id": "8aaaee038c939c14018ccf1aae270000",
@@ -7812,7 +7812,7 @@
                 "vlanId": 1,
                 "static": true,
                 "staticNetworkConfiguration": {
-                    "gateway": "10.247.96.1",
+                    "gateway": "10.10.96.1",
                     "subnet": "255.255.248.0",
                     "primaryDns": "10.244.53.108",
                     "secondaryDns": null,
@@ -7828,7 +7828,7 @@
                     "ipAddress": null,
                     "staticRoute": null
                 },
-                "destinationIpAddress": "10.247.96.0"
+                "destinationIpAddress": "10.1096.0"
             }
         ],
         "blockServiceOperationsMap": {

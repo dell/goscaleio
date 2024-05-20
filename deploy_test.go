@@ -1,4 +1,4 @@
-// Copyright © 2021 - 2023 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2023 - 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ import (
 // TestNewGateway tests the NewGateway function.
 func TestNewGateway(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" && r.URL.Path == "/rest/auth/login" {
+		if r.Method == http.MethodPost && r.URL.Path == "/rest/auth/login" {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintln(w, `{"access_token":"mock_access_token"}`)
 			return
 		}
-		if r.Method == "GET" && r.URL.Path == "/api/version" {
+		if r.Method == http.MethodGet && r.URL.Path == "/api/version" {
 			w.Header().Set("Content-Type", "text/plain")
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintln(w, "4.0")
@@ -57,7 +57,7 @@ func TestNewGateway(t *testing.T) {
 // TestGetVersion tests the GetVersion function.
 func TestGetVersion(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "GET" && r.URL.Path == "/api/version" {
+		if r.Method == http.MethodGet && r.URL.Path == "/api/version" {
 			w.Header().Set("Content-Type", "text/plain")
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprintln(w, "4.0")
@@ -83,7 +83,7 @@ func TestGetVersion(t *testing.T) {
 // TestUploadPackages tests the UploadPackages function.
 func TestUploadPackages(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" && r.URL.Path == "/im/types/installationPackages/instances/actions/uploadPackages" {
+		if r.Method == http.MethodPost && r.URL.Path == "/im/types/installationPackages/instances/actions/uploadPackages" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -108,7 +108,7 @@ func TestUploadPackages(t *testing.T) {
 
 func TestParseCSV(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" && r.URL.Path == "/im/types/Configuration/instances/actions/parseFromCSV" {
+		if r.Method == http.MethodPost && r.URL.Path == "/im/types/Configuration/instances/actions/parseFromCSV" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -164,7 +164,7 @@ func TestGetPackageDetails(t *testing.T) {
     }]`
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "GET" && r.URL.Path == "/im/types/installationPackages/instances" {
+		if r.Method == http.MethodGet && r.URL.Path == "/im/types/installationPackages/instances" {
 			w.WriteHeader(http.StatusOK)
 			_, err := w.Write([]byte(responseJSON))
 			if err != nil {
@@ -222,7 +222,7 @@ func TestDeletePackage(t *testing.T) {
 
 func TestBeginInstallation(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" && strings.HasPrefix(r.URL.Path, "/im/types/Configuration/actions/install") {
+		if r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/im/types/Configuration/actions/install") {
 			w.WriteHeader(http.StatusAccepted)
 			return
 		}
@@ -247,7 +247,7 @@ func TestBeginInstallation(t *testing.T) {
 
 func TestMoveToNextPhase(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" && r.URL.Path == "/im/types/ProcessPhase/actions/moveToNextPhase" {
+		if r.Method == http.MethodPost && r.URL.Path == "/im/types/ProcessPhase/actions/moveToNextPhase" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -269,7 +269,7 @@ func TestMoveToNextPhase(t *testing.T) {
 
 func TestRetryPhase(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" && strings.HasPrefix(r.URL.Path, "/im/types/Command/instances/actions/retry") {
+		if r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/im/types/Command/instances/actions/retry") {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -291,7 +291,7 @@ func TestRetryPhase(t *testing.T) {
 
 func TestAbortOperation(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" && r.URL.Path == "/im/types/Command/instances/actions/abort" {
+		if r.Method == http.MethodPost && r.URL.Path == "/im/types/Command/instances/actions/abort" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -313,7 +313,7 @@ func TestAbortOperation(t *testing.T) {
 
 func TestClearQueueCommand(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" && r.URL.Path == "/im/types/Command/instances/actions/clear" {
+		if r.Method == http.MethodPost && r.URL.Path == "/im/types/Command/instances/actions/clear" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -335,7 +335,7 @@ func TestClearQueueCommand(t *testing.T) {
 
 func TestMoveToIdlePhase(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" && r.URL.Path == "/im/types/ProcessPhase/actions/moveToIdlePhase" {
+		if r.Method == http.MethodPost && r.URL.Path == "/im/types/ProcessPhase/actions/moveToIdlePhase" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -361,7 +361,7 @@ func TestCheckForCompletionQueueCommands(t *testing.T) {
 	}`
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "GET" && r.URL.Path == "/im/types/Command/instances" {
+		if r.Method == http.MethodGet && r.URL.Path == "/im/types/Command/instances" {
 			w.WriteHeader(http.StatusOK)
 			_, err := w.Write([]byte(responseJSON))
 			if err != nil {
@@ -388,7 +388,7 @@ func TestCheckForCompletionQueueCommands(t *testing.T) {
 
 func TestUninstallCluster(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" && strings.Contains(r.URL.Path, "/im/types/Configuration/actions/uninstall") {
+		if r.Method == http.MethodPost && strings.Contains(r.URL.Path, "/im/types/Configuration/actions/uninstall") {
 			w.WriteHeader(http.StatusAccepted)
 			return
 		}

@@ -34,7 +34,7 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 
 	path := fmt.Sprintf("/Api/V1/FirmwareRepository/%v", firmwareRepositoryID)
 
-	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
@@ -67,7 +67,7 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 
 	path = fmt.Sprintf("/Api/V1/ServiceTemplate/%v?forDeployment=true", serviceTemplateID)
 
-	req, httpError = http.NewRequest("GET", gc.host+path, nil)
+	req, httpError = http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
@@ -124,7 +124,7 @@ func (gc *GatewayClient) DeployService(deploymentName, deploymentDesc, serviceTe
 	}
 
 	deploymentPayloadJSON, _ := json.Marshal(deploymentPayload)
-	req, httpError = http.NewRequest("POST", gc.host+"/Api/V1/Deployment", bytes.NewBuffer(deploymentPayloadJSON))
+	req, httpError = http.NewRequest(http.MethodPost, gc.host+"/Api/V1/Deployment", bytes.NewBuffer(deploymentPayloadJSON))
 	if httpError != nil {
 		return nil, httpError
 	}
@@ -179,7 +179,7 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 
 	path := fmt.Sprintf("/Api/V1/Deployment/%v", deploymentID)
 
-	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
@@ -446,7 +446,7 @@ func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken boo
 
 		body, _ := json.Marshal(bodyData)
 
-		req, err := http.NewRequest("POST", gc.host+"/rest/auth/login", bytes.NewBuffer(body))
+		req, err := http.NewRequest(http.MethodPost, gc.host+"/rest/auth/login", bytes.NewBuffer(body))
 		if err != nil {
 			return nil, err
 		}
@@ -469,7 +469,7 @@ func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken boo
 		case resp == nil:
 			return nil, errNilReponse
 		case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
-			return nil, gc.api.ParseJSONError(resp)
+			return nil, ParseJSONError(resp)
 		}
 
 		bs, err := io.ReadAll(resp.Body)
@@ -490,7 +490,7 @@ func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken boo
 
 	path := fmt.Sprintf("/Api/V1/Deployment/%v", deploymentID)
 
-	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
@@ -534,7 +534,7 @@ func (gc *GatewayClient) GetServiceDetailsByFilter(filter, value string) ([]type
 	encodedValue := url.QueryEscape(value)
 	path := fmt.Sprintf("/Api/V1/Deployment?filter=eq,%v,%v", filter, encodedValue)
 
-	req, httpError := http.NewRequest("GET", gc.host+path, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
 	if httpError != nil {
 		return nil, httpError
 	}
@@ -579,7 +579,7 @@ func (gc *GatewayClient) GetServiceDetailsByFilter(filter, value string) ([]type
 func (gc *GatewayClient) GetAllServiceDetails() ([]types.ServiceResponse, error) {
 	defer TimeSpent("DeploGetServiceDetailsByIDyService", time.Now())
 
-	req, httpError := http.NewRequest("GET", gc.host+"/Api/V1/Deployment/", nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+"/Api/V1/Deployment/", nil)
 	if httpError != nil {
 		return nil, httpError
 	}
