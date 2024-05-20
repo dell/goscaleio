@@ -7788,7 +7788,7 @@
                 "staticNetworkConfiguration": {
                     "gateway": "10.1039.1",
                     "subnet": "255.255.255.0",
-                    "primaryDns": "10.244.53.108",
+                    "primaryDns": "10.10.13.8",
                     "secondaryDns": null,
                     "dnsSuffix": null,
                     "ipRange": [
@@ -7814,7 +7814,7 @@
                 "staticNetworkConfiguration": {
                     "gateway": "10.10.96.1",
                     "subnet": "255.255.248.0",
-                    "primaryDns": "10.244.53.108",
+                    "primaryDns": "10.10.13.8",
                     "secondaryDns": null,
                     "dnsSuffix": null,
                     "ipRange": [
