@@ -1249,6 +1249,7 @@ func writeConfig(config *CookieConfig) error {
 	return nil
 }
 
+// ParseJSONError parses the JSON in response into an error object
 func ParseJSONError(r *http.Response) error {
 	jsonError := &types.Error{}
 
