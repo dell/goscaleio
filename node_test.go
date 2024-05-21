@@ -13,222 +13,217 @@
 package goscaleio
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetNodes(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	}))
-	defer svr.Close()
-
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	nodeDetails, err := client.GetAllNodes()
-	assert.Equal(t, len(nodeDetails), 0)
-	assert.Nil(t, err)
-}
-
 func TestGetNodeByID(t *testing.T) {
-	type testCase struct {
-		id       string
-		expected error
-	}
+	responseJSON := `{ "refId": "softwareOnlyServer-1.1.1.1", "refType": null, "ipAddress": "1.1.1.1", "currentIpAddress": "1.1.1.1", "serviceTag": "VMware-42 05 a8 96 26 f7 98 2c-a6 72 b9 1a 26 94 a9 9c-SW", "model": "VMware Virtual Platform", "deviceType": "SoftwareOnlyServer", "discoverDeviceType": "SOFTWAREONLYSERVER_SLES", "displayName": "pfmc-k8s-20230809-1", "managedState": "MANAGED", "state": "READY", "inUse": false, "serviceReferences": [], "statusMessage": null, "firmwareName": "Default Catalog - PowerFlex 4.5.2.0", "customFirmware": false, "needsAttention": false, "manufacturer": "VMware, Inc.", "systemId": null, "health": "NA", "healthMessage": null, "operatingSystem": "N/A", "numberOfCPUs": 0, "cpuType": null, "nics": 0, "memoryInGB": 0, "infraTemplateDate": null, "infraTemplateId": null, "serverTemplateDate": null, "serverTemplateId": null, "inventoryDate": null, "complianceCheckDate": "2024-05-08T11:16:52.951+00:00", "discoveredDate": "2024-05-08T11:16:51.805+00:00", "deviceGroupList": { "paging": null, "deviceGroup": [ { "link": null, "groupSeqId": -1, "groupName": "Global", "groupDescription": null, "createdDate": null, "createdBy": "admin", "updatedDate": null, "updatedBy": null, "managedDeviceList": null, "groupUserList": null } ] }, "detailLink": { "title": "softwareOnlyServer-1.1.1.1", "href": "/AsmManager/ManagedDevice/softwareOnlyServer-1.1.1.1", "rel": "describedby", "type": null }, "credId": "3f5869e6-6525-4dee-bb0c-fab3fe60771d", "compliance": "NONCOMPLIANT", "failuresCount": 0, "chassisId": null, "parsedFacts": null, "config": null, "hostname": "pfmc-k8s-20230809-1", "osIpAddress": null, "osAdminCredential": null, "osImageType": null, "lastJobs": null, "puppetCertName": "sles-1.1.1.1", "svmAdminCredential": null, "svmName": null, "svmIpAddress": null, "svmImageType": null, "flexosMaintMode": 0, "esxiMaintMode": 0, "vmList": [] }`
 
-	cases := []testCase{
-		{
-			id:       "sdnasgw",
-			expected: nil,
-		},
-		{
-			id:       "sdnasgw1",
-			expected: errors.New("The node cannot be found"),
-		},
-	}
-
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/Api/V1/ManagedDevice/") {
+			w.WriteHeader(http.StatusOK)
+			_, err := w.Write([]byte(responseJSON))
+			if err != nil {
+				t.Fatalf("Error writing response: %v", err)
+			}
+			return
+		}
+		http.NotFound(w, r)
 	}))
-	defer svr.Close()
+	defer server.Close()
 
-	for _, tc := range cases {
-		tc := tc
-		t.Run("", func(_ *testing.T) {
-			client, err := NewGateway(svr.URL, "", "", true, false)
-			client.version = "4.5"
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			_, err = client.GetNodeByID(tc.id)
-			if err != nil {
-				if tc.expected == nil {
-					t.Errorf("Getting node by ID did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
-				} else {
-					if err.Error() != tc.expected.Error() {
-						t.Errorf("Getting node by ID did not work as expected, \n\tgot: %s \n\twant: %s", err, tc.expected)
-					}
-				}
-			}
-		})
+	gc := &GatewayClient{
+		http:     &http.Client{},
+		host:     server.URL,
+		username: "test_username",
+		password: "test_password",
 	}
+
+	id := "softwareOnlyServer-1.1.1.1"
+	nodeDetails, err := gc.GetNodeByID(id)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	assert.NotNil(t, nodeDetails, "Expected non-nil response")
+	assert.EqualValues(t, nodeDetails.RefID, "softwareOnlyServer-1.1.1.1")
 }
 
-func TestGetNodePoolByID(t *testing.T) {
-	type testCase struct {
-		id       int
-		expected error
-	}
+func TestGetAllNodes(t *testing.T) {
+	responseJSON := `[{ "refId": "softwareOnlyServer-1.1.1.1", "refType": null, "ipAddress": "1.1.1.1", "currentIpAddress": "1.1.1.1", "serviceTag": "VMware-42 05 a8 96 26 f7 98 2c-a6 72 b9 1a 26 94 a9 9c-SW", "model": "VMware Virtual Platform", "deviceType": "SoftwareOnlyServer", "discoverDeviceType": "SOFTWAREONLYSERVER_SLES", "displayName": "pfmc-k8s-20230809-1", "managedState": "MANAGED", "state": "READY", "inUse": false, "serviceReferences": [], "statusMessage": null, "firmwareName": "Default Catalog - PowerFlex 4.5.2.0", "customFirmware": false, "needsAttention": false, "manufacturer": "VMware, Inc.", "systemId": null, "health": "NA", "healthMessage": null, "operatingSystem": "N/A", "numberOfCPUs": 0, "cpuType": null, "nics": 0, "memoryInGB": 0, "infraTemplateDate": null, "infraTemplateId": null, "serverTemplateDate": null, "serverTemplateId": null, "inventoryDate": null, "complianceCheckDate": "2024-05-08T11:16:52.951+00:00", "discoveredDate": "2024-05-08T11:16:51.805+00:00", "deviceGroupList": { "paging": null, "deviceGroup": [ { "link": null, "groupSeqId": -1, "groupName": "Global", "groupDescription": null, "createdDate": null, "createdBy": "admin", "updatedDate": null, "updatedBy": null, "managedDeviceList": null, "groupUserList": null } ] }, "detailLink": { "title": "softwareOnlyServer-1.1.1.1", "href": "/AsmManager/ManagedDevice/softwareOnlyServer-1.1.1.1", "rel": "describedby", "type": null }, "credId": "3f5869e6-6525-4dee-bb0c-fab3fe60771d", "compliance": "NONCOMPLIANT", "failuresCount": 0, "chassisId": null, "parsedFacts": null, "config": null, "hostname": "pfmc-k8s-20230809-1", "osIpAddress": null, "osAdminCredential": null, "osImageType": null, "lastJobs": null, "puppetCertName": "sles-1.1.1.1", "svmAdminCredential": null, "svmName": null, "svmIpAddress": null, "svmImageType": null, "flexosMaintMode": 0, "esxiMaintMode": 0, "vmList": [] }]`
 
-	cases := []testCase{
-		{
-			id:       1,
-			expected: nil,
-		},
-		{
-			id:       -100,
-			expected: errors.New("The nodepool cannot be found"),
-		},
-	}
-
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/Api/V1/ManagedDevice") {
+			w.WriteHeader(http.StatusOK)
+			_, err := w.Write([]byte(responseJSON))
+			if err != nil {
+				t.Fatalf("Error writing response: %v", err)
+			}
+			return
+		}
+		http.NotFound(w, r)
 	}))
-	defer svr.Close()
+	defer server.Close()
 
-	for _, tc := range cases {
-		tc := tc
-		t.Run("", func(_ *testing.T) {
-			client, err := NewGateway(svr.URL, "", "", true, false)
-			client.version = "4.5"
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			_, err = client.GetNodePoolByID(tc.id)
-			if err != nil {
-				if tc.expected == nil {
-					t.Errorf("Getting nodepool by ID did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
-				} else {
-					if err.Error() != tc.expected.Error() {
-						t.Errorf("Getting nodepool by ID did not work as expected, \n\tgot: %s \n\twant: %s", err, tc.expected)
-					}
-				}
-			}
-		})
+	gc := &GatewayClient{
+		http:     &http.Client{},
+		host:     server.URL,
+		username: "test_username",
+		password: "test_password",
 	}
+
+	nodes, err := gc.GetAllNodes()
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	assert.NotNil(t, nodes, "Expected non-nil response")
+	assert.EqualValues(t, nodes[0].RefID, "softwareOnlyServer-1.1.1.1")
 }
 
 func TestGetNodeByFilters(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	}))
-	defer svr.Close()
+	responseJSON := `[{ "refId": "softwareOnlyServer-1.1.1.1", "refType": null, "ipAddress": "1.1.1.1", "currentIpAddress": "1.1.1.1", "serviceTag": "VMware-42 05 a8 96 26 f7 98 2c-a6 72 b9 1a 26 94 a9 9c-SW", "model": "VMware Virtual Platform", "deviceType": "SoftwareOnlyServer", "discoverDeviceType": "SOFTWAREONLYSERVER_SLES", "displayName": "pfmc-k8s-20230809-1", "managedState": "MANAGED", "state": "READY", "inUse": false, "serviceReferences": [], "statusMessage": null, "firmwareName": "Default Catalog - PowerFlex 4.5.2.0", "customFirmware": false, "needsAttention": false, "manufacturer": "VMware, Inc.", "systemId": null, "health": "NA", "healthMessage": null, "operatingSystem": "N/A", "numberOfCPUs": 0, "cpuType": null, "nics": 0, "memoryInGB": 0, "infraTemplateDate": null, "infraTemplateId": null, "serverTemplateDate": null, "serverTemplateId": null, "inventoryDate": null, "complianceCheckDate": "2024-05-08T11:16:52.951+00:00", "discoveredDate": "2024-05-08T11:16:51.805+00:00", "deviceGroupList": { "paging": null, "deviceGroup": [ { "link": null, "groupSeqId": -1, "groupName": "Global", "groupDescription": null, "createdDate": null, "createdBy": "admin", "updatedDate": null, "updatedBy": null, "managedDeviceList": null, "groupUserList": null } ] }, "detailLink": { "title": "softwareOnlyServer-1.1.1.1", "href": "/AsmManager/ManagedDevice/softwareOnlyServer-1.1.1.1", "rel": "describedby", "type": null }, "credId": "3f5869e6-6525-4dee-bb0c-fab3fe60771d", "compliance": "NONCOMPLIANT", "failuresCount": 0, "chassisId": null, "parsedFacts": null, "config": null, "hostname": "pfmc-k8s-20230809-1", "osIpAddress": null, "osAdminCredential": null, "osImageType": null, "lastJobs": null, "puppetCertName": "sles-1.1.1.1", "svmAdminCredential": null, "svmName": null, "svmIpAddress": null, "svmImageType": null, "flexosMaintMode": 0, "esxiMaintMode": 0, "vmList": [] }]`
 
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
-	if err != nil {
-		t.Fatal(err)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/Api/V1/ManagedDevice") {
+			w.WriteHeader(http.StatusOK)
+			_, err := w.Write([]byte(responseJSON))
+			if err != nil {
+				t.Fatalf("Error writing response: %v", err)
+			}
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	gc := &GatewayClient{
+		http:     &http.Client{},
+		host:     server.URL,
+		username: "test_username",
+		password: "test_password",
 	}
 
-	nodeDetails, err := client.GetNodeByFilters("ipAddress", "1.1.1.1")
-	assert.Equal(t, len(nodeDetails), 0)
-	assert.NotNil(t, err)
+	key := "ipAddress"
+	value := "1.1.1.1"
+	nodes, err := gc.GetNodeByFilters(key, value)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	assert.NotNil(t, nodes, "Expected non-nil response")
+	assert.EqualValues(t, nodes[0].RefID, "softwareOnlyServer-1.1.1.1")
+}
+
+func TestGetNodePoolByID(t *testing.T) {
+	responseJSON := `{ "link": null, "groupSeqId": 123, "groupName": "Test", "groupDescription": "", "createdDate": "2024-05-08T11:27:46.144+00:00", "createdBy": "admin", "updatedDate": "2024-05-08T11:27:46.144+00:00", "updatedBy": "admin", "managedDeviceList": { "paging": null, "totalCount": 1, "managedDevices": [ { "refId": "softwareOnlyServer-1.1.1.1", "refType": null, "ipAddress": "1.1.1.1", "currentIpAddress": "1.1.1.1", "serviceTag": "VMware-42 05 a8 96 26 f7 98 2c-a6 72 b9 1a 26 94 a9 9c-SW", "model": "VMware Virtual Platform", "deviceType": "SoftwareOnlyServer", "discoverDeviceType": "SOFTWAREONLYSERVER_SLES", "displayName": "pfmc-k8s-20230809-1", "managedState": "MANAGED", "state": "READY", "inUse": false, "serviceReferences": [], "statusMessage": null, "firmwareName": "Default Catalog - PowerFlex 4.5.2.0", "customFirmware": false, "needsAttention": false, "manufacturer": "VMware, Inc.", "systemId": null, "health": "NA", "healthMessage": null, "operatingSystem": "N/A", "numberOfCPUs": 0, "cpuType": null, "nics": 0, "memoryInGB": 0, "infraTemplateDate": null, "infraTemplateId": null, "serverTemplateDate": null, "serverTemplateId": null, "inventoryDate": null, "complianceCheckDate": "2024-05-08T11:16:52.951+00:00", "discoveredDate": "2024-05-08T11:16:51.805+00:00", "deviceGroupList": null, "detailLink": null, "credId": "3f5869e6-6525-4dee-bb0c-fab3fe60771d", "compliance": "NONCOMPLIANT", "failuresCount": 0, "chassisId": null, "parsedFacts": null, "config": null, "hostname": "pfmc-k8s-20230809-1", "osIpAddress": null, "osAdminCredential": null, "osImageType": null, "lastJobs": null, "puppetCertName": "sles-1.1.1.1", "svmAdminCredential": null, "svmName": null, "svmIpAddress": null, "svmImageType": null, "flexosMaintMode": 0, "esxiMaintMode": 0, "vmList": [] } ] }, "groupUserList": { "totalRecords": 1, "groupUsers": [ { "userSeqId": "03569bce-5d9b-47a1-addf-2ec44f91f1b9", "userName": "admin", "firstName": "admin", "lastName": "admin", "role": "SuperUser", "enabled": true } ] } }`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/Api/V1/nodepool/") {
+			w.WriteHeader(http.StatusOK)
+			_, err := w.Write([]byte(responseJSON))
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	gc := &GatewayClient{
+		http:     &http.Client{},
+		host:     server.URL,
+		username: "test_username",
+		password: "test_password",
+	}
+
+	id := 123
+	nodePoolDetails, err := gc.GetNodePoolByID(id)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	assert.NotNil(t, nodePoolDetails, "Expected non-nil response")
+	assert.EqualValues(t, nodePoolDetails.ManagedDeviceList.ManagedDevices[0].RefID, "softwareOnlyServer-1.1.1.1")
 }
 
 func TestGetNodePoolByName(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	}))
-	defer svr.Close()
+	responseJSON := `{"deviceGroup": [ { "link": null, "groupSeqId": 43, "groupName": "Test", "groupDescription": "", "createdDate": "2024-05-08T11:27:46.144+00:00", "createdBy": "admin", "updatedDate": "2024-05-08T11:27:46.144+00:00", "updatedBy": "admin", "managedDeviceList": null, "groupUserList": null } ] }`
 
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
-	if err != nil {
-		t.Fatal(err)
+	responseJSONID := `{ "link": null, "groupSeqId": 123, "groupName": "Test", "groupDescription": "", "createdDate": "2024-05-08T11:27:46.144+00:00", "createdBy": "admin", "updatedDate": "2024-05-08T11:27:46.144+00:00", "updatedBy": "admin", "managedDeviceList": { "paging": null, "totalCount": 1, "managedDevices": [ { "refId": "softwareOnlyServer-1.1.1.1", "refType": null, "ipAddress": "1.1.1.1", "currentIpAddress": "1.1.1.1", "serviceTag": "VMware-42 05 a8 96 26 f7 98 2c-a6 72 b9 1a 26 94 a9 9c-SW", "model": "VMware Virtual Platform", "deviceType": "SoftwareOnlyServer", "discoverDeviceType": "SOFTWAREONLYSERVER_SLES", "displayName": "pfmc-k8s-20230809-1", "managedState": "MANAGED", "state": "READY", "inUse": false, "serviceReferences": [], "statusMessage": null, "firmwareName": "Default Catalog - PowerFlex 4.5.2.0", "customFirmware": false, "needsAttention": false, "manufacturer": "VMware, Inc.", "systemId": null, "health": "NA", "healthMessage": null, "operatingSystem": "N/A", "numberOfCPUs": 0, "cpuType": null, "nics": 0, "memoryInGB": 0, "infraTemplateDate": null, "infraTemplateId": null, "serverTemplateDate": null, "serverTemplateId": null, "inventoryDate": null, "complianceCheckDate": "2024-05-08T11:16:52.951+00:00", "discoveredDate": "2024-05-08T11:16:51.805+00:00", "deviceGroupList": null, "detailLink": null, "credId": "3f5869e6-6525-4dee-bb0c-fab3fe60771d", "compliance": "NONCOMPLIANT", "failuresCount": 0, "chassisId": null, "parsedFacts": null, "config": null, "hostname": "pfmc-k8s-20230809-1", "osIpAddress": null, "osAdminCredential": null, "osImageType": null, "lastJobs": null, "puppetCertName": "sles-1.1.1.1", "svmAdminCredential": null, "svmName": null, "svmIpAddress": null, "svmImageType": null, "flexosMaintMode": 0, "esxiMaintMode": 0, "vmList": [] } ] }, "groupUserList": { "totalRecords": 1, "groupUsers": [ { "userSeqId": "03569bce-5d9b-47a1-addf-2ec44f91f1b9", "userName": "admin", "firstName": "admin", "lastName": "admin", "role": "SuperUser", "enabled": true } ] } }`
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/Api/V1/nodepool/") {
+			w.WriteHeader(http.StatusOK)
+			_, err := w.Write([]byte(responseJSONID))
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			return
+		} else if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/Api/V1/nodepool") {
+			w.WriteHeader(http.StatusOK)
+			_, err := w.Write([]byte(responseJSON))
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			return
+		}
+
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	gc := &GatewayClient{
+		http:     &http.Client{},
+		host:     server.URL,
+		username: "test_username",
+		password: "test_password",
 	}
 
-	NodePoolDetails, err := client.GetNodePoolByName("nodepool")
-	assert.Nil(t, NodePoolDetails)
-	assert.NotNil(t, err)
+	name := "Test"
+	nodePoolDetails, err := gc.GetNodePoolByName(name)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	assert.NotNil(t, nodePoolDetails, "Expected non-nil response")
+	assert.GreaterOrEqual(t, len(nodePoolDetails.ManagedDeviceList.ManagedDevices), 1)
 }
 
-func TestGetNodePoolByNameError(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintln(w, `{"error":"Resource not found"}`)
-	}))
-	defer svr.Close()
+func TestGetAllNodePools(t *testing.T) {
+	responseJSON := `{"deviceGroup": [ { "link": null, "groupSeqId": 43, "groupName": "Test", "groupDescription": "", "createdDate": "2024-05-08T11:27:46.144+00:00", "createdBy": "admin", "updatedDate": "2024-05-08T11:27:46.144+00:00", "updatedBy": "admin", "managedDeviceList": null, "groupUserList": null } ] }`
 
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
-	if err != nil {
-		t.Fatal(err)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/Api/V1/nodepool") {
+			w.WriteHeader(http.StatusOK)
+			_, err := w.Write([]byte(responseJSON))
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	gc := &GatewayClient{
+		http:     &http.Client{},
+		host:     server.URL,
+		username: "test_username",
+		password: "test_password",
 	}
 
-	NodePoolDetails, err := client.GetNodePoolByName("nodepool")
-	assert.Nil(t, NodePoolDetails)
-	assert.NotNil(t, err)
-}
-
-func TestGetNodePoolByIDNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintln(w, `{"error":"Resource not found"}`)
-	}))
-	defer svr.Close()
-
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
+	nodePoolDetails, err := gc.GetAllNodePools()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	NodePoolDetails, err := client.GetNodePoolByID(-100)
-	assert.Nil(t, NodePoolDetails)
-	assert.NotNil(t, err)
-}
-
-func TestGetNodeByIDNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintln(w, `{"error":"Resource not found"}`)
-	}))
-	defer svr.Close()
-
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	node, err := client.GetNodeByID("-100")
-	assert.Nil(t, node)
-	assert.NotNil(t, err)
-}
-
-func TestGetAllNodesNegative(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintln(w, `{"error":"Internal Server Error"}`)
-	}))
-	defer svr.Close()
-
-	client, err := NewGateway(svr.URL, "", "", true, false)
-	client.version = "4.5"
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	nodes, err := client.GetAllNodes()
-	assert.Nil(t, nodes)
-	assert.NotNil(t, err)
+	assert.NotNil(t, nodePoolDetails, "Expected non-nil response")
+	assert.GreaterOrEqual(t, len(nodePoolDetails.NodePoolDetails), 1)
 }

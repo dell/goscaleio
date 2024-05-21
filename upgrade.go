@@ -29,7 +29,7 @@ func (gc *GatewayClient) UploadCompliance(uploadComplianceParam *types.UploadCom
 		return &uploadResponse, err
 	}
 
-	req, httpError := http.NewRequest("POST", gc.host+"/Api/V1/FirmwareRepository", bytes.NewBuffer(jsonData))
+	req, httpError := http.NewRequest(http.MethodPost, gc.host+"/Api/V1/FirmwareRepository", bytes.NewBuffer(jsonData))
 	if httpError != nil {
 		return &uploadResponse, httpError
 	}
@@ -77,7 +77,7 @@ func (gc *GatewayClient) UploadCompliance(uploadComplianceParam *types.UploadCom
 func (gc *GatewayClient) GetUploadComplianceDetails(id string) (*types.UploadComplianceTopologyDetails, error) {
 	var getUploadCompResponse types.UploadComplianceTopologyDetails
 
-	req, httpError := http.NewRequest("GET", gc.host+"/Api/V1/FirmwareRepository/"+id, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+"/Api/V1/FirmwareRepository/"+id, nil)
 	if httpError != nil {
 		return &getUploadCompResponse, httpError
 	}
