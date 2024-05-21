@@ -7802,7 +7802,7 @@
                     "ipAddress": null,
                     "staticRoute": null
                 },
-                "destinationIpAddress": "10.1039.0"
+                "destinationIpAddress": "10.10.39.0"
             },
             {
                 "id": "8aaaee038c939c14018ccf1aae270000",
