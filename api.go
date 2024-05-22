@@ -107,7 +107,7 @@ type ClientPersistent struct {
 // 	return version, nil
 // }
 
-func (s *System) GetVersion() (string, error) {
+func (c *Client) GetVersion() (string, error) {
 	defer TimeSpent("GetVersion", time.Now())
 
 	fmt.Println("inside versinnnn block")
@@ -117,7 +117,7 @@ func (s *System) GetVersion() (string, error) {
 		Version string `json:"version"`
 	}
 
-	err := s.client.getJSONWithRetry(
+	err := c.getJSONWithRetry(
 		http.MethodGet, path, nil, &versionResponse)
 	if err != nil {
 		return "", fmt.Errorf("error getting version of ScaleIO: %w", err)
