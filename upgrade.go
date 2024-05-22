@@ -80,7 +80,7 @@ func (gc *GatewayClient) GetUploadComplianceDetails(id string, newToken bool) (*
 	var getUploadCompResponse types.UploadComplianceTopologyDetails
 	var err error
 	if newToken {
-		gc, err = NewGateway(gc.host, gc.username, gc.password, true, false, newToken)
+		gc, err = NewGateway(gc.host, gc.username, gc.password, gc.insecure, true)
 		if err != nil {
 			return nil, err
 		}

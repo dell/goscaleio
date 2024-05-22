@@ -43,7 +43,7 @@ func TestNewGateway(t *testing.T) {
 
 	defer server.Close()
 
-	gc, err := NewGateway(server.URL, "test_username", "test_password", false, false, false)
+	gc, err := NewGateway(server.URL, "test_username", "test_password", false, false)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}

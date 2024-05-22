@@ -49,10 +49,11 @@ type GatewayClient struct {
 	password string
 	token    string
 	version  string
+	insecure bool
 }
 
 // NewGateway returns a new gateway client.
-func NewGateway(host string, username, password string, insecure, useCerts, newToken bool) (*GatewayClient, error) {
+func NewGateway(host string, username, password string, insecure, useCerts bool) (*GatewayClient, error) {
 	if host == "" {
 		return nil, errNewClient
 	}
@@ -62,108 +63,50 @@ func NewGateway(host string, username, password string, insecure, useCerts, newT
 		host:     host,
 		username: username,
 		password: password,
+		insecure: insecure,
 	}
 
-	if !newToken {
-		if insecure {
-			gc.http.Transport = &http.Transport{
-				TLSClientConfig: &tls.Config{
-					// #nosec G402
-					InsecureSkipVerify: true,
-				},
-			}
+	if insecure {
+		gc.http.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				// #nosec G402
+				InsecureSkipVerify: true,
+			},
 		}
+	}
 
-		if !insecure || useCerts {
-			pool, err := x509.SystemCertPool()
-			if err != nil {
-				return nil, errSysCerts
-			}
-
-			gc.http.Transport = &http.Transport{
-				TLSClientConfig: &tls.Config{
-					RootCAs: pool,
-					// #nosec G402
-					InsecureSkipVerify: insecure,
-				},
-			}
-		}
-
-		version, err := gc.GetVersion()
+	if !insecure || useCerts {
+		pool, err := x509.SystemCertPool()
 		if err != nil {
-			return nil, err
+			return nil, errSysCerts
 		}
 
-		if version == "3.5" {
-			gc.version = version
-			// No need to create token
-		} else {
-			bodyData := map[string]interface{}{
-				"username": username,
-				"password": password,
-			}
-
-			body, _ := json.Marshal(bodyData)
-
-			req, err := http.NewRequest(http.MethodPost, host+"/rest/auth/login", bytes.NewBuffer(body))
-			if err != nil {
-				return nil, err
-			}
-
-			req.Header.Add("Content-Type", "application/json")
-
-			resp, err := gc.http.Do(req)
-			if err != nil {
-				return nil, err
-			}
-
-			defer func() {
-				if err := resp.Body.Close(); err != nil {
-					doLog(log.WithError(err).Error, "")
-				}
-			}()
-
-			// parse the response
-			switch {
-			case resp == nil:
-				return nil, errNilReponse
-			case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
-				return nil, ParseJSONError(resp)
-			}
-
-			bs, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return nil, err
-			}
-
-			responseBody := string(bs)
-
-			result := make(map[string]interface{})
-			jsonErr := json.Unmarshal([]byte(responseBody), &result)
-			if err != nil {
-				return nil, fmt.Errorf("Error For Uploading Package: %s", jsonErr)
-			}
-
-			token := result["access_token"].(string)
-
-			gc.token = token
-
-			version, err = gc.GetVersion()
-			if err != nil {
-				return nil, err
-			}
-			gc.version = version
+		gc.http.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				RootCAs: pool,
+				// #nosec G402
+				InsecureSkipVerify: insecure,
+			},
 		}
+	}
 
+	version, err := gc.GetVersion()
+	if err != nil {
+		return nil, err
+	}
+
+	if version == "3.5" {
+		gc.version = version
+		// No need to create token
 	} else {
 		bodyData := map[string]interface{}{
-			"username": gc.username,
-			"password": gc.password,
+			"username": username,
+			"password": password,
 		}
 
 		body, _ := json.Marshal(bodyData)
 
-		req, err := http.NewRequest(http.MethodPost, gc.host+"/rest/auth/login", bytes.NewBuffer(body))
+		req, err := http.NewRequest(http.MethodPost, host+"/rest/auth/login", bytes.NewBuffer(body))
 		if err != nil {
 			return nil, err
 		}
@@ -195,6 +138,7 @@ func NewGateway(host string, username, password string, insecure, useCerts, newT
 		}
 
 		responseBody := string(bs)
+
 		result := make(map[string]interface{})
 		jsonErr := json.Unmarshal([]byte(responseBody), &result)
 		if err != nil {
@@ -202,8 +146,16 @@ func NewGateway(host string, username, password string, insecure, useCerts, newT
 		}
 
 		token := result["access_token"].(string)
+
 		gc.token = token
+
+		version, err = gc.GetVersion()
+		if err != nil {
+			return nil, err
+		}
+		gc.version = version
 	}
+
 	return gc, nil
 }
 

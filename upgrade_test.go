@@ -43,7 +43,7 @@ func TestUploadCompliance(t *testing.T) {
 		tc := tc
 
 		t.Run("", func(_ *testing.T) {
-			GC, err := NewGateway(svr.URL, "", "", true, true, false)
+			GC, err := NewGateway(svr.URL, "", "", true, true)
 			if err != nil {
 				t.Fatal(err)
 			}
