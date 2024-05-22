@@ -163,7 +163,7 @@ func NewGateway(host string, username, password string, insecure, useCerts, newT
 
 		body, _ := json.Marshal(bodyData)
 
-		req, err := http.NewRequest("POST", gc.host+"/rest/auth/login", bytes.NewBuffer(body))
+		req, err := http.NewRequest(http.MethodPost, gc.host+"/rest/auth/login", bytes.NewBuffer(body))
 		if err != nil {
 			return nil, err
 		}

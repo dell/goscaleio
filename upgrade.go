@@ -86,7 +86,7 @@ func (gc *GatewayClient) GetUploadComplianceDetails(id string, newToken bool) (*
 		}
 	}
 
-	req, httpError := http.NewRequest("GET", gc.host+"/Api/V1/FirmwareRepository/"+id, nil)
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+"/Api/V1/FirmwareRepository/"+id, nil)
 	if httpError != nil {
 		return &getUploadCompResponse, httpError
 	}
