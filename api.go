@@ -80,6 +80,21 @@ func (c *Client) GetVersion() (string, error) {
 		return "", err
 	}
 
+	if e, ok := err.(*types.Error); ok {
+		doLog(log.WithError(err).Debug, fmt.Sprintf("Got JSON error: %+v", e))
+		if e.HTTPStatusCode == 401 {
+			doLog(log.Info, "Need to re-auth")
+			// Authenticate then try again
+			if _, err := c.Authenticate(c.configConnect); err != nil {
+				return fmt.Errorf("Error Authenticating: %s", err)
+			}
+			return c.api.DoAndGetResponseBody(
+		               context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
+		}
+	}
+	doLog(log.WithError(err).Error, "returning error1111111112222")
+
+
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
 			doLog(log.WithError(err).Error, "")
