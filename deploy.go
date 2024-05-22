@@ -155,7 +155,6 @@ func NewGateway(host string, username, password string, insecure, useCerts, newT
 			gc.version = version
 		}
 
-		return gc, nil
 	} else {
 		bodyData := map[string]interface{}{
 			"username": gc.username,
