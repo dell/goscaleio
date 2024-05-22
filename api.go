@@ -71,54 +71,63 @@ type ClientPersistent struct {
 }
 
 // GetVersion returns version
+// func (c *Client) GetVersion() (string, error) {
+// 	fmt.Println("inside versinnnn block")
+// 	resp, err := c.api.DoAndGetResponseBody(
+// 		context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
+// 	if err != nil {
+// 		fmt.Println("goscalio errrrrrr", err)
+// 		return "", err
+// 	}
+
+// 	defer func() {
+// 		if err := resp.Body.Close(); err != nil {
+// 			doLog(log.WithError(err).Error, "")
+// 		}
+// 	}()
+
+// 	// parse the response
+// 	switch {
+// 	case resp == nil:
+// 		return "", errNilReponse
+// 	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
+// 		return "", c.api.ParseJSONError(resp)
+// 	}
+
+// 	version, err := extractString(resp)
+// 	fmt.Println("goscalio errrrrrr11111", err)
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+// 	versionRX := regexp.MustCompile(`^(\d+?\.\d+?).*$`)
+// 	if m := versionRX.FindStringSubmatch(version); len(m) > 0 {
+// 		return m[1], nil
+// 	}
+// 	return version, nil
+// }
+
 func (c *Client) GetVersion() (string, error) {
+	defer TimeSpent("GetVersion", time.Now())
+
 	fmt.Println("inside versinnnn block")
-	resp, err := c.api.DoAndGetResponseBody(
-		context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
+	path := "/api/version"
+	var versionResponse struct {
+		Version string `json:"version"`
+	}
+
+	err := c.getJSONWithRetry(
+		http.MethodGet, path, nil, &versionResponse)
 	if err != nil {
-		fmt.Println("goscalio errrrrrr", err)
-		return "", err
+		return "", errors.New("couldn't get version222222222222")
 	}
 
-	if e, ok := err.(*types.Error); ok {
-		doLog(log.WithError(err).Debug, fmt.Sprintf("Got JSON error: %+v", e))
-		if e.HTTPStatusCode == 401 {
-			doLog(log.Info, "Need to re-auth")
-			// Authenticate then try again
-			if _, err := c.Authenticate(c.configConnect); err != nil {
-				return fmt.Errorf("Error Authenticating: %s", err)
-			}
-			return c.api.DoAndGetResponseBody(
-		               context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
-		}
-	}
-	doLog(log.WithError(err).Error, "returning error1111111112222")
-
-
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			doLog(log.WithError(err).Error, "")
-		}
-	}()
-
-	// parse the response
-	switch {
-	case resp == nil:
-		return "", errNilReponse
-	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
-		return "", c.api.ParseJSONError(resp)
-	}
-
-	version, err := extractString(resp)
-	fmt.Println("goscalio errrrrrr11111", err)
-	if err != nil {
-		return "", err
-	}
-
+	version := versionResponse.Version
 	versionRX := regexp.MustCompile(`^(\d+?\.\d+?).*$`)
 	if m := versionRX.FindStringSubmatch(version); len(m) > 0 {
 		return m[1], nil
 	}
+	fmt.Println("version inside goscaleioooo", version)
 	return version, nil
 }
 
