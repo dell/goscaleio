@@ -107,28 +107,30 @@ type ClientPersistent struct {
 // 	return version, nil
 // }
 
-func (c *Client) GetVersion() (string, error) {
+func (s *System) GetVersion() (string, error) {
 	defer TimeSpent("GetVersion", time.Now())
 
 	fmt.Println("inside versinnnn block")
+
 	path := "/api/version"
 	var versionResponse struct {
 		Version string `json:"version"`
 	}
 
-	err := c.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &versionResponse)
 	if err != nil {
-		return "", errors.New("couldn't get version222222222222")
+		return "", fmt.Errorf("error getting version of ScaleIO: %w", err)
 	}
 
 	version := versionResponse.Version
+	fmt.Println("version inside goscaleio", version)
 	versionRX := regexp.MustCompile(`^(\d+?\.\d+?).*$`)
 	if m := versionRX.FindStringSubmatch(version); len(m) > 0 {
 		return m[1], nil
 	}
-	fmt.Println("version inside goscaleioooo", version)
-	return version, nil
+
+	return "", errors.New("version format is invalid")
 }
 
 // updateVersion updates version
