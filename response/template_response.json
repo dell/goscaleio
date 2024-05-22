@@ -1,0 +1,191 @@
+{
+    "id": "12345",
+    "templateName": "Test",
+    "templateDescription": "",
+    "templateType": "VxRack FLEX",
+    "templateVersion": "4.5.0.0",
+    "templateValid": {
+        "valid": true,
+        "messages": []
+    },
+    "originalTemplateId": null,
+    "templateLocked": false,
+    "draft": false,
+    "inConfiguration": false,
+    "createdDate": "2024-02-19T10:50:45.648+00:00",
+    "createdBy": "admin",
+    "updatedDate": "2024-05-09T10:06:02.744+00:00",
+    "lastDeployedDate": "2024-05-09T10:06:02.737+00:00",
+    "updatedBy": "admin",
+    "components": [
+        {
+            "id": "7f54bbd1-6c5d-43d8-8241-19226e10f519",
+            "componentID": "component-scaleio-gateway-1",
+            "identifier": null,
+            "componentValid": {
+                "valid": true,
+                "messages": []
+            },
+            "puppetCertName": null,
+            "osPuppetCertName": null,
+            "name": "PowerFlex Cluster",
+            "type": "SCALEIO",
+            "subType": "HYPERCONVERGED",
+            "teardown": false,
+            "helpText": null,
+            "managementIpAddress": null,
+            "configFile": null,
+            "serialNumber": null,
+            "asmGUID": null,
+            "relatedComponents": {
+                "ac74c075-6dca-453e-a526-397ffde04b76": "Node (Software Only)"
+            },
+            "resources": [],
+            "refId": null,
+            "cloned": false,
+            "clonedFromId": null,
+            "manageFirmware": false,
+            "brownfield": false,
+            "instances": 1,
+            "clonedFromAsmGuid": null,
+            "ip": null
+        },
+        {
+            "id": "ac74c075-6dca-453e-a526-397ffde04b76",
+            "componentID": "component-server-software-only-1",
+            "identifier": null,
+            "componentValid": {
+                "valid": true,
+                "messages": []
+            },
+            "puppetCertName": null,
+            "osPuppetCertName": null,
+            "name": "Node (Software Only)",
+            "type": "SERVER",
+            "subType": null,
+            "teardown": false,
+            "helpText": null,
+            "managementIpAddress": null,
+            "configFile": null,
+            "serialNumber": null,
+            "asmGUID": null,
+            "relatedComponents": {
+                "7f54bbd1-6c5d-43d8-8241-19226e10f519": "PowerFlex Cluster"
+            },
+            "resources": [],
+            "refId": null,
+            "cloned": false,
+            "clonedFromId": null,
+            "manageFirmware": false,
+            "brownfield": false,
+            "instances": 3,
+            "clonedFromAsmGuid": null,
+            "ip": null
+        }
+    ],
+    "category": "Software Only",
+    "allUsersAllowed": false,
+    "assignedUsers": [],
+    "manageFirmware": true,
+    "useDefaultCatalog": false,
+    "firmwareRepository": {
+        "id": "8aaaee208c8c467e018cd37813250614",
+        "name": "PowerFlex 4.5.1.0",
+        "sourceLocation": null,
+        "sourceType": null,
+        "diskLocation": null,
+        "filename": null,
+        "md5Hash": null,
+        "username": null,
+        "password": null,
+        "downloadStatus": null,
+        "createdDate": null,
+        "createdBy": null,
+        "updatedDate": null,
+        "updatedBy": null,
+        "defaultCatalog": false,
+        "embedded": false,
+        "state": null,
+        "softwareComponents": [],
+        "softwareBundles": [],
+        "deployments": [],
+        "bundleCount": 0,
+        "componentCount": 0,
+        "userBundleCount": 0,
+        "minimal": false,
+        "downloadProgress": 0,
+        "extractProgress": 0,
+        "fileSizeInGigabytes": null,
+        "signedKeySourceLocation": null,
+        "signature": null,
+        "custom": false,
+        "needsAttention": false,
+        "jobId": null,
+        "rcmapproved": false
+    },
+    "licenseRepository": null,
+    "configuration": null,
+    "serverCount": 3,
+    "storageCount": 0,
+    "clusterCount": 1,
+    "serviceCount": 0,
+    "switchCount": 0,
+    "vmCount": 0,
+    "sdnasCount": 0,
+    "brownfieldTemplateType": "NONE",
+    "networks": [
+        {
+            "id": "8aaaee038c939c14018cd3defc590004",
+            "name": "LGLOU",
+            "description": "",
+            "type": "SCALEIO_DATA",
+            "vlanId": 1,
+            "static": true,
+            "staticNetworkConfiguration": {
+                "gateway": "10.1039.1",
+                "subnet": "255.255.255.0",
+                "primaryDns": "10.10.13.8",
+                "secondaryDns": null,
+                "dnsSuffix": null,
+                "ipRange": [
+                    {
+                        "id": "8aaaee328cfd27d1018d5953e3380a0d",
+                        "startingIp": "10.1039.122",
+                        "endingIp": "10.1039.132",
+                        "role": null
+                    }
+                ],
+                "ipAddress": null,
+                "staticRoute": null
+            },
+            "destinationIpAddress": "10.10.39.0"
+        },
+        {
+            "id": "8aaaee038c939c14018ccf1aae270000",
+            "name": "PFlexManagement",
+            "description": "",
+            "type": "SCALEIO_MANAGEMENT",
+            "vlanId": 1,
+            "static": true,
+            "staticNetworkConfiguration": {
+                "gateway": "10.10.96.1",
+                "subnet": "255.255.248.0",
+                "primaryDns": "10.10.13.8",
+                "secondaryDns": null,
+                "dnsSuffix": null,
+                "ipRange": [
+                    {
+                        "id": "8aaaee328cfd27d1018d59effa9c0a41",
+                        "startingIp": "10.10.10.14",
+                        "endingIp": "10.10.10.9",
+                        "role": null
+                    }
+                ],
+                "ipAddress": null,
+                "staticRoute": null
+            },
+            "destinationIpAddress": "10.1096.0"
+        }
+    ],
+    "blockServiceOperationsMap": {}
+}

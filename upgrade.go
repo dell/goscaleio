@@ -17,12 +17,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 
 	types "github.com/dell/goscaleio/types/v1"
-	log "github.com/sirupsen/logrus"
 )
 
 // UploadCompliance function is used for uploading the compliance file.
@@ -33,7 +31,7 @@ func (gc *GatewayClient) UploadCompliance(uploadComplianceParam *types.UploadCom
 		return &uploadResponse, err
 	}
 
-	req, httpError := http.NewRequest("POST", gc.host+"/Api/V1/FirmwareRepository", bytes.NewBuffer(jsonData))
+	req, httpError := http.NewRequest(http.MethodPost, gc.host+"/Api/V1/FirmwareRepository", bytes.NewBuffer(jsonData))
 	if httpError != nil {
 		return &uploadResponse, httpError
 	}
@@ -80,55 +78,12 @@ func (gc *GatewayClient) UploadCompliance(uploadComplianceParam *types.UploadCom
 // GetUploadComplianceDetails function is used for getting the details of the compliance upload
 func (gc *GatewayClient) GetUploadComplianceDetails(id string, newToken bool) (*types.UploadComplianceTopologyDetails, error) {
 	var getUploadCompResponse types.UploadComplianceTopologyDetails
-
+	var err error
 	if newToken {
-		bodyData := map[string]interface{}{
-			"username": gc.username,
-			"password": gc.password,
-		}
-
-		body, _ := json.Marshal(bodyData)
-
-		req, err := http.NewRequest("POST", gc.host+"/rest/auth/login", bytes.NewBuffer(body))
+		gc, err = NewGateway(gc.host, gc.username, gc.password, true, false, newToken)
 		if err != nil {
 			return nil, err
 		}
-
-		req.Header.Add("Content-Type", "application/json")
-
-		resp, err := gc.http.Do(req)
-		if err != nil {
-			return nil, err
-		}
-
-		defer func() {
-			if err := resp.Body.Close(); err != nil {
-				doLog(log.WithError(err).Error, "")
-			}
-		}()
-
-		// parse the response
-		switch {
-		case resp == nil:
-			return nil, errNilReponse
-		case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
-			return nil, gc.api.ParseJSONError(resp)
-		}
-
-		bs, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-
-		responseBody := string(bs)
-		result := make(map[string]interface{})
-		jsonErr := json.Unmarshal([]byte(responseBody), &result)
-		if err != nil {
-			return nil, fmt.Errorf("Error For Uploading Package: %s", jsonErr)
-		}
-
-		token := result["access_token"].(string)
-		gc.token = token
 	}
 
 	req, httpError := http.NewRequest("GET", gc.host+"/Api/V1/FirmwareRepository/"+id, nil)

@@ -96,7 +96,7 @@ func initGatewayClient() {
 		log.Printf("%s file not found.", envVarsFile)
 	}
 
-	GC, err = goscaleio.NewGateway(os.Getenv("GATEWAY_ENDPOINT"), os.Getenv("GATEWAY_USERNAME"), os.Getenv("GATEWAY_PASSWORD"), os.Getenv("GATEWAY_INSECURE") == "true", os.Getenv("GATEWAY_INSECURE") == "true")
+	GC, err = goscaleio.NewGateway(os.Getenv("GATEWAY_ENDPOINT"), os.Getenv("GATEWAY_USERNAME"), os.Getenv("GATEWAY_PASSWORD"), os.Getenv("GATEWAY_INSECURE") == "true", os.Getenv("GATEWAY_INSECURE") == "true", false)
 	if err != nil {
 		panic(err)
 	}
