@@ -95,6 +95,7 @@ func (c *Client) GetVersion() (string, error) {
 	}
 
 	version, err := extractString(resp)
+	fmt.Println("goscalio errrrrrr11111", err)
 	if err != nil {
 		return "", err
 	}
