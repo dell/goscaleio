@@ -75,6 +75,7 @@ func (c *Client) GetVersion() (string, error) {
 	resp, err := c.api.DoAndGetResponseBody(
 		context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
 	if err != nil {
+		fmt.Println("goscalio errrrrrr", err)
 		return "", err
 	}
 
