@@ -107,30 +107,45 @@ type ClientPersistent struct {
 // 	return version, nil
 // }
 
-func (c *Client) GetVersion() (string, error) {
-	defer TimeSpent("GetVersion", time.Now())
-
-	fmt.Println("inside versinnnn block")
-
-	path := "/api/version"
-	var versionResponse struct {
-		Version string `json:"version"`
-	}
-
-	err := c.getJSONWithRetry(
-		http.MethodGet, path, nil, &versionResponse)
+func (c *Client) GetVersion() (ver string, err error) {
+	var resp *http.Response
+	fmt.Println(c.GetToken())
+	resp, err = c.api.DoAndGetResponseBody(
+		context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
 	if err != nil {
-		return "", fmt.Errorf("error getting version of ScaleIO: %w", err)
+		return "", err
 	}
-
-	version := versionResponse.Version
-	fmt.Println("version inside goscaleio", version)
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			doLog(log.WithError(err).Error, "")
+		}
+	}()
+	// parse the response
+	switch {
+	case resp == nil:
+		return "", errNilReponse
+	case resp.StatusCode == 401:
+		// Authenticate then try again
+		if _, err = c.Authenticate(c.configConnect); err != nil {
+			return "", c.api.ParseJSONError(resp)
+		}
+		resp, err = c.api.DoAndGetResponseBody(
+			context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
+		if err != nil {
+			return "", c.api.ParseJSONError(resp)
+		}
+	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299) && resp.StatusCode != 401:
+		return "", c.api.ParseJSONError(resp)
+	}
+	version, err := extractString(resp)
+	if err != nil {
+		return "", err
+	}
 	versionRX := regexp.MustCompile(`^(\d+?\.\d+?).*$`)
 	if m := versionRX.FindStringSubmatch(version); len(m) > 0 {
 		return m[1], nil
 	}
-
-	return "", errors.New("version format is invalid")
+	return version, nil
 }
 
 // updateVersion updates version
