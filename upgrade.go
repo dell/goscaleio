@@ -80,10 +80,11 @@ func (gc *GatewayClient) GetUploadComplianceDetails(id string, newToken bool) (*
 	var getUploadCompResponse types.UploadComplianceTopologyDetails
 	var err error
 	if newToken {
-		gc, err = NewGateway(gc.host, gc.username, gc.password, gc.insecure, true)
+		token, err := gc.NewTokenGeneration()
 		if err != nil {
 			return nil, err
 		}
+		gc.token = token
 	}
 
 	req, httpError := http.NewRequest(http.MethodGet, gc.host+"/Api/V1/FirmwareRepository/"+id, nil)

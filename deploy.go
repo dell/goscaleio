@@ -99,53 +99,10 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		gc.version = version
 		// No need to create token
 	} else {
-		bodyData := map[string]interface{}{
-			"username": username,
-			"password": password,
-		}
-
-		body, _ := json.Marshal(bodyData)
-
-		req, err := http.NewRequest(http.MethodPost, host+"/rest/auth/login", bytes.NewBuffer(body))
+		token, err := gc.NewTokenGeneration()
 		if err != nil {
 			return nil, err
 		}
-
-		req.Header.Add("Content-Type", "application/json")
-
-		resp, err := gc.http.Do(req)
-		if err != nil {
-			return nil, err
-		}
-
-		defer func() {
-			if err := resp.Body.Close(); err != nil {
-				doLog(log.WithError(err).Error, "")
-			}
-		}()
-
-		// parse the response
-		switch {
-		case resp == nil:
-			return nil, errNilReponse
-		case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
-			return nil, ParseJSONError(resp)
-		}
-
-		bs, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-
-		responseBody := string(bs)
-
-		result := make(map[string]interface{})
-		jsonErr := json.Unmarshal([]byte(responseBody), &result)
-		if err != nil {
-			return nil, fmt.Errorf("Error For Uploading Package: %s", jsonErr)
-		}
-
-		token := result["access_token"].(string)
 
 		gc.token = token
 
@@ -157,6 +114,60 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 	}
 
 	return gc, nil
+}
+
+func (gc *GatewayClient) NewTokenGeneration() (string, error) {
+
+	var token string
+	bodyData := map[string]interface{}{
+		"username": gc.username,
+		"password": gc.password,
+	}
+
+	body, _ := json.Marshal(bodyData)
+
+	req, err := http.NewRequest(http.MethodPost, gc.host+"/rest/auth/login", bytes.NewBuffer(body))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := gc.http.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			doLog(log.WithError(err).Error, "")
+		}
+	}()
+
+	// parse the response
+	switch {
+	case resp == nil:
+		return "", errNilReponse
+	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
+		return "", ParseJSONError(resp)
+	}
+
+	bs, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	responseBody := string(bs)
+
+	result := make(map[string]interface{})
+	jsonErr := json.Unmarshal([]byte(responseBody), &result)
+	if err != nil {
+		return "", fmt.Errorf("Error For Uploading Package: %s", jsonErr)
+	}
+
+	token = result["access_token"].(string)
+
+	return token, nil
 }
 
 // GetVersion returns version
