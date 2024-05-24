@@ -27,6 +27,9 @@ func TestUploadCompliance(t *testing.T) {
 	if os.Getenv("GOSCALEIO_COMPLIANCE_ENDPOINT") != "" {
 		sourceLocation = os.Getenv("GOSCALEIO_COMPLIANCE_ENDPOINT")
 	}
+	if os.Getenv("GOSCALEIO_COMPLIANCE_NAME") != "" {
+		sourceLocation = os.Getenv("GOSCALEIO_COMPLIANCE_NAME")
+	}
 	ucParam := &types.UploadComplianceParam{
 		SourceLocation: sourceLocation,
 	}
@@ -44,7 +47,7 @@ func TestUploadCompliance(t *testing.T) {
 	assert.Nil(t, err2)
 	assert.NotNil(t, details2.ID)
 	assert.NotNil(t, details2.State)
-	details3, err3 := GC.GetFirmwareRepositoryDetailsUsingName(details.Name)
+	details3, err3 := GC.GetFirmwareRepositoryDetailsUsingName("PowerFlex 4.5.0.0 (14)")
 	assert.Nil(t, err3)
 	assert.NotNil(t, details3.ID)
 	assert.NotNil(t, details3.State)
