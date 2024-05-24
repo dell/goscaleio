@@ -116,8 +116,8 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 	return gc, nil
 }
 
+// NewTokenGeneration return a new token when logged in
 func (gc *GatewayClient) NewTokenGeneration() (string, error) {
-
 	var token string
 	bodyData := map[string]interface{}{
 		"username": gc.username,
