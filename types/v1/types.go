@@ -1844,3 +1844,88 @@ type UploadComplianceTopologyDetails struct {
 	DefaultCatalog bool   `json:"defaultCatalog"`
 	State          string `json:"state"`
 }
+
+// FirmwareRepositoryDetails holds the entire details of firmware repository
+type FirmwareRepositoryDetails struct {
+	ID                  string      `json:"id"`
+	Name                string      `json:"name"`
+	SourceLocation      string      `json:"sourceLocation"`
+	SourceType          string      `json:"sourceType"`
+	DiskLocation        string      `json:"diskLocation"`
+	Filename            string      `json:"filename"`
+	Username            string      `json:"username"`
+	Password            string      `json:"password"`
+	DownloadStatus      string      `json:"downloadStatus"`
+	CreatedDate         string      `json:"createdDate"`
+	CreatedBy           string      `json:"createdBy"`
+	UpdatedDate         string      `json:"updatedDate"`
+	UpdatedBy           string      `json:"updatedBy"`
+	DefaultCatalog      bool        `json:"defaultCatalog"`
+	Embedded            bool        `json:"embedded"`
+	State               string      `json:"state"`
+	SoftwareComponents  []Component `json:"softwareComponents"`
+	SoftwareBundles     []Bundle    `json:"softwareBundles"`
+	BundleCount         int         `json:"bundleCount"`
+	ComponentCount      int         `json:"componentCount"`
+	UserBundleCount     int         `json:"userBundleCount"`
+	Minimal             bool        `json:"minimal"`
+	DownloadProgress    int         `json:"downloadProgress"`
+	ExtractProgress     int         `json:"extractProgress"`
+	FileSizeInGigabytes float64     `json:"fileSizeInGigabytes"`
+	Signature           string      `json:"signature"`
+	Custom              bool        `json:"custom"`
+	NeedsAttention      bool        `json:"needsAttention"`
+	JobID               string      `json:"jobId"`
+	Rcmapproved         bool        `json:"rcmapproved"`
+}
+
+// Component holds the details of firmware components
+type Component struct {
+	ID                  string   `json:"id"`
+	PackageID           string   `json:"packageId"`
+	DellVersion         string   `json:"dellVersion"`
+	VendorVersion       string   `json:"vendorVersion"`
+	ComponentID         string   `json:"componentId"`
+	DeviceID            string   `json:"deviceId"`
+	SubDeviceID         string   `json:"subDeviceId"`
+	VendorID            string   `json:"vendorId"`
+	SubVendorID         string   `json:"subVendorId"`
+	CreatedDate         string   `json:"createdDate"`
+	CreatedBy           string   `json:"createdBy"`
+	UpdatedDate         string   `json:"updatedDate"`
+	UpdatedBy           string   `json:"updatedBy"`
+	Path                string   `json:"path"`
+	HashMd5             string   `json:"hashMd5"`
+	Name                string   `json:"name"`
+	Category            string   `json:"category"`
+	ComponentType       string   `json:"componentType"`
+	OperatingSystem     string   `json:"operatingSystem"`
+	SystemIDs           []string `json:"systemIDs"`
+	Custom              bool     `json:"custom"`
+	NeedsAttention      bool     `json:"needsAttention"`
+	Ignore              bool     `json:"ignore"`
+	OriginalComponentID string   `json:"originalComponentId"`
+	FirmwareRepoName    string   `json:"firmwareRepoName"`
+}
+
+// Bundle holds the details of firmware bundles
+type Bundle struct {
+	ID                 string      `json:"id"`
+	Name               string      `json:"name"`
+	Version            string      `json:"version"`
+	BundleDate         string      `json:"bundleDate"`
+	CreatedDate        string      `json:"createdDate"`
+	CreatedBy          string      `json:"createdBy"`
+	UpdatedDate        string      `json:"updatedDate"`
+	UpdatedBy          string      `json:"updatedBy"`
+	Description        string      `json:"description"`
+	UserBundle         bool        `json:"userBundle"`
+	UserBundlePath     string      `json:"userBundlePath"`
+	DeviceType         string      `json:"deviceType"`
+	DeviceModel        string      `json:"deviceModel"`
+	FwRepositoryID     string      `json:"fwRepositoryId"`
+	BundleType         string      `json:"bundleType"`
+	Custom             bool        `json:"custom"`
+	NeedsAttention     bool        `json:"needsAttention"`
+	SoftwareComponents []Component `json:"softwareComponents"`
+}
