@@ -70,6 +70,7 @@ type ClientPersistent struct {
 	client        *Client
 }
 
+// GetVersion returns version
 func (c *Client) GetVersion() (ver string, err error) {
 	var resp *http.Response
 	fmt.Println(c.GetToken())
