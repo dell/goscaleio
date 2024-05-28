@@ -150,8 +150,6 @@ func TestClientVersion(t *testing.T) {
     }
 }
 
-
-
 func TestClientLogin(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(
 		func(resp http.ResponseWriter, req *http.Request) {
