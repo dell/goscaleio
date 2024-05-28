@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+	"strings"
 
 	v1 "github.com/dell/goscaleio/types/v1"
 )
