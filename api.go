@@ -70,43 +70,6 @@ type ClientPersistent struct {
 	client        *Client
 }
 
-// GetVersion returns version
-// func (c *Client) GetVersion() (string, error)
-// 	fmt.Println("inside versinnnn block")
-// 	resp, err := c.api.DoAndGetResponseBody(
-// 		context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
-// 	if err != nil {
-// 		fmt.Println("goscalio errrrrrr", err)
-// 		return "", err
-// 	}
-
-// 	defer func() {
-// 		if err := resp.Body.Close(); err != nil {
-// 			doLog(log.WithError(err).Error, "")
-// 		}
-// 	}()
-
-// 	// parse the response
-// 	switch {
-// 	case resp == nil:
-// 		return "", errNilReponse
-// 	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
-// 		return "", c.api.ParseJSONError(resp)
-// 	}
-
-// 	version, err := extractString(resp)
-// 	fmt.Println("goscalio errrrrrr11111", err)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	versionRX := regexp.MustCompile(`^(\d+?\.\d+?).*$`)
-// 	if m := versionRX.FindStringSubmatch(version); len(m) > 0 {
-// 		return m[1], nil
-// 	}
-// 	return version, nil
-// }
-
 func (c *Client) GetVersion() (ver string, err error) {
 	var resp *http.Response
 	fmt.Println(c.GetToken())
