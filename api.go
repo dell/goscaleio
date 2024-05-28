@@ -72,9 +72,7 @@ type ClientPersistent struct {
 
 // GetVersion returns version
 func (c *Client) GetVersion() (string, error) {
-	var resp *http.Response
-	fmt.Println(c.GetToken())
-	resp, err = c.api.DoAndGetResponseBody(
+	resp, err := c.api.DoAndGetResponseBody(
 		context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
 	if err != nil {
 		return "", err
