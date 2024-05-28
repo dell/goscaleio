@@ -71,7 +71,7 @@ type ClientPersistent struct {
 }
 
 // GetVersion returns version
-func (c *Client) GetVersion() (ver string, err error) {
+func (c *Client) GetVersion() (string, error) {
 	var resp *http.Response
 	fmt.Println(c.GetToken())
 	resp, err = c.api.DoAndGetResponseBody(
@@ -91,12 +91,12 @@ func (c *Client) GetVersion() (ver string, err error) {
 	case resp.StatusCode == 401:
 		// Authenticate then try again
 		if _, err = c.Authenticate(c.configConnect); err != nil {
-			return "", c.api.ParseJSONError(resp)
+			return "", err
 		}
 		resp, err = c.api.DoAndGetResponseBody(
 			context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
 		if err != nil {
-			return "", c.api.ParseJSONError(resp)
+			return "", err
 		}
 	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299) && resp.StatusCode != 401:
 		return "", c.api.ParseJSONError(resp)
