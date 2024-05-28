@@ -66,28 +66,64 @@ func handleAuthToken(resp http.ResponseWriter, req *http.Request) {
 func TestClientVersion(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(
 		func(resp http.ResponseWriter, req *http.Request) {
-			if req.RequestURI != "/api/version" {
-				t.Fatal("Expecting endpoint /api/version got", req.RequestURI)
+			switch req.RequestURI {
+			case "/api/version":
+				// Check for authentication token
+				if req.Header.Get("Authorization") != "Bearer valid_token" {
+					resp.WriteHeader(http.StatusUnauthorized)
+					resp.Write([]byte(`Unauthorized 401`))
+					return
+				}
+				resp.WriteHeader(http.StatusOK)
+				resp.Write([]byte(`"2.0"`))
+			
+			case "/api/login":
+				// Check for bearer auth
+				bearerToken := req.Header.Get("Authorization")
+				if bearerToken != "Bearer valid_token" {
+					resp.WriteHeader(http.StatusUnauthorized)
+					resp.Write([]byte(`Unauthorized 401`))
+					return
+				}
+				resp.WriteHeader(http.StatusOK)
+				resp.Write([]byte(`"valid_token"`))
+			default:
+				http.Error(resp, "Expecting endpoint /api/login", http.StatusNotFound)
 			}
-			resp.WriteHeader(http.StatusOK)
-			resp.Write([]byte(`"2.0"`))
 		},
 	))
 	defer server.Close()
+
 	hostAddr := server.URL
 	os.Setenv("GOSCALEIO_ENDPOINT", hostAddr+"/api")
+
 	client, err := NewClient()
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// Authenticate with bearer token
+	_,err = client.Authenticate(&ConfigConnect{
+		Username: "ScaleIOUser",
+		Password: "password",
+		Endpoint: "",
+		Version:  "2.0",
+	})
+	if err != nil {
+		t.Fatal("Authentication failed:", err)
+	}
+
+	// Test for version retrieval
 	ver, err := client.GetVersion()
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if ver != "2.0" {
 		t.Fatal("Expecting version string \"2.0\", got ", ver)
 	}
 }
+
 
 func TestClientLogin(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(
