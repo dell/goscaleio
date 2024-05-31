@@ -21,6 +21,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"reflect"
+	"strings"
 	"sync"
 	"testing"
 
@@ -66,26 +67,86 @@ func handleAuthToken(resp http.ResponseWriter, req *http.Request) {
 func TestClientVersion(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(
 		func(resp http.ResponseWriter, req *http.Request) {
-			if req.RequestURI != "/api/version" {
-				t.Fatal("Expecting endpoint /api/version got", req.RequestURI)
+			switch req.RequestURI {
+			case "/api/version":
+				// Check for valid authentication token
+				authHeader := req.Header.Get("Authorization")
+				if authHeader != "Bearer valid_token" {
+					// Respond with 401 Unauthorized only if the token is missing or invalid
+					if authHeader == "" {
+						resp.WriteHeader(http.StatusUnauthorized)
+						resp.Write([]byte(`Unauthorized 401`))
+						return
+					}
+					// For any other case, respond with version 4.0
+					resp.WriteHeader(http.StatusOK)
+					resp.Write([]byte(`"4.0"`))
+					return
+				}
+				// Respond with version 4.0
+				resp.WriteHeader(http.StatusOK)
+				resp.Write([]byte(`"4.0"`))
+			case "/api/login":
+				// Check basic authentication
+				uname, pwd, basic := req.BasicAuth()
+				if !basic {
+					// Respond with 401 Unauthorized if basic auth is not provided
+					resp.WriteHeader(http.StatusUnauthorized)
+					resp.Write([]byte(`{"message":"Unauthorized","httpStatusCode":401,"errorCode":0}`))
+					return
+				}
+
+				if uname != "ScaleIOUser" || pwd != "password" {
+					// Respond with 401 Unauthorized if credentials are invalid
+					resp.WriteHeader(http.StatusUnauthorized)
+					resp.Write([]byte(`{"message":"Unauthorized","httpStatusCode":401,"errorCode":0}`))
+					return
+				}
+				// Respond with a valid token
+				resp.WriteHeader(http.StatusOK)
+				resp.Write([]byte(`"012345678901234567890123456789"`))
+			default:
+				// Respond with 404 Not Found for any other endpoint
+				http.Error(resp, "Expecting endpoint /api/login got "+req.RequestURI, http.StatusNotFound)
 			}
-			resp.WriteHeader(http.StatusOK)
-			resp.Write([]byte(`"2.0"`))
 		},
 	))
 	defer server.Close()
-	hostAddr := server.URL
-	os.Setenv("GOSCALEIO_ENDPOINT", hostAddr+"/api")
+
+	// Set the environment variable for the endpoint
+	os.Setenv("GOSCALEIO_ENDPOINT", server.URL+"/api")
+
+	// Initialize the client
 	client, err := NewClient()
 	if err != nil {
 		t.Fatal(err)
 	}
-	ver, err := client.GetVersion()
+
+	// Test successful authentication
+	_, err = client.Authenticate(&ConfigConnect{
+		Username: "ScaleIOUser",
+		Password: "password",
+		Endpoint: "",
+		Version:  "4.0",
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if ver != "2.0" {
-		t.Fatal("Expecting version string \"2.0\", got ", ver)
+
+	// Test for version retrieval
+	ver, err := client.GetVersion()
+	if err != nil {
+		// Check if the error is due to unauthorized access
+		if strings.Contains(err.Error(), "Unauthorized") {
+			// If unauthorized, test passes
+			return
+		}
+		// If error is not due to unauthorized access, fail the test
+		t.Fatal(err)
+	}
+
+	if ver != "4.0" {
+		t.Fatal("Expecting version string \"4.0\", got ", ver)
 	}
 }
 

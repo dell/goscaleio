@@ -77,26 +77,32 @@ func (c *Client) GetVersion() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
 			doLog(log.WithError(err).Error, "")
 		}
 	}()
-
 	// parse the response
 	switch {
 	case resp == nil:
 		return "", errNilReponse
-	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
+	case resp.StatusCode == http.StatusUnauthorized:
+		// Authenticate then try again
+		if _, err = c.Authenticate(c.configConnect); err != nil {
+			return "", err
+		}
+		resp, err = c.api.DoAndGetResponseBody(
+			context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
+		if err != nil {
+			return "", err
+		}
+	case !(resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices):
 		return "", c.api.ParseJSONError(resp)
 	}
-
 	version, err := extractString(resp)
 	if err != nil {
 		return "", err
 	}
-
 	versionRX := regexp.MustCompile(`^(\d+?\.\d+?).*$`)
 	if m := versionRX.FindStringSubmatch(version); len(m) > 0 {
 		return m[1], nil
