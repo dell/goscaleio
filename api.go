@@ -96,8 +96,7 @@ func (c *Client) GetVersion() (string, error) {
 		if err != nil {
 			return "", err
 		}
-	case !(resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices) && resp.StatusCode != http.StatusUnauthorized:
-
+	case !(resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices):
 		return "", c.api.ParseJSONError(resp)
 	}
 	version, err := extractString(resp)
