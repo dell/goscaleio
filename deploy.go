@@ -31,6 +31,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dell/goscaleio/api"
 	types "github.com/dell/goscaleio/types/v1"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
@@ -71,6 +72,7 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 			TLSClientConfig: &tls.Config{
 				// #nosec G402
 				InsecureSkipVerify: true,
+				CipherSuites:       api.GetSecuredCipherSuites(),
 			},
 		}
 	}
@@ -86,6 +88,7 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 				RootCAs: pool,
 				// #nosec G402
 				InsecureSkipVerify: insecure,
+				CipherSuites:       api.GetSecuredCipherSuites(),
 			},
 		}
 	}
