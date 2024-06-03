@@ -118,15 +118,16 @@ const (
 
 // MdmCluster defines struct for MDM cluster
 type MdmCluster struct {
-	ID              string `json:"id"`
-	ClusterState    string `json:"clusterState"`
-	ClusterMode     string `json:"clusterMode"`
-	GoodNodesNum    int    `json:"goodNodesNum"`
-	GoodReplicasNum int    `json:"goodReplicasNum"`
-	PrimaryMDM      Mdm    `json:"master"`
-	SecondaryMDM    []Mdm  `json:"slaves"`
-	TiebreakerMdm   []Mdm  `json:"tieBreakers"`
-	StandByMdm      []Mdm  `json:"standbyMDMs"`
+	ID              string   `json:"id"`
+	ClusterState    string   `json:"clusterState"`
+	ClusterMode     string   `json:"clusterMode"`
+	GoodNodesNum    int      `json:"goodNodesNum"`
+	GoodReplicasNum int      `json:"goodReplicasNum"`
+	VirtualIPs      []string `json:"virtualIps"`
+	PrimaryMDM      Mdm      `json:"master"`
+	SecondaryMDM    []Mdm    `json:"slaves"`
+	TiebreakerMdm   []Mdm    `json:"tieBreakers"`
+	StandByMdm      []Mdm    `json:"standbyMDMs"`
 }
 
 // Mdm defines struct for a MDM
