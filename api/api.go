@@ -117,6 +117,17 @@ type client struct {
 	debug    bool
 }
 
+// GetSecuredCipherSuites returns a slice of secured cipher suites.
+// It iterates over the tls.CipherSuites() and appends the ID of each cipher su                                                                             ite to the suites slice.
+// The function returns the suites slice.
+func GetSecuredCipherSuites() (suites []uint16) {
+	securedSuite := tls.CipherSuites()
+	for _, v := range securedSuite {
+		suites = append(suites, v.ID)
+	}
+	return suites
+}
+
 // ClientOptions are options for the API client.
 type ClientOptions struct {
 	// Insecure is a flag that indicates whether or not to supress SSL errors.
@@ -160,6 +171,7 @@ func New(
 			TLSClientConfig: &tls.Config{
 				// #nosec G402
 				InsecureSkipVerify: true, // #nosec G402
+				CipherSuites:       GetSecuredCipherSuites(),
 			},
 		}
 	}
@@ -175,6 +187,7 @@ func New(
 				RootCAs: pool,
 				// #nosec G402
 				InsecureSkipVerify: opts.Insecure,
+				CipherSuites:       GetSecuredCipherSuites(),
 			},
 		}
 	}
