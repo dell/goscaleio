@@ -50,6 +50,8 @@ type SSOUserCreateParam struct {
 	Password  string `json:"password"`
 	Type      string `json:"type"`
 	IsEnabled bool   `json:"is_enabled,omitempty"`
+	FirstName string `json:"first_name,omitempty"`
+	LastName  string `json:"last_name,omitempty"`
 }
 
 // SSOUserModifyParam represents the parameters for modifying an SSO user.
@@ -58,4 +60,6 @@ type SSOUserModifyParam struct {
 	Role      string `json:"role,omitempty"`
 	Password  string `json:"password,omitempty"`
 	IsEnabled bool   `json:"is_enabled,omitempty"`
+	FirstName string `json:"first_name,omitempty"`
+	LastName  string `json:"last_name,omitempty"`
 }
