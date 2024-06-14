@@ -299,6 +299,7 @@ func (gc *GatewayClient) GetFirmwareRepositoryDetailsUsingName(name string) (*ty
 	return frDetails, err
 }
 
+// DeleteFirmwareRepository deletes the particular firmware repository
 func (gc *GatewayClient) DeleteFirmwareRepository(id string) error {
 	req, httpError := http.NewRequest(http.MethodDelete, gc.host+"/Api/V1/FirmwareRepository/"+id, nil)
 	if httpError != nil {
@@ -328,11 +329,10 @@ func (gc *GatewayClient) DeleteFirmwareRepository(id string) error {
 	}
 
 	return nil
-
 }
 
+// TestConnection tests the connection to the source location.
 func (gc *GatewayClient) TestConnection(uploadComplianceParam *types.UploadComplianceParam) error {
-
 	jsonData, err := json.Marshal(uploadComplianceParam)
 	if err != nil {
 		return err
@@ -357,7 +357,7 @@ func (gc *GatewayClient) TestConnection(uploadComplianceParam *types.UploadCompl
 	}
 
 	if httpResp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("Error while connecting to the source location. Please chack the credentials.")
+		return fmt.Errorf("Error while connecting to the source location. Please chack the credentials")
 	}
 
 	err3 := storeCookie(httpResp.Header, gc.host)
