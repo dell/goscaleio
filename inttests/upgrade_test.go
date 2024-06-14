@@ -61,3 +61,25 @@ func TestApproveUnsignedFile(t *testing.T) {
 	err := GC.ApproveUnsignedFile(unsigned)
 	assert.Nil(t, err)
 }
+
+func TestDeleteFirmwareRepository(t *testing.T) {
+	var id string
+	if os.Getenv("GOSCALEIO_COMPLIANCE_FILE_ID_FOR_DELETE") != "" {
+		id = os.Getenv("GOSCALEIO_COMPLIANCE_FILE_ID_FOR_DELETE")
+	}
+	err := GC.DeleteFirmwareRepository(id)
+	assert.Nil(t, err)
+}
+
+func TestConnection(t *testing.T) {
+	var sourceLocation string
+	if os.Getenv("GOSCALEIO_COMPLIANCE_ENDPOINT") != "" {
+		sourceLocation = os.Getenv("GOSCALEIO_COMPLIANCE_ENDPOINT")
+	}
+	ucParam := &types.UploadComplianceParam{
+		SourceLocation: sourceLocation,
+	}
+	err := GC.TestConnection(ucParam)
+	assert.Nil(t, err)
+
+}
