@@ -81,5 +81,4 @@ func TestConnection(t *testing.T) {
 	}
 	err := GC.TestConnection(ucParam)
 	assert.Nil(t, err)
-
 }
