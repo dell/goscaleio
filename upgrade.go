@@ -298,3 +298,72 @@ func (gc *GatewayClient) GetFirmwareRepositoryDetailsUsingName(name string) (*ty
 	}
 	return frDetails, err
 }
+
+// DeleteFirmwareRepository deletes the particular firmware repository
+func (gc *GatewayClient) DeleteFirmwareRepository(id string) error {
+	req, httpError := http.NewRequest(http.MethodDelete, gc.host+"/Api/V1/FirmwareRepository/"+id, nil)
+	if httpError != nil {
+		return httpError
+	}
+
+	req.Header.Set("Authorization", "Bearer "+gc.token)
+	setCookieError := setCookie(req.Header, gc.host)
+	if setCookieError != nil {
+		return fmt.Errorf("Error While Handling Cookie: %s", setCookieError)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return httpRespError
+	}
+
+	if httpResp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("Error while deleting firmware repository")
+	}
+
+	err3 := storeCookie(httpResp.Header, gc.host)
+	if err3 != nil {
+		return fmt.Errorf("Error While Storing cookie: %s", err3)
+	}
+
+	return nil
+}
+
+// TestConnection tests the connection to the source location.
+func (gc *GatewayClient) TestConnection(uploadComplianceParam *types.UploadComplianceParam) error {
+	jsonData, err := json.Marshal(uploadComplianceParam)
+	if err != nil {
+		return err
+	}
+
+	req, httpError := http.NewRequest(http.MethodPost, gc.host+"/Api/V1/FirmwareRepository/connection", bytes.NewBuffer(jsonData))
+	if httpError != nil {
+		return httpError
+	}
+
+	req.Header.Set("Authorization", "Bearer "+gc.token)
+	setCookieError := setCookie(req.Header, gc.host)
+	if setCookieError != nil {
+		return fmt.Errorf("Error While Handling Cookie: %s", setCookieError)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return httpRespError
+	}
+
+	if httpResp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("Error while connecting to the source location. Please chack the credentials")
+	}
+
+	err3 := storeCookie(httpResp.Header, gc.host)
+	if err3 != nil {
+		return fmt.Errorf("Error While Storing cookie: %s", err3)
+	}
+
+	return nil
+}
