@@ -1,3 +1,17 @@
+// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package goscaleio
 
 // ServiceFailedResponse represents the response when a service fails.
@@ -90,4 +104,46 @@ type ServiceResponse struct {
 	Path                         string                       `json:"path,omitempty"`
 	Messages                     []Messages                   `json:"messages,omitempty"`
 	StatusCode                   int                          `json:"statusCode,omitempty"`
+}
+
+// ComplianceReport defines the compliance report object for a service.
+type ComplianceReport struct {
+	ServiceTag                 string                       `json:"serviceTag,omitempty"`
+	IPAddress                  string                       `json:"ipAddress,omitempty"`
+	FirmwareRepositoryName     string                       `json:"firmwareRepositoryName,omitempty"`
+	ComplianceReportComponents []ComplianceReportComponents `json:"firmwareComplianceReportComponents,omitempty"`
+	Compliant                  bool                         `json:"compliant,omitempty"`
+	DeviceType                 string                       `json:"deviceType,omitempty"`
+	Model                      string                       `json:"model,omitempty"`
+	Available                  bool                         `json:"available,omitempty"`
+	ManagedState               string                       `json:"managedState,omitempty"`
+	EmbeddedReport             bool                         `json:"embeddedReport,omitempty"`
+	DeviceState                string                       `json:"deviceState,omitempty"`
+	ID                         string                       `json:"id,omitempty"`
+	HostName                   string                       `json:"hostname,omitempty"`
+	CanUpdate                  bool                         `json:"canUpdate,omitempty"`
+}
+
+// ComplianceReportComponents defines the components in the compliance report.
+type ComplianceReportComponents struct {
+	ID              string                               `json:"id,omitempty"`
+	Name            string                               `json:"name,omitempty"`
+	CurrentVersion  ComplianceReportComponentVersionInfo `json:"currentVersion,omitempty"`
+	TargetVersion   ComplianceReportComponentVersionInfo `json:"targetVersion,omitempty"`
+	Vendor          string                               `json:"vendor,omitempty"`
+	OperatingSystem string                               `json:"operatingSystem,omitempty"`
+	Compliant       bool                                 `json:"compliant,omitempty"`
+	Software        bool                                 `json:"software,omitempty"`
+	RPM             bool                                 `json:"rpm,omitempty"`
+	Oscapable       bool                                 `json:"oscompatible,omitempty"`
+}
+
+// ComplianceReportComponentVersionInfo defines the version info in the compliance report component.
+type ComplianceReportComponentVersionInfo struct {
+	ID                 string `json:"id,omitempty"`
+	FirmwareName       string `json:"firmwareName,omitempty"`
+	FirmwareType       string `json:"firmwareType,omitempty"`
+	FirmwareVersion    string `json:"firmwareVersion,omitempty"`
+	FirmwareLastUpdate string `json:"firmwareLastUpdate,omitempty"`
+	FirmwareLevel      string `json:"firmwareLevel,omitempty"`
 }

@@ -57,3 +57,18 @@ func TestGetDeployeServiceByName(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, template)
 }
+
+func TestGetAllComplianceReports(t *testing.T) {
+	complianceReport, err := GC.GetServiceComplianceDetails("8aaa806c9035ea9101903ab07ff623b2")
+	assert.Nil(t, err)
+	assert.NotNil(t, complianceReport)
+}
+
+func TestGetAllComplianceReportsByFilter(t *testing.T) {
+	complianceReport, err := GC.GetServiceComplianceDetailsByFilter("8aaa806c9035ea9101903ab07ff623b2", "ServiceTag", "VMware-42 0c 5e 1c 03 b5 bf a1-a7 cc 69 60 f9 52 80 fa-SW")
+	assert.Nil(t, err)
+	assert.NotNil(t, complianceReport)
+	// invalid filter
+	complianceReport, err = GC.GetServiceComplianceDetailsByFilter("8aaa806c9035ea9101903ab07ff623b2", "NotValid", "VMware-42 0c 5e 1c 03 b5 bf a1-a7 cc 69 60 f9 52 80 fa-SW")
+	assert.Error(t, err)
+}
