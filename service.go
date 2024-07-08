@@ -653,3 +653,90 @@ func (gc *GatewayClient) DeleteService(serviceID, serversInInventory, serversMan
 	}
 	return nil, fmt.Errorf("Couldn't delete service")
 }
+
+// GetServiceComplianceDetails retrieves service compliance details for a given deployment.
+func (gc *GatewayClient) GetServiceComplianceDetails(deploymentID string) ([]types.ComplianceReport, error) {
+	defer TimeSpent("GetServiceComplianceDetails", time.Now())
+
+	path := fmt.Sprintf("/Api/V1/Deployment/%v/firmware/compliancereport", deploymentID)
+
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+path, nil)
+	if httpError != nil {
+		return nil, httpError
+	}
+
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+
+		err := setCookie(req.Header, gc.host)
+		if err != nil {
+			return nil, fmt.Errorf("Error while handling cookie: %s", err)
+		}
+
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := gc.http
+	httpResp, httpRespError := client.Do(req)
+	if httpRespError != nil {
+		return nil, httpRespError
+	}
+	if httpResp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Couldn't find compliance report for given deployment")
+	}
+
+	var complianceReports []types.ComplianceReport
+	responseString, _ := extractString(httpResp)
+	parseError := json.Unmarshal([]byte(responseString), &complianceReports)
+	if parseError != nil {
+		return nil, fmt.Errorf("Error while parsing response data for compliance report: %s", parseError)
+	}
+	if len(complianceReports) == 0 {
+		return nil, fmt.Errorf("Couldn't find compliance report for given deployment")
+	}
+
+	return complianceReports, nil
+}
+
+// GetServiceComplianceDetailsByFilter retrieves service compliance details based on a filter and value.
+func (gc *GatewayClient) GetServiceComplianceDetailsByFilter(deploymentID, filter, value string) ([]types.ComplianceReport, error) {
+	defer TimeSpent("GetServiceComplianceDetailsByFilter", time.Now())
+
+	complianceReports, err := gc.GetServiceComplianceDetails(deploymentID)
+	if err != nil || len(complianceReports) == 0 {
+		return nil, fmt.Errorf("Couldn't find compliance report for the given deployment")
+	}
+
+	filteredComplianceReports := make([]types.ComplianceReport, 0)
+	for _, complianceReport := range complianceReports {
+		switch filter {
+		case "IpAddress":
+			if complianceReport.IPAddress == value {
+				filteredComplianceReports = append(filteredComplianceReports, complianceReport)
+			}
+		case "ServiceTag":
+			if complianceReport.ServiceTag == value {
+				filteredComplianceReports = append(filteredComplianceReports, complianceReport)
+			}
+		case "Compliant":
+			if strconv.FormatBool(complianceReport.Compliant) == value {
+				filteredComplianceReports = append(filteredComplianceReports, complianceReport)
+			}
+		case "HostName":
+			if complianceReport.HostName == value {
+				filteredComplianceReports = append(filteredComplianceReports, complianceReport)
+			}
+		case "ID":
+			if complianceReport.ID == value {
+				filteredComplianceReports = append(filteredComplianceReports, complianceReport)
+			}
+		default:
+			return nil, fmt.Errorf("Invalid filter provided")
+		}
+	}
+
+	return filteredComplianceReports, nil
+}
