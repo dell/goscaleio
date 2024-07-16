@@ -295,6 +295,28 @@ type Statistics struct {
 	VolumeAddressSpaceInKb                   int `json:"volumeAddressSpaceInKb"`
 }
 
+// CompatibilityManagement defines struct of CompatibilityManagement
+type CompatibilityManagement struct {
+	ID                     string `json:"id,omitempty"`
+	Source                 string `json:"source,omitempty"`
+	RepositoryPath         string `json:"repositoryPath,omitempty"`
+	CurrentVersion         string `json:"currentVersion,omitempty"`
+	AvailableVersion       string `json:"availableVersion,omitempty"`
+	CompatibilityData      string `json:"compatibilityData,omitempty"`
+	CompatibilityDataBytes string `json:"compatibilityDataBytes,omitempty"`
+}
+
+// CompatibilityManagementPost defines struct of CompatibilityManagementPost Body
+type CompatibilityManagementPost struct {
+	ID                     string `json:"id,omitempty"`
+	Source                 string `json:"source,omitempty"`
+	RepositoryPath         string `json:"repositoryPath,omitempty"`
+	CurrentVersion         string `json:"currentVersion,omitempty"`
+	AvailableVersion       string `json:"availableVersion,omitempty"`
+	CompatibilityData      string `json:"compatibilityData,omitempty"`
+	CompatibilityDataBytes []byte `json:"compatibilityDataBytes,omitempty"`
+}
+
 // SdcStatistics defines struct of Statistics for PowerFlex SDC
 type SdcStatistics struct {
 	UserDataReadBwc         BWC      `json:"userDataReadBwc"`
