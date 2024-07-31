@@ -295,6 +295,41 @@ type Statistics struct {
 	VolumeAddressSpaceInKb                   int `json:"volumeAddressSpaceInKb"`
 }
 
+// OSRepository defines struct of OS Repository
+type OSRepository struct {
+	CreatedDate  string                    `json:"createdDate,omitempty"`
+	ImageType    string                    `json:"imageType,omitempty"`
+	SourcePath   string                    `json:"sourcePath,omitempty"`
+	RazorName    string                    `json:"razorName,omitempty"`
+	InUse        bool                      `json:"inUse,omitempty"`
+	UserName     string                    `json:"username,omitempty"`
+	CreatedBy    string                    `json:"createdBy,omitempty"`
+	Password     string                    `json:"password,omitempty"`
+	Name         string                    `json:"name,omitempty"`
+	ID           string                    `json:"id,omitempty"`
+	State        string                    `json:"state,omitempty"`
+	RepoType     string                    `json:"repoType,omitempty"`
+	RCMPath      string                    `json:"rcmPath,omitempty"`
+	FirmwareRepo FirmwareRepositoryDetails `json:"firmwareRepository,omitempty"`
+	Metadata     OSRepositoryMetadata      `json:"metadata,omitempty"`
+	BaseURL      string                    `json:"baseUrl,omitempty"`
+	FromWeb      bool                      `json:"fromWeb,omitempty"`
+}
+
+// OSRepositoryMetadata defines struct of Metadata for OS Repository
+type OSRepositoryMetadata struct {
+	Repos []OSRepositoryMetadataRepo `json:"repos,omitempty"`
+}
+
+// OSRepositoryMetadataRepo defines struct of OSRepositoryMetadataRepo
+type OSRepositoryMetadataRepo struct {
+	BasePath    string `json:"base_path,omitempty"`
+	Description string `json:"description,omitempty"`
+	GPGKey      string `json:"gpg_key,omitempty"`
+	Name        string `json:"name,omitempty"`
+	OSPackages  bool   `json:"os_packages,omitempty"`
+}
+
 // CompatibilityManagement defines struct of CompatibilityManagement
 type CompatibilityManagement struct {
 	ID                     string `json:"id,omitempty"`
