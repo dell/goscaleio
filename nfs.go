@@ -108,3 +108,41 @@ func (s *System) DeleteNAS(id string) error {
 
 	return nil
 }
+func (s *System) GetNAS() (*types.NAS, error) {
+	var resp types.NAS
+
+	path := "/rest/v1/nas-servers"
+
+	err := s.client.getJSONWithRetry(http.MethodGet, path, nil, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+func (s *System) PingNAS() error {
+	nas, err := s.GetNAS()
+	if err != nil {
+		return errors.New("could not fetch NAS server")
+	}
+
+	path := "/rest/v1/file-interfaces/" + nas.CurrentPreferredIPv4InterfaceID
+
+	var fileResp types.FileInterface
+	err = s.client.getJSONWithRetry(http.MethodGet, path, nil, &fileResp)
+	if err != nil {
+		return errors.New("Could not find file interface " + fileResp.IPAddress)
+	}
+
+	path = "rest/v1/nas-server/" + nas.ID + "/ping"
+	var body types.PingNASParam
+	body.DestinationAddress = fileResp.IPAddress
+	body.IsIPV6 = false
+	err = s.client.getJSONWithRetry(http.MethodPost, path, body, nil)
+	if err != nil {
+		return errors.New("Could not ping NAS server " + nas.ID)
+	}
+
+	return nil
+}
