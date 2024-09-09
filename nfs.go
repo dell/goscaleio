@@ -128,7 +128,7 @@ func (s *System) PingNAS() error {
 	}
 
 	for _, nas := range nasservers {
-		path := "/rest/v1/file-interfaces/" + nas.CurrentPreferredIPv4InterfaceID
+		path := "/rest/v1/file-interfaces/" + nas.CurrentPreferredIPv4InterfaceID + "?select=*"
 
 		var fileResp types.FileInterface
 		err = s.client.getJSONWithRetry(http.MethodGet, path, nil, &fileResp)
