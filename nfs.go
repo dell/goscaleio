@@ -137,9 +137,11 @@ func (s *System) PingNAS() error {
 		}
 
 		path = "rest/v1/nas-server/" + nas.ID + "/ping"
-		var body types.PingNASParam
-		body.DestinationAddress = fileResp.IPAddress
-		body.IsIPV6 = false
+		body := types.PingNASParam{
+			DestinationAddress: fileResp.IPAddress,
+			IsIPV6:             false,
+		}
+
 		err = s.client.getJSONWithRetry(http.MethodPost, path, body, nil)
 		if err != nil {
 			return errors.New("Could not ping NAS server " + nas.ID)
