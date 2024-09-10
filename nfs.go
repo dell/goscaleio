@@ -136,7 +136,7 @@ func (s *System) PingNAS() error {
 			return errors.New("Could not find file interface " + fileResp.IPAddress)
 		}
 
-		path = "rest/v1/nas-server/" + nas.ID + "/ping"
+		path = "rest/v1/nas-servers/" + nas.ID + "/ping"
 		body := types.PingNASParam{
 			DestinationAddress: fileResp.IPAddress,
 			IsIPV6:             false,
