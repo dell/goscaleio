@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
@@ -68,8 +69,9 @@ func (s *System) GetNASByIDName(id string, name string) (*types.NAS, error) {
 		return nil, err
 	}
 
+	name = strings.ToLower(name)
 	for _, nas := range nasList {
-		if nas.Name == name {
+		if strings.Contains(name, strings.ToLower(nas.Name)) {
 			return &nas, nil
 		}
 	}
