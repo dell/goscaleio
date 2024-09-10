@@ -108,44 +108,43 @@ func (s *System) DeleteNAS(id string) error {
 
 	return nil
 }
-func (s *System) GetNAS() ([]*types.NAS, error) {
-	var resp []*types.NAS
 
-	path := "/rest/v1/nas-servers?select=*"
+func (s *System) GetNASServer(id string) (*types.NAS, error) {
+	var resp types.NAS
+
+	path := fmt.Sprintf("/rest/v1/nas-servers/%s?select=*", id)
 
 	err := s.client.getJSONWithRetry(http.MethodGet, path, nil, &resp)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp, nil
+	return &resp, nil
 }
 
-func (s *System) PingNAS() error {
-	nasservers, err := s.GetNAS()
+func (s *System) PingNAS(id string) error {
+	nasserver, err := s.GetNASServer(id)
 	if err != nil {
-		return errors.New("could not fetch NAS server")
+		return errors.New("could not fetch NAS servers")
 	}
 
-	for _, nas := range nasservers {
-		path := "/rest/v1/file-interfaces/" + nas.CurrentPreferredIPv4InterfaceID + "?select=*"
+	path := fmt.Sprintf("/rest/v1/file-interfaces/%s?select=*", nasserver.CurrentPreferredIPv4InterfaceID)
 
-		var fileResp types.FileInterface
-		err = s.client.getJSONWithRetry(http.MethodGet, path, nil, &fileResp)
-		if err != nil {
-			return errors.New("Could not find file interface " + fileResp.IPAddress)
-		}
+	var fileResp types.FileInterface
+	err = s.client.getJSONWithRetry(http.MethodGet, path, nil, &fileResp)
+	if err != nil {
+		return errors.New("Could not find file interface " + fileResp.IPAddress)
+	}
 
-		path = "rest/v1/nas-servers/" + nas.ID + "/ping"
-		body := types.PingNASParam{
-			DestinationAddress: fileResp.IPAddress,
-			IsIPV6:             false,
-		}
+	path = fmt.Sprintf("rest/v1/nas-servers/%s/ping", id)
+	body := types.PingNASParam{
+		DestinationAddress: fileResp.IPAddress,
+		IsIPV6:             false,
+	}
 
-		err = s.client.getJSONWithRetry(http.MethodPost, path, body, nil)
-		if err != nil {
-			return errors.New("Could not ping NAS server " + nas.ID)
-		}
+	err = s.client.getJSONWithRetry(http.MethodPost, path, body, nil)
+	if err != nil {
+		return errors.New("Could not ping NAS server " + id)
 	}
 
 	return nil
