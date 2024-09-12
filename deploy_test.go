@@ -421,3 +421,49 @@ func TestUninstallCluster(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 }
+
+func TestRenewInstallationCookie(t *testing.T) {
+	responseJSON := `[
+	{
+        "version": "4.5-0.287",
+        "sioPatchNumber": 0,
+        "type": "mdm",
+        "size": 72378708,
+        "label": "0.287.sles15.3.x86_64",
+        "operatingSystem": "linux",
+        "linuxFlavour": "sles15_3",
+        "activemqPackage": false,
+        "filename": "EMC-ScaleIO-mdm-4.5-0.287.sles15.3.x86_64.rpm",
+        "activemqRpmPackage": false,
+        "activemqUbuntuPackage": false,
+        "latest": true
+    }]`
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet && strings.Contains(r.URL.Path, "/im/types/installationPackages/instances") {
+			cookie := &http.Cookie{
+				Name:  "LEGACYGWCOOKIE",
+				Value: "123456789",
+				Path:  "/",
+			}
+			http.SetCookie(w, cookie)
+			w.WriteHeader(http.StatusOK)
+			_, err := w.Write([]byte(responseJSON))
+			if err != nil {
+				t.Fatalf("Error writing response: %v", err)
+			}
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	gc := &GatewayClient{
+		http:     &http.Client{},
+		host:     server.URL,
+		username: "test_username",
+		password: "test_password",
+	}
+
+	err := gc.RenewInstallationCookie(5)
+	assert.NoError(t, err)
+}

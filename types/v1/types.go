@@ -1658,6 +1658,7 @@ type MDMTopologyDetails struct {
 	SystemVersionName string              `json:"systemVersionName,omitempty"`
 	SdsList           []SdsList           `json:"sdsList,omitempty"`
 	SdcList           []SdcList           `json:"sdcList,omitempty"`
+	SdtList           []SdtList           `json:"sdtList,omitempty"`
 	ProtectionDomains []ProtectionDomains `json:"protectionDomains,omitempty"`
 	SdrList           []SdrList           `json:"sdrList,omitempty"`
 	VasaProviderList  []any               `json:"vasaProviderList,omitempty"`
@@ -1757,6 +1758,22 @@ type SdsList struct {
 	OptimizedNumOfIOBufs int       `json:"optimizedNumOfIOBufs,omitempty"`
 	Port                 int       `json:"port,omitempty"`
 	ID                   string    `json:"id,omitempty"`
+}
+
+// SdtList defines struct for SDT Details
+type SdtList struct {
+	Node               Node     `json:"node,omitempty"`
+	SdtName            string   `json:"sdtName,omitempty"`
+	ProtectionDomain   string   `json:"protectionDomain,omitempty"`
+	ProtectionDomainID string   `json:"protectionDomainId,omitempty"`
+	AllIPs             []string `json:"allIPs,omitempty"`
+	StorageOnlyIPs     []string `json:"storageOnlyIPs,omitempty"`
+	HostOnlyIPs        []string `json:"hostOnlyIPs,omitempty"`
+	StoragePort        int      `json:"storagePort,omitempty"`
+	NvmePort           int      `json:"nvmePort,omitempty"`
+	DiscoveryPort      int      `json:"discoveryPort,omitempty"`
+	Optimized          bool     `json:"optimized,omitempty"`
+	ID                 string   `json:"id,omitempty"`
 }
 
 // SdcList defines struct for SDC Details
