@@ -372,3 +372,223 @@ func TestDeleteNAS(t *testing.T) {
 	err = s.DeleteNAS(id)
 	assert.Nil(t, err)
 }
+
+func TestGetNASServer(t *testing.T) {
+	type checkFn func(*testing.T, *types.NAS, error)
+	check := func(fns ...checkFn) []checkFn { return fns }
+
+	hasNoError := func(t *testing.T, _ *types.NAS, err error) {
+		if err != nil {
+			t.Fatalf("expected no error")
+		}
+	}
+
+	hasError := func(t *testing.T, _ *types.NAS, err error) {
+		if err == nil {
+			t.Fatalf("expected error")
+		}
+	}
+
+	checkRespId := func(nasId string) func(t *testing.T, resp *types.NAS, err error) {
+		return func(t *testing.T, resp *types.NAS, _ error) {
+			assert.Equal(t, nasId, resp.ID)
+		}
+	}
+
+	testsName := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
+		"success": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+			systemID := "0000aaacccddd1111"
+			href := "/rest/v1/nas-servers/655374ea-13d7-c2d5-458c-4ec4ea9bb086"
+			system := types.System{
+				ID: systemID,
+			}
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				resp := types.NAS{
+					ID:                              "655374ea-13d7-c2d5-458c-4ec4ea9bb086",
+					Name:                            "test-nas1",
+					ProtectionDomainID:              "test-pd",
+					StoragePoolID:                   "1c64e108000000aa",
+					OperationalStatus:               "Started",
+					PrimaryNodeID:                   "655374ea-13d7-c2d5-458c-4ec4ea9bb086",
+					BackUpNodeID:                    "655374ea-13d7-c2d5-458c-4ec4ea9bb087",
+					ProductionIPv4InterfaceID:       "null",
+					CurrentPreferredIPv4InterfaceID: "65537529-c386-dc63-1d1a-4ec4ea9bb086",
+				}
+
+				respData, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				fmt.Fprintln(w, string(respData))
+			}))
+			return ts, &system, check(hasNoError, checkRespId("655374ea-13d7-c2d5-458c-4ec4ea9bb086"))
+		},
+		"not found": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+			systemID := "0000aaacccddd1111"
+			href := "/rest/v1/nas-servers/6e8d8e8e-671b-336f-eb4e-dee0fbdc981f"
+			system := types.System{
+				ID: systemID,
+			}
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				http.Error(w, "nas not found", http.StatusNotFound)
+			}))
+			return ts, &system, check(hasError)
+		},
+	}
+
+	testCaseNasServers := map[string]string{
+		"success":   "655374ea-13d7-c2d5-458c-4ec4ea9bb086",
+		"not found": "6e8d8e8e-671b-336f-eb4e-dee0fbdc981f",
+	}
+
+	for name, tc := range testsName {
+		t.Run(name, func(t *testing.T) {
+			ts, system, checkFns := tc(t)
+			defer ts.Close()
+
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client.configConnect.Version = "4.0"
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+				System: system,
+			}
+
+			resp, err := s.GetNASServer(testCaseNasServers[name])
+			for _, checkFn := range checkFns {
+				checkFn(t, resp, err)
+			}
+		})
+	}
+}
+
+// func TestPingNAS(t *testing.T) {
+// 	type checkFn func(*testing.T, error)
+// 	check := func(fns ...checkFn) []checkFn { return fns }
+
+// 	hasNoError := func(t *testing.T, err error) {
+// 		if err != nil {
+// 			t.Fatalf("expected no error")
+// 		}
+// 	}
+
+// 	hasError := func(t *testing.T, err error) {
+// 		if err == nil {
+// 			t.Fatalf("expected error")
+// 		}
+// 	}
+
+// 	checkError := func(err error) func(t *testing.T, err error) {
+// 		return func(t *testing.T, err error) {
+// 			assert.Error(t, err)
+// 		}
+// 	}
+
+// 	testsName := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
+// 		"success": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+// 			systemID := "0000aaacccddd1111"
+// 			href := "/rest/v1/nas-servers/655374ea-13d7-c2d5-458c-4ec4ea9bb086/ping"
+// 			system := types.System{
+// 				ID: systemID,
+// 			}
+
+// 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 				if r.Method != http.MethodGet {
+// 					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+// 				}
+
+// 				if r.URL.Path != href {
+// 					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+// 				}
+
+// 				// resp := types.NAS{
+// 				// 	ID:                              "655374ea-13d7-c2d5-458c-4ec4ea9bb086",
+// 				// 	Name:                            "test-nas1",
+// 				// 	ProtectionDomainID:              "test-pd",
+// 				// 	StoragePoolID:                   "1c64e108000000aa",
+// 				// 	OperationalStatus:               "Started",
+// 				// 	PrimaryNodeID:                   "655374ea-13d7-c2d5-458c-4ec4ea9bb086",
+// 				// 	BackUpNodeID:                    "655374ea-13d7-c2d5-458c-4ec4ea9bb087",
+// 				// 	ProductionIPv4InterfaceID:       "null",
+// 				// 	CurrentPreferredIPv4InterfaceID: "65537529-c386-dc63-1d1a-4ec4ea9bb086",
+// 				// }
+
+// 				// respData, err := json.Marshal(resp)
+// 				// if err != nil {
+// 				// 	t.Fatal(err)
+// 				// }
+// 				// fmt.Fprintln(w, string(respData))
+// 			}))
+// 			return ts, &system, check(hasNoError, checkError(nil))
+// 		},
+// 		"not found": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+// 			systemID := "0000aaacccddd1111"
+// 			href := "/rest/v1/nas-servers/6e8d8e8e-671b-336f-eb4e-dee0fbdc981f/ping"
+// 			system := types.System{
+// 				ID: systemID,
+// 			}
+
+// 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 				if r.Method != http.MethodGet {
+// 					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+// 				}
+
+// 				if r.URL.Path != href {
+// 					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+// 				}
+
+// 				http.Error(w, "nas not found", http.StatusNotFound)
+// 			}))
+// 			return ts, &system, check(hasError, checkError(errors.New("Could not ping NAS server 6e8d8e8e-671b-336f-eb4e-dee0fbdc981f")))
+// 		},
+// 	}
+
+// 	testCaseNasServers := map[string]string{
+// 		"success":   "655374ea-13d7-c2d5-458c-4ec4ea9bb086",
+// 		"not found": "6e8d8e8e-671b-336f-eb4e-dee0fbdc981f",
+// 	}
+
+// 	for name, tc := range testsName {
+// 		t.Run(name, func(t *testing.T) {
+// 			ts, system, checkFns := tc(t)
+// 			defer ts.Close()
+
+// 			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+// 			client.configConnect.Version = "4.0"
+// 			if err != nil {
+// 				t.Fatal(err)
+// 			}
+
+// 			s := System{
+// 				client: client,
+// 				System: system,
+// 			}
+
+// 			err = s.PingNAS(testCaseNasServers[name])
+// 			for _, checkFn := range checkFns {
+// 				checkFn(t, err)
+// 			}
+// 		})
+// 	}
+// }

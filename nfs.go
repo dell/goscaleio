@@ -124,27 +124,24 @@ func (s *System) GetNASServer(id string) (*types.NAS, error) {
 	return &resp, nil
 }
 
-func (s *System) PingNAS(id string) error {
-	nasserver, err := s.GetNASServer(id)
-	if err != nil {
-		return errors.New("could not fetch NAS servers")
-	}
+func (s *System) PingNAS(id string, ipaddress string) error {
+	// nasserver, err := s.GetNASServer(id)
+	// if err != nil {
+	// 	return errors.New("could not fetch NAS servers")
+	// }
 
-	path := fmt.Sprintf("/rest/v1/file-interfaces/%s?select=*", nasserver.CurrentPreferredIPv4InterfaceID)
+	// fileResp, err := s.GetFileInterface(nasserver.CurrentPreferredIPv4InterfaceID)
+	// if err != nil {
+	// 	return errors.New("could not fetch file interface")
+	// }
 
-	var fileResp types.FileInterface
-	err = s.client.getJSONWithRetry(http.MethodGet, path, nil, &fileResp)
-	if err != nil {
-		return errors.New("Could not find file interface " + fileResp.IPAddress)
-	}
-
-	path = fmt.Sprintf("rest/v1/nas-servers/%s/ping", id)
+	path := fmt.Sprintf("rest/v1/nas-servers/%s/ping", id)
 	body := types.PingNASParam{
-		DestinationAddress: fileResp.IPAddress,
+		DestinationAddress: ipaddress,
 		IsIPV6:             false,
 	}
 
-	err = s.client.getJSONWithRetry(http.MethodPost, path, body, nil)
+	err := s.client.getJSONWithRetry(http.MethodPost, path, body, nil)
 	if err != nil {
 		return errors.New("Could not ping NAS server " + id)
 	}
