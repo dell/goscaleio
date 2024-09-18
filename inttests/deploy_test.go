@@ -164,3 +164,9 @@ func TestDeployCheckForCompletionQueueCommands(t *testing.T) {
 	assert.NotNil(t, res)
 	assert.Nil(t, err)
 }
+
+// TestRenewInstallationCookie function to test Renew Installation Cookie
+func TestRenewInstallationCookie(t *testing.T) {
+	err := GC.RenewInstallationCookie(5)
+	assert.Nil(t, err)
+}

@@ -26,6 +26,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	path "path/filepath"
 	"regexp"
 	"strconv"
@@ -285,6 +286,14 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 	}
 
 	gatewayResponse.StatusCode = 200
+
+	// store cookie for successive deployment requests
+	if gc.version == "4.0" {
+		err := storeCookie(response.Header, gc.host)
+		if err != nil {
+			return &gatewayResponse, fmt.Errorf("Error While Storing cookie: %s", err)
+		}
+	}
 
 	return &gatewayResponse, nil
 }
@@ -978,6 +987,47 @@ func (gc *GatewayClient) MoveToIdlePhase() (*types.GatewayResponse, error) {
 	return &gatewayResponse, nil
 }
 
+// RenewInstallationCookie is used to renew the installation cookie, i.e. LEGACYGWCOOKIE.
+// Using the same LEGACYGWCOOKIE ensures that the REST requests are sent to the same GW pod.
+// That would help to get the correct response from the GW pod that stores installation packages.
+func (gc *GatewayClient) RenewInstallationCookie(retryCount int) error {
+	var packageParam []*types.PackageDetails
+
+	req, httpError := http.NewRequest(http.MethodGet, gc.host+"/im/types/installationPackages/instances?onlyLatest=false&_search=false", nil)
+	if httpError != nil {
+		return httpError
+	}
+
+	if gc.version == "4.0" {
+		req.Header.Set("Authorization", "Bearer "+gc.token)
+	} else {
+		req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(gc.username+":"+gc.password)))
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	for i := 0; i < retryCount; i++ {
+		httpResp, httpRespError := gc.http.Do(req)
+		if httpRespError != nil {
+			continue
+		}
+
+		responseString, err := extractString(httpResp)
+		if err != nil {
+			continue
+		}
+
+		if httpResp.StatusCode == 200 {
+			err := json.Unmarshal([]byte(responseString), &packageParam)
+			// No packages found. Retry to find the cookie that can return packages info
+			if err != nil || len(packageParam) == 0 || storeCookie(httpResp.Header, gc.host) != nil {
+				continue
+			}
+			return nil
+		}
+	}
+	return fmt.Errorf("Failed to renew installation cookie %d times", retryCount)
+}
+
 // GetInQueueCommand used for get in queue commands
 func (gc *GatewayClient) GetInQueueCommand() ([]types.MDMQueueCommandDetails, error) {
 	var mdmQueueCommandDetails []types.MDMQueueCommandDetails
@@ -1156,7 +1206,17 @@ func jsonToMap(jsonStr string) (map[string]interface{}, error) {
 	return result, nil
 }
 
-const configFile = "/home/.cookie_config.yaml"
+// getConfigPath returns the path to the cookie configuration file in the user's home directory.
+func getConfigPath() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "/home/.cookie_config.yaml", err
+	}
+
+	configPath := filepath.Join(homeDir, ".cookie_config.yaml")
+
+	return configPath, nil
+}
 
 var globalCookie string
 
@@ -1233,7 +1293,8 @@ func setCookie(header http.Header, host string) error {
 }
 
 func loadConfig() (*CookieConfig, error) {
-	if _, err := os.Stat(configFile); err == nil {
+	configFile, _ := getConfigPath()
+	if _, err := os.Stat(filepath.Clean(configFile)); err == nil {
 		data, err := ioutil.ReadFile(configFile)
 		if err != nil {
 			return nil, err
@@ -1257,7 +1318,8 @@ func writeConfig(config *CookieConfig) error {
 		return err
 	}
 	// #nosec G306
-	err = ioutil.WriteFile(configFile, data, 0o644)
+	configFile, _ := getConfigPath()
+	err = ioutil.WriteFile(configFile, data, 0o600)
 	if err != nil {
 		return err
 	}
