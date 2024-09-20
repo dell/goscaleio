@@ -76,7 +76,7 @@ func (s *System) GetNASByIDName(id string, name string) (*types.NAS, error) {
 		}
 	}
 
-	return nil, errors.New("couldn't find given NAS server by name")
+	return nil, errors.New("could not find given NAS server by name")
 }
 
 // CreateNAS creates a NAS server
@@ -111,30 +111,8 @@ func (s *System) DeleteNAS(id string) error {
 	return nil
 }
 
-func (s *System) GetNASServer(id string) (*types.NAS, error) {
-	var resp types.NAS
-
-	path := fmt.Sprintf("/rest/v1/nas-servers/%s?select=*", id)
-
-	err := s.client.getJSONWithRetry(http.MethodGet, path, nil, &resp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
-}
-
+// PingNAS pings a NAS server
 func (s *System) PingNAS(id string, ipaddress string) error {
-	// nasserver, err := s.GetNASServer(id)
-	// if err != nil {
-	// 	return errors.New("could not fetch NAS servers")
-	// }
-
-	// fileResp, err := s.GetFileInterface(nasserver.CurrentPreferredIPv4InterfaceID)
-	// if err != nil {
-	// 	return errors.New("could not fetch file interface")
-	// }
-
 	path := fmt.Sprintf("rest/v1/nas-servers/%s/ping", id)
 	body := types.PingNASParam{
 		DestinationAddress: ipaddress,
