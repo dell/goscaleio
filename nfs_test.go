@@ -481,11 +481,11 @@ func TestGeFileInterfaace(t *testing.T) {
 		}
 	}
 
-	testsId := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
+	testsID := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
 			systemID := "0000aaacccddd1111"
-			fileInterfaceId := "5e8d8e8e-671b-336f-db4e-cee0fbdc981e"
-			href := fmt.Sprintf("/rest/v1/file-interfaces/%s", fileInterfaceId)
+			fileInterfaceID := "5e8d8e8e-671b-336f-db4e-cee0fbdc981e"
+			href := fmt.Sprintf("/rest/v1/file-interfaces/%s", fileInterfaceID)
 			system := types.System{
 				ID: systemID,
 			}
@@ -540,7 +540,7 @@ func TestGeFileInterfaace(t *testing.T) {
 		"not found": "6e8d8e8e-671b-336f-eb4e-dee0fbdc981f",
 	}
 
-	for name, tc := range testsId {
+	for name, tc := range testsID {
 		t.Run(name, func(t *testing.T) {
 			ts, system, checkFns := tc(t)
 			defer ts.Close()
