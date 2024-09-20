@@ -214,14 +214,6 @@ func (c *Client) getJSONWithRetry(
 			return c.api.DoWithHeaders(
 				context.Background(), method, uri, headers, body, resp, c.configConnect.Version)
 		}
-
-		if e.HTTPStatusCode == 500 {
-			doLog(log.Info, "internal server error, retrying after a small delay")
-			time.Sleep(3 * time.Second)
-			return c.api.DoWithHeaders(
-				context.Background(), method, uri, headers, body, resp, c.configConnect.Version)
-
-		}
 	}
 	doLog(log.WithError(err).Error, "returning error")
 
