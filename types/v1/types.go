@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"sync"
@@ -533,6 +534,7 @@ type Sdc struct {
 	Name               string   `json:"name"`
 	PerfProfile        string   `json:"perfProfile"`
 	OSType             string   `json:"osType"`
+	HostType           string   `json:"hostType"`
 	ID                 string   `json:"id"`
 	Links              []*Link  `json:"links"`
 	SdcApprovedIPs     []string `json:"sdcApprovedIps"`
@@ -2009,4 +2011,51 @@ type Bundle struct {
 	Custom             bool        `json:"custom"`
 	NeedsAttention     bool        `json:"needsAttention"`
 	SoftwareComponents []Component `json:"softwareComponents"`
+}
+
+// IntString is a custom type that represents an integer value, while string is used by PowerFlex API.
+type IntString int
+
+// MarshalJSON is a custom JSON marshaler for the IntString type.
+// It converts the IntString value to a string representation and marshals it into a JSON byte slice.
+func (i IntString) MarshalJSON() ([]byte, error) {
+	return json.Marshal(fmt.Sprintf("%d", i))
+}
+
+// NvmeHost defines struct for PowerFlex NVMe host
+type NvmeHost struct {
+	SystemID       string  `json:"systemId"`
+	Name           string  `json:"name"`
+	Nqn            string  `json:"nqn"`
+	MaxNumPaths    int     `json:"maxNumPaths"`
+	MaxNumSysPorts int     `json:"maxNumSysPorts"`
+	HostType       string  `json:"hostType"`
+	ID             string  `json:"id"`
+	Links          []*Link `json:"links"`
+}
+
+// NvmeHostResp defines struct for response of creating NvmeHost
+type NvmeHostResp struct {
+	ID string `json:"id"`
+}
+
+// ChangeNvmeHostNameParam defines struct for renaming the NVMe host
+type ChangeNvmeHostNameParam ChangeSdcNameParam
+
+// ChangeNvmeMaxNumPathsParam defines struct for new max number paths
+type ChangeNvmeMaxNumPathsParam struct {
+	MaxNumPaths IntString `json:"newMaxNumPaths"`
+}
+
+// ChangeNvmeHostMaxNumSysPortsParam defines struct for new max number system ports
+type ChangeNvmeHostMaxNumSysPortsParam struct {
+	MaxNumSysPorts IntString `json:"newMaxNumSysPorts"`
+}
+
+// NvmeHostParam defines struct for creating an NVMe host
+type NvmeHostParam struct {
+	Name           string    `json:"name"`
+	Nqn            string    `json:"nqn"`
+	MaxNumPaths    IntString `json:"maxNumPaths,omitempty"`
+	MaxNumSysPorts IntString `json:"maxNumSysPorts,omitempty"`
 }
