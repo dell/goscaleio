@@ -279,7 +279,7 @@ func TestCreateNAS(t *testing.T) {
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {
-					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodPost, r.Method))
 				}
 
 				if r.URL.Path != href {
@@ -397,9 +397,9 @@ func TestPingNAS(t *testing.T) {
 				ID: systemID,
 			}
 
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {
-					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodPost, r.Method))
 				}
 
 				if r.URL.Path != href {
