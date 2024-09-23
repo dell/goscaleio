@@ -279,7 +279,7 @@ func TestCreateNAS(t *testing.T) {
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != http.MethodPost {
-					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodPost, r.Method))
 				}
 
 				if r.URL.Path != href {
@@ -371,4 +371,195 @@ func TestDeleteNAS(t *testing.T) {
 
 	err = s.DeleteNAS(id)
 	assert.Nil(t, err)
+}
+
+func TestPingNAS(t *testing.T) {
+	type checkFn func(*testing.T, error)
+	check := func(fns ...checkFn) []checkFn { return fns }
+
+	hasNoError := func(t *testing.T, err error) {
+		if err != nil {
+			t.Fatalf("expected no error")
+		}
+	}
+
+	hasError := func(t *testing.T, err error) {
+		if err == nil {
+			t.Fatalf("expected error")
+		}
+	}
+
+	testsName := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
+		"success": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+			systemID := "0000aaacccddd1111"
+			href := "/rest/v1/nas-servers/655374ea-13d7-c2d5-458c-4ec4ea9bb086/ping"
+			system := types.System{
+				ID: systemID,
+			}
+
+			ts := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodPost, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+			}))
+			return ts, &system, check(hasNoError)
+		},
+		"failure": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+			systemID := "0000aaacccddd1111"
+			href := "/rest/v1/nas-servers/6e8d8e8e-671b-336f-eb4e-dee0fbdc981f/ping"
+			system := types.System{
+				ID: systemID,
+			}
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodPost, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				http.Error(w, "could not ping NAS server", http.StatusNotFound)
+			}))
+			return ts, &system, check(hasError)
+		},
+	}
+
+	testCaseNasServers := map[string][]string{
+		"success": {"655374ea-13d7-c2d5-458c-4ec4ea9bb086", "10.20.30.40"},
+		"failure": {"6e8d8e8e-671b-336f-eb4e-dee0fbdc981f", "11.22.33.44"},
+	}
+
+	for name, tc := range testsName {
+		t.Run(name, func(t *testing.T) {
+			ts, system, checkFns := tc(t)
+			defer ts.Close()
+
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client.configConnect.Version = "4.0"
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+				System: system,
+			}
+
+			err = s.PingNAS(testCaseNasServers[name][0], testCaseNasServers[name][1])
+			for _, checkFn := range checkFns {
+				checkFn(t, err)
+			}
+		})
+	}
+}
+
+func TestGeFileInterfaace(t *testing.T) {
+	type checkFn func(*testing.T, *types.FileInterface, error)
+	check := func(fns ...checkFn) []checkFn { return fns }
+
+	hasNoError := func(t *testing.T, _ *types.FileInterface, err error) {
+		if err != nil {
+			t.Fatalf("expected no error")
+		}
+	}
+
+	hasError := func(t *testing.T, _ *types.FileInterface, err error) {
+		if err == nil {
+			t.Fatalf("expected error")
+		}
+	}
+
+	checkRespID := func(fileInterface string) func(t *testing.T, resp *types.FileInterface, err error) {
+		return func(t *testing.T, resp *types.FileInterface, _ error) {
+			assert.Equal(t, fileInterface, resp.ID)
+		}
+	}
+
+	testsID := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
+		"success": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+			systemID := "0000aaacccddd1111"
+			fileInterfaceID := "5e8d8e8e-671b-336f-db4e-cee0fbdc981e"
+			href := fmt.Sprintf("/rest/v1/file-interfaces/%s", fileInterfaceID)
+			system := types.System{
+				ID: systemID,
+			}
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				resp := types.FileInterface{
+					ID:        "5e8d8e8e-671b-336f-db4e-cee0fbdc981e",
+					IPAddress: "10.20.30.40",
+				}
+
+				respData, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				fmt.Fprintln(w, string(respData))
+			}))
+			return ts, &system, check(hasNoError, checkRespID("5e8d8e8e-671b-336f-db4e-cee0fbdc981e"))
+		},
+		"not found": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+			systemID := "0000aaacccddd1111"
+			fileInterfaceID := "6e8d8e8e-671b-336f-eb4e-dee0fbdc981f"
+			href := fmt.Sprintf("/rest/v1/file-interfaces/%s", fileInterfaceID)
+			system := types.System{
+				ID: systemID,
+			}
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				http.Error(w, "could not find the File interface using id", http.StatusNotFound)
+			}))
+			return ts, &system, check(hasError)
+		},
+	}
+
+	testCaseFileInterfaceIDs := map[string]string{
+		"success":   "5e8d8e8e-671b-336f-db4e-cee0fbdc981e",
+		"not found": "6e8d8e8e-671b-336f-eb4e-dee0fbdc981f",
+	}
+
+	for name, tc := range testsID {
+		t.Run(name, func(t *testing.T) {
+			ts, system, checkFns := tc(t)
+			defer ts.Close()
+
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client.configConnect.Version = "4.0"
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+				System: system,
+			}
+
+			resp, err := s.GetFileInterface(testCaseFileInterfaceIDs[name])
+			for _, checkFn := range checkFns {
+				checkFn(t, resp, err)
+			}
+		})
+	}
 }

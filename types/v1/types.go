@@ -1380,6 +1380,12 @@ type CreateNASResponse struct {
 	ID string `json:"id"`
 }
 
+// PingNASParam defines the struct (payload) for Ping NAS
+type PingNASParam struct {
+	DestinationAddress string `json:"destination_address"`
+	IsIPV6             bool   `json:"is_ipv6"`
+}
+
 // CreateNASParam defines the struct for CreateNASParam
 type CreateNASParam struct {
 	Name                         string `json:"name"`

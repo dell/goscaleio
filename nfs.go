@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
@@ -68,13 +69,14 @@ func (s *System) GetNASByIDName(id string, name string) (*types.NAS, error) {
 		return nil, err
 	}
 
+	name = strings.ToLower(name)
 	for _, nas := range nasList {
-		if nas.Name == name {
+		if strings.Contains(name, strings.ToLower(nas.Name)) {
 			return &nas, nil
 		}
 	}
 
-	return nil, errors.New("couldn't find given NAS server by name")
+	return nil, errors.New("could not find given NAS server by name")
 }
 
 // CreateNAS creates a NAS server
@@ -104,6 +106,22 @@ func (s *System) DeleteNAS(id string) error {
 	if err != nil {
 		fmt.Println("err", err)
 		return err
+	}
+
+	return nil
+}
+
+// PingNAS pings a NAS server
+func (s *System) PingNAS(id string, ipaddress string) error {
+	path := fmt.Sprintf("rest/v1/nas-servers/%s/ping", id)
+	body := types.PingNASParam{
+		DestinationAddress: ipaddress,
+		IsIPV6:             false,
+	}
+
+	err := s.client.getJSONWithRetry(http.MethodPost, path, body, nil)
+	if err != nil {
+		return errors.New("Could not ping NAS server " + id)
 	}
 
 	return nil
