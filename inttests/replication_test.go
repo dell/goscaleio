@@ -1,6 +1,6 @@
 /*
  *
- * Copyright © 2020 Dell Inc. or its subsidiaries. All Rights Reserved.
+ * Copyright © 2020-2024 Dell Inc. or its subsidiaries. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  * limitations under the License.
  *
  */
-
 package inttests
 
 import (
@@ -325,6 +324,34 @@ func TestQueryReplicationPairs(t *testing.T) {
 		replicationPair.ReplicaitonPair = pair
 		rep.pair = replicationPair
 	}
+}
+
+// Query Specific Replication Pair
+func TestQueryReplicationPair(t *testing.T) {
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
+
+	pair, err := C.GetReplicationPair(rep.pair.ReplicaitonPair.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, pair)
+}
+
+// Pause and Resume Replication Pair
+func TestPauseAndResumeReplicationPair(t *testing.T) {
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
+
+	// Pause
+	pairP, err := C.PausePairInitialCopy(rep.pair.ReplicaitonPair.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, pairP)
+
+	// Resume
+	pairR, err := C.ResumePairInitialCopy(rep.pair.ReplicaitonPair.ID)
+	assert.Nil(t, err)
+	assert.NotNil(t, pairR)
 }
 
 // Query Replication Pair Statistics
