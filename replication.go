@@ -1,3 +1,20 @@
+/*
+ * Copyright © 2020-2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package goscaleio
 
 import (
@@ -210,6 +227,39 @@ func (c *Client) GetAllReplicationPairs() ([]*types.ReplicationPair, error) {
 	var pairs []*types.ReplicationPair
 	err := c.getJSONWithRetry(http.MethodGet, path, nil, &pairs)
 	return pairs, err
+}
+
+// GetReplicationPair returns a specific replication pair on the system.
+func (c *Client) GetReplicationPair(id string) (*types.ReplicationPair, error) {
+	defer TimeSpent("GetReplicationPair", time.Now())
+
+	path := "/api/instances/ReplicationPair::" + id
+
+	var pair *types.ReplicationPair
+	err := c.getJSONWithRetry(http.MethodGet, path, nil, &pair)
+	return pair, err
+}
+
+// PausePairInitialCopy pauses the initial copy of the replication pair.
+func (c *Client) PausePairInitialCopy(id string) (*types.ReplicationPair, error) {
+	defer TimeSpent("PausePairInitialCopy", time.Now())
+
+	path := "/api/instances/ReplicationPair::" + id + "/action/pausePairInitialCopy"
+
+	var pair *types.ReplicationPair
+	err := c.getJSONWithRetry(http.MethodPost, path, types.EmptyPayload{}, &pair)
+	return pair, err
+}
+
+// ResumePairInitialCopy resumes the initial copy of the replication pair.
+func (c *Client) ResumePairInitialCopy(id string) (*types.ReplicationPair, error) {
+	defer TimeSpent("ResumePairInitialCopy", time.Now())
+
+	path := "/api/instances/ReplicationPair::" + id + "/action/resumePairInitialCopy"
+
+	var pair *types.ReplicationPair
+	err := c.getJSONWithRetry(http.MethodPost, path, types.EmptyPayload{}, &pair)
+	return pair, err
 }
 
 // GetReplicationPairs returns a list of replication pairs associated to the rcg.
