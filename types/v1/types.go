@@ -2054,7 +2054,7 @@ type ChangeNvmeHostMaxNumSysPortsParam struct {
 
 // NvmeHostParam defines struct for creating an NVMe host
 type NvmeHostParam struct {
-	Name           string    `json:"name"`
+	Name           string    `json:"name,omitempty"`
 	Nqn            string    `json:"nqn"`
 	MaxNumPaths    IntString `json:"maxNumPaths,omitempty"`
 	MaxNumSysPorts IntString `json:"maxNumSysPorts,omitempty"`
