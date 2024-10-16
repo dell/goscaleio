@@ -59,7 +59,7 @@ func (s *System) GetAllNvmeHosts() ([]types.NvmeHost, error) {
 }
 
 // GetNvmeHostByID returns an NVMe host searched by id
-func (s *System) GetNvmeHostByID(id string) (*NvmeHost, error) {
+func (s *System) GetNvmeHostByID(id string) (*types.NvmeHost, error) {
 	defer TimeSpent("GetNvmeHostByID", time.Now())
 
 	path := fmt.Sprintf("api/instances/Sdc::%v", id)
@@ -67,11 +67,7 @@ func (s *System) GetNvmeHostByID(id string) (*NvmeHost, error) {
 	var nvmeHost types.NvmeHost
 	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &nvmeHost)
-	if err != nil {
-		return nil, err
-	}
-
-	return NewNvmeHost(s.client, &nvmeHost), nil
+	return &nvmeHost, err
 }
 
 // CreateNvmeHost creates a new NVMe host
@@ -157,4 +153,15 @@ func (s *System) DeleteNvmeHost(id string) error {
 		return err
 	}
 	return nil
+}
+
+// GetHostNvmeControllers returns all attached NVMe controllers
+func (s *System) GetHostNvmeControllers(host types.NvmeHost) ([]types.NvmeController, error) {
+	defer TimeSpent("GetHostNvmeControllers", time.Now())
+	path := fmt.Sprintf("api/instances/Host::%v/relationships/NvmeController", host.ID)
+
+	var nvmeControllers []types.NvmeController
+	err := s.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &nvmeControllers)
+	return nvmeControllers, err
 }
