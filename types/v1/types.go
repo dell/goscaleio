@@ -2095,3 +2095,92 @@ type NvmeHostParam struct {
 	MaxNumPaths    IntString `json:"maxNumPaths,omitempty"`
 	MaxNumSysPorts IntString `json:"maxNumSysPorts,omitempty"`
 }
+
+// Sdt defines struct for Sdt
+type Sdt struct {
+	ID                                string          `json:"id"`
+	Name                              string          `json:"name,omitempty"`
+	ProtectionDomainID                string          `json:"protectionDomainId"`
+	IPList                            []*SdtIP        `json:"ipList"`
+	StoragePort                       int             `json:"storagePort,omitempty"`
+	NvmePort                          int             `json:"nvmePort,omitempty"`
+	DiscoveryPort                     int             `json:"discoveryPort,omitempty"`
+	SdtState                          string          `json:"sdtState"`
+	SystemID                          string          `json:"systemId"`
+	MdmConnectionState                string          `json:"mdmConnectionState"`
+	MembershipState                   string          `json:"membershipState"`
+	FaultSetID                        string          `json:"faultSetId,omitempty"`
+	SoftwareVersionInfo               string          `json:"softwareVersionInfo,omitempty"`
+	MaintenanceState                  string          `json:"maintenanceState,omitempty"`
+	AuthenticationError               string          `json:"authenticationError,omitempty"`
+	PersistentDiscoveryControllersNum int             `json:"persistentDiscoveryControllersNum,omitempty"`
+	CertificateInfo                   CertificateInfo `json:"certificateInfo,omitempty"`
+	Links                             []*Link         `json:"links"`
+}
+
+// SdtIP defines struct for SdtIP
+type SdtIP struct {
+	IP   string `json:"ip"`
+	Role string `json:"role"`
+}
+
+// SdtParam defines struct for SdtParam
+type SdtParam struct {
+	Name               string    `json:"name,omitempty"`
+	IPList             []*SdtIP  `json:"ips"`
+	StoragePort        IntString `json:"storagePort,omitempty"`
+	NvmePort           IntString `json:"nvmePort,omitempty"`
+	DiscoveryPort      IntString `json:"discoveryPort,omitempty"`
+	ProtectionDomainID string    `json:"protectionDomainId"`
+}
+
+// SdtResp defines struct for response of creating sdt
+type SdtResp struct {
+	ID string `json:"id"`
+}
+
+// SdtRenameParam defines the struct for renaming an sdt
+type SdtRenameParam struct {
+	NewName string `json:"newName"`
+}
+
+// SdtNvmePortParam defines the struct for modifying NVMe port for the sdt
+type SdtNvmePortParam struct {
+	NewNvmePort IntString `json:"newNvmePort"`
+}
+
+// SdtStoragePortParam defines the struct for modifying StoragePort for the sdt
+type SdtStoragePortParam struct {
+	NewStoragePort IntString `json:"newStoragePort"`
+}
+
+// SdtDiscoveryPortParam defines the struct for modifying DiscoveryPort for the sdt
+type SdtDiscoveryPortParam struct {
+	NewDiscoveryPort IntString `json:"newDiscoveryPort"`
+}
+
+// SdtRemoveIPParam defines the struct for removing IP from the sdt
+type SdtRemoveIPParam struct {
+	IP string `json:"ip"`
+}
+
+// SdtIPRoleParam defines the struct for modifying IP Role for the sdt
+type SdtIPRoleParam struct {
+	IP   string `json:"ip"`
+	Role string `json:"newRole"`
+}
+
+// NvmeController defines struct for NVMe controller
+type NvmeController struct {
+	Name         string `json:"name"`
+	IsConnected  bool   `json:"isConnected"`
+	SdtID        string `json:"sdtId"`
+	HostIP       string `json:"hostIp"`
+	HostID       string `json:"hostId"`
+	ControllerID int    `json:"controllerId"`
+	SysPortID    int    `json:"sysPortId"`
+	SysPortIP    string `json:"sysPortIp"`
+	Subsystem    string `json:"subsystem"`
+	IsAssigned   bool   `json:"isAssigned"`
+	ID           string `json:"id"`
+}
