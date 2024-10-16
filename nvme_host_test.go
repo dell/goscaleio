@@ -148,7 +148,7 @@ func Test_GetAllNvmeHosts(t *testing.T) {
 }
 
 func Test_GetNvmeHostByID(t *testing.T) {
-	type checkFn func(*testing.T, *NvmeHost, error)
+	type checkFn func(*testing.T, *types.NvmeHost, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
 	responseJSON := `{
@@ -201,19 +201,19 @@ func Test_GetNvmeHostByID(t *testing.T) {
     ]
 }`
 
-	hasNoError := func(t *testing.T, _ *NvmeHost, err error) {
+	hasNoError := func(t *testing.T, _ *types.NvmeHost, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	checkName := func(name string) func(t *testing.T, host *NvmeHost, err error) {
-		return func(t *testing.T, host *NvmeHost, _ error) {
-			assert.Equal(t, host.NvmeHost.Name, name)
+	checkName := func(name string) func(t *testing.T, host *types.NvmeHost, err error) {
+		return func(t *testing.T, host *types.NvmeHost, _ error) {
+			assert.Equal(t, host.Name, name)
 		}
 	}
 
-	hasError := func(t *testing.T, _ *NvmeHost, err error) {
+	hasError := func(t *testing.T, _ *types.NvmeHost, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
@@ -543,7 +543,7 @@ func Test_ChangeNvmeHostMaxNumSysPorts(t *testing.T) {
 	}
 }
 
-func Test_RemoveNvmeHost(t *testing.T) {
+func Test_DeleteNvmeHost(t *testing.T) {
 	type checkFn func(*testing.T, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
@@ -602,6 +602,104 @@ func Test_RemoveNvmeHost(t *testing.T) {
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
+			}
+		})
+	}
+}
+
+func Test_GetHostNvmeControllers(t *testing.T) {
+	type checkFn func(*testing.T, []types.NvmeController, error)
+	check := func(fns ...checkFn) []checkFn { return fns }
+
+	responseJSON := `[
+	{
+		"name": null,
+		"isConnected": true,
+		"sdtId": "cd16ff4300000000",
+		"hostIp": null,
+		"hostId": "4d2a627100010000",
+		"controllerId": 0,
+		"sysPortId": 0,
+		"sysPortIp": "10.0.0.22",
+		"subsystem": "Io",
+		"isAssigned": true,
+		"id": "cc00000001000011",
+		"links": [
+			{
+				"rel": "self",
+				"href": "/api/instances/NvmeController::cc00000001000011"
+			}
+		]
+	}]`
+
+	hasNoError := func(t *testing.T, _ []types.NvmeController, err error) {
+		if err != nil {
+			t.Fatalf("expected no error")
+		}
+	}
+
+	checkLength := func(length int) func(t *testing.T, slice []types.NvmeController, err error) {
+		return func(t *testing.T, slice []types.NvmeController, _ error) {
+			assert.Equal(t, length, len(slice))
+		}
+	}
+
+	hasError := func(t *testing.T, _ []types.NvmeController, err error) {
+		if err == nil {
+			t.Fatalf("expected error")
+		}
+	}
+
+	tests := map[string]func(t *testing.T) (*httptest.Server, types.System, []checkFn){
+		"success": func(_ *testing.T) (*httptest.Server, types.System, []checkFn) {
+			systemID := "mock-system-id"
+			id := "mock-id"
+			url := fmt.Sprintf("/api/instances/Host::%v/relationships/NvmeController", id)
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method == http.MethodGet && strings.EqualFold(r.URL.Path, url) {
+					w.WriteHeader(http.StatusOK)
+					_, err := w.Write([]byte(responseJSON))
+					if err != nil {
+						t.Fatalf("Unexpected error: %v", err)
+					}
+					return
+				}
+				http.NotFound(w, r)
+			}))
+			system := types.System{
+				ID: systemID,
+			}
+			return server, system, check(hasNoError, checkLength(1))
+		},
+		"error response": func(_ *testing.T) (*httptest.Server, types.System, []checkFn) {
+			systemID := "mock-system-id"
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				http.Error(w, "Server Error", http.StatusInternalServerError)
+			}))
+			system := types.System{
+				ID: systemID,
+			}
+			return server, system, check(hasError)
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			server, sys, checkFns := tc(t)
+			defer server.Close()
+
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			system := System{
+				System: &sys,
+				client: client,
+			}
+			host := types.NvmeHost{
+				ID : "mock-id",
+			}
+			nvmeHostControllers, err := system.GetHostNvmeControllers(host)
+
+			for _, checkFn := range checkFns {
+				checkFn(t, nvmeHostControllers, err)
 			}
 		})
 	}
