@@ -158,3 +158,14 @@ func (s *System) DeleteNvmeHost(id string) error {
 	}
 	return nil
 }
+
+// GetHostNvmeControllers returns all attached NVMe controllers
+func (s *System) GetHostNvmeControllers(host types.NvmeHost) ([]types.NvmeController, error) {
+	defer TimeSpent("GetHostNvmeControllers", time.Now())
+	path := fmt.Sprintf("api/instances/Host::%v/relationships/NvmeController", host.ID)
+
+	var nvmeControllers []types.NvmeController
+	err := s.client.getJSONWithRetry(
+		http.MethodGet, path, nil, &nvmeControllers)
+	return nvmeControllers, err
+}

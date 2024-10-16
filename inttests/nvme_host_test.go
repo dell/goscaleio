@@ -67,6 +67,12 @@ func TestNvmeHost(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
+	t.Run("Get Host NVMe Controllers", func(t *testing.T) {
+		controllers, err := system.GetHostNvmeControllers(types.NvmeHost{ID: hostID})
+		assert.Nil(t, err)
+		assert.NotNil(t, controllers)
+	})
+
 	t.Cleanup(func() {
 		err := system.DeleteNvmeHost(hostID)
 		assert.Nil(t, err)
