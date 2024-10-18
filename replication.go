@@ -369,6 +369,80 @@ func (rcg *ReplicationConsistencyGroup) ExecuteSyncOnReplicationGroup() (*types.
 	return resp, err
 }
 
+// SetRPOOnReplicationGroup on the ConsistencyGroup.
+func (rcg *ReplicationConsistencyGroup) SetRPOOnReplicationGroup(param types.SetRPOReplicationConsistencyGroup) error {
+	defer TimeSpent("SetRPOOnReplicationGroup", time.Now())
+
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/ModifyReplicationConsistencyGroupRpo"
+
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}
+
+// SetTargetVolumeAccessModeOnReplicationGroup on the ConsistencyGroup.
+func (rcg *ReplicationConsistencyGroup) SetTargetVolumeAccessModeOnReplicationGroup(param types.SetTargetVolumeAccessModeOnReplicationGroup) error {
+	defer TimeSpent("SetTargetVolumeAccessModeOnReplicationGroup", time.Now())
+
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/modifyReplicationConsistencyGroupTargetVolumeAccessMode"
+
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}
+
+// SetNewNameOnReplicationGroup on the ConsistencyGroup.
+func (rcg *ReplicationConsistencyGroup) SetNewNameOnReplicationGroup(param types.SetNewNameOnReplicationGroup) error {
+	defer TimeSpent("SetNewNameOnReplicationGroup", time.Now())
+
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/renameReplicationConsistencyGroup"
+
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}
+
+// ExecuteConsistentOnReplicationGroup on the ConsistencyGroup.
+func (rcg *ReplicationConsistencyGroup) ExecuteConsistentOnReplicationGroup() error {
+	defer TimeSpent("ExecuteConsistentOnReplicationGroup", time.Now())
+
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/setReplicationConsistencyGroupConsistent"
+	param := types.EmptyPayload{}
+
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}
+
+// ExecuteInconsistentOnReplicationGroup on the ConsistencyGroup.
+func (rcg *ReplicationConsistencyGroup) ExecuteInconsistentOnReplicationGroup() error {
+	defer TimeSpent("ExecuteInconsistentOnReplicationGroup", time.Now())
+
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/setReplicationConsistencyGroupInconsistent"
+	param := types.EmptyPayload{}
+
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}
+
+// ExecuteActivateOnReplicationGroup on the ConsistencyGroup.
+func (rcg *ReplicationConsistencyGroup) ExecuteActivateOnReplicationGroup() error {
+	defer TimeSpent("ExecuteActivateOnReplicationGroup", time.Now())
+
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/activateReplicationConsistencyGroup"
+	param := types.EmptyPayload{}
+
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}
+
+// ExecuteTerminateOnReplicationGroup on the ConsistencyGroup.
+func (rcg *ReplicationConsistencyGroup) ExecuteTerminateOnReplicationGroup() error {
+	defer TimeSpent("ExecuteTerminateOnReplicationGroup", time.Now())
+
+	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/terminateReplicationConsistencyGroup"
+	param := types.EmptyPayload{}
+
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	return err
+}
+
 // GetSyncStateOnReplicationGroup returns the sync status of the ReplicaitonConsistencyGroup.
 func (rcg *ReplicationConsistencyGroup) GetSyncStateOnReplicationGroup(syncKey string) error {
 	defer TimeSpent("ExecuteSyncOnReplicationGroup", time.Now())
