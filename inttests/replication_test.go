@@ -499,6 +499,67 @@ func TestExecuteResumeOnReplicationGroup(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// Test TestSetRPOOnReplicationGroup
+func TestSetRPOOnReplicationGroup(t *testing.T) {
+	// Set the RCG context
+	TestGetReplicationConsistencyGroups(t)
+	// Update the RPO
+	err := rep.rcg.SetRPOOnReplicationGroup(siotypes.SetRPOReplicationConsistencyGroup{RpoInSeconds: "60"})
+	assert.Nil(t, err)
+}
+
+// Test TestSetTargetVolumeAccessModeOnReplicationGroup
+func TestSetTargetVolumeAccessModeOnReplicationGroup(t *testing.T) {
+	// Set the RCG context
+	TestGetReplicationConsistencyGroups(t)
+	err := rep.rcg.SetTargetVolumeAccessModeOnReplicationGroup(siotypes.SetTargetVolumeAccessModeOnReplicationGroup{TargetVolumeAccessMode: "ReadOnly"})
+	assert.Nil(t, err)
+}
+
+// Test TestSetNewNameOnReplicationGroup
+func TestSetNewNameOnReplicationGroup(t *testing.T) {
+	// Set the RCG context
+	TestGetReplicationConsistencyGroups(t)
+	err := rep.rcg.SetNewNameOnReplicationGroup(siotypes.SetNewNameOnReplicationGroup{NewName: "UpdatedNameRCG"})
+	assert.Nil(t, err)
+	// Sleep for 10 to make sure the name is updated, then update it back to the original name
+	time.Sleep(10 * time.Second)
+	err = rep.rcg.SetNewNameOnReplicationGroup(siotypes.SetNewNameOnReplicationGroup{NewName: "inttestrcg"})
+	assert.Nil(t, err)
+}
+
+// Test TestExecuteInconsistentOnReplicationGroup
+func TestExecuteInconsistentOnReplicationGroup(t *testing.T) {
+	// Set the RCG context
+	TestGetReplicationConsistencyGroups(t)
+	err := rep.rcg.ExecuteInconsistentOnReplicationGroup()
+	assert.Nil(t, err)
+}
+
+// Test TestExecuteConsistentOnReplicationGroup
+func TestExecuteConsistentOnReplicationGroup(t *testing.T) {
+	// Set the RCG context
+	TestGetReplicationConsistencyGroups(t)
+	err := rep.rcg.ExecuteConsistentOnReplicationGroup()
+	assert.Nil(t, err)
+}
+
+// Test TestExecuteTerminateOnReplicationGroup
+func TestExecuteTerminateOnReplicationGroup(t *testing.T) {
+	// Set the RCG context
+	TestGetReplicationConsistencyGroups(t)
+	err := rep.rcg.ExecuteTerminateOnReplicationGroup()
+	assert.Nil(t, err)
+}
+
+// Test TestExecuteActivateOnReplicationGroup
+func TestExecuteActivateOnReplicationGroup(t *testing.T) {
+	// Set the RCG context
+	TestGetReplicationConsistencyGroups(t)
+	err := rep.rcg.ExecuteActivateOnReplicationGroup()
+	assert.Nil(t, err)
+}
+
 // Test ResizeReplicationPair
 func TestResizeReplicationPair(t *testing.T) {
 	if C2 == nil {
@@ -600,12 +661,24 @@ func TestFreezeReplcationGroup(t *testing.T) {
 	time.Sleep(2 * time.Second)
 }
 
+// Test TestUnfreezeReplcationGroup
+func TestUnfreezeReplcationGroup(t *testing.T) {
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
+	TestGetReplicationConsistencyGroups(t)
+	assert.NotNil(t, rep.rcg)
+
+	err := rep.rcg.UnfreezeReplicationConsistencyGroup()
+	assert.Nil(t, err)
+}
+
 // Test RemoveReplicatonConsistencyGroup
 func TestRemoveReplicationConsistencyGroup(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
-
+	TestGetReplicationConsistencyGroups(t)
 	assert.NotNil(t, rep.rcg)
 
 	err := rep.rcg.RemoveReplicationConsistencyGroup(false)
