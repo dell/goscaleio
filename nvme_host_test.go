@@ -148,7 +148,7 @@ func Test_GetAllNvmeHosts(t *testing.T) {
 }
 
 func Test_GetNvmeHostByID(t *testing.T) {
-	type checkFn func(*testing.T, *NvmeHost, error)
+	type checkFn func(*testing.T, *types.NvmeHost, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
 	responseJSON := `{
@@ -201,19 +201,19 @@ func Test_GetNvmeHostByID(t *testing.T) {
     ]
 }`
 
-	hasNoError := func(t *testing.T, _ *NvmeHost, err error) {
+	hasNoError := func(t *testing.T, _ *types.NvmeHost, err error) {
 		if err != nil {
 			t.Fatalf("expected no error")
 		}
 	}
 
-	checkName := func(name string) func(t *testing.T, host *NvmeHost, err error) {
-		return func(t *testing.T, host *NvmeHost, _ error) {
-			assert.Equal(t, host.NvmeHost.Name, name)
+	checkName := func(name string) func(t *testing.T, host *types.NvmeHost, err error) {
+		return func(t *testing.T, host *types.NvmeHost, _ error) {
+			assert.Equal(t, host.Name, name)
 		}
 	}
 
-	hasError := func(t *testing.T, _ *NvmeHost, err error) {
+	hasError := func(t *testing.T, _ *types.NvmeHost, err error) {
 		if err == nil {
 			t.Fatalf("expected error")
 		}
