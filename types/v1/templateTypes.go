@@ -986,3 +986,8 @@ type Categories struct {
 type TemplateDetailsFilter struct {
 	TemplateDetails []TemplateDetails `json:"serviceTemplate"`
 }
+
+// IPListNoRole model for Peer Mdm
+type IPListNoRole struct {
+	IP string `json:"ip,omitempty"`
+}
