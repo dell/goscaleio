@@ -59,7 +59,7 @@ func (s *System) GetAllNvmeHosts() ([]types.NvmeHost, error) {
 }
 
 // GetNvmeHostByID returns an NVMe host searched by id
-func (s *System) GetNvmeHostByID(id string) (*NvmeHost, error) {
+func (s *System) GetNvmeHostByID(id string) (*types.NvmeHost, error) {
 	defer TimeSpent("GetNvmeHostByID", time.Now())
 
 	path := fmt.Sprintf("api/instances/Sdc::%v", id)
@@ -71,7 +71,7 @@ func (s *System) GetNvmeHostByID(id string) (*NvmeHost, error) {
 		return nil, err
 	}
 
-	return NewNvmeHost(s.client, &nvmeHost), nil
+	return &nvmeHost, nil
 }
 
 // CreateNvmeHost creates a new NVMe host
