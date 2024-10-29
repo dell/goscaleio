@@ -113,6 +113,116 @@ func TestGetPeerMDMs(t *testing.T) {
 	}
 }
 
+// Get Specific Peer System
+func TestGetPeerSystem(t *testing.T) {
+	srcpeer, err := getPeerMdm()
+	assert.Nil(t, err)
+
+	_, getErr := C.GetPeerMDM(srcpeer.ID)
+	assert.Nil(t, getErr)
+}
+
+// Remove a Peer System
+func TestRemovePeerSystem(t *testing.T) {
+	srcpeer, err := getPeerMdm()
+	assert.Nil(t, err)
+
+	removeErr := C.RemovePeerMdm(srcpeer.ID)
+	assert.Nil(t, removeErr)
+}
+
+func TestAddPeerSystem(t *testing.T) {
+	if C2 == nil {
+		t.Skip("no client connection to replication target system")
+	}
+	system := getTargetSystem()
+	peerPayload := &siotypes.AddPeerMdm{
+		PeerSystemID:  system.System.ID,
+		PeerSystemIps: system.System.MdmManagementIPList,
+		Port:          "7611",
+		Name:          "PeerSystemTestName",
+	}
+	// Add a Peer System
+	_, err := C.AddPeerMdm(peerPayload)
+	assert.Nil(t, err)
+}
+
+// Modify a Peer System name
+func TestModifyPeerSystemName(t *testing.T) {
+	srcpeer, err := getPeerMdm()
+	assert.Nil(t, err)
+
+	// Modify name
+	modifyErr := C.ModifyPeerMdmName(srcpeer.ID, &siotypes.ModifyPeerMDMNameParam{
+		NewName: "testName",
+	})
+	assert.Nil(t, modifyErr)
+
+	// Modify Name back to original
+	modifyErr = C.ModifyPeerMdmName(srcpeer.ID, &siotypes.ModifyPeerMDMNameParam{
+		NewName: srcpeer.Name,
+	})
+}
+
+// Modify a Peer System name
+func TestModifyPeerSystemPort(t *testing.T) {
+	srcpeer, err := getPeerMdm()
+	assert.Nil(t, err)
+
+	// Modify port
+	modifyErr := C.ModifyPeerMdmPort(srcpeer.ID, &siotypes.ModifyPeerMDMPortParam{
+		NewPort: "7612",
+	})
+	assert.Nil(t, modifyErr)
+
+	// Modify Name back to original
+	modifyErr = C.ModifyPeerMdmPort(srcpeer.ID, &siotypes.ModifyPeerMDMPortParam{
+		NewPort: fmt.Sprint(srcpeer.Port),
+	})
+}
+
+// Modify a Peer System Performance Parameters
+func TestModifyPeerSystemPerformanceParameters(t *testing.T) {
+	srcpeer, err := getPeerMdm()
+	assert.Nil(t, err)
+
+	// Modify port
+	modifyErr := C.ModifyPeerMdmPerformanceParameters(srcpeer.ID, &siotypes.ModifyPeerMdmPerformanceParametersParam{
+		NewPreformanceProfile: "Compact",
+	})
+	assert.Nil(t, modifyErr)
+
+	// Modify Name back to original
+	modifyErr = C.ModifyPeerMdmPerformanceParameters(srcpeer.ID, &siotypes.ModifyPeerMdmPerformanceParametersParam{
+		NewPreformanceProfile: srcpeer.PerfProfile,
+	})
+}
+
+// Modify a Peer System Ips
+func TestModifyPeerSystemIps(t *testing.T) {
+	srcpeer, err := getPeerMdm()
+	assert.Nil(t, err)
+
+	var ips []string
+	for _, ip := range srcpeer.IPList {
+		ips = append(ips, ip.IP)
+	}
+
+	// Modify ips
+	modifyErr := C.ModifyPeerMdmIP(srcpeer.ID, ips)
+	assert.Nil(t, modifyErr)
+}
+
+// Make it easier to get a Peer System to run the tests against
+func getPeerMdm() (*siotypes.PeerMDM, error) {
+	srcpeers, err := C.GetPeerMDMs()
+
+	if err != nil || len(srcpeers) == 0 {
+		return nil, fmt.Errorf("no peer systems found")
+	}
+	return srcpeers[0], nil
+}
+
 // Get the Target System
 func getTargetSystem() *goscaleio.System {
 	system := goscaleio.NewSystem(C2)

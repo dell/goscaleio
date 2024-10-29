@@ -61,6 +61,121 @@ func (c *Client) GetPeerMDMs() ([]*types.PeerMDM, error) {
 	return peerMdms, err
 }
 
+// GetPeerMDM returns a specific peer MDM
+func (c *Client) GetPeerMDM(id string) (*types.PeerMDM, error) {
+	defer TimeSpent("GetPeerMDM", time.Now())
+
+	path := "/api/instances/PeerMdm::" + id
+	var peerMdm *types.PeerMDM
+
+	err := c.getJSONWithRetry(http.MethodGet, path, nil, &peerMdm)
+	return peerMdm, err
+}
+
+// ModifyPeerMdmIP updates a Peer MDM Ips
+func (c *Client) ModifyPeerMdmIP(id string, ips []string) error {
+	defer TimeSpent("ModifyPeerMdmIP", time.Now())
+	// Format into the strucutre that the API expects
+	var ipMap []map[string]interface{}
+	for _, ip := range ips {
+		ipMap = append(ipMap, map[string]interface{}{"hostName": ip})
+	}
+	param := types.ModifyPeerMdmIPParam{
+		NewPeerMDMIps: ipMap,
+	}
+	path := "/api/instances/PeerMdm::" + id + "/action/modifyPeerMdmIp"
+
+	if err := c.getJSONWithRetry(http.MethodPost, path, param, nil); err != nil {
+		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, param, nil) returned %s", err)
+		return err
+	}
+
+	return nil
+}
+
+// ModifyPeerMdmName updates a Peer MDM Name
+func (c *Client) ModifyPeerMdmName(id string, name *types.ModifyPeerMDMNameParam) error {
+	defer TimeSpent("ModifyPeerMdmName", time.Now())
+
+	path := "/api/instances/PeerMdm::" + id + "/action/modifyPeerMdmName"
+
+	if err := c.getJSONWithRetry(http.MethodPost, path, name, nil); err != nil {
+		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, name, nil) returned %s", err)
+		return err
+	}
+
+	return nil
+}
+
+// ModifyPeerMdmPort updates a Peer MDM Port
+func (c *Client) ModifyPeerMdmPort(id string, port *types.ModifyPeerMDMPortParam) error {
+	defer TimeSpent("ModifyPeerMdmPort", time.Now())
+
+	path := "/api/instances/PeerMdm::" + id + "/action/modifyPeerMdmPort"
+
+	if err := c.getJSONWithRetry(http.MethodPost, path, port, nil); err != nil {
+		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, port, nil) returned %s", err)
+		return err
+	}
+
+	return nil
+}
+
+// ModifyPeerMdmPerformanceParameters updates a Peer MDM Performance Parameters
+func (c *Client) ModifyPeerMdmPerformanceParameters(id string, param *types.ModifyPeerMdmPerformanceParametersParam) error {
+	defer TimeSpent("ModifyPeerMdmPerformanceParameters", time.Now())
+
+	path := "/api/instances/PeerMdm::" + id + "/action/setPeerMdmPerformanceParameters"
+
+	if err := c.getJSONWithRetry(http.MethodPost, path, param, nil); err != nil {
+		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, param, nil) returned %s", err)
+		return err
+	}
+
+	return nil
+}
+
+// AddPeerMdm Adds a Peer MDM
+func (c *Client) AddPeerMdm(param *types.AddPeerMdm) (*types.PeerMDM, error) {
+	defer TimeSpent("AddPeerMdm", time.Now())
+	if param.PeerSystemID == "" || len(param.PeerSystemIps) == 0 {
+		return nil, errors.New("PeerSystemID and PeerSystemIps are required")
+	}
+	path := "/api/types/PeerMdm/instances"
+	peerMdm := &types.PeerMDM{}
+	var ipMap []map[string]interface{}
+	for _, ip := range param.PeerSystemIps {
+		ipMap = append(ipMap, map[string]interface{}{"hostName": ip})
+	}
+	paramCreate := types.AddPeerMdmParam{
+		PeerSystemID:  param.PeerSystemID,
+		PeerSystemIps: ipMap,
+		Port:          param.Port,
+		Name:          param.Name,
+	}
+
+	if err := c.getJSONWithRetry(http.MethodPost, path, paramCreate, peerMdm); err != nil {
+		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, paramCreate, peerMdm) returned %s", err)
+		return nil, err
+	}
+
+	return peerMdm, nil
+}
+
+// RemovePeerMdm removes a Peer MDM
+func (c *Client) RemovePeerMdm(id string) error {
+	defer TimeSpent("RemovePeerMdm", time.Now())
+
+	path := "/api/instances/PeerMdm::" + id + "/action/removePeerMdm"
+	params := types.EmptyPayload{}
+	if err := c.getJSONWithRetry(http.MethodPost, path, params, nil); err != nil {
+		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, params, nil) returned %s", err)
+		return err
+	}
+
+	return nil
+}
+
 // ReplicationConsistencyGroup encpsulates a types.ReplicationConsistencyGroup and a client.
 type ReplicationConsistencyGroup struct {
 	ReplicationConsistencyGroup *types.ReplicationConsistencyGroup

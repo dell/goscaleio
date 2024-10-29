@@ -1210,6 +1210,42 @@ type PeerMDM struct {
 	IPList              []*IPListNoRole `json:"ipList"`
 }
 
+// ModifyPeerMdmIPParam defines struct for ModifyPeerMdmIPParam
+type ModifyPeerMdmIPParam struct {
+	NewPeerMDMIps []map[string]interface{} `json:"newPeerSystemIps"`
+}
+
+// ModifyPeerMDMNameParam defines struct for ModifyPeerMDMNameParam
+type ModifyPeerMDMNameParam struct {
+	NewName string `json:"newName"`
+}
+
+// ModifyPeerMDMPortParam defines struct for ModifyPeerMDMPortParam
+type ModifyPeerMDMPortParam struct {
+	NewPort string `json:"newPort"`
+}
+
+// ModifyPeerMdmPerformanceParametersParam defines struct for ModifyPeerMdmPerformanceParametersParam
+type ModifyPeerMdmPerformanceParametersParam struct {
+	NewPreformanceProfile string `json:"perfProfile"`
+}
+
+// AddPeerMdm defines struct for AddPeerMdm
+type AddPeerMdm struct {
+	PeerSystemID  string   `json:"peerSystemId"`
+	PeerSystemIps []string `json:"peerSystemIps"`
+	Port          string   `json:"port"`
+	Name          string   `json:"name"`
+}
+
+// AddPeerMdmParam defines struct for AddPeerMdm
+type AddPeerMdmParam struct {
+	PeerSystemID  string                   `json:"peerSystemId"`
+	PeerSystemIps []map[string]interface{} `json:"peerSystemIps"`
+	Port          string                   `json:"port"`
+	Name          string                   `json:"name"`
+}
+
 // ReplicationConsistencyGroup (RCG) has information about a replication session
 type ReplicationConsistencyGroup struct {
 	ID                       string `json:"id,omitempty"`
