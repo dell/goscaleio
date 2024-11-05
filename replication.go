@@ -400,17 +400,14 @@ func (rcg *ReplicationConsistencyGroup) GetReplicationPairs() ([]*types.Replicat
 }
 
 // CreateReplicationConsistencyGroupSnapshot creates a snapshot of the ReplicationConsistencyGroup on the target array.
-func (rcg *ReplicationConsistencyGroup) CreateReplicationConsistencyGroupSnapshot(force bool) (*types.CreateReplicationConsistencyGroupSnapshotResp, error) {
+func (rcg *ReplicationConsistencyGroup) CreateReplicationConsistencyGroupSnapshot() (*types.CreateReplicationConsistencyGroupSnapshotResp, error) {
 	defer TimeSpent("GetReplicationPairs", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/createReplicationConsistencyGroupSnapshots"
-	param := &types.CreateReplicationConsistencyGroupSnapshot{
-		Force: force,
-	}
 
 	resp := &types.CreateReplicationConsistencyGroupSnapshotResp{}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, resp)
+	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, types.EmptyPayload{}, resp)
 	return resp, err
 }
 
