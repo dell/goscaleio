@@ -498,7 +498,7 @@ func TestCreateReplicationConsistencyGroupSnapshot(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	resp, err := rep.rcg.CreateReplicationConsistencyGroupSnapshot(false)
+	resp, err := rep.rcg.CreateReplicationConsistencyGroupSnapshot()
 	assert.Nil(t, err)
 
 	t.Logf("Consistency Group Snapshot ID: %s", resp.SnapshotGroupID)
