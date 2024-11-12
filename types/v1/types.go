@@ -2184,3 +2184,10 @@ type NvmeController struct {
 	IsAssigned   bool   `json:"isAssigned"`
 	ID           string `json:"id"`
 }
+
+// LcmStatus defines struct for PFMP status
+type LcmStatus struct {
+	LcmStatus      string `json:"lcmStatus"`
+	ClusterVersion string `json:"clusterVersion"`
+	ClusterBuild   string `json:"clusterBuild"`
+}
