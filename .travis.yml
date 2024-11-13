@@ -8,4 +8,4 @@ os:
   - linux
 
 install: true
-script:  go build
+script: go build
