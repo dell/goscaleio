@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math"
@@ -47,7 +48,7 @@ func initClient() {
 	}
 
 	if C.GetToken() == "" {
-		_, err := C.Authenticate(&goscaleio.ConfigConnect{
+		_, err := C.Authenticate(context.Background(), &goscaleio.ConfigConnect{
 			Endpoint: os.Getenv(mainEndpoint),
 			Username: os.Getenv("GOSCALEIO_USERNAME"),
 			Password: os.Getenv("GOSCALEIO_PASSWORD"),
@@ -78,7 +79,7 @@ func initClient2() bool {
 	}
 
 	if C2.GetToken() == "" {
-		_, err := C2.Authenticate(&goscaleio.ConfigConnect{
+		_, err := C2.Authenticate(context.Background(), &goscaleio.ConfigConnect{
 			Endpoint: os.Getenv(replicationEnpoint),
 			Username: os.Getenv("GOSCALEIO_USERNAME2"),
 			Password: os.Getenv("GOSCALEIO_PASSWORD2"),

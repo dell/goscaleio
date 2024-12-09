@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -35,7 +36,7 @@ func setupClient(t *testing.T, hostAddr string) *Client {
 		t.Fatal(err)
 	}
 	// test ok
-	_, err = client.Authenticate(&ConfigConnect{
+	_, err = client.Authenticate(context.Background(), &ConfigConnect{
 		Username: "ScaleIOUser",
 		Password: "password",
 		Version:  "2.0",
@@ -123,7 +124,7 @@ func TestClientVersion(t *testing.T) {
 	}
 
 	// Test successful authentication
-	_, err = client.Authenticate(&ConfigConnect{
+	_, err = client.Authenticate(context.Background(), &ConfigConnect{
 		Username: "ScaleIOUser",
 		Password: "password",
 		Endpoint: "",
@@ -193,7 +194,7 @@ func TestClientLogin(t *testing.T) {
 		t.Fatal(err)
 	}
 	// test ok
-	_, err = client.Authenticate(&ConfigConnect{
+	_, err = client.Authenticate(context.Background(), &ConfigConnect{
 		Username: "ScaleIOUser",
 		Password: "password",
 		Endpoint: "",
@@ -207,7 +208,7 @@ func TestClientLogin(t *testing.T) {
 	}
 
 	// test bad login
-	_, err = client.Authenticate(&ConfigConnect{
+	_, err = client.Authenticate(context.Background(), &ConfigConnect{
 		Username: "ScaleIOUser",
 		Password: "badPassWord",
 		Endpoint: "",

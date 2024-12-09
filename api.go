@@ -88,7 +88,7 @@ func (c *Client) GetVersion() (string, error) {
 		return "", errNilReponse
 	case resp.StatusCode == http.StatusUnauthorized:
 		// Authenticate then try again
-		if _, err = c.Authenticate(c.configConnect); err != nil {
+		if _, err = c.Authenticate(context.Background(), c.configConnect); err != nil {
 			return "", err
 		}
 		resp, err = c.api.DoAndGetResponseBody(
@@ -134,7 +134,7 @@ func updateHeaders(version string) {
 }
 
 // Authenticate controls authentication to client
-func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
+func (c *Client) Authenticate(ctx context.Context, configConnect *ConfigConnect) (Cluster, error) {
 	configConnect.Version = c.configConnect.Version
 	c.configConnect = configConnect
 
@@ -145,7 +145,7 @@ func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
 		configConnect.Username, configConnect.Password)
 
 	resp, err := c.api.DoAndGetResponseBody(
-		context.Background(), http.MethodGet, "api/login", headers, nil, c.configConnect.Version)
+		ctx, http.MethodGet, "api/login", headers, nil, c.configConnect.Version)
 	if err != nil {
 		doLog(log.WithError(err).Error, "")
 		return Cluster{}, err
@@ -208,7 +208,7 @@ func (c *Client) getJSONWithRetry(
 		if e.HTTPStatusCode == 401 {
 			doLog(log.Info, "Need to re-auth")
 			// Authenticate then try again
-			if _, err := c.Authenticate(c.configConnect); err != nil {
+			if _, err := c.Authenticate(context.Background(), c.configConnect); err != nil {
 				return fmt.Errorf("Error Authenticating: %s", err)
 			}
 			return c.api.DoWithHeaders(
@@ -284,7 +284,7 @@ func (c *Client) getStringWithRetry(
 		if retry {
 			doLog(log.Info, "need to re-auth")
 			// Authenticate then try again
-			if _, err = c.Authenticate(c.configConnect); err != nil {
+			if _, err = c.Authenticate(context.Background(), c.configConnect); err != nil {
 				return "", fmt.Errorf("Error Authenticating: %s", err)
 			}
 			resp, err = c.api.DoAndGetResponseBody(
