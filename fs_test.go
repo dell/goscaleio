@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -189,7 +190,7 @@ func TestGetFileSystemByIDName(t *testing.T) {
 				client: client,
 			}
 
-			resp, err := s.GetFileSystemByIDName("", testCaseFSNames[name])
+			resp, err := s.GetFileSystemByIDName(context.Background(), "", testCaseFSNames[name])
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -211,7 +212,7 @@ func TestGetFileSystemByIDName(t *testing.T) {
 				client: client,
 			}
 
-			resp, err := s.GetFileSystemByIDName(testCaseFSIds[id], "")
+			resp, err := s.GetFileSystemByIDName(context.Background(), testCaseFSIds[id], "")
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -306,7 +307,7 @@ func TestCreateFileSystem(t *testing.T) {
 				NasServerID:   "64132f37-d33e-9d4a-89ba-d625520a4779",
 			}
 
-			resp, err := s.CreateFileSystem(fs)
+			resp, err := s.CreateFileSystem(context.Background(), fs)
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -400,7 +401,7 @@ func TestCreateFileSystemSnapshot(t *testing.T) {
 				Name: "test-snapshot",
 			}
 
-			resp, err := s.CreateFileSystemSnapshot(fsSnapRequest, fsID)
+			resp, err := s.CreateFileSystemSnapshot(context.Background(), fsSnapRequest, fsID)
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -499,7 +500,7 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 
 			fsID := "64366a19-54e8-1544-f3d7-2a50fb1ccff3"
 
-			resp, err := s.GetFsSnapshotsByVolumeID(fsID)
+			resp, err := s.GetFsSnapshotsByVolumeID(context.Background(), fsID)
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -634,7 +635,7 @@ func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 				}
 			}
 
-			resp, err := s.RestoreFileSystemFromSnapshot(restoreSnapshotRequest, fsID)
+			resp, err := s.RestoreFileSystemFromSnapshot(context.Background(), restoreSnapshotRequest, fsID)
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -660,7 +661,7 @@ func TestDeleteFileSystem(t *testing.T) {
 		client: client,
 	}
 
-	err = s.DeleteFileSystem(name)
+	err = s.DeleteFileSystem(context.Background(), name)
 	assert.NotNil(t, err)
 }
 
@@ -707,7 +708,7 @@ func TestModifyFileSystem(t *testing.T) {
 			}
 
 			// calling ModifyFileSystem with mock value
-			err = s.ModifyFileSystem(fsParam, tc.fsID)
+			err = s.ModifyFileSystem(context.Background(), fsParam, tc.fsID)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Modifying FS did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)

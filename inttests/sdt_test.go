@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -27,6 +28,7 @@ func TestSdt(t *testing.T) {
 	name := fmt.Sprintf("example-sdt_%v", randString(5))
 	newName := fmt.Sprintf("example-sdt_%v", randString(10))
 	var sdtID string
+	ctx := context.Background()
 
 	t.Run("Create sdt", func(t *testing.T) {
 		assert.NotNil(t, system)
@@ -42,7 +44,7 @@ func TestSdt(t *testing.T) {
 			DiscoveryPort:      8009,
 			ProtectionDomainID: pd.ProtectionDomain.ID,
 		}
-		resp, err := pd.CreateSdt(sdtParam)
+		resp, err := pd.CreateSdt(ctx, sdtParam)
 		assert.Nil(t, err)
 		assert.NotNil(t, resp.ID)
 		sdtID = resp.ID
@@ -50,72 +52,72 @@ func TestSdt(t *testing.T) {
 
 	t.Run("Remove Sdt Target IP", func(t *testing.T) {
 		targetIP := os.Getenv("NVME_TARGET_IP2")
-		err := system.RemoveSdtTargetIP(sdtID, targetIP)
+		err := system.RemoveSdtTargetIP(ctx, sdtID, targetIP)
 		assert.Nil(t, err)
 	})
 
 	t.Run("Add Sdt Target IP", func(t *testing.T) {
 		targetIP := os.Getenv("NVME_TARGET_IP2")
-		err := system.AddSdtTargetIP(sdtID, targetIP, "StorageAndHost")
+		err := system.AddSdtTargetIP(ctx, sdtID, targetIP, "StorageAndHost")
 		assert.Nil(t, err)
 	})
 
 	t.Run("Get All Sdt", func(t *testing.T) {
-		hosts, err := system.GetAllSdts()
+		hosts, err := system.GetAllSdts(ctx)
 		assert.Nil(t, err)
 		assert.NotNil(t, hosts)
 	})
 
 	t.Run("Get Sdt By ID", func(t *testing.T) {
-		host, err := system.GetSdtByID(sdtID)
+		host, err := system.GetSdtByID(ctx, sdtID)
 		assert.Nil(t, err)
 		assert.NotNil(t, host)
 	})
 
 	t.Run("Rename Sdt", func(t *testing.T) {
-		err := system.RenameSdt(sdtID, newName)
+		err := system.RenameSdt(ctx, sdtID, newName)
 		assert.Nil(t, err)
 	})
 
 	t.Run("Set Sdt NvmePort", func(t *testing.T) {
-		err := system.SetSdtNvmePort(sdtID, 4422)
+		err := system.SetSdtNvmePort(ctx, sdtID, 4422)
 		assert.Nil(t, err)
 	})
 
 	t.Run("Set Sdt StoragePort", func(t *testing.T) {
-		err := system.SetSdtStoragePort(sdtID, 12300)
+		err := system.SetSdtStoragePort(ctx, sdtID, 12300)
 		assert.Nil(t, err)
 	})
 
 	t.Run("Set Sdt DiscoveryPort", func(t *testing.T) {
-		err := system.SetSdtDiscoveryPort(sdtID, 8010)
+		err := system.SetSdtDiscoveryPort(ctx, sdtID, 8010)
 		assert.Nil(t, err)
 	})
 
 	t.Run("Modify Sdt IP and Role", func(t *testing.T) {
 		targetIP := os.Getenv("NVME_TARGET_IP2")
-		err := system.ModifySdtIPRole(sdtID, targetIP, "StorageOnly")
+		err := system.ModifySdtIPRole(ctx, sdtID, targetIP, "StorageOnly")
 		assert.Nil(t, err)
 	})
 
 	t.Run("Rollback Sdt StoragePort", func(t *testing.T) {
-		err := system.SetSdtStoragePort(sdtID, 12200)
+		err := system.SetSdtStoragePort(ctx, sdtID, 12200)
 		assert.Nil(t, err)
 	})
 
 	t.Run("Enter Sdt Maintenance Mode", func(t *testing.T) {
-		err := system.EnterSdtMaintenanceMode(sdtID)
+		err := system.EnterSdtMaintenanceMode(ctx, sdtID)
 		assert.Nil(t, err)
 	})
 
 	t.Run("Exit Sdt Maintenance Mode", func(t *testing.T) {
-		err := system.ExitSdtMaintenanceMode(sdtID)
+		err := system.ExitSdtMaintenanceMode(ctx, sdtID)
 		assert.Nil(t, err)
 		time.Sleep(5 * time.Second)
 	})
 
 	t.Cleanup(func() {
-		err := system.DeleteNvmeHost(sdtID)
+		err := system.DeleteNvmeHost(ctx, sdtID)
 		assert.Nil(t, err)
 	})
 }

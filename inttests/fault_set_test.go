@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -33,35 +34,37 @@ func TestCreateModifyDeleteFaultSet(t *testing.T) {
 		ProtectionDomainID: domain.ProtectionDomain.ID,
 	}
 
+	ctx := context.Background()
+
 	// create the fault set
-	fsID, err := domain.CreateFaultSet(fs)
+	fsID, err := domain.CreateFaultSet(ctx, fs)
 	assert.Nil(t, err)
 	assert.NotNil(t, fsID)
 
 	// create a fault set that exists
-	fsID2, err2 := domain.CreateFaultSet(fs)
+	fsID2, err2 := domain.CreateFaultSet(ctx, fs)
 	assert.NotNil(t, err2)
 	assert.Equal(t, "", fsID2)
 
 	// modify fault set name
-	err = domain.ModifyFaultSetName(fsID, "faultSetRenamed")
+	err = domain.ModifyFaultSetName(ctx, fsID, "faultSetRenamed")
 	assert.Nil(t, err)
 
 	// modify fault set performance profile
-	err = domain.ModifyFaultSetPerfProfile(fsID, "Compact")
+	err = domain.ModifyFaultSetPerfProfile(ctx, fsID, "Compact")
 	assert.Nil(t, err)
 	time.Sleep(5 * time.Second)
 
 	// read the fault set
-	fsr, err := system.GetFaultSetByID(fsID)
+	fsr, err := system.GetFaultSetByID(ctx, fsID)
 	assert.Equal(t, "faultSetRenamed", fsr.Name)
 
 	// delete the fault set
-	err = domain.DeleteFaultSet(fsID)
+	err = domain.DeleteFaultSet(ctx, fsID)
 	assert.Nil(t, err)
 
 	// try to delete non-existent fault set
-	err3 := domain.DeleteFaultSet(invalidIdentifier)
+	err3 := domain.DeleteFaultSet(ctx, invalidIdentifier)
 	assert.NotNil(t, err3)
 }
 
@@ -69,7 +72,7 @@ func TestGetAllFaultSets(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	_, err := system.GetAllFaultSets()
+	_, err := system.GetAllFaultSets(context.Background())
 	assert.Nil(t, err)
 }
 
@@ -77,11 +80,13 @@ func TestGetSdsFaultSet(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	faultsets, err := system.GetAllFaultSets()
+	ctx := context.Background()
+
+	faultsets, err := system.GetAllFaultSets(ctx)
 	assert.Nil(t, err)
 
 	if len(faultsets) > 0 {
-		_, err = system.GetAllSDSByFaultSetID(faultsets[0].ID)
+		_, err = system.GetAllSDSByFaultSetID(ctx, faultsets[0].ID)
 		assert.Nil(t, err)
 	}
 }
@@ -98,11 +103,13 @@ func TestGetFaultSetByName(t *testing.T) {
 		ProtectionDomainID: domain.ProtectionDomain.ID,
 	}
 
+	ctx := context.Background()
+
 	// create the fault set
-	_, err := domain.CreateFaultSet(fs)
+	_, err := domain.CreateFaultSet(ctx, fs)
 	assert.Nil(t, err)
 
-	fsDetails, err := system.GetFaultSetByName(fsName)
+	fsDetails, err := system.GetFaultSetByName(ctx, fsName)
 	assert.NotNil(t, fsDetails)
 	assert.Nil(t, err)
 }

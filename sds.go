@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -53,7 +54,7 @@ func NewSdsEx(client *Client, sds *types.Sds) *Sds {
 }
 
 // CreateSds creates a new Sds with automatically assigned roles to IPs
-func (pd *ProtectionDomain) CreateSds(
+func (pd *ProtectionDomain) CreateSds(ctx context.Context,
 	name string, ipList []string,
 ) (string, error) {
 	defer TimeSpent("CreateSds", time.Now())
@@ -80,7 +81,7 @@ func (pd *ProtectionDomain) CreateSds(
 		return "", fmt.Errorf("Must explicitly provide IP role for more than 2 SDS IPs")
 	}
 
-	return pd.createSds(sdsParam)
+	return pd.createSds(ctx, sdsParam)
 }
 
 func getNonZeroIntType(i int) string {
@@ -91,7 +92,7 @@ func getNonZeroIntType(i int) string {
 }
 
 // CreateSdsWithParams creates a new Sds with user defined SdsParam struct
-func (pd *ProtectionDomain) CreateSdsWithParams(sds *types.Sds) (string, error) {
+func (pd *ProtectionDomain) CreateSdsWithParams(ctx context.Context, sds *types.Sds) (string, error) {
 	defer TimeSpent("CreateSdsWithParams", time.Now())
 
 	sdsParam := &types.SdsParam{
@@ -133,14 +134,14 @@ func (pd *ProtectionDomain) CreateSdsWithParams(sds *types.Sds) (string, error) 
 		}
 	}
 
-	return pd.createSds(sdsParam)
+	return pd.createSds(ctx, sdsParam)
 }
 
-func (pd *ProtectionDomain) createSds(sdsParam *types.SdsParam) (string, error) {
+func (pd *ProtectionDomain) createSds(ctx context.Context, sdsParam *types.SdsParam) (string, error) {
 	path := fmt.Sprintf("/api/types/Sds/instances")
 
 	sds := types.SdsResp{}
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, sdsParam, &sds)
 	if err != nil {
 		return "", err
@@ -150,13 +151,13 @@ func (pd *ProtectionDomain) createSds(sdsParam *types.SdsParam) (string, error) 
 }
 
 // GetSds returns all Sds on the protection domain
-func (pd *ProtectionDomain) GetSds() ([]types.Sds, error) {
+func (pd *ProtectionDomain) GetSds(ctx context.Context) ([]types.Sds, error) {
 	defer TimeSpent("GetSds", time.Now())
 	path := fmt.Sprintf("/api/instances/ProtectionDomain::%v/relationships/Sds",
 		pd.ProtectionDomain.ID)
 
 	var sdss []types.Sds
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &sdss)
 	if err != nil {
 		return nil, err
@@ -166,12 +167,12 @@ func (pd *ProtectionDomain) GetSds() ([]types.Sds, error) {
 }
 
 // GetAllSds returns all SDS on the system
-func (s *System) GetAllSds() ([]types.Sds, error) {
+func (s *System) GetAllSds(ctx context.Context) ([]types.Sds, error) {
 	defer TimeSpent("GetSds", time.Now())
 	path := "/api/types/Sds/instances"
 
 	var sdss []types.Sds
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &sdss)
 	if err != nil {
 		return nil, err
@@ -181,12 +182,12 @@ func (s *System) GetAllSds() ([]types.Sds, error) {
 }
 
 // FindSds returns a Sds
-func (pd *ProtectionDomain) FindSds(
+func (pd *ProtectionDomain) FindSds(ctx context.Context,
 	field, value string,
 ) (*types.Sds, error) {
 	defer TimeSpent("FindSds", time.Now())
 
-	sdss, err := pd.GetSds()
+	sdss, err := pd.GetSds(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -203,26 +204,26 @@ func (pd *ProtectionDomain) FindSds(
 }
 
 // GetSdsByID returns a Sds by ID
-func (s *System) GetSdsByID(id string) (types.Sds, error) {
+func (s *System) GetSdsByID(ctx context.Context, id string) (types.Sds, error) {
 	defer TimeSpent("GetSdsByID", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sds::%s", id)
 
 	var sds types.Sds
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &sds)
 
 	return sds, err
 }
 
 // DeleteSds deletes a Sds against Id
-func (pd *ProtectionDomain) DeleteSds(id string) error {
+func (pd *ProtectionDomain) DeleteSds(ctx context.Context, id string) error {
 	defer TimeSpent("DeleteSds", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sds::%v/action/removeSds", id)
 
 	sdsParam := &types.EmptyPayload{}
-	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, sdsParam, nil)
 	if err != nil {
 		return err
 	}
@@ -231,12 +232,12 @@ func (pd *ProtectionDomain) DeleteSds(id string) error {
 }
 
 // AddSdSIP adds a new IP with specified Role in SDS
-func (pd *ProtectionDomain) AddSdSIP(id, ip, role string) error {
+func (pd *ProtectionDomain) AddSdSIP(ctx context.Context, id, ip, role string) error {
 	defer TimeSpent("AddSDSIPRole", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sds::%v/action/addSdsIp", id)
 
-	err := pd.client.getJSONWithRetry(http.MethodPost, path, map[string]string{
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, map[string]string{
 		"ip":   ip,
 		"role": role,
 	}, nil)
@@ -248,7 +249,7 @@ func (pd *ProtectionDomain) AddSdSIP(id, ip, role string) error {
 }
 
 // SetSDSIPRole sets IP and Role of SDS
-func (pd *ProtectionDomain) SetSDSIPRole(id, ip, role string) error {
+func (pd *ProtectionDomain) SetSDSIPRole(ctx context.Context, id, ip, role string) error {
 	defer TimeSpent("SetSDSIPRole", time.Now())
 
 	sdsParam := &types.SdsIPRole{
@@ -258,7 +259,7 @@ func (pd *ProtectionDomain) SetSDSIPRole(id, ip, role string) error {
 
 	path := fmt.Sprintf("/api/instances/Sds::%v/action/setSdsIpRole", id)
 
-	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, sdsParam, nil)
 	if err != nil {
 		return err
 	}
@@ -267,7 +268,7 @@ func (pd *ProtectionDomain) SetSDSIPRole(id, ip, role string) error {
 }
 
 // RemoveSDSIP removes IP from SDS
-func (pd *ProtectionDomain) RemoveSDSIP(id, ip string) error {
+func (pd *ProtectionDomain) RemoveSDSIP(ctx context.Context, id, ip string) error {
 	defer TimeSpent("RemoveSDSIP", time.Now())
 
 	sdsParam := &types.SdsIP{
@@ -276,7 +277,7 @@ func (pd *ProtectionDomain) RemoveSDSIP(id, ip string) error {
 
 	path := fmt.Sprintf("/api/instances/Sds::%v/action/removeSdsIp", id)
 
-	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, sdsParam, nil)
 	if err != nil {
 		return err
 	}
@@ -285,7 +286,7 @@ func (pd *ProtectionDomain) RemoveSDSIP(id, ip string) error {
 }
 
 // SetSdsName sets sds name
-func (pd *ProtectionDomain) SetSdsName(id, name string) error {
+func (pd *ProtectionDomain) SetSdsName(ctx context.Context, id, name string) error {
 	defer TimeSpent("SetSdsName", time.Now())
 
 	sdsParam := &types.SdsName{
@@ -294,7 +295,7 @@ func (pd *ProtectionDomain) SetSdsName(id, name string) error {
 
 	path := fmt.Sprintf("/api/instances/Sds::%v/action/setSdsName", id)
 
-	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, sdsParam, nil)
 	if err != nil {
 		return err
 	}
@@ -303,7 +304,7 @@ func (pd *ProtectionDomain) SetSdsName(id, name string) error {
 }
 
 // SetSdsPort sets sds port
-func (pd *ProtectionDomain) SetSdsPort(id string, port int) error {
+func (pd *ProtectionDomain) SetSdsPort(ctx context.Context, id string, port int) error {
 	defer TimeSpent("SetSdsPort", time.Now())
 
 	sdsParam := &map[string]string{
@@ -312,7 +313,7 @@ func (pd *ProtectionDomain) SetSdsPort(id string, port int) error {
 
 	path := fmt.Sprintf("/api/instances/Sds::%v/action/setSdsPort", id)
 
-	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, sdsParam, nil)
 	if err != nil {
 		return err
 	}
@@ -321,7 +322,7 @@ func (pd *ProtectionDomain) SetSdsPort(id string, port int) error {
 }
 
 // SetSdsDrlMode sets sds DRL Mode (Volatile or NonVolatile)
-func (pd *ProtectionDomain) SetSdsDrlMode(id, drlMode string) error {
+func (pd *ProtectionDomain) SetSdsDrlMode(ctx context.Context, id, drlMode string) error {
 	defer TimeSpent("SetSdsDrlMode", time.Now())
 
 	sdsParam := &map[string]string{
@@ -330,7 +331,7 @@ func (pd *ProtectionDomain) SetSdsDrlMode(id, drlMode string) error {
 
 	path := fmt.Sprintf("/api/instances/Sds::%s/action/setDrlMode", id)
 
-	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, sdsParam, nil)
 	if err != nil {
 		return err
 	}
@@ -339,7 +340,7 @@ func (pd *ProtectionDomain) SetSdsDrlMode(id, drlMode string) error {
 }
 
 // SetSdsRfCache enables or disables Rf Cache
-func (pd *ProtectionDomain) SetSdsRfCache(id string, enable bool) error {
+func (pd *ProtectionDomain) SetSdsRfCache(ctx context.Context, id string, enable bool) error {
 	defer TimeSpent("SetSdsRfCache", time.Now())
 	rfcachePaths := map[bool]string{
 		true:  "/api/instances/Sds::%s/action/enableRfcache",
@@ -348,7 +349,7 @@ func (pd *ProtectionDomain) SetSdsRfCache(id string, enable bool) error {
 	path := fmt.Sprintf(rfcachePaths[enable], id)
 	sdsParam := &types.EmptyPayload{}
 
-	err := pd.client.getJSONWithRetry(http.MethodPost, path, sdsParam, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, sdsParam, nil)
 	if err != nil {
 		return err
 	}
@@ -357,7 +358,7 @@ func (pd *ProtectionDomain) SetSdsRfCache(id string, enable bool) error {
 }
 
 // SetSdsRmCache enables or disables Read Ram Cache
-func (pd *ProtectionDomain) SetSdsRmCache(id string, enable bool) error {
+func (pd *ProtectionDomain) SetSdsRmCache(ctx context.Context, id string, enable bool) error {
 	defer TimeSpent("SetSdsRmCache", time.Now())
 
 	rmCacheParam := &map[string]string{
@@ -366,7 +367,7 @@ func (pd *ProtectionDomain) SetSdsRmCache(id string, enable bool) error {
 
 	path := fmt.Sprintf("/api/instances/Sds::%s/action/setSdsRmcacheEnabled", id)
 
-	err := pd.client.getJSONWithRetry(http.MethodPost, path, rmCacheParam, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, rmCacheParam, nil)
 	if err != nil {
 		return err
 	}
@@ -375,7 +376,7 @@ func (pd *ProtectionDomain) SetSdsRmCache(id string, enable bool) error {
 }
 
 // SetSdsRmCacheSize sets size of Read Ram Cache in MB
-func (pd *ProtectionDomain) SetSdsRmCacheSize(id string, size int) error {
+func (pd *ProtectionDomain) SetSdsRmCacheSize(ctx context.Context, id string, size int) error {
 	defer TimeSpent("SetSdsRmCacheSize", time.Now())
 
 	rmCacheSizeParam := &map[string]string{
@@ -384,7 +385,7 @@ func (pd *ProtectionDomain) SetSdsRmCacheSize(id string, size int) error {
 
 	path := fmt.Sprintf("/api/instances/Sds::%s/action/setSdsRmcacheSize", id)
 
-	err := pd.client.getJSONWithRetry(http.MethodPost, path, rmCacheSizeParam, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, rmCacheSizeParam, nil)
 	if err != nil {
 		return err
 	}
@@ -393,7 +394,7 @@ func (pd *ProtectionDomain) SetSdsRmCacheSize(id string, size int) error {
 }
 
 // SetSdsPerformanceProfile sets the SDS Performance Profile
-func (pd *ProtectionDomain) SetSdsPerformanceProfile(id, perfProf string) error {
+func (pd *ProtectionDomain) SetSdsPerformanceProfile(ctx context.Context, id, perfProf string) error {
 	defer TimeSpent("SetSdsRmCacheSize", time.Now())
 
 	perfProfileParam := &map[string]string{
@@ -402,7 +403,7 @@ func (pd *ProtectionDomain) SetSdsPerformanceProfile(id, perfProf string) error 
 
 	path := fmt.Sprintf("/api/instances/Sds::%s/action/setSdsPerformanceParameters", id)
 
-	err := pd.client.getJSONWithRetry(http.MethodPost, path, perfProfileParam, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, perfProfileParam, nil)
 	if err != nil {
 		return err
 	}
@@ -411,12 +412,12 @@ func (pd *ProtectionDomain) SetSdsPerformanceProfile(id, perfProf string) error 
 }
 
 // FindSds returns a Sds using system instance
-func (s *System) FindSds(
+func (s *System) FindSds(ctx context.Context,
 	field, value string,
 ) (*types.Sds, error) {
 	defer TimeSpent("FindSds", time.Now())
 
-	sdss, err := s.GetAllSds()
+	sdss, err := s.GetAllSds(ctx)
 	if err != nil {
 		return nil, err
 	}

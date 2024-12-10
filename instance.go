@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,7 +23,7 @@ import (
 )
 
 // GetInstance returns an instance
-func (c *Client) GetInstance(systemhref string) ([]*types.System, error) {
+func (c *Client) GetInstance(ctx context.Context, systemhref string) ([]*types.System, error) {
 	defer TimeSpent("GetInstance", time.Now())
 
 	var (
@@ -32,11 +33,9 @@ func (c *Client) GetInstance(systemhref string) ([]*types.System, error) {
 	)
 
 	if systemhref == "" {
-		err = c.getJSONWithRetry(
-			http.MethodGet, "api/types/System/instances", nil, &systems)
+		err = c.getJSONWithRetry(ctx, http.MethodGet, "api/types/System/instances", nil, &systems)
 	} else {
-		err = c.getJSONWithRetry(
-			http.MethodGet, systemhref, nil, system)
+		err = c.getJSONWithRetry(ctx, http.MethodGet, systemhref, nil, system)
 	}
 	if err != nil {
 		return nil, err
@@ -50,7 +49,7 @@ func (c *Client) GetInstance(systemhref string) ([]*types.System, error) {
 }
 
 // GetVolume returns a volume
-func (c *Client) GetVolume(
+func (c *Client) GetVolume(ctx context.Context,
 	volumehref, volumeid, ancestorvolumeid, volumename string,
 	getSnapshots bool,
 ) ([]*types.Volume, error) {
@@ -64,7 +63,7 @@ func (c *Client) GetVolume(
 	)
 
 	if volumename != "" {
-		volumeid, err = c.FindVolumeID(volumename)
+		volumeid, err = c.FindVolumeID(ctx, volumename)
 		if err != nil && err.Error() == "Not found" {
 			return nil, nil
 		}
@@ -82,11 +81,9 @@ func (c *Client) GetVolume(
 	}
 
 	if volumehref == "" && volumeid == "" {
-		err = c.getJSONWithRetry(
-			http.MethodGet, path, nil, &volumes)
+		err = c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &volumes)
 	} else {
-		err = c.getJSONWithRetry(
-			http.MethodGet, path, nil, volume)
+		err = c.getJSONWithRetry(ctx, http.MethodGet, path, nil, volume)
 	}
 	if err != nil {
 		return nil, err
@@ -107,7 +104,7 @@ func (c *Client) GetVolume(
 }
 
 // FindVolumeID returns a VolumeID
-func (c *Client) FindVolumeID(volumename string) (string, error) {
+func (c *Client) FindVolumeID(ctx context.Context, volumename string) (string, error) {
 	defer TimeSpent("FindVolumeID", time.Now())
 
 	volumeQeryIDByKeyParam := &types.VolumeQeryIDByKeyParam{
@@ -116,8 +113,7 @@ func (c *Client) FindVolumeID(volumename string) (string, error) {
 
 	path := fmt.Sprintf("/api/types/Volume/instances/action/queryIdByKey")
 
-	volumeID, err := c.getStringWithRetry(http.MethodPost, path,
-		volumeQeryIDByKeyParam)
+	volumeID, err := c.getStringWithRetry(ctx, http.MethodPost, path, volumeQeryIDByKeyParam)
 	fmt.Printf("[FindVolumeID] volumeID: %+v\n", volumeID)
 	if err != nil {
 		return "", err
@@ -127,7 +123,7 @@ func (c *Client) FindVolumeID(volumename string) (string, error) {
 }
 
 // CreateVolume creates a volume
-func (c *Client) CreateVolume(
+func (c *Client) CreateVolume(ctx context.Context,
 	volume *types.VolumeParam,
 	storagePoolName, protectionDomain string,
 ) (*types.VolumeResp, error) {
@@ -135,7 +131,7 @@ func (c *Client) CreateVolume(
 
 	path := "/api/types/Volume/instances"
 
-	storagePool, err := c.FindStoragePool("", storagePoolName, "", protectionDomain)
+	storagePool, err := c.FindStoragePool(ctx, "", storagePoolName, "", protectionDomain)
 	if err != nil {
 		return nil, err
 	}
@@ -144,8 +140,7 @@ func (c *Client) CreateVolume(
 	volume.ProtectionDomainID = storagePool.ProtectionDomainID
 
 	vol := &types.VolumeResp{}
-	err = c.getJSONWithRetry(
-		http.MethodPost, path, volume, vol)
+	err = c.getJSONWithRetry(ctx, http.MethodPost, path, volume, vol)
 	if err != nil {
 		return nil, err
 	}
@@ -154,9 +149,7 @@ func (c *Client) CreateVolume(
 }
 
 // GetStoragePool returns a storagepool
-func (c *Client) GetStoragePool(
-	storagepoolhref string,
-) ([]*types.StoragePool, error) {
+func (c *Client) GetStoragePool(ctx context.Context, storagepoolhref string) ([]*types.StoragePool, error) {
 	defer TimeSpent("GetStoragePool", time.Now())
 
 	var (
@@ -166,12 +159,10 @@ func (c *Client) GetStoragePool(
 	)
 
 	if storagepoolhref == "" {
-		err = c.getJSONWithRetry(
-			http.MethodGet, "/api/types/StoragePool/instances",
+		err = c.getJSONWithRetry(ctx, http.MethodGet, "/api/types/StoragePool/instances",
 			nil, &storagePools)
 	} else {
-		err = c.getJSONWithRetry(
-			http.MethodGet, storagepoolhref, nil, storagePool)
+		err = c.getJSONWithRetry(ctx, http.MethodGet, storagepoolhref, nil, storagePool)
 	}
 	if err != nil {
 		return nil, err
@@ -184,12 +175,10 @@ func (c *Client) GetStoragePool(
 }
 
 // FindStoragePool returns a StoragePool
-func (c *Client) FindStoragePool(
-	id, name, href, protectionDomain string,
-) (*types.StoragePool, error) {
+func (c *Client) FindStoragePool(ctx context.Context, id, name, href, protectionDomain string) (*types.StoragePool, error) {
 	defer TimeSpent("FindStoragePool", time.Now())
 
-	storagePools, err := c.GetStoragePool(href)
+	storagePools, err := c.GetStoragePool(ctx, href)
 	if err != nil {
 		return nil, fmt.Errorf("Error getting storage pool %s", err)
 	}
@@ -220,7 +209,7 @@ func NewSnapshotPolicy(client *Client) *SnapshotPolicy {
 }
 
 // FindSnapshotPolicyID retruns a Snapshot Policy ID based on name
-func (c *Client) FindSnapshotPolicyID(spname string) (string, error) {
+func (c *Client) FindSnapshotPolicyID(ctx context.Context, spname string) (string, error) {
 	defer TimeSpent("FindSnapshotPolicyID", time.Now())
 
 	SnapshotPolicyQueryIDByKeyParam := &types.SnapshotPolicyQueryIDByKeyParam{
@@ -229,8 +218,7 @@ func (c *Client) FindSnapshotPolicyID(spname string) (string, error) {
 
 	path := fmt.Sprintf("/api/types/SnapshotPolicy/instances/action/queryIdByKey")
 
-	spID, err := c.getStringWithRetry(
-		http.MethodPost, path, SnapshotPolicyQueryIDByKeyParam)
+	spID, err := c.getStringWithRetry(ctx, http.MethodPost, path, SnapshotPolicyQueryIDByKeyParam)
 	if err != nil {
 		return "", err
 	}
@@ -239,9 +227,7 @@ func (c *Client) FindSnapshotPolicyID(spname string) (string, error) {
 }
 
 // GetSnapshotPolicy returns a list of snapshot policy
-func (c *Client) GetSnapshotPolicy(
-	spname, spid string,
-) ([]*types.SnapshotPolicy, error) {
+func (c *Client) GetSnapshotPolicy(ctx context.Context, spname, spid string) ([]*types.SnapshotPolicy, error) {
 	defer TimeSpent("GetSnapshotPolicy", time.Now())
 
 	var (
@@ -252,7 +238,7 @@ func (c *Client) GetSnapshotPolicy(
 	)
 
 	if spname != "" {
-		spid, err = c.FindSnapshotPolicyID(spname)
+		spid, err = c.FindSnapshotPolicyID(ctx, spname)
 		if err != nil && err.Error() == "Not found" {
 			return nil, nil
 		}
@@ -268,11 +254,9 @@ func (c *Client) GetSnapshotPolicy(
 	}
 
 	if spid == "" {
-		err = c.getJSONWithRetry(
-			http.MethodGet, path, nil, &sps)
+		err = c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &sps)
 	} else {
-		err = c.getJSONWithRetry(
-			http.MethodGet, path, nil, sp)
+		err = c.getJSONWithRetry(ctx, http.MethodGet, path, nil, sp)
 	}
 	if err != nil {
 		return nil, err
@@ -286,13 +270,12 @@ func (c *Client) GetSnapshotPolicy(
 }
 
 // GetStoragePoolVolumes returns list of volumes connected to storage pool Storagepool by ID
-func (c *Client) GetStoragePoolVolumes(id string) ([]*types.Volume, error) {
+func (c *Client) GetStoragePoolVolumes(ctx context.Context, id string) ([]*types.Volume, error) {
 	defer TimeSpent("GetStoragePoolByID", time.Now())
 
 	path := fmt.Sprintf("/api/instances/StoragePool::%s/relationships/Volume", id)
 	var storagepoolVolumes []*types.Volume
-	err := c.getJSONWithRetry(
-		http.MethodGet, path, nil, &storagepoolVolumes)
+	err := c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &storagepoolVolumes)
 	if err != nil {
 		return nil, err
 	}

@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -21,13 +22,13 @@ import (
 )
 
 // GetVTrees returns vtrees present in the cluster
-func (c *Client) GetVTrees() ([]types.VTreeDetails, error) {
+func (c *Client) GetVTrees(ctx context.Context) ([]types.VTreeDetails, error) {
 	defer TimeSpent("GetVTrees", time.Now())
 
 	path := "/api/types/VTree/instances"
 
 	var vTree []types.VTreeDetails
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &vTree)
+	err := c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &vTree)
 	if err != nil {
 		return nil, err
 	}
@@ -36,13 +37,13 @@ func (c *Client) GetVTrees() ([]types.VTreeDetails, error) {
 }
 
 // GetVTreeByID returns the VTree details for the given ID
-func (c *Client) GetVTreeByID(id string) (*types.VTreeDetails, error) {
+func (c *Client) GetVTreeByID(ctx context.Context, id string) (*types.VTreeDetails, error) {
 	defer TimeSpent("GetVTreeByID", time.Now())
 
 	path := fmt.Sprintf("/api/instances/VTree::%v", id)
 
 	var vTree types.VTreeDetails
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &vTree)
+	err := c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &vTree)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +51,7 @@ func (c *Client) GetVTreeByID(id string) (*types.VTreeDetails, error) {
 }
 
 // GetVTreeInstances returns the VTree details for the given IDs
-func (c *Client) GetVTreeInstances(ids []string) ([]types.VTreeDetails, error) {
+func (c *Client) GetVTreeInstances(ctx context.Context, ids []string) ([]types.VTreeDetails, error) {
 	defer TimeSpent("GetVTrees", time.Now())
 
 	path := "/api/types/VTree/instances/action/queryBySelectedIds"
@@ -59,7 +60,7 @@ func (c *Client) GetVTreeInstances(ids []string) ([]types.VTreeDetails, error) {
 		IDs: ids,
 	}
 	var vTree []types.VTreeDetails
-	err := c.getJSONWithRetry(http.MethodPost, path, payload, &vTree)
+	err := c.getJSONWithRetry(ctx, http.MethodPost, path, payload, &vTree)
 	if err != nil {
 		return nil, err
 	}
@@ -67,13 +68,13 @@ func (c *Client) GetVTreeInstances(ids []string) ([]types.VTreeDetails, error) {
 }
 
 // GetVTreeByVolumeID returns VTree details based on Volume ID
-func (c *Client) GetVTreeByVolumeID(id string) (*types.VTreeDetails, error) {
+func (c *Client) GetVTreeByVolumeID(ctx context.Context, id string) (*types.VTreeDetails, error) {
 	defer TimeSpent("GetVTreeByVolumeID", time.Now())
 
-	volDetails, err := c.GetVolume("", id, "", "", false)
+	volDetails, err := c.GetVolume(ctx, "", id, "", "", false)
 	if err != nil {
 		return nil, err
 	}
 
-	return c.GetVTreeByID(volDetails[0].VTreeID)
+	return c.GetVTreeByID(ctx, volDetails[0].VTreeID)
 }

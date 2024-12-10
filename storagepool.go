@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -44,11 +45,11 @@ func NewStoragePoolEx(client *Client, pool *types.StoragePool) *StoragePool {
 }
 
 // CreateStoragePool creates a storage pool
-func (pd *ProtectionDomain) CreateStoragePool(sp *types.StoragePoolParam) (string, error) {
+func (pd *ProtectionDomain) CreateStoragePool(ctx context.Context, sp *types.StoragePoolParam) (string, error) {
 	path := fmt.Sprintf("/api/types/StoragePool/instances")
 	sp.ProtectionDomainID = pd.ProtectionDomain.ID
 	spResponse := types.StoragePoolResp{}
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, sp, &spResponse)
 	if err != nil {
 		return "", err
@@ -57,7 +58,7 @@ func (pd *ProtectionDomain) CreateStoragePool(sp *types.StoragePoolParam) (strin
 }
 
 // ModifyStoragePoolName Modifies Storagepool Name
-func (pd *ProtectionDomain) ModifyStoragePoolName(ID, name string) (string, error) {
+func (pd *ProtectionDomain) ModifyStoragePoolName(ctx context.Context, ID, name string) (string, error) {
 	storagePoolParam := &types.ModifyStoragePoolName{
 		Name: name,
 	}
@@ -65,7 +66,7 @@ func (pd *ProtectionDomain) ModifyStoragePoolName(ID, name string) (string, erro
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setStoragePoolName", ID)
 
 	spResp := types.StoragePoolResp{}
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, storagePoolParam, &spResp)
 	if err != nil {
 		return "", err
@@ -75,7 +76,7 @@ func (pd *ProtectionDomain) ModifyStoragePoolName(ID, name string) (string, erro
 }
 
 // ModifyStoragePoolMedia Modifies Storagepool Media Type
-func (pd *ProtectionDomain) ModifyStoragePoolMedia(ID, mediaType string) (string, error) {
+func (pd *ProtectionDomain) ModifyStoragePoolMedia(ctx context.Context, ID, mediaType string) (string, error) {
 	storagePool := &types.StoragePoolMediaType{
 		MediaType: mediaType,
 	}
@@ -83,7 +84,7 @@ func (pd *ProtectionDomain) ModifyStoragePoolMedia(ID, mediaType string) (string
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setMediaType", ID)
 
 	spResp := types.StoragePoolResp{}
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, storagePool, &spResp)
 	if err != nil {
 		return "", err
@@ -93,7 +94,7 @@ func (pd *ProtectionDomain) ModifyStoragePoolMedia(ID, mediaType string) (string
 }
 
 // ModifyRMCache Sets Read RAM Cache
-func (sp *StoragePool) ModifyRMCache(useRmcache string) error {
+func (sp *StoragePool) ModifyRMCache(ctx context.Context, useRmcache string) error {
 	link, err := GetLink(sp.StoragePool.Links, "self")
 	if err != nil {
 		return err
@@ -102,19 +103,19 @@ func (sp *StoragePool) ModifyRMCache(useRmcache string) error {
 	payload := &types.StoragePoolUseRmCache{
 		UseRmcache: useRmcache,
 	}
-	err = sp.client.getJSONWithRetry(
+	err = sp.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, payload, nil)
 	return err
 }
 
 // EnableRFCache Enables RFCache
-func (pd *ProtectionDomain) EnableRFCache(ID string) (string, error) {
+func (pd *ProtectionDomain) EnableRFCache(ctx context.Context, ID string) (string, error) {
 	storagePoolParam := &types.StoragePoolUseRfCache{}
 
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/enableRfcache", ID)
 
 	spResp := types.StoragePoolResp{}
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, storagePoolParam, &spResp)
 	if err != nil {
 		return "", err
@@ -124,12 +125,12 @@ func (pd *ProtectionDomain) EnableRFCache(ID string) (string, error) {
 }
 
 // EnableOrDisableZeroPadding Enables / disables zero padding
-func (pd *ProtectionDomain) EnableOrDisableZeroPadding(ID string, zeroPadValue string) error {
+func (pd *ProtectionDomain) EnableOrDisableZeroPadding(ctx context.Context, ID string, zeroPadValue string) error {
 	zeroPaddedParam := &types.StoragePoolZeroPadEnabled{
 		ZeroPadEnabled: zeroPadValue,
 	}
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setZeroPaddingPolicy", ID)
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, zeroPaddedParam, nil)
 	if err != nil {
 		return err
@@ -138,12 +139,12 @@ func (pd *ProtectionDomain) EnableOrDisableZeroPadding(ID string, zeroPadValue s
 }
 
 // SetReplicationJournalCapacity Sets replication journal capacity
-func (pd *ProtectionDomain) SetReplicationJournalCapacity(ID string, replicationJournalCapacity string) error {
+func (pd *ProtectionDomain) SetReplicationJournalCapacity(ctx context.Context, ID string, replicationJournalCapacity string) error {
 	replicationJournalCapacityParam := &types.ReplicationJournalCapacityParam{
 		ReplicationJournalCapacityMaxRatio: replicationJournalCapacity,
 	}
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setReplicationJournalCapacity", ID)
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, replicationJournalCapacityParam, nil)
 	if err != nil {
 		return err
@@ -152,9 +153,9 @@ func (pd *ProtectionDomain) SetReplicationJournalCapacity(ID string, replication
 }
 
 // SetCapacityAlertThreshold Sets high or critical capacity alert threshold
-func (pd *ProtectionDomain) SetCapacityAlertThreshold(ID string, capacityAlertThreshold *types.CapacityAlertThresholdParam) error {
+func (pd *ProtectionDomain) SetCapacityAlertThreshold(ctx context.Context, ID string, capacityAlertThreshold *types.CapacityAlertThresholdParam) error {
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setCapacityAlertThresholds", ID)
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, capacityAlertThreshold, nil)
 	if err != nil {
 		return err
@@ -163,9 +164,9 @@ func (pd *ProtectionDomain) SetCapacityAlertThreshold(ID string, capacityAlertTh
 }
 
 // SetProtectedMaintenanceModeIoPriorityPolicy sets protected maintenance mode IO priority policy
-func (pd *ProtectionDomain) SetProtectedMaintenanceModeIoPriorityPolicy(ID string, protectedMaintenanceModeParam *types.ProtectedMaintenanceModeParam) error {
+func (pd *ProtectionDomain) SetProtectedMaintenanceModeIoPriorityPolicy(ctx context.Context, ID string, protectedMaintenanceModeParam *types.ProtectedMaintenanceModeParam) error {
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setProtectedMaintenanceModeIoPriorityPolicy", ID)
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, protectedMaintenanceModeParam, nil)
 	if err != nil {
 		return err
@@ -174,12 +175,12 @@ func (pd *ProtectionDomain) SetProtectedMaintenanceModeIoPriorityPolicy(ID strin
 }
 
 // SetRebalanceEnabled sets rebalance enabled.
-func (pd *ProtectionDomain) SetRebalanceEnabled(ID string, rebalanceEnabledValue string) error {
+func (pd *ProtectionDomain) SetRebalanceEnabled(ctx context.Context, ID string, rebalanceEnabledValue string) error {
 	rebalanceEnabledParam := &types.RebalanceEnabledParam{
 		RebalanceEnabled: rebalanceEnabledValue,
 	}
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setRebalanceEnabled", ID)
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, rebalanceEnabledParam, nil)
 	if err != nil {
 		return err
@@ -188,9 +189,9 @@ func (pd *ProtectionDomain) SetRebalanceEnabled(ID string, rebalanceEnabledValue
 }
 
 // SetRebalanceIoPriorityPolicy Sets rebalance I/O priority policy
-func (pd *ProtectionDomain) SetRebalanceIoPriorityPolicy(ID string, protectedMaintenanceModeParam *types.ProtectedMaintenanceModeParam) error {
+func (pd *ProtectionDomain) SetRebalanceIoPriorityPolicy(ctx context.Context, ID string, protectedMaintenanceModeParam *types.ProtectedMaintenanceModeParam) error {
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setRebalanceIoPriorityPolicy", ID)
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, protectedMaintenanceModeParam, nil)
 	if err != nil {
 		return err
@@ -199,9 +200,9 @@ func (pd *ProtectionDomain) SetRebalanceIoPriorityPolicy(ID string, protectedMai
 }
 
 // SetVTreeMigrationIOPriorityPolicy Sets V-Tree migration I/O priority policy
-func (pd *ProtectionDomain) SetVTreeMigrationIOPriorityPolicy(ID string, protectedMaintenanceModeParam *types.ProtectedMaintenanceModeParam) error {
+func (pd *ProtectionDomain) SetVTreeMigrationIOPriorityPolicy(ctx context.Context, ID string, protectedMaintenanceModeParam *types.ProtectedMaintenanceModeParam) error {
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setVTreeMigrationIoPriorityPolicy", ID)
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, protectedMaintenanceModeParam, nil)
 	if err != nil {
 		return err
@@ -210,12 +211,12 @@ func (pd *ProtectionDomain) SetVTreeMigrationIOPriorityPolicy(ID string, protect
 }
 
 // SetSparePercentage Sets spare percentage
-func (pd *ProtectionDomain) SetSparePercentage(ID string, sparePercentageValue string) error {
+func (pd *ProtectionDomain) SetSparePercentage(ctx context.Context, ID string, sparePercentageValue string) error {
 	percentageParam := &types.SparePercentageParam{
 		SparePercentage: sparePercentageValue,
 	}
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setSparePercentage", ID)
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, percentageParam, nil)
 	if err != nil {
 		return err
@@ -224,12 +225,12 @@ func (pd *ProtectionDomain) SetSparePercentage(ID string, sparePercentageValue s
 }
 
 // SetRMcacheWriteHandlingMode Sets RMcache write handling mode
-func (pd *ProtectionDomain) SetRMcacheWriteHandlingMode(ID string, writeHandlingModeValue string) error {
+func (pd *ProtectionDomain) SetRMcacheWriteHandlingMode(ctx context.Context, ID string, writeHandlingModeValue string) error {
 	writeHandlingParam := &types.RmcacheWriteHandlingModeParam{
 		RmcacheWriteHandlingMode: writeHandlingModeValue,
 	}
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setRmcacheWriteHandlingMode", ID)
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, writeHandlingParam, nil)
 	if err != nil {
 		return err
@@ -238,12 +239,12 @@ func (pd *ProtectionDomain) SetRMcacheWriteHandlingMode(ID string, writeHandling
 }
 
 // SetRebuildEnabled Sets Rebuild Enabled
-func (pd *ProtectionDomain) SetRebuildEnabled(ID string, rebuildEnabledValue string) error {
+func (pd *ProtectionDomain) SetRebuildEnabled(ctx context.Context, ID string, rebuildEnabledValue string) error {
 	rebuildEnabled := &types.RebuildEnabledParam{
 		RebuildEnabled: rebuildEnabledValue,
 	}
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setRebuildEnabled", ID)
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, rebuildEnabled, nil)
 	if err != nil {
 		return err
@@ -252,12 +253,12 @@ func (pd *ProtectionDomain) SetRebuildEnabled(ID string, rebuildEnabledValue str
 }
 
 // SetRebuildRebalanceParallelismParam Sets rebuild/rebalance parallelism
-func (pd *ProtectionDomain) SetRebuildRebalanceParallelismParam(ID string, limitValue string) error {
+func (pd *ProtectionDomain) SetRebuildRebalanceParallelismParam(ctx context.Context, ID string, limitValue string) error {
 	rebuildRebalanceParam := &types.RebuildRebalanceParallelismParam{
 		Limit: limitValue,
 	}
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/setRebuildRebalanceParallelism", ID)
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, rebuildRebalanceParam, nil)
 	if err != nil {
 		return err
@@ -266,19 +267,19 @@ func (pd *ProtectionDomain) SetRebuildRebalanceParallelismParam(ID string, limit
 }
 
 // Fragmentation enables or disables fragmentation
-func (pd *ProtectionDomain) Fragmentation(ID string, value bool) error {
+func (pd *ProtectionDomain) Fragmentation(ctx context.Context, ID string, value bool) error {
 	payload := &types.FragmentationParam{}
 	if value {
 
 		path := fmt.Sprintf("/api/instances/StoragePool::%v/action/enableFragmentation", ID)
-		err := pd.client.getJSONWithRetry(
+		err := pd.client.getJSONWithRetry(ctx,
 			http.MethodPost, path, payload, nil)
 		if err != nil {
 			return err
 		}
 	} else {
 		path := fmt.Sprintf("/api/instances/StoragePool::%v/action/disableFragmentation", ID)
-		err := pd.client.getJSONWithRetry(
+		err := pd.client.getJSONWithRetry(ctx,
 			http.MethodPost, path, payload, nil)
 		if err != nil {
 			return err
@@ -289,13 +290,13 @@ func (pd *ProtectionDomain) Fragmentation(ID string, value bool) error {
 }
 
 // DisableRFCache Disables RFCache
-func (pd *ProtectionDomain) DisableRFCache(ID string) (string, error) {
+func (pd *ProtectionDomain) DisableRFCache(ctx context.Context, ID string) (string, error) {
 	payload := &types.StoragePoolUseRfCache{}
 
 	path := fmt.Sprintf("/api/instances/StoragePool::%v/action/disableRfcache", ID)
 
 	spResp := types.StoragePoolResp{}
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 
 		http.MethodPost, path, payload, &spResp)
 	if err != nil {
@@ -306,9 +307,9 @@ func (pd *ProtectionDomain) DisableRFCache(ID string) (string, error) {
 }
 
 // DeleteStoragePool will delete a storage pool
-func (pd *ProtectionDomain) DeleteStoragePool(name string) error {
+func (pd *ProtectionDomain) DeleteStoragePool(ctx context.Context, name string) error {
 	// get the storage pool name
-	pool, err := pd.FindStoragePool("", name, "")
+	pool, err := pd.FindStoragePool(ctx, "", name, "")
 	if err != nil {
 		return err
 	}
@@ -322,7 +323,7 @@ func (pd *ProtectionDomain) DeleteStoragePool(name string) error {
 
 	path := fmt.Sprintf("%v/action/removeStoragePool", link.HREF)
 
-	err = pd.client.getJSONWithRetry(
+	err = pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, storagePoolParam, nil)
 	if err != nil {
 		return err
@@ -332,7 +333,7 @@ func (pd *ProtectionDomain) DeleteStoragePool(name string) error {
 }
 
 // GetStoragePool returns a storage pool
-func (pd *ProtectionDomain) GetStoragePool(
+func (pd *ProtectionDomain) GetStoragePool(ctx context.Context,
 	storagepoolhref string,
 ) ([]*types.StoragePool, error) {
 	var (
@@ -348,10 +349,10 @@ func (pd *ProtectionDomain) GetStoragePool(
 		if err != nil {
 			return nil, err
 		}
-		err = pd.client.getJSONWithRetry(
+		err = pd.client.getJSONWithRetry(ctx,
 			http.MethodGet, link.HREF, nil, &sps)
 	} else {
-		err = pd.client.getJSONWithRetry(
+		err = pd.client.getJSONWithRetry(ctx,
 			http.MethodGet, storagepoolhref, nil, sp)
 	}
 	if err != nil {
@@ -365,10 +366,10 @@ func (pd *ProtectionDomain) GetStoragePool(
 }
 
 // FindStoragePool returns a storagepool based on id or name
-func (pd *ProtectionDomain) FindStoragePool(
+func (pd *ProtectionDomain) FindStoragePool(ctx context.Context,
 	id, name, href string,
 ) (*types.StoragePool, error) {
-	sps, err := pd.GetStoragePool(href)
+	sps, err := pd.GetStoragePool(ctx, href)
 	if err != nil {
 		return nil, fmt.Errorf("Error getting protection domains %s", err)
 	}
@@ -383,7 +384,7 @@ func (pd *ProtectionDomain) FindStoragePool(
 }
 
 // GetStatistics returns statistics
-func (sp *StoragePool) GetStatistics() (*types.Statistics, error) {
+func (sp *StoragePool) GetStatistics(ctx context.Context) (*types.Statistics, error) {
 	link, err := GetLink(sp.StoragePool.Links,
 		"/api/StoragePool/relationship/Statistics")
 	if err != nil {
@@ -391,7 +392,7 @@ func (sp *StoragePool) GetStatistics() (*types.Statistics, error) {
 	}
 
 	stats := types.Statistics{}
-	err = sp.client.getJSONWithRetry(
+	err = sp.client.getJSONWithRetry(ctx,
 		http.MethodGet, link.HREF, nil, &stats)
 	if err != nil {
 		return nil, err
@@ -401,7 +402,7 @@ func (sp *StoragePool) GetStatistics() (*types.Statistics, error) {
 }
 
 // GetSDSStoragePool return SDS instances associated with storage pool
-func (sp *StoragePool) GetSDSStoragePool() ([]types.Sds, error) {
+func (sp *StoragePool) GetSDSStoragePool(ctx context.Context) ([]types.Sds, error) {
 	link, err := GetLink(sp.StoragePool.Links,
 		"/api/StoragePool/relationship/SpSds")
 	if err != nil {
@@ -409,7 +410,7 @@ func (sp *StoragePool) GetSDSStoragePool() ([]types.Sds, error) {
 	}
 
 	sds := []types.Sds{}
-	err = sp.client.getJSONWithRetry(
+	err = sp.client.getJSONWithRetry(ctx,
 		http.MethodGet, link.HREF, nil, &sds)
 	if err != nil {
 		return nil, err
@@ -419,13 +420,13 @@ func (sp *StoragePool) GetSDSStoragePool() ([]types.Sds, error) {
 }
 
 // GetStoragePoolByID returns a Storagepool by ID
-func (s *System) GetStoragePoolByID(id string) (*types.StoragePool, error) {
+func (s *System) GetStoragePoolByID(ctx context.Context, id string) (*types.StoragePool, error) {
 	defer TimeSpent("GetStoragePoolByID", time.Now())
 
 	path := fmt.Sprintf("/api/instances/StoragePool::%s", id)
 
 	var storagepool *types.StoragePool
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &storagepool)
 	if err != nil {
 		return nil, err
@@ -435,12 +436,12 @@ func (s *System) GetStoragePoolByID(id string) (*types.StoragePool, error) {
 }
 
 // GetAllStoragePools returns all Storage pools on the system
-func (s *System) GetAllStoragePools() ([]types.StoragePool, error) {
+func (s *System) GetAllStoragePools(ctx context.Context) ([]types.StoragePool, error) {
 	defer TimeSpent("GetStoragepool", time.Now())
 	path := "/api/types/StoragePool/instances"
 
 	var storagepools []types.StoragePool
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &storagepools)
 	if err != nil {
 		return nil, err

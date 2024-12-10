@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -23,7 +24,7 @@ import (
 // TestOSRepositoryGetAll tests get All OS Repositories
 func TestOSRepositoryGetAll(t *testing.T) {
 	system := getSystem()
-	osRepositories, err := system.GetAllOSRepositories()
+	osRepositories, err := system.GetAllOSRepositories(context.Background())
 	assert.Nil(t, err)
 	assert.NotNil(t, osRepositories)
 }
@@ -31,7 +32,7 @@ func TestOSRepositoryGetAll(t *testing.T) {
 // TestOSRepositoryGetByID tests Get OS Repository by Id
 func TestOSRepositoryGetByID(t *testing.T) {
 	system := getSystem()
-	osRepository, err := system.GetOSRepositoryByID("8aaa80458fca6913018fce6449f50e81")
+	osRepository, err := system.GetOSRepositoryByID(context.Background(), "8aaa80458fca6913018fce6449f50e81")
 	assert.Nil(t, err)
 	assert.NotNil(t, osRepository)
 }
@@ -39,14 +40,14 @@ func TestOSRepositoryGetByID(t *testing.T) {
 // TestOSRepositoryGetByIDFail tests the negative case for Get OS Repository by Id
 func TestOSRepositoryGetByIDFail(t *testing.T) {
 	system := getSystem()
-	_, err := system.GetOSRepositoryByID("Invalid")
+	_, err := system.GetOSRepositoryByID(context.Background(), "Invalid")
 	assert.NotNil(t, err)
 }
 
 // TestGetOSRepositoryByIDFail tests the negative case for Get OS Repository by Id
 func TestOSRepositoryCreateFail(t *testing.T) {
 	system := getSystem()
-	_, err := system.CreateOSRepository(nil)
+	_, err := system.CreateOSRepository(context.Background(), nil)
 	assert.NotNil(t, err)
 }
 
@@ -54,7 +55,7 @@ func TestOSRepositoryCreateFail(t *testing.T) {
 func TestOSRepositoryDeleteFail(t *testing.T) {
 	system := getSystem()
 	// Delete
-	err := system.RemoveOSRepository("invalid")
+	err := system.RemoveOSRepository(context.Background(), "invalid")
 	assert.NotNil(t, err)
 }
 
@@ -67,15 +68,17 @@ func TestOSRepositoryCreateAndDelete(t *testing.T) {
 		SourcePath: "https://100.65.27.72/artifactory/vxfm-yum-release/pfmp20/RCM/Denver/RCMs/esxi/ESXi-8.0.0-20513097-3.8.0.0_Dell.iso",
 		ImageType:  "vmware_esxi",
 	}
+	ctx := context.Background()
+
 	// Create
-	osRepository, err := system.CreateOSRepository(createOSRepository)
+	osRepository, err := system.CreateOSRepository(ctx, createOSRepository)
 	assert.Nil(t, err)
 	assert.NotNil(t, osRepository)
 	// We will wait for Repository to be unpacked and created
 	time.Sleep(240 * time.Second)
 
 	var repoID string
-	osRepositories, err := system.GetAllOSRepositories()
+	osRepositories, err := system.GetAllOSRepositories(ctx)
 	assert.Nil(t, err)
 	assert.NotNil(t, osRepositories)
 	for _, repo := range osRepositories {
@@ -86,6 +89,6 @@ func TestOSRepositoryCreateAndDelete(t *testing.T) {
 	}
 
 	// Delete
-	err = system.RemoveOSRepository(repoID)
+	err = system.RemoveOSRepository(ctx, repoID)
 	assert.Nil(t, err)
 }

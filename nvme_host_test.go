@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"net/http"
@@ -138,7 +139,7 @@ func Test_GetAllNvmeHosts(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			nvmeHosts, err := system.GetAllNvmeHosts()
+			nvmeHosts, err := system.GetAllNvmeHosts(context.Background())
 
 			for _, checkFn := range checkFns {
 				checkFn(t, nvmeHosts, err)
@@ -262,7 +263,7 @@ func Test_GetNvmeHostByID(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			nvmeHost, err := system.GetNvmeHostByID("mock-id")
+			nvmeHost, err := system.GetNvmeHostByID(context.Background(), "mock-id")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, nvmeHost, err)
@@ -342,7 +343,7 @@ func Test_CreateNvmeHost(t *testing.T) {
 				MaxNumPaths:    4,
 				MaxNumSysPorts: 10,
 			}
-			resp, err := system.CreateNvmeHost(nvmeHostParam)
+			resp, err := system.CreateNvmeHost(context.Background(), nvmeHostParam)
 
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
@@ -406,7 +407,7 @@ func Test_ChangeNvmeHostName(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.ChangeNvmeHostName("mock-id", "new-mock-name")
+			err := system.ChangeNvmeHostName(context.Background(), "mock-id", "new-mock-name")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -470,7 +471,7 @@ func Test_ChangeNvmeHostMaxNumPaths(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.ChangeNvmeHostMaxNumPaths("mock-id", 8)
+			err := system.ChangeNvmeHostMaxNumPaths(context.Background(), "mock-id", 8)
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -534,7 +535,7 @@ func Test_ChangeNvmeHostMaxNumSysPorts(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.ChangeNvmeHostMaxNumSysPorts("mock-id", 8)
+			err := system.ChangeNvmeHostMaxNumSysPorts(context.Background(), "mock-id", 8)
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -598,7 +599,7 @@ func Test_DeleteNvmeHost(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.DeleteNvmeHost("mock-id")
+			err := system.DeleteNvmeHost(context.Background(), "mock-id")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -714,7 +715,7 @@ func Test_GetHostNvmeControllers(t *testing.T) {
 			host := types.NvmeHost{
 				ID: "mock-id",
 			}
-			nvmeHostControllers, err := system.GetHostNvmeControllers(host)
+			nvmeHostControllers, err := system.GetHostNvmeControllers(context.Background(), host)
 
 			for _, checkFn := range checkFns {
 				checkFn(t, nvmeHostControllers, err)

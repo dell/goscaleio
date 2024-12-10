@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -23,11 +24,11 @@ import (
 const osRepoPath = "/api/v1/OSRepository"
 
 // GetAllOSRepositories Gets all OS Repositories
-func (s *System) GetAllOSRepositories() ([]types.OSRepository, error) {
+func (s *System) GetAllOSRepositories(ctx context.Context) ([]types.OSRepository, error) {
 	defer TimeSpent("GetAllOSRepositories", time.Now())
 
 	var osRepositories []types.OSRepository
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, osRepoPath, nil, &osRepositories)
 	if err != nil {
 		return nil, err
@@ -36,12 +37,12 @@ func (s *System) GetAllOSRepositories() ([]types.OSRepository, error) {
 }
 
 // GetOSRepositoryByID Gets OS Repository by ID
-func (s *System) GetOSRepositoryByID(id string) (*types.OSRepository, error) {
+func (s *System) GetOSRepositoryByID(ctx context.Context, id string) (*types.OSRepository, error) {
 	defer TimeSpent("GetOSRepositoryByID", time.Now())
 
 	pathWithID := fmt.Sprintf("%v/%v", osRepoPath, id)
 	var osRepository types.OSRepository
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, pathWithID, nil, &osRepository)
 	if err != nil {
 		return nil, err
@@ -51,7 +52,7 @@ func (s *System) GetOSRepositoryByID(id string) (*types.OSRepository, error) {
 }
 
 // CreateOSRepository Creates OS Repository
-func (s *System) CreateOSRepository(createOSRepository *types.OSRepository) (*types.OSRepository, error) {
+func (s *System) CreateOSRepository(ctx context.Context, createOSRepository *types.OSRepository) (*types.OSRepository, error) {
 	defer TimeSpent("CreateOSRepository", time.Now())
 	var createResponse types.OSRepository
 	if createOSRepository == nil {
@@ -63,7 +64,7 @@ func (s *System) CreateOSRepository(createOSRepository *types.OSRepository) (*ty
 		"sourcePath": createOSRepository.SourcePath,
 		"imageType":  createOSRepository.ImageType,
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, osRepoPath, bodyData, &createResponse)
 	if err != nil {
 		return nil, err
@@ -73,10 +74,10 @@ func (s *System) CreateOSRepository(createOSRepository *types.OSRepository) (*ty
 }
 
 // RemoveOSRepository Removes OS Repository
-func (s *System) RemoveOSRepository(id string) error {
+func (s *System) RemoveOSRepository(ctx context.Context, id string) error {
 	defer TimeSpent("RemoveOSRepository", time.Now())
 	pathWithID := fmt.Sprintf("%v/%v", osRepoPath, id)
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodDelete, pathWithID, nil, nil)
 	if err != nil {
 		return err

@@ -19,6 +19,7 @@
 package goscaleio
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -195,7 +196,7 @@ func TestGetNFSExportByIDName(t *testing.T) {
 				client: client,
 			}
 
-			resp, err := s.client.GetNFSExportByIDName("", testCaseFSNames[name])
+			resp, err := s.client.GetNFSExportByIDName(context.Background(), "", testCaseFSNames[name])
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -217,7 +218,7 @@ func TestGetNFSExportByIDName(t *testing.T) {
 				client: client,
 			}
 
-			resp, err := s.client.GetNFSExportByIDName(testCaseFSIds[id], "")
+			resp, err := s.client.GetNFSExportByIDName(context.Background(), testCaseFSIds[id], "")
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -240,7 +241,7 @@ func TestDeleteNFSExport(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = client.DeleteNFSExport(id)
+	err = client.DeleteNFSExport(context.Background(), id)
 	assert.Nil(t, err)
 }
 
@@ -320,7 +321,7 @@ func TestCreateNFSExport(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			resp, err := client.CreateNFSExport(&types.NFSExportCreate{
+			resp, err := client.CreateNFSExport(context.Background(), &types.NFSExportCreate{
 				Name:         "twee-kk",
 				FileSystemID: "6436aa58-e6a1-a4e2-de7b-2a50fb1ccff3",
 				Path:         "/twee-fs11",

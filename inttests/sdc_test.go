@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"testing"
 
 	"github.com/dell/goscaleio"
@@ -29,7 +30,7 @@ func getAllSdc(t *testing.T) []*goscaleio.Sdc {
 	}
 
 	var allSdc []*goscaleio.Sdc
-	sdc, err := system.GetSdc()
+	sdc, err := system.GetSdc(context.Background())
 	assert.Nil(t, err)
 	assert.NotZero(t, len(sdc))
 	for _, s := range sdc {
@@ -46,6 +47,7 @@ func TestGetSdcs(t *testing.T) {
 
 // TestGetSdcByAttribute gets a single specific Sdc by attribute
 func TestGetSdcByAttribute(t *testing.T) {
+	ctx := context.Background()
 	system := getSystem()
 	assert.NotNil(t, system)
 	if system == nil {
@@ -58,17 +60,17 @@ func TestGetSdcByAttribute(t *testing.T) {
 		return
 	}
 
-	found, err := system.FindSdc("Name", Sdc[0].Sdc.Name)
+	found, err := system.FindSdc(ctx, "Name", Sdc[0].Sdc.Name)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, Sdc[0].Sdc.Name, found.Sdc.Name)
 
-	found, err = system.FindSdc("ID", Sdc[0].Sdc.ID)
+	found, err = system.FindSdc(ctx, "ID", Sdc[0].Sdc.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, Sdc[0].Sdc.ID, found.Sdc.ID)
 
-	found, err = system.FindSdc("SdcGUID", Sdc[0].Sdc.SdcGUID)
+	found, err = system.FindSdc(ctx, "SdcGUID", Sdc[0].Sdc.SdcGUID)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, Sdc[0].Sdc.SdcGUID, found.Sdc.SdcGUID)
@@ -77,6 +79,7 @@ func TestGetSdcByAttribute(t *testing.T) {
 // TestGetSdcByAttributeInvalid fails to get a single specific Sdc by attribute
 func TestGetSdcByAttributeInvalid(t *testing.T) {
 	system := getSystem()
+	ctx := context.Background()
 	assert.NotNil(t, system)
 	if system == nil {
 		return
@@ -87,11 +90,11 @@ func TestGetSdcByAttributeInvalid(t *testing.T) {
 		return
 	}
 
-	found, err := system.FindSdc("Name", invalidIdentifier)
+	found, err := system.FindSdc(ctx, "Name", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, found)
 
-	found, err = system.FindSdc("ID", invalidIdentifier)
+	found, err = system.FindSdc(ctx, "ID", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, found)
 }
@@ -105,7 +108,7 @@ func TestGetSdcStatistics(t *testing.T) {
 	}
 
 	for _, s := range Sdc {
-		stats, err := s.GetStatistics()
+		stats, err := s.GetStatistics(context.Background())
 		assert.Nil(t, err)
 		assert.NotNil(t, stats)
 	}
@@ -120,7 +123,7 @@ func TestGetSdcVolumes(t *testing.T) {
 	}
 
 	for _, s := range Sdc {
-		_, err := s.GetVolume()
+		_, err := s.GetVolume(context.Background())
 		assert.Nil(t, err)
 	}
 }
@@ -134,93 +137,98 @@ func TestFindSdcVolumes(t *testing.T) {
 	}
 
 	for _, s := range Sdc {
-		_, err := s.FindVolumes()
+		_, err := s.FindVolumes(context.Background())
 		assert.Nil(t, err)
 	}
 }
 
 // TestChangeSdcName function tests Change name functionality of SDC.
 func TestChangeSdcName(t *testing.T) {
+	ctx := context.Background()
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	sdc, err := system.GetSdc()
+	sdc, err := system.GetSdc(ctx)
 	assert.Nil(t, err)
 	firstSdc := sdc[0]
 
 	baseName := firstSdc.Name
-	nameChng, err := system.ChangeSdcName(firstSdc.ID, randString(10))
+	nameChng, err := system.ChangeSdcName(ctx, firstSdc.ID, randString(10))
 	assert.Nil(t, err)
 	assert.NotNil(t, nameChng)
-	nameChngBack, err := system.ChangeSdcName(firstSdc.ID, baseName)
+	nameChngBack, err := system.ChangeSdcName(ctx, firstSdc.ID, baseName)
 	assert.Nil(t, err)
 	assert.NotNil(t, nameChngBack)
 }
 
 // TestChangeSdcPerfProfile function tests Change PerfProfile functionality of SDC.
 func TestChangeSdcPerfProfile(t *testing.T) {
+	ctx := context.Background()
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	sdc, err := system.GetSdc()
+	sdc, err := system.GetSdc(ctx)
 	assert.Nil(t, err)
 	firstSdc := sdc[0]
 
 	basePerfProgile := firstSdc.PerfProfile
-	ppChng, err := system.ChangeSdcPerfProfile(firstSdc.ID, "Compact")
+	ppChng, err := system.ChangeSdcPerfProfile(ctx, firstSdc.ID, "Compact")
 	assert.Nil(t, err)
 	assert.NotNil(t, ppChng)
-	nameChngBack, err := system.ChangeSdcPerfProfile(firstSdc.ID, basePerfProgile)
+	nameChngBack, err := system.ChangeSdcPerfProfile(ctx, firstSdc.ID, basePerfProgile)
 	assert.Nil(t, err)
 	assert.NotNil(t, nameChngBack)
 }
 
 // TestDeleteSdc will attempt to delete an SDS, which results in faliure
 func TestDeleteSdc(t *testing.T) {
+	ctx := context.Background()
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	sdc, err := system.GetSdc()
+	sdc, err := system.GetSdc(ctx)
 	assert.Nil(t, err)
 	firstSdc := sdc[0]
 
 	sdsID := firstSdc.ID
-	err = system.DeleteSdc(sdsID)
+	err = system.DeleteSdc(ctx, sdsID)
 	assert.NotNil(t, err)
 }
 
 // GetSdcIdByIP will attempt to get SDC ID By IP Address
 func TestGetSdcIdByIP(t *testing.T) {
+	ctx := context.Background()
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	sdc, err := system.GetSdc()
+	sdc, err := system.GetSdc(ctx)
 	assert.Nil(t, err)
 	firstSdc := sdc[0]
 
 	sdsIP := firstSdc.SdcIP
-	sdcID, err := system.GetSdcIDByIP(sdsIP)
+	sdcID, err := system.GetSdcIDByIP(ctx, sdsIP)
 	assert.NotNil(t, sdcID)
 	assert.Nil(t, err)
 }
 
 func TestSdcRestrictedMode(t *testing.T) {
+	ctx := context.Background()
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	err := system.SetRestrictedMode("Guid")
+	err := system.SetRestrictedMode(ctx, "Guid")
 	assert.Nil(t, err)
 
 	param := &types.ApproveSdcParam{
 		SdcIP: "10.10.10.10",
 	}
 
-	_, err = system.ApproveSdc(param)
+	_, err = system.ApproveSdc(ctx, param)
 	assert.NotNil(t, err)
 
-	err = system.SetApprovedIps("62276a432d28538a", []string{"10.10.10.10"})
+	err = system.SetApprovedIps(ctx, "62276a432d28538a", []string{"10.10.10.10"})
 	assert.NotNil(t, err)
 
-	err = system.SetRestrictedMode("None")
+	err = system.SetRestrictedMode(ctx, "None")
 	assert.Nil(t, err)
 }

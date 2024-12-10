@@ -1,6 +1,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"math"
 	"net/http"
@@ -48,7 +49,7 @@ func TestCreateUser(t *testing.T) {
 			s := System{
 				client: client,
 			}
-			_, err2 := s.CreateUser(&tc.user)
+			_, err2 := s.CreateUser(context.Background(), &tc.user)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Creating User did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -95,7 +96,7 @@ func TestGetUserByIDName(t *testing.T) {
 			s := System{
 				client: client,
 			}
-			_, err2 := s.GetUserByIDName(tc.id, tc.name)
+			_, err2 := s.GetUserByIDName(context.Background(), tc.id, tc.name)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Creating User did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -139,7 +140,7 @@ func TestRemoveUser(t *testing.T) {
 			s := System{
 				client: client,
 			}
-			err2 := s.RemoveUser(tc.id)
+			err2 := s.RemoveUser(context.Background(), tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Removing User did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -190,7 +191,7 @@ func TestSetRole(t *testing.T) {
 			s := System{
 				client: client,
 			}
-			err2 := s.SetUserRole(&tc.role, tc.id)
+			err2 := s.SetUserRole(context.Background(), &tc.role, tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Removing User did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)

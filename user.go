@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,14 +23,14 @@ import (
 )
 
 // GetUser returns user
-func (s *System) GetUser() ([]types.User, error) {
+func (s *System) GetUser(ctx context.Context) ([]types.User, error) {
 	defer TimeSpent("GetUser", time.Now())
 
 	path := fmt.Sprintf("/api/instances/System::%v/relationships/User",
 		s.System.ID)
 
 	var user []types.User
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &user)
 	if err != nil {
 		return nil, err
@@ -39,7 +40,7 @@ func (s *System) GetUser() ([]types.User, error) {
 }
 
 // GetUserByIDName returns a specific user based on it's user id
-func (s *System) GetUserByIDName(userID string, username string) (*types.User, error) {
+func (s *System) GetUserByIDName(ctx context.Context, userID string, username string) (*types.User, error) {
 	if userID == "" && username == "" {
 		return nil, errors.New("user name or ID is mandatory, please enter a valid value")
 	}
@@ -47,7 +48,7 @@ func (s *System) GetUserByIDName(userID string, username string) (*types.User, e
 	if userID != "" {
 		path := fmt.Sprintf("/api/instances/User::%v", userID)
 		user := &types.User{}
-		err := s.client.getJSONWithRetry(http.MethodGet, path, nil, &user)
+		err := s.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &user)
 		if err != nil {
 			return nil, err
 		}
@@ -56,7 +57,7 @@ func (s *System) GetUserByIDName(userID string, username string) (*types.User, e
 
 	}
 	// Get user by username
-	allUsers, err := s.GetUser()
+	allUsers, err := s.GetUser(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -71,9 +72,9 @@ func (s *System) GetUserByIDName(userID string, username string) (*types.User, e
 }
 
 // CreateUser creates a new user with some role.
-func (s *System) CreateUser(userParam *types.UserParam) (*types.UserResp, error) {
+func (s *System) CreateUser(ctx context.Context, userParam *types.UserParam) (*types.UserResp, error) {
 	userResp := &types.UserResp{}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, "/api/types/User/instances", userParam, &userResp)
 	if err != nil {
 		return nil, err
@@ -82,18 +83,18 @@ func (s *System) CreateUser(userParam *types.UserParam) (*types.UserResp, error)
 }
 
 // RemoveUser removes a particular user.
-func (s *System) RemoveUser(userID string) error {
+func (s *System) RemoveUser(ctx context.Context, userID string) error {
 	path := fmt.Sprintf("/api/instances/User::%v/action/removeUser", userID)
 	empty := &types.EmptyPayload{}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, empty, nil)
 	return err
 }
 
 // SetUserRole sets a new role for a particular user.
-func (s *System) SetUserRole(userRole *types.UserRoleParam, userID string) error {
+func (s *System) SetUserRole(ctx context.Context, userRole *types.UserRoleParam, userID string) error {
 	path := fmt.Sprintf("/api/instances/User::%v/action/setUserRole", userID)
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, userRole, nil)
 	return err
 }

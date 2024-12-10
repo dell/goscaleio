@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -21,10 +22,10 @@ import (
 )
 
 // GetSSOUser retrieves the details of an SSO user by their ID.
-func (c *Client) GetSSOUser(userID string) (*types.SSOUserDetails, error) {
+func (c *Client) GetSSOUser(ctx context.Context, userID string) (*types.SSOUserDetails, error) {
 	path := fmt.Sprintf("/rest/v1/users/%s", userID)
 	user := &types.SSOUserDetails{}
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &user)
+	err := c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &user)
 	if err != nil {
 		return nil, err
 	}
@@ -33,11 +34,11 @@ func (c *Client) GetSSOUser(userID string) (*types.SSOUserDetails, error) {
 }
 
 // GetSSOUserByFilters retrieves the details of an SSO user by filter.
-func (c *Client) GetSSOUserByFilters(key string, value string) (*types.SSOUserList, error) {
+func (c *Client) GetSSOUserByFilters(ctx context.Context, key string, value string) (*types.SSOUserList, error) {
 	encodedValue := url.QueryEscape(value)
 	path := `/rest/v1/users?filter=` + key + `%20eq%20%22` + encodedValue + `%22`
 	users := &types.SSOUserList{}
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &users)
+	err := c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &users)
 	if err != nil {
 		return nil, err
 	}
@@ -45,9 +46,9 @@ func (c *Client) GetSSOUserByFilters(key string, value string) (*types.SSOUserLi
 }
 
 // CreateSSOUser creates a new SSO user with the given parameters.
-func (c *Client) CreateSSOUser(userParam *types.SSOUserCreateParam) (*types.SSOUserDetails, error) {
+func (c *Client) CreateSSOUser(ctx context.Context, userParam *types.SSOUserCreateParam) (*types.SSOUserDetails, error) {
 	userResp := &types.SSOUserDetails{}
-	err := c.getJSONWithRetry(http.MethodPost, "/rest/v1/users", userParam, &userResp)
+	err := c.getJSONWithRetry(ctx, http.MethodPost, "/rest/v1/users", userParam, &userResp)
 	if err != nil {
 		return nil, err
 	}
@@ -55,19 +56,19 @@ func (c *Client) CreateSSOUser(userParam *types.SSOUserCreateParam) (*types.SSOU
 }
 
 // ModifySSOUser modifies the details of an SSO user by their ID.
-func (c *Client) ModifySSOUser(userID string, userParam *types.SSOUserModifyParam) (*types.SSOUserDetails, error) {
+func (c *Client) ModifySSOUser(ctx context.Context, userID string, userParam *types.SSOUserModifyParam) (*types.SSOUserDetails, error) {
 	path := fmt.Sprintf("/rest/v1/users/%s", userID)
-	err := c.getJSONWithRetry(http.MethodPatch, path, userParam, nil)
+	err := c.getJSONWithRetry(ctx, http.MethodPatch, path, userParam, nil)
 	if err != nil {
 		return nil, err
 	}
-	return c.GetSSOUser(userID)
+	return c.GetSSOUser(ctx, userID)
 }
 
 // ResetSSOUserPassword resets the password of an SSO user by their ID.
-func (c *Client) ResetSSOUserPassword(userID string, userParam *types.SSOUserModifyParam) error {
+func (c *Client) ResetSSOUserPassword(ctx context.Context, userID string, userParam *types.SSOUserModifyParam) error {
 	path := fmt.Sprintf("/rest/v1/users/%s/reset-password", userID)
-	err := c.getJSONWithRetry(http.MethodPost, path, userParam, nil)
+	err := c.getJSONWithRetry(ctx, http.MethodPost, path, userParam, nil)
 	if err != nil {
 		return err
 	}
@@ -75,9 +76,9 @@ func (c *Client) ResetSSOUserPassword(userID string, userParam *types.SSOUserMod
 }
 
 // DeleteSSOUser deletes an SSO user by their ID.
-func (c *Client) DeleteSSOUser(userID string) error {
+func (c *Client) DeleteSSOUser(ctx context.Context, userID string) error {
 	path := fmt.Sprintf("/rest/v1/users/%s", userID)
-	err := c.getJSONWithRetry(http.MethodDelete, path, nil, nil)
+	err := c.getJSONWithRetry(ctx, http.MethodDelete, path, nil, nil)
 	if err != nil {
 		return err
 	}

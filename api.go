@@ -71,9 +71,9 @@ type ClientPersistent struct {
 }
 
 // GetVersion returns version
-func (c *Client) GetVersion() (string, error) {
+func (c *Client) GetVersion(ctx context.Context) (string, error) {
 	resp, err := c.api.DoAndGetResponseBody(
-		context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
+		ctx, http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
 	if err != nil {
 		return "", err
 	}
@@ -88,11 +88,11 @@ func (c *Client) GetVersion() (string, error) {
 		return "", errNilReponse
 	case resp.StatusCode == http.StatusUnauthorized:
 		// Authenticate then try again
-		if _, err = c.Authenticate(context.Background(), c.configConnect); err != nil {
+		if _, err = c.Authenticate(ctx, c.configConnect); err != nil {
 			return "", err
 		}
 		resp, err = c.api.DoAndGetResponseBody(
-			context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
+			ctx, http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
 		if err != nil {
 			return "", err
 		}
@@ -111,8 +111,8 @@ func (c *Client) GetVersion() (string, error) {
 }
 
 // updateVersion updates version
-func (c *Client) updateVersion() error {
-	version, err := c.GetVersion()
+func (c *Client) updateVersion(ctx context.Context) error {
+	version, err := c.GetVersion(ctx)
 	if err != nil {
 		return err
 	}
@@ -173,7 +173,7 @@ func (c *Client) Authenticate(ctx context.Context, configConnect *ConfigConnect)
 	c.api.SetToken(token)
 
 	if c.configConnect.Version == "" {
-		err = c.updateVersion()
+		err = c.updateVersion(ctx)
 		if err != nil {
 			return Cluster{}, errors.New("error getting version of ScaleIO")
 		}
@@ -187,7 +187,7 @@ func basicAuth(username, password string) string {
 	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
-func (c *Client) getJSONWithRetry(
+func (c *Client) getJSONWithRetry(ctx context.Context,
 	method, uri string,
 	body, resp interface{},
 ) error {
@@ -197,7 +197,7 @@ func (c *Client) getJSONWithRetry(
 	addMetaData(headers, body)
 
 	err := c.api.DoWithHeaders(
-		context.Background(), method, uri, headers, body, resp, c.configConnect.Version)
+		ctx, method, uri, headers, body, resp, c.configConnect.Version)
 	if err == nil {
 		return nil
 	}
@@ -208,11 +208,11 @@ func (c *Client) getJSONWithRetry(
 		if e.HTTPStatusCode == 401 {
 			doLog(log.Info, "Need to re-auth")
 			// Authenticate then try again
-			if _, err := c.Authenticate(context.Background(), c.configConnect); err != nil {
+			if _, err := c.Authenticate(ctx, c.configConnect); err != nil {
 				return fmt.Errorf("Error Authenticating: %s", err)
 			}
 			return c.api.DoWithHeaders(
-				context.Background(), method, uri, headers, body, resp, c.configConnect.Version)
+				ctx, method, uri, headers, body, resp, c.configConnect.Version)
 		}
 	}
 	doLog(log.WithError(err).Error, "returning error")
@@ -240,7 +240,7 @@ func extractString(resp *http.Response) (string, error) {
 	return s, nil
 }
 
-func (c *Client) getStringWithRetry(
+func (c *Client) getStringWithRetry(ctx context.Context,
 	method, uri string,
 	body interface{},
 ) (string, error) {
@@ -275,7 +275,7 @@ func (c *Client) getStringWithRetry(
 	}
 
 	resp, err := c.api.DoAndGetResponseBody(
-		context.Background(), method, uri, headers, body, c.configConnect.Version)
+		ctx, method, uri, headers, body, c.configConnect.Version)
 	if err != nil {
 		return "", err
 	}
@@ -284,11 +284,11 @@ func (c *Client) getStringWithRetry(
 		if retry {
 			doLog(log.Info, "need to re-auth")
 			// Authenticate then try again
-			if _, err = c.Authenticate(context.Background(), c.configConnect); err != nil {
+			if _, err = c.Authenticate(ctx, c.configConnect); err != nil {
 				return "", fmt.Errorf("Error Authenticating: %s", err)
 			}
 			resp, err = c.api.DoAndGetResponseBody(
-				context.Background(), method, uri, headers, body, c.configConnect.Version)
+				ctx, method, uri, headers, body, c.configConnect.Version)
 			if err != nil {
 				return "", err
 			}

@@ -1,6 +1,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"math"
 	"net/http"
@@ -22,7 +23,7 @@ func TestGetVTrees(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vTreeDetails, err := client.GetVTrees()
+	vTreeDetails, err := client.GetVTrees(context.Background())
 	assert.Equal(t, len(vTreeDetails), 0)
 	assert.Nil(t, err)
 }
@@ -56,7 +57,7 @@ func TestGetVTreeByID(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err = client.GetVTreeByID(tc.id)
+			_, err = client.GetVTreeByID(context.Background(), tc.id)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Getting VTree by ID did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
@@ -99,7 +100,7 @@ func TestGetVTreeInstances(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err = client.GetVTreeInstances(tc.ids)
+			_, err = client.GetVTreeInstances(context.Background(), tc.ids)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Getting VTree by ID did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
@@ -142,7 +143,7 @@ func TestGetVTreeByVolumeID(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err = client.GetVTreeByVolumeID(tc.id)
+			_, err = client.GetVTreeByVolumeID(context.Background(), tc.id)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Getting VTree by Volume ID did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)

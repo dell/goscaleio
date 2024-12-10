@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -54,7 +55,7 @@ func NewVolume(client *Client) *Volume {
 }
 
 // GetVolume returns a volume
-func (sp *StoragePool) GetVolume(
+func (sp *StoragePool) GetVolume(ctx context.Context,
 	volumehref, volumeid, ancestorvolumeid, volumename string,
 	getSnapshots bool,
 ) ([]*types.Volume, error) {
@@ -68,7 +69,7 @@ func (sp *StoragePool) GetVolume(
 	)
 
 	if volumename != "" {
-		volumeid, err = sp.FindVolumeID(volumename)
+		volumeid, err = sp.FindVolumeID(ctx, volumename)
 		if err != nil && err.Error() == "Not found" {
 			return nil, nil
 		}
@@ -91,10 +92,10 @@ func (sp *StoragePool) GetVolume(
 	}
 
 	if volumehref == "" && volumeid == "" {
-		err = sp.client.getJSONWithRetry(
+		err = sp.client.getJSONWithRetry(ctx,
 			http.MethodGet, path, nil, &volumes)
 	} else {
-		err = sp.client.getJSONWithRetry(
+		err = sp.client.getJSONWithRetry(ctx,
 			http.MethodGet, path, nil, volume)
 	}
 	if err != nil {
@@ -116,7 +117,7 @@ func (sp *StoragePool) GetVolume(
 }
 
 // FindVolumeID retruns a volume ID based on name
-func (sp *StoragePool) FindVolumeID(volumename string) (string, error) {
+func (sp *StoragePool) FindVolumeID(ctx context.Context, volumename string) (string, error) {
 	defer TimeSpent("FindVolumeID", time.Now())
 
 	volumeQeryIDByKeyParam := &types.VolumeQeryIDByKeyParam{
@@ -125,8 +126,7 @@ func (sp *StoragePool) FindVolumeID(volumename string) (string, error) {
 
 	path := fmt.Sprintf("/api/types/Volume/instances/action/queryIdByKey")
 
-	volumeID, err := sp.client.getStringWithRetry(
-		http.MethodPost, path, volumeQeryIDByKeyParam)
+	volumeID, err := sp.client.getStringWithRetry(ctx, http.MethodPost, path, volumeQeryIDByKeyParam)
 	if err != nil {
 		return "", err
 	}
@@ -189,7 +189,7 @@ func getVolumeMapping(sysID string, volID string) (mappedVolumes []*SdcMappedVol
 }
 
 // CreateVolume creates a volume
-func (sp *StoragePool) CreateVolume(
+func (sp *StoragePool) CreateVolume(ctx context.Context,
 	volume *types.VolumeParam,
 ) (*types.VolumeResp, error) {
 	defer TimeSpent("CreateVolume", time.Now())
@@ -199,7 +199,7 @@ func (sp *StoragePool) CreateVolume(
 	volume.StoragePoolID = sp.StoragePool.ID
 	volume.ProtectionDomainID = sp.StoragePool.ProtectionDomainID
 	volumeResp := &types.VolumeResp{}
-	err := sp.client.getJSONWithRetry(
+	err := sp.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, volume, volumeResp)
 	if err != nil {
 		return nil, err
@@ -209,7 +209,7 @@ func (sp *StoragePool) CreateVolume(
 }
 
 // GetVTree returns a volume's vtree
-func (v *Volume) GetVTree() (*types.VTree, error) {
+func (v *Volume) GetVTree(ctx context.Context) (*types.VTree, error) {
 	defer TimeSpent("GetVTree", time.Now())
 
 	link, err := GetLink(v.Volume.Links, "/api/parent/relationship/vtreeId")
@@ -218,7 +218,7 @@ func (v *Volume) GetVTree() (*types.VTree, error) {
 	}
 
 	vtree := &types.VTree{}
-	err = v.client.getJSONWithRetry(
+	err = v.client.getJSONWithRetry(ctx,
 		http.MethodGet, link.HREF, nil, vtree)
 	if err != nil {
 		return nil, err
@@ -228,7 +228,7 @@ func (v *Volume) GetVTree() (*types.VTree, error) {
 }
 
 // GetVolumeStatistics returns a volume's statistics
-func (v *Volume) GetVolumeStatistics() (*types.VolumeStatistics, error) {
+func (v *Volume) GetVolumeStatistics(ctx context.Context) (*types.VolumeStatistics, error) {
 	defer TimeSpent("GetStatistics", time.Now())
 
 	link, err := GetLink(v.Volume.Links, "/api/Volume/relationship/Statistics")
@@ -237,7 +237,7 @@ func (v *Volume) GetVolumeStatistics() (*types.VolumeStatistics, error) {
 	}
 
 	var stats types.VolumeStatistics
-	err = v.client.getJSONWithRetry(
+	err = v.client.getJSONWithRetry(ctx,
 		http.MethodGet, link.HREF, nil, &stats)
 	if err != nil {
 		return nil, err
@@ -247,7 +247,7 @@ func (v *Volume) GetVolumeStatistics() (*types.VolumeStatistics, error) {
 }
 
 // RemoveVolume removes a volume
-func (v *Volume) RemoveVolume(removeMode string) error {
+func (v *Volume) RemoveVolume(ctx context.Context, removeMode string) error {
 	defer TimeSpent("RemoveVolume", time.Now())
 
 	link, err := GetLink(v.Volume.Links, "self")
@@ -264,25 +264,25 @@ func (v *Volume) RemoveVolume(removeMode string) error {
 		RemoveMode: removeMode,
 	}
 
-	err = v.client.getJSONWithRetry(
+	err = v.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, removeVolumeParam, nil)
 	return err
 }
 
 // SetVolumeName sets a volume's name
-func (v *Volume) SetVolumeName(newName string) error {
+func (v *Volume) SetVolumeName(ctx context.Context, newName string) error {
 	path := fmt.Sprintf("/api/instances/Volume::%s/action/setVolumeName", v.Volume.ID)
 
 	payload := &types.SetVolumeNameParam{
 		NewName: newName,
 	}
-	err := v.client.getJSONWithRetry(
+	err := v.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, payload, nil)
 	return err
 }
 
 // SetVolumeSize sets a volume's size
-func (v *Volume) SetVolumeSize(sizeInGB string) error {
+func (v *Volume) SetVolumeSize(ctx context.Context, sizeInGB string) error {
 	link, err := GetLink(v.Volume.Links, "self")
 	if err != nil {
 		return err
@@ -291,7 +291,7 @@ func (v *Volume) SetVolumeSize(sizeInGB string) error {
 	payload := &types.SetVolumeSizeParam{
 		SizeInGB: sizeInGB,
 	}
-	err = v.client.getJSONWithRetry(
+	err = v.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, payload, nil)
 	return err
 }
@@ -302,7 +302,7 @@ type AutoSnapshotParam struct {
 }
 
 // LockAutoSnapshot locks volume's auto snapshot in snapshotpolicy
-func (v *Volume) LockAutoSnapshot() error {
+func (v *Volume) LockAutoSnapshot(ctx context.Context) error {
 	if v.Volume.VolumeType != "Snapshot" {
 		return errors.New("Volume type should be snapshot")
 	}
@@ -315,13 +315,13 @@ func (v *Volume) LockAutoSnapshot() error {
 	payload := AutoSnapshotParam{
 		AutoSnapshotWillBeRemoved: false,
 	}
-	err = v.client.getJSONWithRetry(
+	err = v.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, payload, nil)
 	return err
 }
 
 // UnlockAutoSnapshot unlocks volume's auto snapshot in snapshotpolicy
-func (v *Volume) UnlockAutoSnapshot() error {
+func (v *Volume) UnlockAutoSnapshot(ctx context.Context) error {
 	if v.Volume.VolumeType != "Snapshot" {
 		return errors.New("Volume type should be snapshot")
 	}
@@ -335,7 +335,7 @@ func (v *Volume) UnlockAutoSnapshot() error {
 	payload := AutoSnapshotParam{
 		AutoSnapshotWillBeRemoved: false,
 	}
-	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	err = v.client.getJSONWithRetry(ctx, http.MethodPost, path, payload, nil)
 	return err
 }
 
@@ -345,7 +345,7 @@ type SetVolumeAccessModeLimitParam struct {
 }
 
 // SetVolumeAccessModeLimit sets access mode for volume/snapshot
-func (v *Volume) SetVolumeAccessModeLimit(mode string) error {
+func (v *Volume) SetVolumeAccessModeLimit(ctx context.Context, mode string) error {
 	link, err := GetLink(v.Volume.Links, "self")
 	if err != nil {
 		return err
@@ -355,7 +355,7 @@ func (v *Volume) SetVolumeAccessModeLimit(mode string) error {
 	payload := SetVolumeAccessModeLimitParam{
 		AccessModeLimit: mode,
 	}
-	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	err = v.client.getJSONWithRetry(ctx, http.MethodPost, path, payload, nil)
 	return err
 }
 
@@ -365,7 +365,7 @@ type SetSnapshotSecurityParam struct {
 }
 
 // SetSnapshotSecurity set retention period in min on snapshot
-func (v *Volume) SetSnapshotSecurity(retentionPeriodInMin string) error {
+func (v *Volume) SetSnapshotSecurity(ctx context.Context, retentionPeriodInMin string) error {
 	link, err := GetLink(v.Volume.Links, "self")
 	if err != nil {
 		return err
@@ -375,7 +375,7 @@ func (v *Volume) SetSnapshotSecurity(retentionPeriodInMin string) error {
 	payload := SetSnapshotSecurityParam{
 		RetentionPeriodInMin: retentionPeriodInMin,
 	}
-	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	err = v.client.getJSONWithRetry(ctx, http.MethodPost, path, payload, nil)
 	return err
 }
 
@@ -386,7 +386,7 @@ type SetVolumeMappingAccessModeParam struct {
 }
 
 // SetVolumeMappingAccessMode set access mode of mapped sdc on snapshot
-func (v *Volume) SetVolumeMappingAccessMode(accessmode string, sdcid string) error {
+func (v *Volume) SetVolumeMappingAccessMode(ctx context.Context, accessmode string, sdcid string) error {
 	link, err := GetLink(v.Volume.Links, "self")
 	if err != nil {
 		return err
@@ -396,7 +396,7 @@ func (v *Volume) SetVolumeMappingAccessMode(accessmode string, sdcid string) err
 		AccessMode: accessmode,
 		SdcID:      sdcid,
 	}
-	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	err = v.client.getJSONWithRetry(ctx, http.MethodPost, path, payload, nil)
 	return err
 }
 
@@ -406,7 +406,7 @@ type SetVolumeUseRmCacheParam struct {
 }
 
 // SetVolumeUseRmCache set volume rm cahce use
-func (v *Volume) SetVolumeUseRmCache(useRmCache bool) error {
+func (v *Volume) SetVolumeUseRmCache(ctx context.Context, useRmCache bool) error {
 	link, err := GetLink(v.Volume.Links, "self")
 	if err != nil {
 		return err
@@ -415,7 +415,7 @@ func (v *Volume) SetVolumeUseRmCache(useRmCache bool) error {
 	payload := SetVolumeUseRmCacheParam{
 		UseRmCache: types.GetBoolType(useRmCache),
 	}
-	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	err = v.client.getJSONWithRetry(ctx, http.MethodPost, path, payload, nil)
 	return err
 }
 
@@ -425,7 +425,7 @@ type SetCompressionMethodParam struct {
 }
 
 // SetCompressionMethod set the volume compression method.
-func (v *Volume) SetCompressionMethod(compressionMethod string) error {
+func (v *Volume) SetCompressionMethod(ctx context.Context, compressionMethod string) error {
 	link, err := GetLink(v.Volume.Links, "self")
 	if err != nil {
 		return err
@@ -434,17 +434,17 @@ func (v *Volume) SetCompressionMethod(compressionMethod string) error {
 	payload := SetCompressionMethodParam{
 		CompressionMethod: compressionMethod,
 	}
-	err = v.client.getJSONWithRetry(http.MethodPost, path, payload, nil)
+	err = v.client.getJSONWithRetry(ctx, http.MethodPost, path, payload, nil)
 	return err
 }
 
 // UnmarkForReplication Depricated Message (3.6)
-func (v *Volume) UnmarkForReplication() error {
+func (v *Volume) UnmarkForReplication(ctx context.Context) error {
 	path := fmt.Sprintf("/api/instances/Volume::%s/action/unmarkForReplication", v.Volume.ID)
 
 	payload := &types.EmptyPayload{}
 
-	err := v.client.getJSONWithRetry(
+	err := v.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, payload, nil)
 
 	return err

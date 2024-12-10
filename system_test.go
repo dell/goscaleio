@@ -1,6 +1,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"math"
 	"net/http"
@@ -45,7 +46,7 @@ func TestModifyPerformanceProfile(t *testing.T) {
 				client: client,
 			}
 
-			err = s.ModifyPerformanceProfileMdmCluster(tc.perfProfile)
+			err = s.ModifyPerformanceProfileMdmCluster(context.Background(), tc.perfProfile)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Modifying performance profile of MDM cluster did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
@@ -94,7 +95,7 @@ func TestAddStandByMDM(t *testing.T) {
 				IPs:  tc.ips,
 				Role: tc.role,
 			}
-			_, err = s.AddStandByMdm(&payload)
+			_, err = s.AddStandByMdm(context.Background(), &payload)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Adding standby mdm did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
@@ -142,7 +143,7 @@ func TestRemoveStandByMDM(t *testing.T) {
 				client: client,
 			}
 
-			err = s.RemoveStandByMdm(tc.mdmID)
+			err = s.RemoveStandByMdm(context.Background(), tc.mdmID)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Adding standby mdm did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
@@ -190,7 +191,7 @@ func TestChangeMDMOwnership(t *testing.T) {
 				client: client,
 			}
 
-			err = s.ChangeMdmOwnerShip(tc.mdmID)
+			err = s.ChangeMdmOwnerShip(context.Background(), tc.mdmID)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Changing MDM ownership did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
@@ -249,7 +250,7 @@ func TestSwitchClusterMode(t *testing.T) {
 				AddTBMdms:        tc.addTBMdmList,
 			}
 
-			err = s.SwitchClusterMode(&payload)
+			err = s.SwitchClusterMode(context.Background(), &payload)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Switching MDM cluster did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
@@ -279,7 +280,7 @@ func TestGetMDMClusterDetails(t *testing.T) {
 		client: client,
 	}
 
-	mdmDetails, err1 := s.GetMDMClusterDetails()
+	mdmDetails, err1 := s.GetMDMClusterDetails(context.Background())
 	assert.NotNil(t, mdmDetails)
 	assert.Nil(t, err1)
 }
@@ -327,7 +328,7 @@ func TestRenameMdm(t *testing.T) {
 				NewName: tc.newName,
 			}
 
-			err = s.RenameMdm(&payload)
+			err = s.RenameMdm(context.Background(), &payload)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Renaming MDM did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)

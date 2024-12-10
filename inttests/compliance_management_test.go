@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"testing"
 
 	siotypes "github.com/dell/goscaleio/types/v1"
@@ -22,7 +23,7 @@ import (
 // TestGetComplianceManagement tests compliance management get
 func TestGetComplianceManagement(t *testing.T) {
 	system := getSystem()
-	complianceReport, err := system.GetCompatibilityManagement()
+	complianceReport, err := system.GetCompatibilityManagement(context.Background())
 	assert.Nil(t, err)
 	assert.NotNil(t, complianceReport)
 }
@@ -30,7 +31,7 @@ func TestGetComplianceManagement(t *testing.T) {
 // TestSetComplianceManagement tests compliance management set
 func TestSetComplianceManagement(t *testing.T) {
 	system := getSystem()
-	complianceReport, err := system.SetCompatibilityManagement(&siotypes.CompatibilityManagementPost{
+	complianceReport, err := system.SetCompatibilityManagement(context.Background(), &siotypes.CompatibilityManagementPost{
 		Source:         "local",
 		RepositoryPath: "cm-20231005-01-test.gpg",
 		CompatibilityDataBytes: []byte{

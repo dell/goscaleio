@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -136,7 +137,7 @@ func TestGetSystemLimits(t *testing.T) {
 				client: client,
 			}
 
-			resp, err := sys.client.GetSystemLimits()
+			resp, err := sys.client.GetSystemLimits(context.Background())
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}

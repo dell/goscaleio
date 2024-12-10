@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -126,7 +127,7 @@ func Test_GetVolumeStatistics(t *testing.T) {
 
 			volClient := NewVolume(client)
 			volClient.Volume = vol
-			_, err = volClient.GetVolumeStatistics()
+			_, err = volClient.GetVolumeStatistics(context.Background())
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
 			}

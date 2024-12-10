@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -35,15 +36,14 @@ func NewNvmeHost(client *Client, nvmeHost *types.NvmeHost) *NvmeHost {
 }
 
 // GetAllNvmeHosts returns all NvmeHost list
-func (s *System) GetAllNvmeHosts() ([]types.NvmeHost, error) {
+func (s *System) GetAllNvmeHosts(ctx context.Context) ([]types.NvmeHost, error) {
 	defer TimeSpent("GetAllNvmeHosts", time.Now())
 
 	path := fmt.Sprintf("/api/instances/System::%v/relationships/Sdc",
 		s.System.ID)
 
 	var allHosts []types.NvmeHost
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, &allHosts)
+	err := s.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &allHosts)
 	if err != nil {
 		return nil, err
 	}
@@ -59,13 +59,13 @@ func (s *System) GetAllNvmeHosts() ([]types.NvmeHost, error) {
 }
 
 // GetNvmeHostByID returns an NVMe host searched by id
-func (s *System) GetNvmeHostByID(id string) (*types.NvmeHost, error) {
+func (s *System) GetNvmeHostByID(ctx context.Context, id string) (*types.NvmeHost, error) {
 	defer TimeSpent("GetNvmeHostByID", time.Now())
 
 	path := fmt.Sprintf("api/instances/Sdc::%v", id)
 
 	var nvmeHost types.NvmeHost
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &nvmeHost)
 	if err != nil {
 		return nil, err
@@ -75,13 +75,13 @@ func (s *System) GetNvmeHostByID(id string) (*types.NvmeHost, error) {
 }
 
 // CreateNvmeHost creates a new NVMe host
-func (s *System) CreateNvmeHost(nvmeHostParam types.NvmeHostParam) (*types.NvmeHostResp, error) {
+func (s *System) CreateNvmeHost(ctx context.Context, nvmeHostParam types.NvmeHostParam) (*types.NvmeHostResp, error) {
 	defer TimeSpent("CreateNvmeHost", time.Now())
 
 	path := "/api/types/Host/instances"
 	nvmeHostResp := &types.NvmeHostResp{}
 
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, nvmeHostParam, nvmeHostResp)
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (s *System) CreateNvmeHost(nvmeHostParam types.NvmeHostParam) (*types.NvmeH
 }
 
 // ChangeNvmeHostName changes the name of the Nvme host.
-func (s *System) ChangeNvmeHostName(id, name string) error {
+func (s *System) ChangeNvmeHostName(ctx context.Context, id, name string) error {
 	defer TimeSpent("ChangeNvmeHostName", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcName", id)
@@ -99,7 +99,7 @@ func (s *System) ChangeNvmeHostName(id, name string) error {
 	body := types.ChangeNvmeHostNameParam{
 		SdcName: name,
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, nil)
 	if err != nil {
 		return err
@@ -109,7 +109,7 @@ func (s *System) ChangeNvmeHostName(id, name string) error {
 }
 
 // ChangeNvmeHostMaxNumPaths changes the max number paths of the Nvme host.
-func (s *System) ChangeNvmeHostMaxNumPaths(id string, maxNumPaths int) error {
+func (s *System) ChangeNvmeHostMaxNumPaths(ctx context.Context, id string, maxNumPaths int) error {
 	defer TimeSpent("ChangeNvmeHostMaxNumPaths", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Host::%v/action/modifyMaxNumPaths", id)
@@ -117,7 +117,7 @@ func (s *System) ChangeNvmeHostMaxNumPaths(id string, maxNumPaths int) error {
 	body := types.ChangeNvmeMaxNumPathsParam{
 		MaxNumPaths: types.IntString(maxNumPaths),
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, nil)
 	if err != nil {
 		return err
@@ -127,7 +127,7 @@ func (s *System) ChangeNvmeHostMaxNumPaths(id string, maxNumPaths int) error {
 }
 
 // ChangeNvmeHostMaxNumSysPorts changes the max number of sys ports of the Nvme host.
-func (s *System) ChangeNvmeHostMaxNumSysPorts(id string, maxNumSysPorts int) error {
+func (s *System) ChangeNvmeHostMaxNumSysPorts(ctx context.Context, id string, maxNumSysPorts int) error {
 	defer TimeSpent("ChangeNvmeHostMaxNumPaths", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Host::%v/action/modifyMaxNumSysPorts", id)
@@ -135,7 +135,7 @@ func (s *System) ChangeNvmeHostMaxNumSysPorts(id string, maxNumSysPorts int) err
 	body := types.ChangeNvmeHostMaxNumSysPortsParam{
 		MaxNumSysPorts: types.IntString(maxNumSysPorts),
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, nil)
 	if err != nil {
 		return err
@@ -145,13 +145,13 @@ func (s *System) ChangeNvmeHostMaxNumSysPorts(id string, maxNumSysPorts int) err
 }
 
 // DeleteNvmeHost deletes the NVMe host
-func (s *System) DeleteNvmeHost(id string) error {
+func (s *System) DeleteNvmeHost(ctx context.Context, id string) error {
 	defer TimeSpent("DeleteNvmeHost", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdc::%v/action/removeSdc", id)
 
 	param := &types.EmptyPayload{}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, param, nil)
 	if err != nil {
 		return err
@@ -160,12 +160,12 @@ func (s *System) DeleteNvmeHost(id string) error {
 }
 
 // GetHostNvmeControllers returns all attached NVMe controllers
-func (s *System) GetHostNvmeControllers(host types.NvmeHost) ([]types.NvmeController, error) {
+func (s *System) GetHostNvmeControllers(ctx context.Context, host types.NvmeHost) ([]types.NvmeController, error) {
 	defer TimeSpent("GetHostNvmeControllers", time.Now())
 	path := fmt.Sprintf("api/instances/Host::%v/relationships/NvmeController", host.ID)
 
 	var nvmeControllers []types.NvmeController
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &nvmeControllers)
 	return nvmeControllers, err
 }

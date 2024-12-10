@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"math"
 	"net/http"
@@ -63,7 +64,7 @@ func TestCreateFaultSet(t *testing.T) {
 
 			p := NewProtectionDomain(client)
 
-			ID, errFs = p.CreateFaultSet(tc.fs)
+			ID, errFs = p.CreateFaultSet(context.Background(), tc.fs)
 			if errFs != nil {
 				if tc.expected == nil {
 					t.Errorf("Creating fault set did not work as expected, \n\tgot: %s \n\twant: %v", errFs, tc.expected)
@@ -107,7 +108,7 @@ func TestGetFaultByID(t *testing.T) {
 			s := System{
 				client: client,
 			}
-			_, err2 := s.GetFaultSetByID(tc.id)
+			_, err2 := s.GetFaultSetByID(context.Background(), tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Fetching fault set did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -154,7 +155,7 @@ func TestModifyFaultSetName(t *testing.T) {
 			p := ProtectionDomain{
 				client: client,
 			}
-			err2 := p.ModifyFaultSetName(tc.id, tc.name)
+			err2 := p.ModifyFaultSetName(context.Background(), tc.id, tc.name)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Modifying fault set did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -206,7 +207,7 @@ func TestModifyFaultPerfProfile(t *testing.T) {
 			p := ProtectionDomain{
 				client: client,
 			}
-			err2 := p.ModifyFaultSetPerfProfile(tc.id, tc.perfProfile)
+			err2 := p.ModifyFaultSetPerfProfile(context.Background(), tc.id, tc.perfProfile)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Modifying fault set did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -250,7 +251,7 @@ func TestDeleteFaultSet(t *testing.T) {
 			p := ProtectionDomain{
 				client: client,
 			}
-			err2 := p.DeleteFaultSet(tc.id)
+			err2 := p.DeleteFaultSet(context.Background(), tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Removing fault set did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -279,7 +280,7 @@ func TestGetAllFaultSets(t *testing.T) {
 		client: client,
 	}
 
-	faultsets, err := s.GetAllFaultSets()
+	faultsets, err := s.GetAllFaultSets(context.Background())
 	assert.Equal(t, len(faultsets), 0)
 	assert.Nil(t, err)
 }
@@ -315,7 +316,7 @@ func TestGetAllFaultSetsSds(t *testing.T) {
 			s := System{
 				client: client,
 			}
-			_, err2 := s.GetAllSDSByFaultSetID(tc.id)
+			_, err2 := s.GetAllSDSByFaultSetID(context.Background(), tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Getting sds related with fault set did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)

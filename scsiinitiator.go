@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -21,7 +22,7 @@ import (
 )
 
 // GetScsiInitiator returns a ScsiInitiator
-func (s *System) GetScsiInitiator() ([]types.ScsiInitiator, error) {
+func (s *System) GetScsiInitiator(ctx context.Context) ([]types.ScsiInitiator, error) {
 	defer TimeSpent("GetScsiInitiator", time.Now())
 
 	path := fmt.Sprintf(
@@ -29,8 +30,7 @@ func (s *System) GetScsiInitiator() ([]types.ScsiInitiator, error) {
 		s.System.ID)
 
 	var si []types.ScsiInitiator
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, &si)
+	err := s.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &si)
 	if err != nil {
 		return nil, err
 	}

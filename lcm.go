@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -26,10 +27,10 @@ import (
 // Returns -1 if PFMP version < the given version,
 // Returns 1 if PFMP version > the given version,
 // Returns 0 if PFMP version == the given version.
-func CheckPfmpVersion(client *Client, version string) (int, error) {
+func CheckPfmpVersion(ctx context.Context, client *Client, version string) (int, error) {
 	defer TimeSpent("CheckPfmpVersion", time.Now())
 
-	lcmStatus, err := GetPfmpStatus(*client)
+	lcmStatus, err := GetPfmpStatus(ctx, *client)
 	if err != nil {
 		return -1, fmt.Errorf("failed to get PFMP version : %v", err)
 	}
@@ -42,14 +43,13 @@ func CheckPfmpVersion(client *Client, version string) (int, error) {
 }
 
 // GetPfmpStatus gets the PFMP status
-func GetPfmpStatus(client Client) (*types.LcmStatus, error) {
+func GetPfmpStatus(ctx context.Context, client Client) (*types.LcmStatus, error) {
 	defer TimeSpent("GetPfmpStatus", time.Now())
 
 	path := "/Api/V1/corelcm/status"
 
 	var status types.LcmStatus
-	err := client.getJSONWithRetry(
-		http.MethodGet, path, nil, &status)
+	err := client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &status)
 	if err != nil {
 		return nil, err
 	}

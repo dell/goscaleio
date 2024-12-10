@@ -18,6 +18,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -51,29 +52,29 @@ func NewPeerMDM(client *Client, peerMDM *types.PeerMDM) *PeerMDM {
 }
 
 // GetPeerMDMs returns a list of peer MDMs know to the System
-func (c *Client) GetPeerMDMs() ([]*types.PeerMDM, error) {
+func (c *Client) GetPeerMDMs(ctx context.Context) ([]*types.PeerMDM, error) {
 	defer TimeSpent("GetPeerMDMs", time.Now())
 
 	path := "/api/types/PeerMdm/instances"
 	var peerMdms []*types.PeerMDM
 
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &peerMdms)
+	err := c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &peerMdms)
 	return peerMdms, err
 }
 
 // GetPeerMDM returns a specific peer MDM
-func (c *Client) GetPeerMDM(id string) (*types.PeerMDM, error) {
+func (c *Client) GetPeerMDM(ctx context.Context, id string) (*types.PeerMDM, error) {
 	defer TimeSpent("GetPeerMDM", time.Now())
 
 	path := "/api/instances/PeerMdm::" + id
 	var peerMdm *types.PeerMDM
 
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &peerMdm)
+	err := c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &peerMdm)
 	return peerMdm, err
 }
 
 // ModifyPeerMdmIP updates a Peer MDM Ips
-func (c *Client) ModifyPeerMdmIP(id string, ips []string) error {
+func (c *Client) ModifyPeerMdmIP(ctx context.Context, id string, ips []string) error {
 	defer TimeSpent("ModifyPeerMdmIP", time.Now())
 	// Format into the strucutre that the API expects
 	var ipMap []map[string]interface{}
@@ -85,8 +86,8 @@ func (c *Client) ModifyPeerMdmIP(id string, ips []string) error {
 	}
 	path := "/api/instances/PeerMdm::" + id + "/action/modifyPeerMdmIp"
 
-	if err := c.getJSONWithRetry(http.MethodPost, path, param, nil); err != nil {
-		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, param, nil) returned %s", err)
+	if err := c.getJSONWithRetry(ctx, http.MethodPost, path, param, nil); err != nil {
+		fmt.Printf("c.getJSONWithRetry(ctx,http.MethodPost, path, param, nil) returned %s", err)
 		return err
 	}
 
@@ -94,13 +95,13 @@ func (c *Client) ModifyPeerMdmIP(id string, ips []string) error {
 }
 
 // ModifyPeerMdmName updates a Peer MDM Name
-func (c *Client) ModifyPeerMdmName(id string, name *types.ModifyPeerMDMNameParam) error {
+func (c *Client) ModifyPeerMdmName(ctx context.Context, id string, name *types.ModifyPeerMDMNameParam) error {
 	defer TimeSpent("ModifyPeerMdmName", time.Now())
 
 	path := "/api/instances/PeerMdm::" + id + "/action/modifyPeerMdmName"
 
-	if err := c.getJSONWithRetry(http.MethodPost, path, name, nil); err != nil {
-		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, name, nil) returned %s", err)
+	if err := c.getJSONWithRetry(ctx, http.MethodPost, path, name, nil); err != nil {
+		fmt.Printf("c.getJSONWithRetry(ctx,http.MethodPost, path, name, nil) returned %s", err)
 		return err
 	}
 
@@ -108,13 +109,13 @@ func (c *Client) ModifyPeerMdmName(id string, name *types.ModifyPeerMDMNameParam
 }
 
 // ModifyPeerMdmPort updates a Peer MDM Port
-func (c *Client) ModifyPeerMdmPort(id string, port *types.ModifyPeerMDMPortParam) error {
+func (c *Client) ModifyPeerMdmPort(ctx context.Context, id string, port *types.ModifyPeerMDMPortParam) error {
 	defer TimeSpent("ModifyPeerMdmPort", time.Now())
 
 	path := "/api/instances/PeerMdm::" + id + "/action/modifyPeerMdmPort"
 
-	if err := c.getJSONWithRetry(http.MethodPost, path, port, nil); err != nil {
-		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, port, nil) returned %s", err)
+	if err := c.getJSONWithRetry(ctx, http.MethodPost, path, port, nil); err != nil {
+		fmt.Printf("c.getJSONWithRetry(ctx,http.MethodPost, path, port, nil) returned %s", err)
 		return err
 	}
 
@@ -122,13 +123,13 @@ func (c *Client) ModifyPeerMdmPort(id string, port *types.ModifyPeerMDMPortParam
 }
 
 // ModifyPeerMdmPerformanceParameters updates a Peer MDM Performance Parameters
-func (c *Client) ModifyPeerMdmPerformanceParameters(id string, param *types.ModifyPeerMdmPerformanceParametersParam) error {
+func (c *Client) ModifyPeerMdmPerformanceParameters(ctx context.Context, id string, param *types.ModifyPeerMdmPerformanceParametersParam) error {
 	defer TimeSpent("ModifyPeerMdmPerformanceParameters", time.Now())
 
 	path := "/api/instances/PeerMdm::" + id + "/action/setPeerMdmPerformanceParameters"
 
-	if err := c.getJSONWithRetry(http.MethodPost, path, param, nil); err != nil {
-		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, param, nil) returned %s", err)
+	if err := c.getJSONWithRetry(ctx, http.MethodPost, path, param, nil); err != nil {
+		fmt.Printf("c.getJSONWithRetry(ctx,http.MethodPost, path, param, nil) returned %s", err)
 		return err
 	}
 
@@ -136,7 +137,7 @@ func (c *Client) ModifyPeerMdmPerformanceParameters(id string, param *types.Modi
 }
 
 // AddPeerMdm Adds a Peer MDM
-func (c *Client) AddPeerMdm(param *types.AddPeerMdm) (*types.PeerMDM, error) {
+func (c *Client) AddPeerMdm(ctx context.Context, param *types.AddPeerMdm) (*types.PeerMDM, error) {
 	defer TimeSpent("AddPeerMdm", time.Now())
 	if param.PeerSystemID == "" || len(param.PeerSystemIps) == 0 {
 		return nil, errors.New("PeerSystemID and PeerSystemIps are required")
@@ -154,8 +155,8 @@ func (c *Client) AddPeerMdm(param *types.AddPeerMdm) (*types.PeerMDM, error) {
 		Name:          param.Name,
 	}
 
-	if err := c.getJSONWithRetry(http.MethodPost, path, paramCreate, peerMdm); err != nil {
-		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, paramCreate, peerMdm) returned %s", err)
+	if err := c.getJSONWithRetry(ctx, http.MethodPost, path, paramCreate, peerMdm); err != nil {
+		fmt.Printf("c.getJSONWithRetry(ctx,http.MethodPost, path, paramCreate, peerMdm) returned %s", err)
 		return nil, err
 	}
 
@@ -163,13 +164,13 @@ func (c *Client) AddPeerMdm(param *types.AddPeerMdm) (*types.PeerMDM, error) {
 }
 
 // RemovePeerMdm removes a Peer MDM
-func (c *Client) RemovePeerMdm(id string) error {
+func (c *Client) RemovePeerMdm(ctx context.Context, id string) error {
 	defer TimeSpent("RemovePeerMdm", time.Now())
 
 	path := "/api/instances/PeerMdm::" + id + "/action/removePeerMdm"
 	params := types.EmptyPayload{}
-	if err := c.getJSONWithRetry(http.MethodPost, path, params, nil); err != nil {
-		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, params, nil) returned %s", err)
+	if err := c.getJSONWithRetry(ctx, http.MethodPost, path, params, nil); err != nil {
+		fmt.Printf("c.getJSONWithRetry(ctx,http.MethodPost, path, params, nil) returned %s", err)
 		return err
 	}
 
@@ -207,29 +208,29 @@ func NewReplicationPair(client *Client) *ReplicationPair {
 }
 
 // GetReplicationConsistencyGroups returns a list of the ReplicationConsistencyGroups
-func (c *Client) GetReplicationConsistencyGroups() ([]*types.ReplicationConsistencyGroup, error) {
+func (c *Client) GetReplicationConsistencyGroups(ctx context.Context) ([]*types.ReplicationConsistencyGroup, error) {
 	defer TimeSpent("GetReplicationConsistencyGroups", time.Now())
 
 	uri := "/api/types/ReplicationConsistencyGroup/instances"
 	var rcgs []*types.ReplicationConsistencyGroup
 
-	err := c.getJSONWithRetry(http.MethodGet, uri, nil, &rcgs)
+	err := c.getJSONWithRetry(ctx, http.MethodGet, uri, nil, &rcgs)
 	return rcgs, err
 }
 
 // GetReplicationConsistencyGroupByID returns a specified ReplicationConsistencyGroup
-func (c *Client) GetReplicationConsistencyGroupByID(groupID string) (*types.ReplicationConsistencyGroup, error) {
+func (c *Client) GetReplicationConsistencyGroupByID(ctx context.Context, groupID string) (*types.ReplicationConsistencyGroup, error) {
 	defer TimeSpent("GetReplicationConsistencyGroupById", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + groupID
 	var group *types.ReplicationConsistencyGroup
 
-	err := c.getJSONWithRetry(http.MethodGet, uri, nil, &group)
+	err := c.getJSONWithRetry(ctx, http.MethodGet, uri, nil, &group)
 	return group, err
 }
 
 // CreateReplicationConsistencyGroup creates a ReplicationConsistencyGroup on the array
-func (c *Client) CreateReplicationConsistencyGroup(rcg *types.ReplicationConsistencyGroupCreatePayload) (*types.ReplicationConsistencyGroupResp, error) {
+func (c *Client) CreateReplicationConsistencyGroup(ctx context.Context, rcg *types.ReplicationConsistencyGroupCreatePayload) (*types.ReplicationConsistencyGroupResp, error) {
 	defer TimeSpent("CreateReplicationConsistencyGroup", time.Now())
 
 	if rcg.RpoInSeconds == "" || rcg.ProtectionDomainID == "" || rcg.RemoteProtectionDomainID == "" {
@@ -243,9 +244,9 @@ func (c *Client) CreateReplicationConsistencyGroup(rcg *types.ReplicationConsist
 	path := "/api/types/ReplicationConsistencyGroup/instances"
 	rcgResp := &types.ReplicationConsistencyGroupResp{}
 
-	err := c.getJSONWithRetry(http.MethodPost, path, rcg, rcgResp)
+	err := c.getJSONWithRetry(ctx, http.MethodPost, path, rcg, rcgResp)
 	if err != nil {
-		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, rcg, rcgResp) returned %s", err)
+		fmt.Printf("c.getJSONWithRetry(ctx,http.MethodPost, path, rcg, rcgResp) returned %s", err)
 		return nil, err
 	}
 	return rcgResp, nil
@@ -253,7 +254,7 @@ func (c *Client) CreateReplicationConsistencyGroup(rcg *types.ReplicationConsist
 
 // RemoveReplicationConsistencyGroup removes a replication consistency group
 // At this point I don't know when forceIgnoreConsistency might be required.
-func (rcg *ReplicationConsistencyGroup) RemoveReplicationConsistencyGroup(forceIgnoreConsistency bool) error {
+func (rcg *ReplicationConsistencyGroup) RemoveReplicationConsistencyGroup(ctx context.Context, forceIgnoreConsistency bool) error {
 	defer TimeSpent("RemoveReplicationConsistencyGroup", time.Now())
 
 	link, err := GetLink(rcg.ReplicationConsistencyGroup.Links, "self")
@@ -267,34 +268,34 @@ func (rcg *ReplicationConsistencyGroup) RemoveReplicationConsistencyGroup(forceI
 		removeRCGParam.ForceIgnoreConsistency = "True"
 	}
 
-	err = rcg.client.getJSONWithRetry(http.MethodPost, path, removeRCGParam, nil)
+	err = rcg.client.getJSONWithRetry(ctx, http.MethodPost, path, removeRCGParam, nil)
 	return err
 }
 
 // FreezeReplicationConsistencyGroup sets the ReplicationConsistencyGroup into a freeze state
-func (rcg *ReplicationConsistencyGroup) FreezeReplicationConsistencyGroup(id string) error {
+func (rcg *ReplicationConsistencyGroup) FreezeReplicationConsistencyGroup(ctx context.Context, id string) error {
 	defer TimeSpent("FreezeReplicationConsistencyGroup", time.Now())
 
 	params := types.EmptyPayload{}
 	path := "/api/instances/ReplicationConsistencyGroup::" + id + "/action/freezeApplyReplicationConsistencyGroup"
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, path, params, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, path, params, nil)
 	return err
 }
 
 // UnfreezeReplicationConsistencyGroup sets the ReplicationConsistencyGroup into a Unfreeze state
-func (rcg *ReplicationConsistencyGroup) UnfreezeReplicationConsistencyGroup() error {
+func (rcg *ReplicationConsistencyGroup) UnfreezeReplicationConsistencyGroup(ctx context.Context) error {
 	defer TimeSpent("UnfreezeReplicationConsistencyGroup", time.Now())
 
 	params := types.EmptyPayload{}
 	path := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/unfreezeApplyReplicationConsistencyGroup"
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, path, params, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, path, params, nil)
 	return err
 }
 
 // CreateReplicationPair creates a ReplicationPair on the desired ReplicaitonConsistencyGroup
-func (c *Client) CreateReplicationPair(rp *types.QueryReplicationPair) (*types.ReplicationPair, error) {
+func (c *Client) CreateReplicationPair(ctx context.Context, rp *types.QueryReplicationPair) (*types.ReplicationPair, error) {
 	defer TimeSpent("CreateReplicationPair", time.Now())
 
 	if rp.CopyType == "" || rp.SourceVolumeID == "" || rp.DestinationVolumeID == "" || rp.ReplicationConsistencyGroupID == "" {
@@ -304,8 +305,8 @@ func (c *Client) CreateReplicationPair(rp *types.QueryReplicationPair) (*types.R
 	path := "/api/types/ReplicationPair/instances"
 	rpResp := &types.ReplicationPair{}
 
-	if err := c.getJSONWithRetry(http.MethodPost, path, rp, rpResp); err != nil {
-		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, rp, rpResp) returned %s", err)
+	if err := c.getJSONWithRetry(ctx, http.MethodPost, path, rp, rpResp); err != nil {
+		fmt.Printf("c.getJSONWithRetry(ctx,http.MethodPost, path, rp, rpResp) returned %s", err)
 		return nil, err
 	}
 
@@ -313,7 +314,7 @@ func (c *Client) CreateReplicationPair(rp *types.QueryReplicationPair) (*types.R
 }
 
 // RemoveReplicationPair removes the desired replication pair.
-func (rp *ReplicationPair) RemoveReplicationPair(force bool) (*types.ReplicationPair, error) {
+func (rp *ReplicationPair) RemoveReplicationPair(ctx context.Context, force bool) (*types.ReplicationPair, error) {
 	defer TimeSpent("RemoveReplicationPair", time.Now())
 
 	uri := "/api/instances/ReplicationPair::" + rp.ReplicaitonPair.ID + "/action/removeReplicationPair"
@@ -325,8 +326,8 @@ func (rp *ReplicationPair) RemoveReplicationPair(force bool) (*types.Replication
 		param.Force = "true"
 	}
 
-	if err := rp.client.getJSONWithRetry(http.MethodPost, uri, param, resp); err != nil {
-		fmt.Printf("c.getJSONWithRetry(http.MethodPost, path, rp, pair) returned %s", err)
+	if err := rp.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, resp); err != nil {
+		fmt.Printf("c.getJSONWithRetry(ctx,http.MethodPost, path, rp, pair) returned %s", err)
 		return nil, err
 	}
 
@@ -334,130 +335,130 @@ func (rp *ReplicationPair) RemoveReplicationPair(force bool) (*types.Replication
 }
 
 // GetReplicationPairStatistics returns the statistics of the desired ReplicaitonPair.
-func (rp *ReplicationPair) GetReplicationPairStatistics() (*types.QueryReplicationPairStatistics, error) {
+func (rp *ReplicationPair) GetReplicationPairStatistics(ctx context.Context) (*types.QueryReplicationPairStatistics, error) {
 	defer TimeSpent("GetReplicationPairStatistics", time.Now())
 
 	path := "/api/instances/ReplicationPair::" + rp.ReplicaitonPair.ID + "/relationships/Statistics"
 	rpResp := &types.QueryReplicationPairStatistics{}
 
-	err := rp.client.getJSONWithRetry(http.MethodGet, path, nil, &rpResp)
+	err := rp.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &rpResp)
 	return rpResp, err
 }
 
 // GetAllReplicationPairs returns a list all replication pairs on the system.
-func (c *Client) GetAllReplicationPairs() ([]*types.ReplicationPair, error) {
+func (c *Client) GetAllReplicationPairs(ctx context.Context) ([]*types.ReplicationPair, error) {
 	defer TimeSpent("GetReplicationPairs", time.Now())
 
 	path := "/api/types/ReplicationPair/instances"
 
 	var pairs []*types.ReplicationPair
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &pairs)
+	err := c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &pairs)
 	return pairs, err
 }
 
 // GetReplicationPair returns a specific replication pair on the system.
-func (c *Client) GetReplicationPair(id string) (*types.ReplicationPair, error) {
+func (c *Client) GetReplicationPair(ctx context.Context, id string) (*types.ReplicationPair, error) {
 	defer TimeSpent("GetReplicationPair", time.Now())
 
 	path := "/api/instances/ReplicationPair::" + id
 
 	var pair *types.ReplicationPair
-	err := c.getJSONWithRetry(http.MethodGet, path, nil, &pair)
+	err := c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &pair)
 	return pair, err
 }
 
 // PausePairInitialCopy pauses the initial copy of the replication pair.
-func (c *Client) PausePairInitialCopy(id string) (*types.ReplicationPair, error) {
+func (c *Client) PausePairInitialCopy(ctx context.Context, id string) (*types.ReplicationPair, error) {
 	defer TimeSpent("PausePairInitialCopy", time.Now())
 
 	path := "/api/instances/ReplicationPair::" + id + "/action/pausePairInitialCopy"
 
 	var pair *types.ReplicationPair
-	err := c.getJSONWithRetry(http.MethodPost, path, types.EmptyPayload{}, &pair)
+	err := c.getJSONWithRetry(ctx, http.MethodPost, path, types.EmptyPayload{}, &pair)
 	return pair, err
 }
 
 // ResumePairInitialCopy resumes the initial copy of the replication pair.
-func (c *Client) ResumePairInitialCopy(id string) (*types.ReplicationPair, error) {
+func (c *Client) ResumePairInitialCopy(ctx context.Context, id string) (*types.ReplicationPair, error) {
 	defer TimeSpent("ResumePairInitialCopy", time.Now())
 
 	path := "/api/instances/ReplicationPair::" + id + "/action/resumePairInitialCopy"
 
 	var pair *types.ReplicationPair
-	err := c.getJSONWithRetry(http.MethodPost, path, types.EmptyPayload{}, &pair)
+	err := c.getJSONWithRetry(ctx, http.MethodPost, path, types.EmptyPayload{}, &pair)
 	return pair, err
 }
 
 // GetReplicationPairs returns a list of replication pairs associated to the rcg.
-func (rcg *ReplicationConsistencyGroup) GetReplicationPairs() ([]*types.ReplicationPair, error) {
+func (rcg *ReplicationConsistencyGroup) GetReplicationPairs(ctx context.Context) ([]*types.ReplicationPair, error) {
 	defer TimeSpent("GetReplicationPairs", time.Now())
 
 	path := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/relationships/ReplicationPair"
 
 	var pairs []*types.ReplicationPair
-	err := rcg.client.getJSONWithRetry(http.MethodGet, path, nil, &pairs)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &pairs)
 	return pairs, err
 }
 
 // CreateReplicationConsistencyGroupSnapshot creates a snapshot of the ReplicationConsistencyGroup on the target array.
-func (rcg *ReplicationConsistencyGroup) CreateReplicationConsistencyGroupSnapshot() (*types.CreateReplicationConsistencyGroupSnapshotResp, error) {
+func (rcg *ReplicationConsistencyGroup) CreateReplicationConsistencyGroupSnapshot(ctx context.Context) (*types.CreateReplicationConsistencyGroupSnapshotResp, error) {
 	defer TimeSpent("GetReplicationPairs", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/createReplicationConsistencyGroupSnapshots"
 
 	resp := &types.CreateReplicationConsistencyGroupSnapshotResp{}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, types.EmptyPayload{}, resp)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, types.EmptyPayload{}, resp)
 	return resp, err
 }
 
 // ExecuteFailoverOnReplicationGroup sets the ReplicationconsistencyGroup into a failover state.
-func (rcg *ReplicationConsistencyGroup) ExecuteFailoverOnReplicationGroup() error {
+func (rcg *ReplicationConsistencyGroup) ExecuteFailoverOnReplicationGroup(ctx context.Context) error {
 	defer TimeSpent("ExecuteFailoverOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/failoverReplicationConsistencyGroup"
 	param := types.EmptyPayload{}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteSwitchoverOnReplicationGroup sets the ReplicationconsistencyGroup into a switchover state.
-func (rcg *ReplicationConsistencyGroup) ExecuteSwitchoverOnReplicationGroup(_ bool) error {
+func (rcg *ReplicationConsistencyGroup) ExecuteSwitchoverOnReplicationGroup(ctx context.Context, _ bool) error {
 	defer TimeSpent("ExecuteSwitchoverOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/switchoverReplicationConsistencyGroup"
 	// API is incorrect. No params needed.
 	param := types.EmptyPayload{}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteRestoreOnReplicationGroup restores the ReplicationConsistencyGroup from a failover/switchover state.
-func (rcg *ReplicationConsistencyGroup) ExecuteRestoreOnReplicationGroup() error {
+func (rcg *ReplicationConsistencyGroup) ExecuteRestoreOnReplicationGroup(ctx context.Context) error {
 	defer TimeSpent("ExecuteRestoreOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/restoreReplicationConsistencyGroup"
 	param := types.EmptyPayload{}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteReverseOnReplicationGroup reverses the direction of replication from a failover/switchover state.
-func (rcg *ReplicationConsistencyGroup) ExecuteReverseOnReplicationGroup() error {
+func (rcg *ReplicationConsistencyGroup) ExecuteReverseOnReplicationGroup(ctx context.Context) error {
 	defer TimeSpent("ExecuteReverseOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/reverseReplicationConsistencyGroup"
 	param := types.EmptyPayload{}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecutePauseOnReplicationGroup pauses the replication of the ConsistencyGroup.
-func (rcg *ReplicationConsistencyGroup) ExecutePauseOnReplicationGroup() error {
+func (rcg *ReplicationConsistencyGroup) ExecutePauseOnReplicationGroup(ctx context.Context) error {
 	defer TimeSpent("ExecutePauseOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/pauseReplicationConsistencyGroup"
@@ -465,109 +466,109 @@ func (rcg *ReplicationConsistencyGroup) ExecutePauseOnReplicationGroup() error {
 		PauseMode: string(types.StopDataTransfer),
 	}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteResumeOnReplicationGroup resumes the ConsistencyGroup when it is in a Paused state.
-func (rcg *ReplicationConsistencyGroup) ExecuteResumeOnReplicationGroup() error {
+func (rcg *ReplicationConsistencyGroup) ExecuteResumeOnReplicationGroup(ctx context.Context) error {
 	defer TimeSpent("ExecuteResumeOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/resumeReplicationConsistencyGroup"
 	param := types.EmptyPayload{}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteSyncOnReplicationGroup forces a synce on the ConsistencyGroup.
-func (rcg *ReplicationConsistencyGroup) ExecuteSyncOnReplicationGroup() (*types.SynchronizationResponse, error) {
+func (rcg *ReplicationConsistencyGroup) ExecuteSyncOnReplicationGroup(ctx context.Context) (*types.SynchronizationResponse, error) {
 	defer TimeSpent("ExecuteSyncOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/syncNowReplicationConsistencyGroup"
 	param := types.EmptyPayload{}
 	resp := &types.SynchronizationResponse{}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, resp)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, resp)
 	return resp, err
 }
 
 // SetRPOOnReplicationGroup on the ConsistencyGroup.
-func (rcg *ReplicationConsistencyGroup) SetRPOOnReplicationGroup(param types.SetRPOReplicationConsistencyGroup) error {
+func (rcg *ReplicationConsistencyGroup) SetRPOOnReplicationGroup(ctx context.Context, param types.SetRPOReplicationConsistencyGroup) error {
 	defer TimeSpent("SetRPOOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/ModifyReplicationConsistencyGroupRpo"
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // SetTargetVolumeAccessModeOnReplicationGroup on the ConsistencyGroup.
-func (rcg *ReplicationConsistencyGroup) SetTargetVolumeAccessModeOnReplicationGroup(param types.SetTargetVolumeAccessModeOnReplicationGroup) error {
+func (rcg *ReplicationConsistencyGroup) SetTargetVolumeAccessModeOnReplicationGroup(ctx context.Context, param types.SetTargetVolumeAccessModeOnReplicationGroup) error {
 	defer TimeSpent("SetTargetVolumeAccessModeOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/modifyReplicationConsistencyGroupTargetVolumeAccessMode"
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // SetNewNameOnReplicationGroup on the ConsistencyGroup.
-func (rcg *ReplicationConsistencyGroup) SetNewNameOnReplicationGroup(param types.SetNewNameOnReplicationGroup) error {
+func (rcg *ReplicationConsistencyGroup) SetNewNameOnReplicationGroup(ctx context.Context, param types.SetNewNameOnReplicationGroup) error {
 	defer TimeSpent("SetNewNameOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/renameReplicationConsistencyGroup"
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteConsistentOnReplicationGroup on the ConsistencyGroup.
-func (rcg *ReplicationConsistencyGroup) ExecuteConsistentOnReplicationGroup() error {
+func (rcg *ReplicationConsistencyGroup) ExecuteConsistentOnReplicationGroup(ctx context.Context) error {
 	defer TimeSpent("ExecuteConsistentOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/setReplicationConsistencyGroupConsistent"
 	param := types.EmptyPayload{}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteInconsistentOnReplicationGroup on the ConsistencyGroup.
-func (rcg *ReplicationConsistencyGroup) ExecuteInconsistentOnReplicationGroup() error {
+func (rcg *ReplicationConsistencyGroup) ExecuteInconsistentOnReplicationGroup(ctx context.Context) error {
 	defer TimeSpent("ExecuteInconsistentOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/setReplicationConsistencyGroupInconsistent"
 	param := types.EmptyPayload{}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteActivateOnReplicationGroup on the ConsistencyGroup.
-func (rcg *ReplicationConsistencyGroup) ExecuteActivateOnReplicationGroup() error {
+func (rcg *ReplicationConsistencyGroup) ExecuteActivateOnReplicationGroup(ctx context.Context) error {
 	defer TimeSpent("ExecuteActivateOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/activateReplicationConsistencyGroup"
 	param := types.EmptyPayload{}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // ExecuteTerminateOnReplicationGroup on the ConsistencyGroup.
-func (rcg *ReplicationConsistencyGroup) ExecuteTerminateOnReplicationGroup() error {
+func (rcg *ReplicationConsistencyGroup) ExecuteTerminateOnReplicationGroup(ctx context.Context) error {
 	defer TimeSpent("ExecuteTerminateOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/terminateReplicationConsistencyGroup"
 	param := types.EmptyPayload{}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }
 
 // GetSyncStateOnReplicationGroup returns the sync status of the ReplicaitonConsistencyGroup.
-func (rcg *ReplicationConsistencyGroup) GetSyncStateOnReplicationGroup(syncKey string) error {
+func (rcg *ReplicationConsistencyGroup) GetSyncStateOnReplicationGroup(ctx context.Context, syncKey string) error {
 	defer TimeSpent("ExecuteSyncOnReplicationGroup", time.Now())
 
 	uri := "/api/instances/ReplicationConsistencyGroup::" + rcg.ReplicationConsistencyGroup.ID + "/action/querySyncNowReplicationConsistencyGroup"
@@ -575,6 +576,6 @@ func (rcg *ReplicationConsistencyGroup) GetSyncStateOnReplicationGroup(syncKey s
 		SyncNowKey: syncKey,
 	}
 
-	err := rcg.client.getJSONWithRetry(http.MethodPost, uri, param, nil)
+	err := rcg.client.getJSONWithRetry(ctx, http.MethodPost, uri, param, nil)
 	return err
 }

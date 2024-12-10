@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -35,13 +36,13 @@ func NewSdt(client *Client, sdt *types.Sdt) *Sdt {
 }
 
 // GetAllSdts returns all sdt
-func (s *System) GetAllSdts() ([]types.Sdt, error) {
+func (s *System) GetAllSdts(ctx context.Context) ([]types.Sdt, error) {
 	defer TimeSpent("GetAllSdts", time.Now())
 
 	path := "/api/types/Sdt/instances"
 
 	var allSdts []types.Sdt
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &allSdts)
 	if err != nil {
 		return nil, err
@@ -51,13 +52,13 @@ func (s *System) GetAllSdts() ([]types.Sdt, error) {
 }
 
 // GetSdtByID returns an sdt searched by id
-func (s *System) GetSdtByID(id string) (*types.Sdt, error) {
+func (s *System) GetSdtByID(ctx context.Context, id string) (*types.Sdt, error) {
 	defer TimeSpent("GetSdtByID", time.Now())
 
 	path := fmt.Sprintf("api/instances/Sdt::%v", id)
 
 	var sdt types.Sdt
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &sdt)
 	if err != nil {
 		return nil, err
@@ -67,7 +68,7 @@ func (s *System) GetSdtByID(id string) (*types.Sdt, error) {
 }
 
 // CreateSdt creates a new Sdt
-func (pd *ProtectionDomain) CreateSdt(param *types.SdtParam) (*types.SdtResp, error) {
+func (pd *ProtectionDomain) CreateSdt(ctx context.Context, param *types.SdtParam) (*types.SdtResp, error) {
 	defer TimeSpent("CreateSdt", time.Now())
 
 	if len(param.IPList) == 0 {
@@ -78,13 +79,13 @@ func (pd *ProtectionDomain) CreateSdt(param *types.SdtParam) (*types.SdtResp, er
 
 	resp := &types.SdtResp{}
 	path := "/api/types/Sdt/instances"
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, param, resp)
 	return resp, err
 }
 
 // RenameSdt changes the name of the sdt.
-func (s *System) RenameSdt(id, name string) error {
+func (s *System) RenameSdt(ctx context.Context, id, name string) error {
 	defer TimeSpent("RenameSdt", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdt::%v/action/renameSdt", id)
@@ -92,7 +93,7 @@ func (s *System) RenameSdt(id, name string) error {
 	body := types.SdtRenameParam{
 		NewName: name,
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, nil)
 	if err != nil {
 		return err
@@ -102,7 +103,7 @@ func (s *System) RenameSdt(id, name string) error {
 }
 
 // SetSdtNvmePort set the NVMe port for the sdt.
-func (s *System) SetSdtNvmePort(id string, port int) error {
+func (s *System) SetSdtNvmePort(ctx context.Context, id string, port int) error {
 	defer TimeSpent("SetSdtNvmePort", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdt::%v/action/modifyNvmePort", id)
@@ -110,7 +111,7 @@ func (s *System) SetSdtNvmePort(id string, port int) error {
 	body := types.SdtNvmePortParam{
 		NewNvmePort: types.IntString(port),
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, nil)
 	if err != nil {
 		return err
@@ -120,7 +121,7 @@ func (s *System) SetSdtNvmePort(id string, port int) error {
 }
 
 // SetSdtStoragePort sets the storage port for the sdt.
-func (s *System) SetSdtStoragePort(id string, port int) error {
+func (s *System) SetSdtStoragePort(ctx context.Context, id string, port int) error {
 	defer TimeSpent("SetSdtStoragePort", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdt::%v/action/modifyStoragePort", id)
@@ -128,7 +129,7 @@ func (s *System) SetSdtStoragePort(id string, port int) error {
 	body := types.SdtStoragePortParam{
 		NewStoragePort: types.IntString(port),
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, nil)
 	if err != nil {
 		return err
@@ -138,7 +139,7 @@ func (s *System) SetSdtStoragePort(id string, port int) error {
 }
 
 // SetSdtDiscoveryPort sets the discovery port for the sdt.
-func (s *System) SetSdtDiscoveryPort(id string, port int) error {
+func (s *System) SetSdtDiscoveryPort(ctx context.Context, id string, port int) error {
 	defer TimeSpent("SetSdtDiscoveryPort", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdt::%v/action/modifyDiscoveryPort", id)
@@ -146,7 +147,7 @@ func (s *System) SetSdtDiscoveryPort(id string, port int) error {
 	body := types.SdtDiscoveryPortParam{
 		NewDiscoveryPort: types.IntString(port),
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, nil)
 	if err != nil {
 		return err
@@ -156,7 +157,7 @@ func (s *System) SetSdtDiscoveryPort(id string, port int) error {
 }
 
 // AddSdtTargetIP adds target IP and role for the sdt.
-func (s *System) AddSdtTargetIP(id, ip, role string) error {
+func (s *System) AddSdtTargetIP(ctx context.Context, id, ip, role string) error {
 	defer TimeSpent("AddSdtTargetIP", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdt::%v/action/addIp", id)
@@ -165,7 +166,7 @@ func (s *System) AddSdtTargetIP(id, ip, role string) error {
 		IP:   ip,
 		Role: role,
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, nil)
 	if err != nil {
 		return err
@@ -175,7 +176,7 @@ func (s *System) AddSdtTargetIP(id, ip, role string) error {
 }
 
 // RemoveSdtTargetIP removes target IP and role from the sdt.
-func (s *System) RemoveSdtTargetIP(id, ip string) error {
+func (s *System) RemoveSdtTargetIP(ctx context.Context, id, ip string) error {
 	defer TimeSpent("RemoveSdtTargetIP", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdt::%v/action/removeIp", id)
@@ -183,7 +184,7 @@ func (s *System) RemoveSdtTargetIP(id, ip string) error {
 	body := types.SdtRemoveIPParam{
 		IP: ip,
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, nil)
 	if err != nil {
 		return err
@@ -193,7 +194,7 @@ func (s *System) RemoveSdtTargetIP(id, ip string) error {
 }
 
 // ModifySdtIPRole modify target IP role for the sdt.
-func (s *System) ModifySdtIPRole(id, ip, role string) error {
+func (s *System) ModifySdtIPRole(ctx context.Context, id, ip, role string) error {
 	defer TimeSpent("ModifySdtIPRole", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdt::%v/action/modifyIpRole", id)
@@ -202,7 +203,7 @@ func (s *System) ModifySdtIPRole(id, ip, role string) error {
 		IP:   ip,
 		Role: role,
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, nil)
 	if err != nil {
 		return err
@@ -212,13 +213,13 @@ func (s *System) ModifySdtIPRole(id, ip, role string) error {
 }
 
 // DeleteSdt deletes the sdt
-func (s *System) DeleteSdt(id string) error {
+func (s *System) DeleteSdt(ctx context.Context, id string) error {
 	defer TimeSpent("DeleteSdt", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdt::%v/action/removeSdt", id)
 
 	param := &types.EmptyPayload{}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, param, nil)
 	if err != nil {
 		return err
@@ -227,13 +228,13 @@ func (s *System) DeleteSdt(id string) error {
 }
 
 // EnterSdtMaintenanceMode enter sdt maintenance mode
-func (s *System) EnterSdtMaintenanceMode(id string) error {
+func (s *System) EnterSdtMaintenanceMode(ctx context.Context, id string) error {
 	defer TimeSpent("EnterSdtMaintenanceMode", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdt::%v/action/enterMaintenanceMode", id)
 
 	param := &types.EmptyPayload{}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, param, nil)
 	if err != nil {
 		return err
@@ -242,13 +243,13 @@ func (s *System) EnterSdtMaintenanceMode(id string) error {
 }
 
 // ExitSdtMaintenanceMode exit sdt maintenance mode
-func (s *System) ExitSdtMaintenanceMode(id string) error {
+func (s *System) ExitSdtMaintenanceMode(ctx context.Context, id string) error {
 	defer TimeSpent("ExitSdtMaintenanceMode", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdt::%v/action/exitMaintenanceMode", id)
 
 	param := &types.EmptyPayload{}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, param, nil)
 	if err != nil {
 		return err

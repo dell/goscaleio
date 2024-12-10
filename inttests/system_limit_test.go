@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -21,7 +22,7 @@ import (
 
 // TestGetSystemLimits gets the list of system limits
 func TestGetSystemLimits(t *testing.T) {
-	resp, err := C.GetSystemLimits()
+	resp, err := C.GetSystemLimits(context.Background())
 	fmt.Println("systemlimit", resp)
 	assert.NotNil(t, resp)
 	assert.Nil(t, err)
@@ -29,7 +30,7 @@ func TestGetSystemLimits(t *testing.T) {
 
 // TestGetMaxVol get the max volume
 func TestGetMaxVol(t *testing.T) {
-	maxvolsize, err := C.GetMaxVol()
+	maxvolsize, err := C.GetMaxVol(context.Background())
 	fmt.Println("max vol size", maxvolsize)
 	assert.NotNil(t, maxvolsize)
 	assert.Nil(t, err)

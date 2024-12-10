@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"net/http"
@@ -129,7 +130,7 @@ func Test_GetAllSdts(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			sdts, err := system.GetAllSdts()
+			sdts, err := system.GetAllSdts(context.Background())
 
 			for _, checkFn := range checkFns {
 				checkFn(t, sdts, err)
@@ -242,7 +243,7 @@ func Test_GetSdtByID(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			sdt, err := system.GetSdtByID("mock-id")
+			sdt, err := system.GetSdtByID(context.Background(), "mock-id")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, sdt, err)
@@ -344,7 +345,7 @@ func Test_CreateSdt(t *testing.T) {
 
 			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
 			pd := NewProtectionDomain(client)
-			resp, err := pd.CreateSdt(sdtParam)
+			resp, err := pd.CreateSdt(context.Background(), sdtParam)
 
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
@@ -408,7 +409,7 @@ func Test_RenameSdt(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.RenameSdt("mock-id", "new-mock-name")
+			err := system.RenameSdt(context.Background(), "mock-id", "new-mock-name")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -472,7 +473,7 @@ func Test_SetSdtNvmePort(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.SetSdtNvmePort("mock-id", 1234)
+			err := system.SetSdtNvmePort(context.Background(), "mock-id", 1234)
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -536,7 +537,7 @@ func Test_SetSdtStoragePort(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.SetSdtStoragePort("mock-id", 1234)
+			err := system.SetSdtStoragePort(context.Background(), "mock-id", 1234)
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -600,7 +601,7 @@ func Test_SetSdtDiscoveryPort(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.SetSdtDiscoveryPort("mock-id", 1234)
+			err := system.SetSdtDiscoveryPort(context.Background(), "mock-id", 1234)
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -664,7 +665,7 @@ func Test_AddSdtTargetIP(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.AddSdtTargetIP("mock-id", "192.168.0.2", "StorageAndHost")
+			err := system.AddSdtTargetIP(context.Background(), "mock-id", "192.168.0.2", "StorageAndHost")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -728,7 +729,7 @@ func Test_RemoveSdtTargetIP(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.RemoveSdtTargetIP("mock-id", "192.168.0.2")
+			err := system.RemoveSdtTargetIP(context.Background(), "mock-id", "192.168.0.2")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -792,7 +793,7 @@ func Test_ModifySdtIPRole(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.ModifySdtIPRole("mock-id", "192.168.0.2", "StorageOnly")
+			err := system.ModifySdtIPRole(context.Background(), "mock-id", "192.168.0.2", "StorageOnly")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -856,7 +857,7 @@ func Test_DeleteSdt(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.DeleteSdt("mock-id")
+			err := system.DeleteSdt(context.Background(), "mock-id")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -920,7 +921,7 @@ func Test_EnterSdtMaintenanceMode(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.EnterSdtMaintenanceMode("mock-id")
+			err := system.EnterSdtMaintenanceMode(context.Background(), "mock-id")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -984,7 +985,7 @@ func Test_ExitSdtMaintenanceMode(t *testing.T) {
 				System: &sys,
 				client: client,
 			}
-			err := system.ExitSdtMaintenanceMode("mock-id")
+			err := system.ExitSdtMaintenanceMode(context.Background(), "mock-id")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)

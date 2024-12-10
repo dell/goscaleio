@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,12 +23,11 @@ import (
 )
 
 // CreateFaultSet creates a fault set
-func (pd *ProtectionDomain) CreateFaultSet(fs *types.FaultSetParam) (string, error) {
+func (pd *ProtectionDomain) CreateFaultSet(ctx context.Context, fs *types.FaultSetParam) (string, error) {
 	path := fmt.Sprintf("/api/types/FaultSet/instances")
 	fs.ProtectionDomainID = pd.ProtectionDomain.ID
 	fsResp := types.FaultSetResp{}
-	err := pd.client.getJSONWithRetry(
-		http.MethodPost, path, fs, &fsResp)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, fs, &fsResp)
 	if err != nil {
 		return "", err
 	}
@@ -35,11 +35,10 @@ func (pd *ProtectionDomain) CreateFaultSet(fs *types.FaultSetParam) (string, err
 }
 
 // DeleteFaultSet will delete a fault set
-func (pd *ProtectionDomain) DeleteFaultSet(id string) error {
+func (pd *ProtectionDomain) DeleteFaultSet(ctx context.Context, id string) error {
 	path := fmt.Sprintf("/api/instances/FaultSet::%v/action/removeFaultSet", id)
 	fsParam := &types.EmptyPayload{}
-	err := pd.client.getJSONWithRetry(
-		http.MethodPost, path, fsParam, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, fsParam, nil)
 	if err != nil {
 		return err
 	}
@@ -47,13 +46,12 @@ func (pd *ProtectionDomain) DeleteFaultSet(id string) error {
 }
 
 // ModifyFaultSetName will modify the name of the fault set
-func (pd *ProtectionDomain) ModifyFaultSetName(id, name string) error {
+func (pd *ProtectionDomain) ModifyFaultSetName(ctx context.Context, id, name string) error {
 	fs := &types.FaultSetRename{}
 	fs.NewName = name
 	path := fmt.Sprintf("/api/instances/FaultSet::%v/action/setFaultSetName", id)
 
-	err := pd.client.getJSONWithRetry(
-		http.MethodPost, path, fs, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, fs, nil)
 	if err != nil {
 		return err
 	}
@@ -61,13 +59,12 @@ func (pd *ProtectionDomain) ModifyFaultSetName(id, name string) error {
 }
 
 // ModifyFaultSetPerfProfile will modify the performance profile of the fault set
-func (pd *ProtectionDomain) ModifyFaultSetPerfProfile(id, perfProfile string) error {
+func (pd *ProtectionDomain) ModifyFaultSetPerfProfile(ctx context.Context, id, perfProfile string) error {
 	pp := &types.ChangeSdcPerfProfile{}
 	pp.PerfProfile = perfProfile
 	path := fmt.Sprintf("/api/instances/FaultSet::%v/action/setSdsPerformanceParameters", id)
 
-	err := pd.client.getJSONWithRetry(
-		http.MethodPost, path, pp, nil)
+	err := pd.client.getJSONWithRetry(ctx, http.MethodPost, path, pp, nil)
 	if err != nil {
 		return err
 	}
@@ -75,12 +72,11 @@ func (pd *ProtectionDomain) ModifyFaultSetPerfProfile(id, perfProfile string) er
 }
 
 // GetFaultSetByID will read the fault set using the ID.
-func (s *System) GetFaultSetByID(id string) (*types.FaultSet, error) {
+func (s *System) GetFaultSetByID(ctx context.Context, id string) (*types.FaultSet, error) {
 	fs := &types.FaultSet{}
 	path := fmt.Sprintf("/api/instances/FaultSet::%v", id)
 
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, fs)
+	err := s.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, fs)
 	if err != nil {
 		return nil, err
 	}
@@ -88,13 +84,12 @@ func (s *System) GetFaultSetByID(id string) (*types.FaultSet, error) {
 }
 
 // GetAllFaultSets returns all fault sets on the system
-func (s *System) GetAllFaultSets() ([]types.FaultSet, error) {
+func (s *System) GetAllFaultSets(ctx context.Context) ([]types.FaultSet, error) {
 	defer TimeSpent("FaultSet", time.Now())
 	path := "/api/types/FaultSet/instances"
 
 	var faultsets []types.FaultSet
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, &faultsets)
+	err := s.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &faultsets)
 	if err != nil {
 		return nil, err
 	}
@@ -103,13 +98,12 @@ func (s *System) GetAllFaultSets() ([]types.FaultSet, error) {
 }
 
 // GetAllSDSByFaultSetID returns SDS details associated with fault set
-func (s *System) GetAllSDSByFaultSetID(faultsetid string) ([]types.Sds, error) {
+func (s *System) GetAllSDSByFaultSetID(ctx context.Context, faultsetid string) ([]types.Sds, error) {
 	defer TimeSpent("FaultSet", time.Now())
 	path := fmt.Sprintf("/api/instances/FaultSet::%v/relationships/Sds", faultsetid)
 
 	var faultsets []types.Sds
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, &faultsets)
+	err := s.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &faultsets)
 	if err != nil {
 		return nil, err
 	}
@@ -118,8 +112,8 @@ func (s *System) GetAllSDSByFaultSetID(faultsetid string) ([]types.Sds, error) {
 }
 
 // GetFaultSetByName will read the fault set using the name
-func (s *System) GetFaultSetByName(name string) (*types.FaultSet, error) {
-	allFaultSets, err := s.GetAllFaultSets()
+func (s *System) GetFaultSetByName(ctx context.Context, name string) (*types.FaultSet, error) {
+	allFaultSets, err := s.GetAllFaultSets(ctx)
 	if err != nil {
 		return nil, err
 	}

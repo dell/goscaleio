@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"math"
 	"net/http"
 	"net/http/httptest"
@@ -139,7 +140,7 @@ func Test_CheckPfmpVersion(t *testing.T) {
 			defer server.Close()
 
 			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
-			result, err := CheckPfmpVersion(client, version)
+			result, err := CheckPfmpVersion(context.Background(), client, version)
 
 			for _, checkFn := range checkFns {
 				checkFn(t, result, err)

@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -29,7 +30,7 @@ var createdVolumes = make([]string, 0)
 func getVolByID(id string) (*siotypes.Volume, error) {
 	// The `GetVolume` API returns a slice of volumes, but when only passing
 	// in a volume ID, the response will be just the one volume
-	vols, err := C.GetVolume("", strings.TrimSpace(id), "", "", false)
+	vols, err := C.GetVolume(context.Background(), "", strings.TrimSpace(id), "", "", false)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +54,7 @@ func createVolume(t *testing.T, useName string) (string, error) {
 		VolumeSizeInKb: fmt.Sprintf("%d", defaultVolumeSize),
 		VolumeType:     "ThinProvisioned",
 	}
-	createResp, err := pool.CreateVolume(volumeParam)
+	createResp, err := pool.CreateVolume(context.Background(), volumeParam)
 	if err != nil {
 		return "", fmt.Errorf("error when creating volume %s storagepool %s: %s", name, pool.StoragePool.Name, err.Error())
 	}
@@ -70,7 +71,7 @@ func deleteVolume(_ *testing.T, volID string) error {
 	vol := goscaleio.NewVolume(C)
 	vol.Volume = existingVol
 	// by default, Remove volume will remove "ONLY_ME"
-	err = vol.RemoveVolume("")
+	err = vol.RemoveVolume(context.Background(), "")
 	if err != nil {
 		return err
 	}
@@ -93,6 +94,7 @@ func deleteAllVolumes(t *testing.T) error {
 }
 
 func TestGetVolumes(t *testing.T) {
+	ctx := context.Background()
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
 	newVolume, err := getVolByID(volID)
@@ -115,38 +117,38 @@ func TestGetVolumes(t *testing.T) {
 	assert.NotNil(t, system)
 
 	// Create snapshot
-	snapResponse, err := system.CreateSnapshotConsistencyGroup(snapParam)
+	snapResponse, err := system.CreateSnapshotConsistencyGroup(ctx, snapParam)
 	assert.Nil(t, err)
 	assert.NotZero(t, len(snapResponse.VolumeIDList))
 
 	pool := getStoragePool(t)
-	volumes, err := pool.GetVolume("", volID, "", "", true)
+	volumes, err := pool.GetVolume(ctx, "", volID, "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
 	// get volume by name
-	volumes, err = pool.GetVolume("", "", "", newVolume.Name, true)
+	volumes, err = pool.GetVolume(ctx, "", "", "", newVolume.Name, true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
 	// get volume by ID
-	volumes, err = pool.GetVolume("", newVolume.ID, "", "", true)
+	volumes, err = pool.GetVolume(ctx, "", newVolume.ID, "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
 	// get volume by href
 	href := fmt.Sprintf("/api/instances/Volume::%s", newVolume.ID)
-	volumes, err = pool.GetVolume(href, "", "", "", true)
+	volumes, err = pool.GetVolume(ctx, href, "", "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
 	// get volume by ancestor ID
-	volumes, err = pool.GetVolume("", "", newVolume.ID, "", true)
+	volumes, err = pool.GetVolume(ctx, "", "", newVolume.ID, "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
 	// get the snapshots
-	volumes, err = pool.GetVolume("", snapResponse.VolumeIDList[0], "", "", true)
+	volumes, err = pool.GetVolume(ctx, "", snapResponse.VolumeIDList[0], "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
@@ -167,7 +169,7 @@ func TestFindVolumeID(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, volID)
 
-	found, err := C.FindVolumeID(name)
+	found, err := C.FindVolumeID(context.Background(), name)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, volID, found)
@@ -238,7 +240,7 @@ func TestCreateDeleteSnapshot(t *testing.T) {
 	assert.NotNil(t, system)
 
 	// Create snapshot
-	snapResponse, err := system.CreateSnapshotConsistencyGroup(snapParam)
+	snapResponse, err := system.CreateSnapshotConsistencyGroup(context.Background(), snapParam)
 	assert.Nil(t, err)
 	assert.NotZero(t, len(snapResponse.VolumeIDList))
 	// delete the snapshots
@@ -250,6 +252,7 @@ func TestCreateDeleteSnapshot(t *testing.T) {
 }
 
 func TestGetVolumeVtree(t *testing.T) {
+	ctx := context.Background()
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
 
@@ -261,14 +264,14 @@ func TestGetVolumeVtree(t *testing.T) {
 	volume.Volume = vol
 
 	// get a valid vtree
-	vtree, err := volume.GetVTree()
+	vtree, err := volume.GetVTree(ctx)
 	assert.Nil(t, err)
 	assert.NotNil(t, vtree)
 	assert.Equal(t, volume.Volume.Name, vtree.Name)
 
 	// attempt to get the VTree again, this time with a non-existent volume
 	badVolume := goscaleio.NewVolume(C)
-	vtree, err = badVolume.GetVTree()
+	vtree, err = badVolume.GetVTree(ctx)
 	assert.NotNil(t, err)
 	assert.Nil(t, vtree)
 
@@ -279,6 +282,7 @@ func TestGetVolumeVtree(t *testing.T) {
 }
 
 func TestGetVolumeStatistics(t *testing.T) {
+	ctx := context.Background()
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
 
@@ -288,13 +292,13 @@ func TestGetVolumeStatistics(t *testing.T) {
 
 	volume := goscaleio.NewVolume(C)
 	volume.Volume = vol
-	stats, err := volume.GetVolumeStatistics()
+	stats, err := volume.GetVolumeStatistics(ctx)
 	assert.Nil(t, err)
 	assert.NotNil(t, stats)
 
 	// attempt to get the statistics again, this time with a non-existent volume
 	badVolume := goscaleio.NewVolume(C)
-	stats, err = badVolume.GetVolumeStatistics()
+	stats, err = badVolume.GetVolumeStatistics(ctx)
 	assert.NotNil(t, err)
 	assert.Nil(t, stats)
 
@@ -316,7 +320,7 @@ func TestResizeVolume(t *testing.T) {
 	existingSizeGB := volume.Volume.SizeInKb / (1024 * 1024)
 	newSize := existingSizeGB * 2
 	// double the szie of the volume
-	err = volume.SetVolumeSize(strconv.Itoa(int(newSize)))
+	err = volume.SetVolumeSize(context.Background(), strconv.Itoa(int(newSize)))
 
 	volumeTemp, err := getVolByID(volID)
 	assert.Nil(t, err)
@@ -331,6 +335,7 @@ func TestResizeVolume(t *testing.T) {
 }
 
 func TestMapQueryUnmapVolume(t *testing.T) {
+	ctx := context.Background()
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
 
@@ -352,9 +357,9 @@ func TestMapQueryUnmapVolume(t *testing.T) {
 		AllSdcs:               "",
 		AccessMode:            "ReadOnly",
 	}
-	volume.MapVolumeSdc(mapVolumeSdcParam)
+	volume.MapVolumeSdc(ctx, mapVolumeSdcParam)
 
-	stats, err := volume.GetVolumeStatistics()
+	stats, err := volume.GetVolumeStatistics(ctx)
 	assert.Nil(t, err)
 	assert.NotNil(t, stats)
 
@@ -363,7 +368,7 @@ func TestMapQueryUnmapVolume(t *testing.T) {
 		AllSdcs: "",
 	}
 
-	err = volume.UnmapVolumeSdc(unmapVolumeSdcParam)
+	err = volume.UnmapVolumeSdc(ctx, unmapVolumeSdcParam)
 	assert.Nil(t, err)
 
 	err = deleteVolume(t, volID)
@@ -372,6 +377,7 @@ func TestMapQueryUnmapVolume(t *testing.T) {
 }
 
 func TestMapQueryUnmapSnapshot(t *testing.T) {
+	ctx := context.Background()
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
 	newVolume, err := getVolByID(volID)
@@ -394,18 +400,18 @@ func TestMapQueryUnmapSnapshot(t *testing.T) {
 	assert.NotNil(t, system)
 
 	// Create snapshot
-	snapResponse, err := system.CreateSnapshotConsistencyGroup(snapParam)
+	snapResponse, err := system.CreateSnapshotConsistencyGroup(ctx, snapParam)
 	assert.Nil(t, err)
 	assert.NotZero(t, len(snapResponse.VolumeIDList))
 
 	// Get StoragePool
 	pool := getStoragePool(t)
-	volumes, err := pool.GetVolume("", volID, "", "", true)
+	volumes, err := pool.GetVolume(ctx, "", volID, "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
 	// Get Snapshot
-	volumes, err = pool.GetVolume("", snapResponse.VolumeIDList[0], "", "", true)
+	volumes, err = pool.GetVolume(ctx, "", snapResponse.VolumeIDList[0], "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
@@ -414,10 +420,10 @@ func TestMapQueryUnmapSnapshot(t *testing.T) {
 	assert.Nil(t, err)
 	sr := goscaleio.NewVolume(C)
 	sr.Volume = snap
-	err = sr.SetVolumeAccessModeLimit("ReadWrite")
+	err = sr.SetVolumeAccessModeLimit(ctx, "ReadWrite")
 	assert.Nil(t, err)
 	// testing invalid case
-	err = sr.SetVolumeAccessModeLimit(invalidIdentifier)
+	err = sr.SetVolumeAccessModeLimit(ctx, invalidIdentifier)
 	assert.NotNil(t, err)
 
 	// get the SDCs and pick one...
@@ -429,14 +435,14 @@ func TestMapQueryUnmapSnapshot(t *testing.T) {
 		AllowMultipleMappings: "FALSE",
 		AllSdcs:               "",
 	}
-	err = sr.MapVolumeSdc(mapVolumeSdcParam)
+	err = sr.MapVolumeSdc(ctx, mapVolumeSdcParam)
 	assert.Nil(t, err)
 
 	unmapVolumeSdcParam := &siotypes.UnmapVolumeSdcParam{
 		SdcID:   chosenSDC.Sdc.ID,
 		AllSdcs: "",
 	}
-	sr.UnmapVolumeSdc(unmapVolumeSdcParam)
+	sr.UnmapVolumeSdc(ctx, unmapVolumeSdcParam)
 	assert.Nil(t, err)
 
 	// Delete Snapshot and Volume
@@ -460,7 +466,7 @@ func TestCreateInstanceVolume(t *testing.T) {
 		Name:           name,
 	}
 
-	volResp, err := C.CreateVolume(&volParams, poolName, "")
+	volResp, err := C.CreateVolume(context.Background(), &volParams, poolName, "")
 	assert.Nil(t, err)
 	assert.NotNil(t, volResp)
 
@@ -479,12 +485,13 @@ func TestCreateInstanceVolumeInvalidSize(t *testing.T) {
 		Name:           name,
 	}
 
-	volResp, err := C.CreateVolume(&volParams, poolName, "")
+	volResp, err := C.CreateVolume(context.Background(), &volParams, poolName, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, volResp)
 }
 
 func TestGetInstanceVolume(t *testing.T) {
+	ctx := context.Background()
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
 
@@ -492,34 +499,34 @@ func TestGetInstanceVolume(t *testing.T) {
 	assert.Nil(t, err)
 
 	// get by ID
-	volume, err := C.GetVolume("", volID, "", "", true)
+	volume, err := C.GetVolume(ctx, "", volID, "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volume)
 
 	// Find by name
-	volume, err = C.GetVolume("", "", "", thisVolume.Name, true)
+	volume, err = C.GetVolume(ctx, "", "", "", thisVolume.Name, true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volume)
 
 	// Find by href
 	href := fmt.Sprintf("/api/instances/Volume::%s", volID)
-	volume, err = C.GetVolume(href, "", "", "", true)
+	volume, err = C.GetVolume(ctx, href, "", "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volume)
 
 	// Find with invalid name
-	volume, err = C.GetVolume("", "", "", invalidIdentifier, true)
+	volume, err = C.GetVolume(ctx, "", "", "", invalidIdentifier, true)
 	assert.NotNil(t, err)
 	assert.Nil(t, volume)
 
 	// Find with invalid ID
-	volume, err = C.GetVolume(invalidIdentifier, "", "", "", true)
+	volume, err = C.GetVolume(ctx, invalidIdentifier, "", "", "", true)
 	assert.NotNil(t, err)
 	assert.Nil(t, volume)
 
 	// Find with an invalid href
 	href = fmt.Sprintf("/api/BAD/instances/Volume::%s", volID)
-	volume, err = C.GetVolume(href, "", "", "", true)
+	volume, err = C.GetVolume(ctx, href, "", "", "", true)
 	assert.NotNil(t, err)
 	assert.Nil(t, volume)
 
@@ -543,7 +550,7 @@ func TestSetMappedSdcLimitsInvalid(t *testing.T) {
 		IopsLimit:            "0",
 	}
 
-	err = thisVolume.SetMappedSdcLimits(&settings)
+	err = thisVolume.SetMappedSdcLimits(context.Background(), &settings)
 	assert.NotNil(t, err)
 
 	err = deleteVolume(t, volID)
@@ -553,6 +560,7 @@ func TestSetMappedSdcLimitsInvalid(t *testing.T) {
 
 // Testing TestLockUnlockAutoSnapshot will attempting locking the auto snapshot and unlocking the auto snapshot
 func TestLockUnlockAutoSnapshot(t *testing.T) {
+	ctx := context.Background()
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
 	newVolume, err := getVolByID(volID)
@@ -575,18 +583,18 @@ func TestLockUnlockAutoSnapshot(t *testing.T) {
 	assert.NotNil(t, system)
 
 	// Create snapshot
-	snapResponse, err := system.CreateSnapshotConsistencyGroup(snapParam)
+	snapResponse, err := system.CreateSnapshotConsistencyGroup(ctx, snapParam)
 	assert.Nil(t, err)
 	assert.NotZero(t, len(snapResponse.VolumeIDList))
 
 	// Get StoragePool
 	pool := getStoragePool(t)
-	volumes, err := pool.GetVolume("", volID, "", "", true)
+	volumes, err := pool.GetVolume(ctx, "", volID, "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
 	// Get Snapshot
-	volumes, err = pool.GetVolume("", snapResponse.VolumeIDList[0], "", "", true)
+	volumes, err = pool.GetVolume(ctx, "", snapResponse.VolumeIDList[0], "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
@@ -595,9 +603,9 @@ func TestLockUnlockAutoSnapshot(t *testing.T) {
 	assert.Nil(t, err)
 	sr := goscaleio.NewVolume(C)
 	sr.Volume = snap
-	err = sr.LockAutoSnapshot()
+	err = sr.LockAutoSnapshot(ctx)
 	assert.NotNil(t, err)
-	err = sr.UnlockAutoSnapshot()
+	err = sr.UnlockAutoSnapshot(ctx)
 	assert.NotNil(t, err)
 
 	// Delete Snapshot and Volume
@@ -610,16 +618,17 @@ func TestLockUnlockAutoSnapshot(t *testing.T) {
 
 // Testing TestSetVolumeAccessModeLimit will be attempting set access mode of volume
 func TestSetVolumeAccessModeLimit(t *testing.T) {
+	ctx := context.Background()
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
 	vol, err := getVolByID(volID)
 	assert.Nil(t, err)
 	vr := goscaleio.NewVolume(C)
 	vr.Volume = vol
-	err = vr.SetVolumeAccessModeLimit("ReadOnly")
+	err = vr.SetVolumeAccessModeLimit(ctx, "ReadOnly")
 	assert.Nil(t, err)
 	// testing invalid case
-	err = vr.SetVolumeAccessModeLimit(invalidIdentifier)
+	err = vr.SetVolumeAccessModeLimit(ctx, invalidIdentifier)
 	assert.NotNil(t, err)
 
 	err = deleteVolume(t, volID)
@@ -628,6 +637,7 @@ func TestSetVolumeAccessModeLimit(t *testing.T) {
 
 // TestSetSnapshotSecurity will be attemting to set the snapshot security for a snapshot
 func TestSetSnapshotSecurity(t *testing.T) {
+	ctx := context.Background()
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
 	newVolume, err := getVolByID(volID)
@@ -650,17 +660,17 @@ func TestSetSnapshotSecurity(t *testing.T) {
 	assert.NotNil(t, system)
 
 	// Create snapshot
-	snapResponse, err := system.CreateSnapshotConsistencyGroup(snapParam)
+	snapResponse, err := system.CreateSnapshotConsistencyGroup(ctx, snapParam)
 	assert.Nil(t, err)
 	assert.NotZero(t, len(snapResponse.VolumeIDList))
 	// Get StoragePool
 	pool := getStoragePool(t)
-	volumes, err := pool.GetVolume("", volID, "", "", true)
+	volumes, err := pool.GetVolume(ctx, "", volID, "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
 	// Get Snapshot
-	volumes, err = pool.GetVolume("", snapResponse.VolumeIDList[0], "", "", true)
+	volumes, err = pool.GetVolume(ctx, "", snapResponse.VolumeIDList[0], "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
@@ -669,10 +679,10 @@ func TestSetSnapshotSecurity(t *testing.T) {
 	assert.Nil(t, err)
 	sr := goscaleio.NewVolume(C)
 	sr.Volume = snap
-	err = sr.SetSnapshotSecurity("0")
+	err = sr.SetSnapshotSecurity(ctx, "0")
 	assert.Nil(t, err)
 	// testing invalid case
-	err = sr.SetSnapshotSecurity(invalidIdentifier)
+	err = sr.SetSnapshotSecurity(ctx, invalidIdentifier)
 	assert.NotNil(t, err)
 	// Delete Snapshot and Volume
 	fmt.Println("Will wait for 60 sec so that the retention period expires and snapshot can be deleted")
@@ -685,6 +695,7 @@ func TestSetSnapshotSecurity(t *testing.T) {
 
 // TestSetVolumeMappingAccessMode will be attemting to set the access mode on mapped sdc
 func TestSetVolumeMappingAccessMode(t *testing.T) {
+	ctx := context.Background()
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
 	newVolume, err := getVolByID(volID)
@@ -707,17 +718,17 @@ func TestSetVolumeMappingAccessMode(t *testing.T) {
 	assert.NotNil(t, system)
 
 	// Create snapshot
-	snapResponse, err := system.CreateSnapshotConsistencyGroup(snapParam)
+	snapResponse, err := system.CreateSnapshotConsistencyGroup(ctx, snapParam)
 	assert.Nil(t, err)
 	assert.NotZero(t, len(snapResponse.VolumeIDList))
 	// Get StoragePool
 	pool := getStoragePool(t)
-	volumes, err := pool.GetVolume("", volID, "", "", true)
+	volumes, err := pool.GetVolume(ctx, "", volID, "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
 	// Get Snapshot
-	volumes, err = pool.GetVolume("", snapResponse.VolumeIDList[0], "", "", true)
+	volumes, err = pool.GetVolume(ctx, "", snapResponse.VolumeIDList[0], "", "", true)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 
@@ -730,14 +741,14 @@ func TestSetVolumeMappingAccessMode(t *testing.T) {
 		SdcID:                 "c423b09800000003",
 		AllowMultipleMappings: "true",
 	}
-	sr.MapVolumeSdc(pfmvsp)
-	err = sr.SetVolumeMappingAccessMode("ReadWrite", "c423b09800000003")
+	sr.MapVolumeSdc(ctx, pfmvsp)
+	err = sr.SetVolumeMappingAccessMode(ctx, "ReadWrite", "c423b09800000003")
 	assert.Nil(t, err)
 	// testing invalid case
-	err = sr.SetVolumeMappingAccessMode(invalidIdentifier, invalidIdentifier)
+	err = sr.SetVolumeMappingAccessMode(ctx, invalidIdentifier, invalidIdentifier)
 	assert.NotNil(t, err)
 	// Delete Snapshot and Volume
-	sr.UnmapVolumeSdc(
+	sr.UnmapVolumeSdc(ctx,
 		&siotypes.UnmapVolumeSdcParam{
 			SdcID: "c423b09800000003",
 		},
@@ -756,7 +767,7 @@ func TestSetVolumeUseRmCache(t *testing.T) {
 	assert.Nil(t, err)
 	vr := goscaleio.NewVolume(C)
 	vr.Volume = vol
-	err = vr.SetVolumeUseRmCache(true)
+	err = vr.SetVolumeUseRmCache(context.Background(), true)
 	assert.Nil(t, err)
 	err = deleteVolume(t, volID)
 	assert.Nil(t, err)
@@ -764,6 +775,7 @@ func TestSetVolumeUseRmCache(t *testing.T) {
 
 // Testing TestSetCompressionMethod will be attempting set compression method
 func TestSetCompressionMethod(t *testing.T) {
+	ctx := context.Background()
 	volID, err := createVolume(t, "")
 	assert.Nil(t, err)
 	vol, err := getVolByID(volID)
@@ -771,16 +783,17 @@ func TestSetCompressionMethod(t *testing.T) {
 	vr := goscaleio.NewVolume(C)
 	vr.Volume = vol
 	// set compression method will only get pass for snapshot with fine granularity
-	err = vr.SetCompressionMethod("None")
+	err = vr.SetCompressionMethod(ctx, "None")
 	assert.NotNil(t, err)
 	// testing invalid case
-	err = vr.SetCompressionMethod(invalidIdentifier)
+	err = vr.SetCompressionMethod(ctx, invalidIdentifier)
 	assert.NotNil(t, err)
 	err = deleteVolume(t, volID)
 	assert.Nil(t, err)
 }
 
 func TestGetStoragePoolVolumes(t *testing.T) {
+	ctx := context.Background()
 	name := fmt.Sprintf("%s-%s", testPrefix, "instanceCreated")
 
 	poolName := getStoragePoolName(t)
@@ -795,11 +808,11 @@ func TestGetStoragePoolVolumes(t *testing.T) {
 		Name:           name,
 	}
 
-	volResp, err := C.CreateVolume(&volParams, poolName, "")
+	volResp, err := C.CreateVolume(ctx, &volParams, poolName, "")
 	assert.Nil(t, err)
 	assert.NotNil(t, volResp)
 
-	volumes, err := C.GetStoragePoolVolumes(pool.StoragePool.ID)
+	volumes, err := C.GetStoragePoolVolumes(ctx, pool.StoragePool.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, volumes)
 

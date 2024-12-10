@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -35,10 +36,10 @@ func NewSystem(client *Client) *System {
 }
 
 // GetSystems returns systems
-func (c *Client) GetSystems() ([]*types.System, error) {
+func (c *Client) GetSystems(ctx context.Context) ([]*types.System, error) {
 	defer TimeSpent("GetSystems", time.Now())
 
-	systems, err := c.GetInstance("")
+	systems, err := c.GetInstance(ctx, "")
 	if err != nil {
 		return nil, fmt.Errorf("err: problem getting instances: %s", err)
 	}
@@ -46,12 +47,12 @@ func (c *Client) GetSystems() ([]*types.System, error) {
 }
 
 // FindSystem returns a system based on ID or name
-func (c *Client) FindSystem(
+func (c *Client) FindSystem(ctx context.Context,
 	instanceID, name, href string,
 ) (*System, error) {
 	defer TimeSpent("FindSystem", time.Now())
 
-	systems, err := c.GetInstance(href)
+	systems, err := c.GetInstance(ctx, href)
 	if err != nil {
 		return nil, fmt.Errorf("err: problem getting instances: %s", err)
 	}
@@ -67,7 +68,7 @@ func (c *Client) FindSystem(
 }
 
 // GetStatistics returns system statistics
-func (s *System) GetStatistics() (*types.Statistics, error) {
+func (s *System) GetStatistics(ctx context.Context) (*types.Statistics, error) {
 	defer TimeSpent("GetStatistics", time.Now())
 
 	link, err := GetLink(s.System.Links,
@@ -77,7 +78,7 @@ func (s *System) GetStatistics() (*types.Statistics, error) {
 	}
 
 	stats := types.Statistics{}
-	err = s.client.getJSONWithRetry(
+	err = s.client.getJSONWithRetry(ctx,
 		http.MethodGet, link.HREF, nil, &stats)
 	if err != nil {
 		return nil, err
@@ -87,7 +88,7 @@ func (s *System) GetStatistics() (*types.Statistics, error) {
 }
 
 // CreateSnapshotConsistencyGroup creates a snapshot consistency group
-func (s *System) CreateSnapshotConsistencyGroup(
+func (s *System) CreateSnapshotConsistencyGroup(ctx context.Context,
 	snapshotVolumesParam *types.SnapshotVolumesParam,
 ) (*types.SnapshotVolumesResp, error) {
 	defer TimeSpent("CreateSnapshotConsistencyGroup", time.Now())
@@ -100,7 +101,7 @@ func (s *System) CreateSnapshotConsistencyGroup(
 	path := fmt.Sprintf("%v/action/snapshotVolumes", link.HREF)
 
 	snapResp := types.SnapshotVolumesResp{}
-	err = s.client.getJSONWithRetry(
+	err = s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, snapshotVolumesParam, &snapResp)
 	if err != nil {
 		return nil, err
@@ -110,14 +111,14 @@ func (s *System) CreateSnapshotConsistencyGroup(
 }
 
 // GetMDMClusterDetails returns MDM cluster details
-func (s *System) GetMDMClusterDetails() (*types.MdmCluster, error) {
+func (s *System) GetMDMClusterDetails(ctx context.Context) (*types.MdmCluster, error) {
 	defer TimeSpent("GetMDMClusterDetails", time.Now())
 
 	path := "api/instances/System/queryMdmCluster"
 	mdmParam := &types.EmptyPayload{}
 
 	mdmResp := types.MdmCluster{}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, mdmParam, &mdmResp)
 	if err != nil {
 		return nil, err
@@ -127,12 +128,12 @@ func (s *System) GetMDMClusterDetails() (*types.MdmCluster, error) {
 }
 
 // AddStandByMdm adds the standby MDMs to the MDM cluster
-func (s *System) AddStandByMdm(mdmParam *types.StandByMdm) (string, error) {
+func (s *System) AddStandByMdm(ctx context.Context, mdmParam *types.StandByMdm) (string, error) {
 	defer TimeSpent("AddStandByMdm", time.Now())
 
 	path := "api/instances/System/action/addStandbyMdm"
 	mdm := &types.Mdm{}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, mdmParam, &mdm)
 	if err != nil {
 		return "", err
@@ -141,14 +142,14 @@ func (s *System) AddStandByMdm(mdmParam *types.StandByMdm) (string, error) {
 }
 
 // RemoveStandByMdm removes standby MDM
-func (s *System) RemoveStandByMdm(id string) error {
+func (s *System) RemoveStandByMdm(ctx context.Context, id string) error {
 	defer TimeSpent("RemoveStandByMdm", time.Now())
 
 	path := "/api/instances/System/action/removeStandbyMdm"
 	mdmParam := &types.RemoveStandByMdmParam{
 		ID: id,
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, mdmParam, nil)
 	if err != nil {
 		return err
@@ -157,14 +158,14 @@ func (s *System) RemoveStandByMdm(id string) error {
 }
 
 // ModifyPerformanceProfileMdmCluster modifies performance profile of MDM cluster
-func (s *System) ModifyPerformanceProfileMdmCluster(perfProfile string) error {
+func (s *System) ModifyPerformanceProfileMdmCluster(ctx context.Context, perfProfile string) error {
 	defer TimeSpent("ModifyPerformanceProfileMdmCluster", time.Now())
 
 	path := "/api/instances/System/action/setMdmPerformanceParameters"
 	mdmParam := &types.ChangeMdmPerfProfile{
 		PerfProfile: perfProfile,
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, mdmParam, nil)
 	if err != nil {
 		return err
@@ -173,12 +174,12 @@ func (s *System) ModifyPerformanceProfileMdmCluster(perfProfile string) error {
 }
 
 // SwitchClusterMode changes the MDM cluster mode
-func (s *System) SwitchClusterMode(switchClusterMode *types.SwitchClusterMode) error {
+func (s *System) SwitchClusterMode(ctx context.Context, switchClusterMode *types.SwitchClusterMode) error {
 	defer TimeSpent("SwitchClusterMode", time.Now())
 
 	path := "/api/instances/System/action/switchClusterMode"
 
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, switchClusterMode, nil)
 	if err != nil {
 		return err
@@ -187,14 +188,14 @@ func (s *System) SwitchClusterMode(switchClusterMode *types.SwitchClusterMode) e
 }
 
 // ChangeMdmOwnerShip modifies the primary MDM
-func (s *System) ChangeMdmOwnerShip(id string) error {
+func (s *System) ChangeMdmOwnerShip(ctx context.Context, id string) error {
 	defer TimeSpent("ChangeMdmOwnerShip", time.Now())
 
 	path := "/api/instances/System/action/changeMdmOwnership"
 	mdmParam := &types.ChangeMdmOwnerShip{
 		ID: id,
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, mdmParam, nil)
 	if err != nil {
 		return err
@@ -203,11 +204,11 @@ func (s *System) ChangeMdmOwnerShip(id string) error {
 }
 
 // RenameMdm modifies name of the MDM
-func (s *System) RenameMdm(renameMdm *types.RenameMdm) error {
+func (s *System) RenameMdm(ctx context.Context, renameMdm *types.RenameMdm) error {
 	defer TimeSpent("ChangeMdmOwnerShip", time.Now())
 
 	path := "/api/instances/System/action/renameMdm"
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, renameMdm, nil)
 	if err != nil {
 		return err

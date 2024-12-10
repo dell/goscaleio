@@ -19,6 +19,7 @@
 package goscaleio
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -216,7 +217,7 @@ func TestGetNasByIDName(t *testing.T) {
 				System: system,
 			}
 
-			resp, err := s.GetNASByIDName("", testCaseNasNames[name])
+			resp, err := s.GetNASByIDName(context.Background(), "", testCaseNasNames[name])
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -239,7 +240,7 @@ func TestGetNasByIDName(t *testing.T) {
 				System: system,
 			}
 
-			resp, err := s.GetNASByIDName(testCaseNasIDs[name], "")
+			resp, err := s.GetNASByIDName(context.Background(), testCaseNasIDs[name], "")
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -336,7 +337,7 @@ func TestCreateNAS(t *testing.T) {
 				System: system,
 			}
 
-			resp, err := s.CreateNAS("test-nas1", "pd1")
+			resp, err := s.CreateNAS(context.Background(), "test-nas1", "pd1")
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -369,7 +370,7 @@ func TestDeleteNAS(t *testing.T) {
 		System: system1,
 	}
 
-	err = s.DeleteNAS(id)
+	err = s.DeleteNAS(context.Background(), id)
 	assert.Nil(t, err)
 }
 
@@ -451,7 +452,7 @@ func TestPingNAS(t *testing.T) {
 				System: system,
 			}
 
-			err = s.PingNAS(testCaseNasServers[name][0], testCaseNasServers[name][1])
+			err = s.PingNAS(context.Background(), testCaseNasServers[name][0], testCaseNasServers[name][1])
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
 			}
@@ -556,7 +557,7 @@ func TestGeFileInterfaace(t *testing.T) {
 				System: system,
 			}
 
-			resp, err := s.GetFileInterface(testCaseFileInterfaceIDs[name])
+			resp, err := s.GetFileInterface(context.Background(), testCaseFileInterfaceIDs[name])
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}

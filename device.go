@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -45,11 +46,11 @@ func NewDeviceEx(client *Client, device *types.Device) *Device {
 }
 
 // AttachDevice attaches a device
-func (sp *StoragePool) AttachDevice(deviceParam *types.DeviceParam) (string, error) {
+func (sp *StoragePool) AttachDevice(ctx context.Context, deviceParam *types.DeviceParam) (string, error) {
 	defer TimeSpent("AttachDevice", time.Now())
 	deviceParam.StoragePoolID = sp.StoragePool.ID
 	dev := types.DeviceResp{}
-	err := sp.client.getJSONWithRetry(
+	err := sp.client.getJSONWithRetry(ctx,
 		http.MethodPost, "/api/types/Device/instances",
 		deviceParam, &dev)
 	if err != nil {
@@ -60,7 +61,7 @@ func (sp *StoragePool) AttachDevice(deviceParam *types.DeviceParam) (string, err
 }
 
 // GetDevice returns a device based on Storage Pool ID
-func (sp *StoragePool) GetDevice() ([]types.Device, error) {
+func (sp *StoragePool) GetDevice(ctx context.Context) ([]types.Device, error) {
 	defer TimeSpent("GetDevice", time.Now())
 
 	path := fmt.Sprintf(
@@ -68,7 +69,7 @@ func (sp *StoragePool) GetDevice() ([]types.Device, error) {
 		sp.StoragePool.ID)
 
 	var devices []types.Device
-	err := sp.client.getJSONWithRetry(
+	err := sp.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &devices)
 	if err != nil {
 		return nil, err
@@ -78,12 +79,12 @@ func (sp *StoragePool) GetDevice() ([]types.Device, error) {
 }
 
 // FindDevice returns a Device
-func (sp *StoragePool) FindDevice(
+func (sp *StoragePool) FindDevice(ctx context.Context,
 	field, value string,
 ) (*types.Device, error) {
 	defer TimeSpent("FindDevice", time.Now())
 
-	devices, err := sp.GetDevice()
+	devices, err := sp.GetDevice(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +101,7 @@ func (sp *StoragePool) FindDevice(
 }
 
 // GetDevice returns a devices based on SDS ID
-func (sds *Sds) GetDevice() ([]types.Device, error) {
+func (sds *Sds) GetDevice(ctx context.Context) ([]types.Device, error) {
 	defer TimeSpent("GetSDSDevice", time.Now())
 
 	path := fmt.Sprintf(
@@ -108,7 +109,7 @@ func (sds *Sds) GetDevice() ([]types.Device, error) {
 		sds.Sds.ID)
 
 	var devices []types.Device
-	err := sds.client.getJSONWithRetry(http.MethodGet, path, nil, &devices)
+	err := sds.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &devices)
 	if err != nil {
 		return nil, err
 	}
@@ -117,12 +118,12 @@ func (sds *Sds) GetDevice() ([]types.Device, error) {
 }
 
 // FindDevice returns a Device
-func (sds *Sds) FindDevice(
+func (sds *Sds) FindDevice(ctx context.Context,
 	field, value string,
 ) (*types.Device, error) {
 	defer TimeSpent("FindDevice", time.Now())
 
-	devices, err := sds.GetDevice()
+	devices, err := sds.GetDevice(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -139,13 +140,13 @@ func (sds *Sds) FindDevice(
 }
 
 // GetAllDevice returns all device in the system
-func (s *System) GetAllDevice() ([]types.Device, error) {
+func (s *System) GetAllDevice(ctx context.Context) ([]types.Device, error) {
 	defer TimeSpent("GetAllDevice", time.Now())
 
 	path := "/api/types/Device/instances"
 
 	var deviceResult []types.Device
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &deviceResult)
 	if err != nil {
 		return nil, err
@@ -155,12 +156,10 @@ func (s *System) GetAllDevice() ([]types.Device, error) {
 }
 
 // GetDeviceByField returns a Device list filter by the field
-func (s *System) GetDeviceByField(
-	field, value string,
-) ([]types.Device, error) {
+func (s *System) GetDeviceByField(ctx context.Context, field, value string) ([]types.Device, error) {
 	defer TimeSpent("GetDeviceByField", time.Now())
 
-	devices, err := s.GetAllDevice()
+	devices, err := s.GetAllDevice(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +179,7 @@ func (s *System) GetDeviceByField(
 }
 
 // GetDevice returns a device using Device ID
-func (s *System) GetDevice(id string) (*types.Device, error) {
+func (s *System) GetDevice(ctx context.Context, id string) (*types.Device, error) {
 	defer TimeSpent("GetDevice", time.Now())
 
 	path := fmt.Sprintf(
@@ -188,8 +187,7 @@ func (s *System) GetDevice(id string) (*types.Device, error) {
 		id)
 
 	var deviceResult types.Device
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, &deviceResult)
+	err := s.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &deviceResult)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +196,7 @@ func (s *System) GetDevice(id string) (*types.Device, error) {
 }
 
 // SetDeviceName modifies device name
-func (sp *StoragePool) SetDeviceName(id, name string) error {
+func (sp *StoragePool) SetDeviceName(ctx context.Context, id, name string) error {
 	defer TimeSpent("SetDeviceName", time.Now())
 
 	deviceParam := &types.SetDeviceName{
@@ -206,8 +204,7 @@ func (sp *StoragePool) SetDeviceName(id, name string) error {
 	}
 	path := fmt.Sprintf("/api/instances/Device::%v/action/setDeviceName", id)
 
-	err := sp.client.getJSONWithRetry(
-		http.MethodPost, path, deviceParam, nil)
+	err := sp.client.getJSONWithRetry(ctx, http.MethodPost, path, deviceParam, nil)
 	if err != nil {
 		return err
 	}
@@ -215,7 +212,7 @@ func (sp *StoragePool) SetDeviceName(id, name string) error {
 }
 
 // SetDeviceMediaType modifies device media type
-func (sp *StoragePool) SetDeviceMediaType(id, mediaType string) error {
+func (sp *StoragePool) SetDeviceMediaType(ctx context.Context, id, mediaType string) error {
 	defer TimeSpent("SetDeviceMediaType", time.Now())
 
 	deviceParam := &types.SetDeviceMediaType{
@@ -223,8 +220,7 @@ func (sp *StoragePool) SetDeviceMediaType(id, mediaType string) error {
 	}
 	path := fmt.Sprintf("/api/instances/Device::%v/action/setMediaType", id)
 
-	err := sp.client.getJSONWithRetry(
-		http.MethodPost, path, deviceParam, nil)
+	err := sp.client.getJSONWithRetry(ctx, http.MethodPost, path, deviceParam, nil)
 	if err != nil {
 		return err
 	}
@@ -232,7 +228,7 @@ func (sp *StoragePool) SetDeviceMediaType(id, mediaType string) error {
 }
 
 // SetDeviceExternalAccelerationType modifies device external acceleration type
-func (sp *StoragePool) SetDeviceExternalAccelerationType(id, externalAccelerationType string) error {
+func (sp *StoragePool) SetDeviceExternalAccelerationType(ctx context.Context, id, externalAccelerationType string) error {
 	defer TimeSpent("SetDeviceExternalAccelerationType", time.Now())
 
 	deviceParam := &types.SetDeviceExternalAccelerationType{
@@ -240,8 +236,7 @@ func (sp *StoragePool) SetDeviceExternalAccelerationType(id, externalAcceleratio
 	}
 	path := fmt.Sprintf("/api/instances/Device::%v/action/setExternalAccelerationType", id)
 
-	err := sp.client.getJSONWithRetry(
-		http.MethodPost, path, deviceParam, nil)
+	err := sp.client.getJSONWithRetry(ctx, http.MethodPost, path, deviceParam, nil)
 	if err != nil {
 		return err
 	}
@@ -249,7 +244,7 @@ func (sp *StoragePool) SetDeviceExternalAccelerationType(id, externalAcceleratio
 }
 
 // SetDeviceCapacityLimit modifies device capacity limit
-func (sp *StoragePool) SetDeviceCapacityLimit(id, capacityLimitInGB string) error {
+func (sp *StoragePool) SetDeviceCapacityLimit(ctx context.Context, id, capacityLimitInGB string) error {
 	defer TimeSpent("SetDeviceExternalAccelerationType", time.Now())
 
 	deviceParam := &types.SetDeviceCapacityLimit{
@@ -257,8 +252,7 @@ func (sp *StoragePool) SetDeviceCapacityLimit(id, capacityLimitInGB string) erro
 	}
 	path := fmt.Sprintf("/api/instances/Device::%v/action/setDeviceCapacityLimit", id)
 
-	err := sp.client.getJSONWithRetry(
-		http.MethodPost, path, deviceParam, nil)
+	err := sp.client.getJSONWithRetry(ctx, http.MethodPost, path, deviceParam, nil)
 	if err != nil {
 		return err
 	}
@@ -266,14 +260,13 @@ func (sp *StoragePool) SetDeviceCapacityLimit(id, capacityLimitInGB string) erro
 }
 
 // UpdateDeviceOriginalPathways modifies device path if changed during server restart
-func (sp *StoragePool) UpdateDeviceOriginalPathways(id string) error {
+func (sp *StoragePool) UpdateDeviceOriginalPathways(ctx context.Context, id string) error {
 	defer TimeSpent("UpdateDeviceOriginalPathways", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Device::%v/action/updateDeviceOriginalPathname", id)
 	deviceParam := &types.EmptyPayload{}
 
-	err := sp.client.getJSONWithRetry(
-		http.MethodPost, path, deviceParam, nil)
+	err := sp.client.getJSONWithRetry(ctx, http.MethodPost, path, deviceParam, nil)
 	if err != nil {
 		return err
 	}
@@ -281,13 +274,12 @@ func (sp *StoragePool) UpdateDeviceOriginalPathways(id string) error {
 }
 
 // RemoveDevice removes device from storage pool
-func (sp *StoragePool) RemoveDevice(id string) error {
+func (sp *StoragePool) RemoveDevice(ctx context.Context, id string) error {
 	defer TimeSpent("RemoveDevice", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Device::%v/action/removeDevice", id)
 
-	err := sp.client.getJSONWithRetry(
-		http.MethodPost, path, nil, nil)
+	err := sp.client.getJSONWithRetry(ctx, http.MethodPost, path, nil, nil)
 	if err != nil {
 		return err
 	}

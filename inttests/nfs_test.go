@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -27,7 +28,7 @@ func getNasName(t *testing.T) string {
 	}
 	system := getSystem()
 	assert.NotNil(t, system)
-	nasServer, _ := system.GetNASByIDName("", "")
+	nasServer, _ := system.GetNASByIDName(context.Background(), "", "")
 	assert.NotNil(t, nasServer)
 	if nasServer == nil {
 		return ""
@@ -44,18 +45,20 @@ func TestGetNASByIDName(t *testing.T) {
 	nasName := getNasName(t)
 	assert.NotZero(t, len(nasName))
 
-	nasserver, err := system.GetNASByIDName("", nasName)
+	ctx := context.Background()
+
+	nasserver, err := system.GetNASByIDName(ctx, "", nasName)
 	assert.Nil(t, err)
 	assert.Equal(t, nasName, nasserver.Name)
 
 	if nasserver != nil {
-		nas, err := system.GetNASByIDName(nasserver.ID, "")
+		nas, err := system.GetNASByIDName(ctx, nasserver.ID, "")
 		assert.Nil(t, err)
 		assert.Equal(t, nasserver.ID, nas.ID)
 	}
 
 	if len(nasName) > 0 {
-		nas, err := system.GetNASByIDName("", nasName)
+		nas, err := system.GetNASByIDName(ctx, "", nasName)
 		assert.Nil(t, err)
 		assert.Equal(t, nasName, nas.Name)
 	}
@@ -66,11 +69,13 @@ func TestGetNasByIDNameInvalid(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	nas, err := system.GetNASByIDName(invalidIdentifier, "")
+	ctx := context.Background()
+
+	nas, err := system.GetNASByIDName(ctx, invalidIdentifier, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, nas)
 
-	nasName, err := system.GetNASByIDName("", invalidIdentifier)
+	nasName, err := system.GetNASByIDName(ctx, "", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, nasName)
 }
@@ -81,6 +86,8 @@ func TestCreateDeleteNAS(t *testing.T) {
 
 	nasName := fmt.Sprintf("%s-%s", testPrefix, "twee2")
 
+	ctx := context.Background()
+
 	// get protection domain
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
@@ -88,26 +95,26 @@ func TestCreateDeleteNAS(t *testing.T) {
 	var pdID string
 
 	if pd != nil {
-		pDomain, _ := system.FindProtectionDomain(pd.ProtectionDomain.ID, "", "")
+		pDomain, _ := system.FindProtectionDomain(ctx, pd.ProtectionDomain.ID, "", "")
 		assert.NotNil(t, pDomain)
 		pdID = pDomain.ID
 	}
 
 	// create the NAS Server
-	nasID, err := system.CreateNAS(nasName, pdID)
+	nasID, err := system.CreateNAS(ctx, nasName, pdID)
 	assert.Nil(t, err)
 	assert.NotNil(t, nasID.ID)
 
 	// try to create a NAS Server that exists
-	_, err = system.CreateNAS(nasName, pdID)
+	_, err = system.CreateNAS(ctx, nasName, pdID)
 	assert.NotNil(t, err)
 
 	// delete the NAS Server
-	err = system.DeleteNAS(nasID.ID)
+	err = system.DeleteNAS(ctx, nasID.ID)
 	assert.Nil(t, err)
 
 	// try to delete non-existent NAS Server
-	err = system.DeleteNAS(nasID.ID)
+	err = system.DeleteNAS(ctx, nasID.ID)
 	assert.NotNil(t, err)
 }
 
@@ -116,12 +123,14 @@ func TestGetFileInterfaceById(t *testing.T) {
 	nasName := getNasName(t)
 	assert.NotZero(t, len(nasName))
 
-	nasserver, err := system.GetNASByIDName("", nasName)
+	ctx := context.Background()
+
+	nasserver, err := system.GetNASByIDName(ctx, "", nasName)
 	assert.Nil(t, err)
 	assert.Equal(t, nasName, nasserver.Name)
 
 	if nasserver != nil {
-		fileInterface, err := system.GetFileInterface(nasserver.CurrentPreferredIPv4InterfaceID)
+		fileInterface, err := system.GetFileInterface(ctx, nasserver.CurrentPreferredIPv4InterfaceID)
 		assert.Nil(t, err)
 		assert.NotNil(t, fileInterface)
 	}

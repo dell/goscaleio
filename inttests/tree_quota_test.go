@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -23,6 +24,8 @@ import (
 
 // TestTreeQuotaByID will return specific specific Tree Quota by ID
 func TestTreeQuotaByID(t *testing.T) {
+	ctx := context.Background()
+
 	system := getSystem()
 	assert.NotNil(t, system)
 
@@ -32,12 +35,12 @@ func TestTreeQuotaByID(t *testing.T) {
 		quotaid = os.Getenv("GOSCALEIO_TREEQUOTAID")
 	}
 	fmt.Println("quotaid", quotaid)
-	quota, err := system.GetTreeQuotaByID(quotaid)
+	quota, err := system.GetTreeQuotaByID(ctx, quotaid)
 	assert.Nil(t, err)
 	assert.Equal(t, quotaid, quota.ID)
 
 	if quota != nil {
-		treequota, err := system.GetTreeQuotaByID(quota.ID)
+		treequota, err := system.GetTreeQuotaByID(ctx, quota.ID)
 		assert.Nil(t, err)
 		assert.Equal(t, treequota.ID, quota.ID)
 	}
@@ -45,6 +48,8 @@ func TestTreeQuotaByID(t *testing.T) {
 
 // TestCreateModifyDeleteTreeQuota will create , modify and delete a tree quota
 func TestCreateModifyDeleteTreeQuota(t *testing.T) {
+	ctx := context.Background()
+
 	system := getSystem()
 	assert.NotNil(t, system)
 
@@ -53,24 +58,24 @@ func TestCreateModifyDeleteTreeQuota(t *testing.T) {
 	if os.Getenv("GOSCALEIO_FILESYSTEM") != "" {
 		filesystemname = os.Getenv("GOSCALEIO_FILESYSTEM")
 	}
-	filesystem, err := system.GetFileSystemByIDName("", filesystemname)
+	filesystem, err := system.GetFileSystemByIDName(ctx, "", filesystemname)
 	treequota := &types.TreeQuotaCreate{
 		FileSystemID: filesystem.ID,
 		Path:         "/" + "fs123",
 	}
 
-	err = system.ModifyFileSystem(&types.FSModify{
+	err = system.ModifyFileSystem(ctx, &types.FSModify{
 		IsQuotaEnabled: true,
 	}, filesystem.ID)
 
 	// create tree quota
-	quota, err := system.CreateTreeQuota(treequota)
+	quota, err := system.CreateTreeQuota(ctx, treequota)
 	quotaid := quota.ID
 	assert.Nil(t, err)
 	assert.NotNil(t, quotaid)
 
 	// try to create existing tree quota
-	quota, err = system.CreateTreeQuota(treequota)
+	quota, err = system.CreateTreeQuota(ctx, treequota)
 	assert.NotNil(t, err)
 
 	// Modify Tree Quota
@@ -79,32 +84,33 @@ func TestCreateModifyDeleteTreeQuota(t *testing.T) {
 		SoftLimit:   900,
 	}
 
-	err = system.ModifyTreeQuota(quotaModify, quotaid)
+	err = system.ModifyTreeQuota(ctx, quotaModify, quotaid)
 	assert.Nil(t, err)
 
 	// negative case
-	err = system.ModifyTreeQuota(quotaModify, "")
+	err = system.ModifyTreeQuota(ctx, quotaModify, "")
 	assert.NotNil(t, err)
 
 	// Delete tree Quota
-	err = system.DeleteTreeQuota(quotaid)
+	err = system.DeleteTreeQuota(ctx, quotaid)
 	assert.Nil(t, err)
 }
 
 // TestGetTreeQuotaByFSID will return specific tree quota by filesystem ID
 func TestGetTreeQuotaByFSID(t *testing.T) {
+	ctx := context.Background()
 	system := getSystem()
 	assert.NotNil(t, system)
 
 	fsName := getFileSystemName(t)
 	assert.NotZero(t, len(fsName))
 
-	filesystem, err := system.GetFileSystemByIDName("", fsName)
+	filesystem, err := system.GetFileSystemByIDName(ctx, "", fsName)
 	assert.Nil(t, err)
 	assert.Equal(t, fsName, filesystem.Name)
 
 	// enable quota for filesystem
-	err = system.ModifyFileSystem(&types.FSModify{
+	err = system.ModifyFileSystem(ctx, &types.FSModify{
 		IsQuotaEnabled: true,
 	}, filesystem.ID)
 
@@ -117,22 +123,22 @@ func TestGetTreeQuotaByFSID(t *testing.T) {
 		GracePeriod:  604800,
 	}
 
-	quota, err := system.CreateTreeQuota(treequota)
+	quota, err := system.CreateTreeQuota(ctx, treequota)
 	quotaid := quota.ID
 	assert.Nil(t, err)
 	assert.NotNil(t, quotaid)
 
-	treeQuota, err := system.GetTreeQuotaByFSID(filesystem.ID)
+	treeQuota, err := system.GetTreeQuotaByFSID(ctx, filesystem.ID)
 	assert.Nil(t, err)
 	assert.Equal(t, filesystem.ID, treeQuota.FileSysytemID)
 
 	if treeQuota != nil {
-		treequota, err := system.GetTreeQuotaByID(treeQuota.ID)
+		treequota, err := system.GetTreeQuotaByID(ctx, treeQuota.ID)
 		assert.Nil(t, err)
 		assert.Equal(t, treequota.ID, quota.ID)
 	}
 
 	// Delete tree Quota
-	err = system.DeleteTreeQuota(treeQuota.ID)
+	err = system.DeleteTreeQuota(ctx, treeQuota.ID)
 	assert.Nil(t, err)
 }

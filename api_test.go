@@ -135,7 +135,7 @@ func TestClientVersion(t *testing.T) {
 	}
 
 	// Test for version retrieval
-	ver, err := client.GetVersion()
+	ver, err := client.GetVersion(context.Background())
 	if err != nil {
 		// Check if the error is due to unauthorized access
 		if strings.Contains(err.Error(), "Unauthorized") {
@@ -320,7 +320,7 @@ func Test_getJSONWithRetry(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		c.getJSONWithRetry(http.MethodPost, "/testing", wantBody, nil)
+		c.getJSONWithRetry(context.Background(), http.MethodPost, "/testing", wantBody, nil)
 
 		// Assert the call order was as expected.
 		wantPaths := []string{"POST /testing", "GET /api/login", "POST /testing"}

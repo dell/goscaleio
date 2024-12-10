@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -62,7 +63,7 @@ func TestCreateSSOUser(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err2 := client.CreateSSOUser(&tc.user)
+			_, err2 := client.CreateSSOUser(context.Background(), &tc.user)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Creating user did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -103,7 +104,7 @@ func TestGetSSOUser(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err2 := client.GetSSOUser(tc.id)
+			_, err2 := client.GetSSOUser(context.Background(), tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Getting user details did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -140,7 +141,7 @@ func TestGetSSOUserByFilters(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err2 := client.GetSSOUserByFilters(tc.username, "admin")
+			_, err2 := client.GetSSOUserByFilters(context.Background(), tc.username, "admin")
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Getting user details did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -188,7 +189,7 @@ func TestModifySSOUser(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, err2 := client.ModifySSOUser(tc.id, &tc.user)
+			_, err2 := client.ModifySSOUser(context.Background(), tc.id, &tc.user)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Modifying user did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -229,7 +230,7 @@ func TestResetSSOUserPassword(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			err2 := client.ResetSSOUserPassword(tc.id, &tc.user)
+			err2 := client.ResetSSOUserPassword(context.Background(), tc.id, &tc.user)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Resetting user password did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -270,7 +271,7 @@ func TestDeleteSSOUser(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			err2 := client.DeleteSSOUser(tc.id)
+			err2 := client.DeleteSSOUser(context.Background(), tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Deleting user did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -296,7 +297,7 @@ func TestGetSSOUserNegative(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	details, err := client.GetSSOUser("93634330-6ffd-4d17-a22a-d3ec701e73d4")
+	details, err := client.GetSSOUser(context.Background(), "93634330-6ffd-4d17-a22a-d3ec701e73d4")
 	assert.Nil(t, details)
 	assert.NotNil(t, err)
 }
@@ -313,7 +314,7 @@ func TestDeleteSSOUserNegative(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = client.DeleteSSOUser("93634330-6ffd-4d17-a22a-d3ec701e73d4")
+	err = client.DeleteSSOUser(context.Background(), "93634330-6ffd-4d17-a22a-d3ec701e73d4")
 	assert.NotNil(t, err)
 }
 
@@ -335,6 +336,6 @@ func TestCreateSSOUserNegative(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = client.CreateSSOUser(user)
+	_, err = client.CreateSSOUser(context.Background(), user)
 	assert.NotNil(t, err)
 }

@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -36,13 +37,12 @@ func NewFileSystem(client *Client, fs *types.FileSystem) *FileSystem {
 }
 
 // GetAllFileSystems returns a file system
-func (s *System) GetAllFileSystems() ([]types.FileSystem, error) {
+func (s *System) GetAllFileSystems(ctx context.Context) ([]types.FileSystem, error) {
 	defer TimeSpent("GetAllFileSystems", time.Now())
 
 	path := fmt.Sprintf("/rest/v1/file-systems?select=*")
 	var fs []types.FileSystem
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, &fs)
+	err := s.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &fs)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (s *System) GetAllFileSystems() ([]types.FileSystem, error) {
 }
 
 // GetFileSystemByIDName returns a file system by Name or ID
-func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSystem, error) {
+func (s *System) GetFileSystemByIDName(ctx context.Context, id string, name string) (*types.FileSystem, error) {
 	defer TimeSpent("GetFileSystemByIDName", time.Now())
 
 	if id == "" && name == "" {
@@ -62,8 +62,7 @@ func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSyste
 	if id != "" {
 		path := fmt.Sprintf("/rest/v1/file-systems/%v?select=*", id)
 		var fs types.FileSystem
-		err := s.client.getJSONWithRetry(
-			http.MethodGet, path, nil, &fs)
+		err := s.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &fs)
 		if err != nil {
 			return nil, errors.New("couldn't find filesystem by id")
 		}
@@ -72,7 +71,7 @@ func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSyste
 	}
 
 	// Get filesystem by name
-	filesystems, err := s.GetAllFileSystems()
+	filesystems, err := s.GetAllFileSystems(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -87,13 +86,12 @@ func (s *System) GetFileSystemByIDName(id string, name string) (*types.FileSyste
 }
 
 // CreateFileSystem creates a file system
-func (s *System) CreateFileSystem(fs *types.FsCreate) (*types.FileSystemResp, error) {
+func (s *System) CreateFileSystem(ctx context.Context, fs *types.FsCreate) (*types.FileSystemResp, error) {
 	defer TimeSpent("CreateFileSystem", time.Now())
 
 	path := fmt.Sprintf("/rest/v1/file-systems")
 	fsResponse := types.FileSystemResp{}
-	err := s.client.getJSONWithRetry(
-		http.MethodPost, path, fs, &fsResponse)
+	err := s.client.getJSONWithRetry(ctx, http.MethodPost, path, fs, &fsResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -102,13 +100,12 @@ func (s *System) CreateFileSystem(fs *types.FsCreate) (*types.FileSystemResp, er
 }
 
 // CreateFileSystemSnapshot creates a snapshot for a given file system
-func (s *System) CreateFileSystemSnapshot(createSnapParam *types.CreateFileSystemSnapshotParam, fsID string) (*types.CreateFileSystemSnapshotResponse, error) {
+func (s *System) CreateFileSystemSnapshot(ctx context.Context, createSnapParam *types.CreateFileSystemSnapshotParam, fsID string) (*types.CreateFileSystemSnapshotResponse, error) {
 	defer TimeSpent("CreateFileSystemSnapshot", time.Now())
 
 	path := fmt.Sprintf("/rest/v1/file-systems/%v/snapshot", fsID)
 	snapResponse := types.CreateFileSystemSnapshotResponse{}
-	err := s.client.getJSONWithRetry(
-		http.MethodPost, path, createSnapParam, &snapResponse)
+	err := s.client.getJSONWithRetry(ctx, http.MethodPost, path, createSnapParam, &snapResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +114,7 @@ func (s *System) CreateFileSystemSnapshot(createSnapParam *types.CreateFileSyste
 }
 
 // RestoreFileSystemFromSnapshot restores the filesystem from a given snapshot using filesytem id
-func (s *System) RestoreFileSystemFromSnapshot(restoreSnapParam *types.RestoreFsSnapParam, fsID string) (*types.RestoreFsSnapResponse, error) {
+func (s *System) RestoreFileSystemFromSnapshot(ctx context.Context, restoreSnapParam *types.RestoreFsSnapParam, fsID string) (*types.RestoreFsSnapResponse, error) {
 	defer TimeSpent("CreateFileSystemSnapshot", time.Now())
 
 	path := fmt.Sprintf("/rest/v1/file-systems/%v/restore", fsID)
@@ -125,14 +122,12 @@ func (s *System) RestoreFileSystemFromSnapshot(restoreSnapParam *types.RestoreFs
 	restoreFsResponse := types.RestoreFsSnapResponse{}
 	var err error
 	if restoreSnapParam.CopyName == "" {
-		err = s.client.getJSONWithRetry(
-			http.MethodPost, path, restoreSnapParam, nil)
+		err = s.client.getJSONWithRetry(ctx, http.MethodPost, path, restoreSnapParam, nil)
 		if err == nil {
 			return nil, nil
 		}
 	} else {
-		err = s.client.getJSONWithRetry(
-			http.MethodPost, path, restoreSnapParam, &restoreFsResponse)
+		err = s.client.getJSONWithRetry(ctx, http.MethodPost, path, restoreSnapParam, &restoreFsResponse)
 		if err == nil {
 			return &restoreFsResponse, nil
 		}
@@ -146,10 +141,10 @@ func (s *System) RestoreFileSystemFromSnapshot(restoreSnapParam *types.RestoreFs
 }
 
 // GetFsSnapshotsByVolumeID gets list of snapshots associated with a filesystem
-func (s *System) GetFsSnapshotsByVolumeID(fsID string) ([]types.FileSystem, error) {
+func (s *System) GetFsSnapshotsByVolumeID(ctx context.Context, fsID string) ([]types.FileSystem, error) {
 	defer TimeSpent("GetFsSnapshotsByVolumeID", time.Now())
 	var snapshotList []types.FileSystem
-	fsList, err := s.GetAllFileSystems()
+	fsList, err := s.GetAllFileSystems(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -162,18 +157,17 @@ func (s *System) GetFsSnapshotsByVolumeID(fsID string) ([]types.FileSystem, erro
 }
 
 // DeleteFileSystem deletes a file system
-func (s *System) DeleteFileSystem(name string) error {
+func (s *System) DeleteFileSystem(ctx context.Context, name string) error {
 	defer TimeSpent("DeleteFileSystem", time.Now())
 
-	fs, err := s.GetFileSystemByIDName("", name)
+	fs, err := s.GetFileSystemByIDName(ctx, "", name)
 	if err != nil {
 		return err
 	}
 
 	path := fmt.Sprintf("/rest/v1/file-systems/%v", fs.ID)
 
-	err = s.client.getJSONWithRetry(
-		http.MethodDelete, path, nil, nil)
+	err = s.client.getJSONWithRetry(ctx, http.MethodDelete, path, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -182,10 +176,10 @@ func (s *System) DeleteFileSystem(name string) error {
 }
 
 // ModifyFileSystem modifies a file system
-func (s *System) ModifyFileSystem(modifyFsParam *types.FSModify, id string) error {
+func (s *System) ModifyFileSystem(ctx context.Context, modifyFsParam *types.FSModify, id string) error {
 	defer TimeSpent("ModifyFileSystem", time.Now())
 
-	fs, err := s.GetFileSystemByIDName(id, "")
+	fs, err := s.GetFileSystemByIDName(ctx, id, "")
 	if err != nil {
 		return err
 	}
@@ -193,7 +187,7 @@ func (s *System) ModifyFileSystem(modifyFsParam *types.FSModify, id string) erro
 	var body *types.FSModify = modifyFsParam
 	path := fmt.Sprintf("/rest/v1/file-systems/%v", fs.ID)
 
-	err = s.client.getJSONWithRetry(http.MethodPatch, path, body, nil)
+	err = s.client.getJSONWithRetry(ctx, http.MethodPatch, path, body, nil)
 	if err != nil {
 		return err
 	}

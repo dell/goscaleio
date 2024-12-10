@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -25,7 +26,7 @@ func GetNFSExportbyName(t *testing.T) string {
 		return os.Getenv("GOSCALEIO_NFSEXPORT")
 	}
 
-	nfsexport, _ := C.GetNFSExport()
+	nfsexport, _ := C.GetNFSExport(context.Background())
 	assert.NotNil(t, nfsexport)
 	if nfsexport == nil {
 		return ""
@@ -37,29 +38,31 @@ func TestNFSExportByIDName(t *testing.T) {
 	nfsName := GetNFSExportbyName(t)
 	assert.NotZero(t, len(nfsName))
 
-	nfs, err := C.GetNFSExportByIDName("", nfsName)
+	ctx := context.Background()
+
+	nfs, err := C.GetNFSExportByIDName(ctx, "", nfsName)
 	assert.Nil(t, err)
 	assert.Equal(t, nfsName, nfs.Name)
 
 	if nfs != nil {
-		nfsexport, err := C.GetNFSExportByIDName(nfs.ID, "")
+		nfsexport, err := C.GetNFSExportByIDName(ctx, nfs.ID, "")
 		assert.Nil(t, err)
 		assert.Equal(t, nfs.ID, nfsexport.ID)
 	}
 
 	if len(nfsName) > 0 {
-		nfs, err := C.GetNFSExportByIDName("", nfsName)
+		nfs, err := C.GetNFSExportByIDName(ctx, "", nfsName)
 		assert.Nil(t, err)
 		assert.Equal(t, nfsName, nfs.Name)
 	}
 }
 
 func TestNFSExportByIDNameInvalid(t *testing.T) {
-	nfs, err := C.GetNFSExportByIDName(invalidIdentifier, "")
+	nfs, err := C.GetNFSExportByIDName(context.Background(), invalidIdentifier, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, nfs)
 
-	nfsexport, err := C.GetNFSExportByIDName("", invalidIdentifier)
+	nfsexport, err := C.GetNFSExportByIDName(context.Background(), "", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, nfsexport)
 }
@@ -68,13 +71,15 @@ func TestCreateModifyDeleteNFSExport(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
+	ctx := context.Background()
+
 	nfsName := "NFS" + testPrefix + randString(8)
 	nfsmodify := "NFS export modify testing"
 	var filesystemname string
 	if os.Getenv("GOSCALEIO_FILESYSTEM_NFSEXPORT") != "" {
 		filesystemname = os.Getenv("GOSCALEIO_FILESYSTEM_NFSEXPORT")
 	}
-	filesystem, err := system.GetFileSystemByIDName("", filesystemname)
+	filesystem, err := system.GetFileSystemByIDName(ctx, "", filesystemname)
 	nfsexport := &types.NFSExportCreate{
 		Name:         nfsName,
 		FileSystemID: filesystem.ID,
@@ -82,13 +87,13 @@ func TestCreateModifyDeleteNFSExport(t *testing.T) {
 	}
 
 	// create nfs export
-	nfs, err := C.CreateNFSExport(nfsexport)
+	nfs, err := C.CreateNFSExport(ctx, nfsexport)
 	fsID := nfs.ID
 	assert.Nil(t, err)
 	assert.NotNil(t, fsID)
 
 	// try to create existing nfs export
-	nfs, err = C.CreateNFSExport(nfsexport)
+	nfs, err = C.CreateNFSExport(ctx, nfsexport)
 	assert.NotNil(t, err)
 
 	// Modify NFS export proprties
@@ -96,9 +101,9 @@ func TestCreateModifyDeleteNFSExport(t *testing.T) {
 		Description:           nfsmodify,
 		AddReadWriteRootHosts: []string{"192.168.100.10", "192.168.100.11"},
 	}
-	err = C.ModifyNFSExport(nfsexportmodify, fsID)
+	err = C.ModifyNFSExport(ctx, nfsexportmodify, fsID)
 
 	// delete the NFS export
-	err = C.DeleteNFSExport(fsID)
+	err = C.DeleteNFSExport(ctx, fsID)
 	assert.Nil(t, err)
 }

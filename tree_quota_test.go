@@ -19,6 +19,7 @@
 package goscaleio
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -118,7 +119,7 @@ func TestTreeQuotaByID(t *testing.T) {
 				client: client,
 			}
 
-			resp, err := s.GetTreeQuotaByID(testCaseIDs[id])
+			resp, err := s.GetTreeQuotaByID(context.Background(), testCaseIDs[id])
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -206,7 +207,7 @@ func TestCreateTreeQuota(t *testing.T) {
 				client: client,
 			}
 
-			resp, err := s.CreateTreeQuota(&types.TreeQuotaCreate{
+			resp, err := s.CreateTreeQuota(context.Background(), &types.TreeQuotaCreate{
 				FileSystemID: "64b3ceca-046f-eb3a-da83-3a7645b0a943",
 				Path:         "/fs111",
 			})
@@ -236,7 +237,7 @@ func TestDeleteTreeQuota(t *testing.T) {
 		client: client,
 	}
 
-	err = s.DeleteTreeQuota(id)
+	err = s.DeleteTreeQuota(context.Background(), id)
 	assert.Nil(t, err)
 }
 
@@ -283,7 +284,7 @@ func TestModifyTreeQuota(t *testing.T) {
 			}
 
 			// calling ModifyTreeQuota with mock value
-			err = s.ModifyTreeQuota(quotaParam, tc.QuotaID)
+			err = s.ModifyTreeQuota(context.Background(), quotaParam, tc.QuotaID)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Modifying FS did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)

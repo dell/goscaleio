@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"time"
@@ -21,11 +22,11 @@ import (
 )
 
 // GetSystemLimits gets list of sytem limits
-func (c *Client) GetSystemLimits() (systemLimits *types.QuerySystemLimitsResponse, err error) {
+func (c *Client) GetSystemLimits(ctx context.Context) (systemLimits *types.QuerySystemLimitsResponse, err error) {
 	defer TimeSpent("GetSystemLimits", time.Now())
 	var body types.QuerySystemLimitsParam
 	path := "/api/instances/System/action/querySystemLimits"
-	err = c.getJSONWithRetry(
+	err = c.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, &systemLimits)
 	if err != nil {
 		return nil, err
@@ -35,9 +36,9 @@ func (c *Client) GetSystemLimits() (systemLimits *types.QuerySystemLimitsRespons
 }
 
 // GetMaxVol returns max volume size in GB
-func (c *Client) GetMaxVol() (MaxVolumeSize string, err error) {
+func (c *Client) GetMaxVol(ctx context.Context) (MaxVolumeSize string, err error) {
 	defer TimeSpent("GetMaxVol", time.Now())
-	sysLimit, err := c.GetSystemLimits()
+	sysLimit, err := c.GetSystemLimits(ctx)
 	if err != nil {
 		return "", err
 	}

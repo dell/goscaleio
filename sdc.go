@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -39,14 +40,14 @@ func NewSdc(client *Client, sdc *types.Sdc) *Sdc {
 }
 
 // GetSdc returns a Sdc
-func (s *System) GetSdc() ([]types.Sdc, error) {
+func (s *System) GetSdc(ctx context.Context) ([]types.Sdc, error) {
 	defer TimeSpent("GetSdc", time.Now())
 
 	path := fmt.Sprintf("/api/instances/System::%v/relationships/Sdc",
 		s.System.ID)
 
 	var sdcs []types.Sdc
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &sdcs)
 	if err != nil {
 		return nil, err
@@ -56,13 +57,13 @@ func (s *System) GetSdc() ([]types.Sdc, error) {
 }
 
 // GetSdcByID returns a Sdc searched by id
-func (s *System) GetSdcByID(id string) (*Sdc, error) {
+func (s *System) GetSdcByID(ctx context.Context, id string) (*Sdc, error) {
 	defer TimeSpent("GetSdcByID", time.Now())
 
 	path := fmt.Sprintf("api/instances/Sdc::%v", id)
 
 	var sdc types.Sdc
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, nil, &sdc)
 	if err != nil {
 		return nil, err
@@ -73,7 +74,7 @@ func (s *System) GetSdcByID(id string) (*Sdc, error) {
 
 // ChangeSdcName returns a Sdc after changing its name
 // https://developer.dell.com/apis/4008/versions/4.0/PowerFlex_REST_API.json/paths/~1api~1instances~1Sdc::%7Bid%7D~1action~1setSdcName/post
-func (s *System) ChangeSdcName(idOfSdc, name string) (*Sdc, error) {
+func (s *System) ChangeSdcName(ctx context.Context, idOfSdc, name string) (*Sdc, error) {
 	defer TimeSpent("ChangeSdcName", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcName", idOfSdc)
@@ -83,7 +84,7 @@ func (s *System) ChangeSdcName(idOfSdc, name string) (*Sdc, error) {
 	var body types.ChangeSdcNameParam = types.ChangeSdcNameParam{
 		SdcName: name,
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, &sdc)
 	if err != nil {
 		return nil, err
@@ -93,7 +94,7 @@ func (s *System) ChangeSdcName(idOfSdc, name string) (*Sdc, error) {
 }
 
 // ChangeSdcPerfProfile returns a Sdc after changing its PerfProfile
-func (s *System) ChangeSdcPerfProfile(idOfSdc, perfProfile string) (*Sdc, error) {
+func (s *System) ChangeSdcPerfProfile(ctx context.Context, idOfSdc, perfProfile string) (*Sdc, error) {
 	defer TimeSpent("ChangeSdcPerfProfile", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcPerformanceParameters", idOfSdc)
@@ -103,7 +104,7 @@ func (s *System) ChangeSdcPerfProfile(idOfSdc, perfProfile string) (*Sdc, error)
 	var body types.ChangeSdcPerfProfile = types.ChangeSdcPerfProfile{
 		PerfProfile: perfProfile,
 	}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, body, &sdc)
 	if err != nil {
 		return nil, err
@@ -113,10 +114,10 @@ func (s *System) ChangeSdcPerfProfile(idOfSdc, perfProfile string) (*Sdc, error)
 }
 
 // FindSdc returns a Sdc
-func (s *System) FindSdc(field, value string) (*Sdc, error) {
+func (s *System) FindSdc(ctx context.Context, field, value string) (*Sdc, error) {
 	defer TimeSpent("FindSdc", time.Now())
 
-	sdcs, err := s.GetSdc()
+	sdcs, err := s.GetSdc(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +134,7 @@ func (s *System) FindSdc(field, value string) (*Sdc, error) {
 }
 
 // ApproveSdcByGUID approves the Sdc When the Powerflex Array is operating in Guid RestrictedSdcMode.
-func (s *System) ApproveSdcByGUID(sdcGUID string) (*types.ApproveSdcByGUIDResponse, error) {
+func (s *System) ApproveSdcByGUID(ctx context.Context, sdcGUID string) (*types.ApproveSdcByGUIDResponse, error) {
 	defer TimeSpent("ApproveSdcByGUID", time.Now())
 
 	var resp types.ApproveSdcByGUIDResponse
@@ -144,7 +145,7 @@ func (s *System) ApproveSdcByGUID(sdcGUID string) (*types.ApproveSdcByGUIDRespon
 		SdcGUID: sdcGUID,
 	}
 
-	err := s.client.getJSONWithRetry(http.MethodPost, path, body, &resp)
+	err := s.client.getJSONWithRetry(ctx, http.MethodPost, path, body, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +154,7 @@ func (s *System) ApproveSdcByGUID(sdcGUID string) (*types.ApproveSdcByGUIDRespon
 }
 
 // GetStatistics returns a Sdc statistcs
-func (sdc *Sdc) GetStatistics() (*types.SdcStatistics, error) {
+func (sdc *Sdc) GetStatistics(ctx context.Context) (*types.SdcStatistics, error) {
 	defer TimeSpent("GetStatistics", time.Now())
 
 	link, err := GetLink(sdc.Sdc.Links, "/api/Sdc/relationship/Statistics")
@@ -162,7 +163,7 @@ func (sdc *Sdc) GetStatistics() (*types.SdcStatistics, error) {
 	}
 
 	var stats types.SdcStatistics
-	err = sdc.client.getJSONWithRetry(
+	err = sdc.client.getJSONWithRetry(ctx,
 		http.MethodGet, link.HREF, nil, &stats)
 	if err != nil {
 		return nil, err
@@ -172,7 +173,7 @@ func (sdc *Sdc) GetStatistics() (*types.SdcStatistics, error) {
 }
 
 // GetVolume returns a volume
-func (sdc *Sdc) GetVolume() ([]*types.Volume, error) {
+func (sdc *Sdc) GetVolume(ctx context.Context) ([]*types.Volume, error) {
 	defer TimeSpent("GetVolume", time.Now())
 
 	link, err := GetLink(sdc.Sdc.Links, "/api/Sdc/relationship/Volume")
@@ -181,7 +182,7 @@ func (sdc *Sdc) GetVolume() ([]*types.Volume, error) {
 	}
 
 	var vols []*types.Volume
-	err = sdc.client.getJSONWithRetry(
+	err = sdc.client.getJSONWithRetry(ctx,
 		http.MethodGet, link.HREF, nil, &vols)
 	if err != nil {
 		return nil, err
@@ -191,11 +192,11 @@ func (sdc *Sdc) GetVolume() ([]*types.Volume, error) {
 }
 
 // FindVolumes returns volumes
-func (sdc *Sdc) FindVolumes() ([]*Volume, error) {
+func (sdc *Sdc) FindVolumes(ctx context.Context) ([]*Volume, error) {
 	defer TimeSpent("FindVolumes", time.Now())
 
 	var rlt []*Volume
-	vols, err := sdc.GetVolume()
+	vols, err := sdc.GetVolume(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +229,7 @@ func GetSdcLocalGUID() (string, error) {
 }
 
 // MapVolumeSdc maps a volume to Sdc
-func (v *Volume) MapVolumeSdc(
+func (v *Volume) MapVolumeSdc(ctx context.Context,
 	mapVolumeSdcParam *types.MapVolumeSdcParam,
 ) error {
 	defer TimeSpent("MapVolumeSdc", time.Now())
@@ -236,7 +237,7 @@ func (v *Volume) MapVolumeSdc(
 	path := fmt.Sprintf("/api/instances/Volume::%s/action/addMappedSdc",
 		v.Volume.ID)
 
-	err := v.client.getJSONWithRetry(
+	err := v.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, mapVolumeSdcParam, nil)
 	if err != nil {
 		return err
@@ -246,7 +247,7 @@ func (v *Volume) MapVolumeSdc(
 }
 
 // UnmapVolumeSdc unmaps a volume from Sdc
-func (v *Volume) UnmapVolumeSdc(
+func (v *Volume) UnmapVolumeSdc(ctx context.Context,
 	unmapVolumeSdcParam *types.UnmapVolumeSdcParam,
 ) error {
 	defer TimeSpent("UnmapVolumeSdc", time.Now())
@@ -254,7 +255,7 @@ func (v *Volume) UnmapVolumeSdc(
 	path := fmt.Sprintf("/api/instances/Volume::%s/action/removeMappedSdc",
 		v.Volume.ID)
 
-	err := v.client.getJSONWithRetry(
+	err := v.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, unmapVolumeSdcParam, nil)
 	if err != nil {
 		return err
@@ -264,7 +265,7 @@ func (v *Volume) UnmapVolumeSdc(
 }
 
 // SetMappedSdcLimits sets Sdc mapped limits
-func (v *Volume) SetMappedSdcLimits(
+func (v *Volume) SetMappedSdcLimits(ctx context.Context,
 	setMappedSdcLimitsParam *types.SetMappedSdcLimitsParam,
 ) error {
 	defer TimeSpent("SetMappedSdcLimits", time.Now())
@@ -273,7 +274,7 @@ func (v *Volume) SetMappedSdcLimits(
 		"/api/instances/Volume::%s/action/setMappedSdcLimits",
 		v.Volume.ID)
 
-	err := v.client.getJSONWithRetry(
+	err := v.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, setMappedSdcLimitsParam, nil)
 	if err != nil {
 		return err
@@ -283,14 +284,14 @@ func (v *Volume) SetMappedSdcLimits(
 }
 
 // RenameSdc renames the sdc with given name
-func (c *Client) RenameSdc(sdcID, name string) error {
+func (c *Client) RenameSdc(ctx context.Context, sdcID, name string) error {
 	path := fmt.Sprintf("/api/instances/Sdc::%s/action/setSdcName", sdcID)
 
 	renameSdcParam := &types.RenameSdcParam{
 		SdcName: name,
 	}
 
-	err := c.getJSONWithRetry(
+	err := c.getJSONWithRetry(ctx,
 		http.MethodPost, path, renameSdcParam, nil)
 	if err != nil {
 		return err
@@ -299,13 +300,13 @@ func (c *Client) RenameSdc(sdcID, name string) error {
 }
 
 // DeleteSdc deletes a Sdc against Id
-func (s *System) DeleteSdc(id string) error {
+func (s *System) DeleteSdc(ctx context.Context, id string) error {
 	defer TimeSpent("DeleteSdc", time.Now())
 
 	path := fmt.Sprintf("/api/instances/Sdc::%v/action/removeSdc", id)
 
 	sdcParam := &types.EmptyPayload{}
-	err := s.client.getJSONWithRetry(http.MethodPost, path, sdcParam, nil)
+	err := s.client.getJSONWithRetry(ctx, http.MethodPost, path, sdcParam, nil)
 	if err != nil {
 		return err
 	}
@@ -314,7 +315,7 @@ func (s *System) DeleteSdc(id string) error {
 }
 
 // GetSdcIDByIP get a Sdc id by IP Address
-func (s *System) GetSdcIDByIP(ip string) (string, error) {
+func (s *System) GetSdcIDByIP(ctx context.Context, ip string) (string, error) {
 	defer TimeSpent("GetSdcId", time.Now())
 
 	path := fmt.Sprintf("/api/types/Sdc/instances/action/queryIdByKey")
@@ -322,7 +323,7 @@ func (s *System) GetSdcIDByIP(ip string) (string, error) {
 	sdcParam := &types.GetSdcIDByIPParam{
 		IP: ip,
 	}
-	sdcID, err := s.client.getStringWithRetry(http.MethodPost, path, sdcParam)
+	sdcID, err := s.client.getStringWithRetry(ctx, http.MethodPost, path, sdcParam)
 	if err != nil {
 		return "", err
 	}
@@ -331,14 +332,14 @@ func (s *System) GetSdcIDByIP(ip string) (string, error) {
 }
 
 // SetRestrictedMode sets the restricted mode for the system
-func (s *System) SetRestrictedMode(mode string) error {
+func (s *System) SetRestrictedMode(ctx context.Context, mode string) error {
 	defer TimeSpent("SetRestrictedMode", time.Now())
 
 	path := fmt.Sprintf("/api/instances/System::%v/action/setRestrictedSdcMode", s.System.ID)
 	sdcParam := &types.SetRestrictedMode{
 		RestrictedSdcMode: mode,
 	}
-	err := s.client.getJSONWithRetry(http.MethodPost, path, sdcParam, nil)
+	err := s.client.getJSONWithRetry(ctx, http.MethodPost, path, sdcParam, nil)
 	if err != nil {
 		return err
 	}
@@ -347,7 +348,7 @@ func (s *System) SetRestrictedMode(mode string) error {
 }
 
 // SetApprovedIps sets the approved IPs for a specific SDC in the system.
-func (s *System) SetApprovedIps(sdcID string, sdcApprovedIps []string) error {
+func (s *System) SetApprovedIps(ctx context.Context, sdcID string, sdcApprovedIps []string) error {
 	defer TimeSpent("SetApprovedIps", time.Now())
 
 	path := fmt.Sprintf("/api/instances/System::%v/action/setApprovedSdcIps", s.System.ID)
@@ -356,7 +357,7 @@ func (s *System) SetApprovedIps(sdcID string, sdcApprovedIps []string) error {
 		SdcApprovedIps: sdcApprovedIps,
 	}
 
-	err := s.client.getJSONWithRetry(http.MethodPost, path, sdcParam, nil)
+	err := s.client.getJSONWithRetry(ctx, http.MethodPost, path, sdcParam, nil)
 	if err != nil {
 		return err
 	}
@@ -365,7 +366,7 @@ func (s *System) SetApprovedIps(sdcID string, sdcApprovedIps []string) error {
 }
 
 // ApproveSdc approves an SDC
-func (s *System) ApproveSdc(approveSdcParam *types.ApproveSdcParam) (*types.ApproveSdcByGUIDResponse, error) {
+func (s *System) ApproveSdc(ctx context.Context, approveSdcParam *types.ApproveSdcParam) (*types.ApproveSdcByGUIDResponse, error) {
 	defer TimeSpent("ApproveSdc", time.Now())
 	var resp types.ApproveSdcByGUIDResponse
 
@@ -377,7 +378,7 @@ func (s *System) ApproveSdc(approveSdcParam *types.ApproveSdcParam) (*types.Appr
 		Name:    approveSdcParam.Name,
 	}
 
-	err := s.client.getJSONWithRetry(http.MethodPost, path, sdcParam, &resp)
+	err := s.client.getJSONWithRetry(ctx, http.MethodPost, path, sdcParam, &resp)
 	if err != nil {
 		return nil, err
 	}

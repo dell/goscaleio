@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -25,12 +26,14 @@ func TestGetAllUsers(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	allUsers, err := system.GetUser()
+	allUsers, err := system.GetUser(context.Background())
 	assert.Nil(t, err)
 	assert.NotZero(t, len(allUsers))
 }
 
 func TestCreateAndDeleteUser(t *testing.T) {
+	ctx := context.Background()
+
 	// Get the System
 	system := getSystem()
 	assert.NotNil(t, system)
@@ -41,17 +44,17 @@ func TestCreateAndDeleteUser(t *testing.T) {
 		Password: os.Getenv("USER_PASSWORD"),
 		UserRole: "Security",
 	}
-	resp, err1 := system.CreateUser(&userParams)
+	resp, err1 := system.CreateUser(ctx, &userParams)
 	assert.Nil(t, err1)
 	assert.NotEmpty(t, resp)
 
 	// Fetch the User which you just now created
-	user, err2 := system.GetUserByIDName(resp.ID, "")
+	user, err2 := system.GetUserByIDName(ctx, resp.ID, "")
 	assert.Nil(t, err2)
 	assert.Equal(t, "testUser", user.Name)
 	assert.Equal(t, "Security", user.UserRole)
 
-	user2, err2 := system.GetUserByIDName("", "testUser")
+	user2, err2 := system.GetUserByIDName(ctx, "", "testUser")
 	assert.Nil(t, err2)
 	assert.Equal(t, "testUser", user2.Name)
 	assert.Equal(t, "Security", user2.UserRole)
@@ -59,10 +62,10 @@ func TestCreateAndDeleteUser(t *testing.T) {
 	userRoleParams := siotypes.UserRoleParam{
 		UserRole: "Configure",
 	}
-	err3 := system.SetUserRole(&userRoleParams, resp.ID)
+	err3 := system.SetUserRole(ctx, &userRoleParams, resp.ID)
 	assert.Nil(t, err3)
 
 	// Remove the user
-	err4 := system.RemoveUser(resp.ID)
+	err4 := system.RemoveUser(ctx, resp.ID)
 	assert.Nil(t, err4)
 }

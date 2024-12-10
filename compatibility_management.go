@@ -13,17 +13,17 @@
 package goscaleio
 
 import (
+	"context"
 	"net/http"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
 
 // GetCompatibilityManagement Gets Compatibility Management
-func (s *System) GetCompatibilityManagement() (*types.CompatibilityManagement, error) {
+func (s *System) GetCompatibilityManagement(ctx context.Context) (*types.CompatibilityManagement, error) {
 	path := "/api/v1/Compatibility"
 	var compatibilityManagement types.CompatibilityManagement
-	err := s.client.getJSONWithRetry(
-		http.MethodGet, path, nil, &compatibilityManagement)
+	err := s.client.getJSONWithRetry(ctx, http.MethodGet, path, nil, &compatibilityManagement)
 	if err != nil {
 		return nil, err
 	}
@@ -32,11 +32,10 @@ func (s *System) GetCompatibilityManagement() (*types.CompatibilityManagement, e
 }
 
 // SetCompatibilityManagement Sets Compatibility Management
-func (s *System) SetCompatibilityManagement(compatibilityManagement *types.CompatibilityManagementPost) (*types.CompatibilityManagement, error) {
+func (s *System) SetCompatibilityManagement(ctx context.Context, compatibilityManagement *types.CompatibilityManagementPost) (*types.CompatibilityManagement, error) {
 	path := "/api/v1/Compatibility"
 	resp := types.CompatibilityManagement{}
-	err := s.client.getJSONWithRetry(
-		http.MethodPost, path, compatibilityManagement, &resp)
+	err := s.client.getJSONWithRetry(ctx, http.MethodPost, path, compatibilityManagement, &resp)
 	if err != nil {
 		return nil, err
 	}

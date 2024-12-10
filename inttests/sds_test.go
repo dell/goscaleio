@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"testing"
@@ -39,7 +40,7 @@ func getAllSds(t *testing.T) []*goscaleio.Sds {
 
 	if pd != nil {
 		var allSds []*goscaleio.Sds
-		sds, err := pd.GetSds()
+		sds, err := pd.GetSds(context.Background())
 		assert.Nil(t, err)
 		assert.NotZero(t, len(sds))
 		for _, s := range sds {
@@ -64,6 +65,7 @@ func TestGetSDSs(t *testing.T) {
 
 // TestGetSDSByAttribute gets a single specific SDS by attribute
 func TestGetSDSByAttribute(t *testing.T) {
+	ctx := context.Background()
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 	if pd == nil {
@@ -76,12 +78,12 @@ func TestGetSDSByAttribute(t *testing.T) {
 		return
 	}
 
-	found, err := pd.FindSds("Name", sds[0].Sds.Name)
+	found, err := pd.FindSds(ctx, "Name", sds[0].Sds.Name)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, sds[0].Sds.Name, found.Name)
 
-	found, err = pd.FindSds("ID", sds[0].Sds.ID)
+	found, err = pd.FindSds(ctx, "ID", sds[0].Sds.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, sds[0].Sds.ID, found.ID)
@@ -89,6 +91,8 @@ func TestGetSDSByAttribute(t *testing.T) {
 
 // TestGetSDSByAttributeInvalid fails to get a single specific SDS by attribute
 func TestGetSDSByAttributeInvalid(t *testing.T) {
+	ctx := context.Background()
+
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 	if pd == nil {
@@ -101,11 +105,11 @@ func TestGetSDSByAttributeInvalid(t *testing.T) {
 		return
 	}
 
-	found, err := pd.FindSds("Name", invalidIdentifier)
+	found, err := pd.FindSds(ctx, "Name", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, found)
 
-	found, err = pd.FindSds("ID", invalidIdentifier)
+	found, err = pd.FindSds(ctx, "ID", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, found)
 }
@@ -119,7 +123,7 @@ func TestCreateSdsInvalid(t *testing.T) {
 	// this is done, in a failure mode, to prevent changing the Protection Domain used for testing
 	sdsName := "invalid"
 	sdsIPList := []string{"0.1.1.1", "0.2.2.2"}
-	sdsID, err := pd.CreateSds(sdsName, sdsIPList)
+	sdsID, err := pd.CreateSds(context.Background(), sdsName, sdsIPList)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", sdsID)
 }
@@ -140,13 +144,15 @@ func TestCreateSdsParamsInvalid(t *testing.T) {
 		Name:   sdsName,
 		IPList: sdsIPList,
 	}
-	sdsID, err := pd.CreateSdsWithParams(sdsParam)
+	sdsID, err := pd.CreateSdsWithParams(context.Background(), sdsParam)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", sdsID)
 }
 
 // TestCompareSdsIDApi checks if all fields for the SDS are same for fetching by ID and Protection Domain
 func TestCompareSdsIDApi(t *testing.T) {
+	ctx := context.Background()
+
 	// get protection domain
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
@@ -156,12 +162,12 @@ func TestCompareSdsIDApi(t *testing.T) {
 	assert.NotNil(t, system)
 
 	// get all sds under the pd
-	sdss, err := pd.GetSds()
+	sdss, err := pd.GetSds(ctx)
 	assert.Nilf(t, err, "Could not get all sds")
 
 	for _, sds := range sdss {
 		// for every sds in the list, check that fetch by ID returns identical struct
-		sdsa, err := system.GetSdsByID(sds.ID)
+		sdsa, err := system.GetSdsByID(ctx, sds.ID)
 		assert.Nilf(t, err, "Could not get sds by ID %s", sds.ID)
 		assert.Equalf(t, true, reflect.DeepEqual(sds, sdsa), "Two forms of sds are not equal for id %s", sds.ID)
 	}
@@ -169,17 +175,19 @@ func TestCompareSdsIDApi(t *testing.T) {
 
 // TestCompareSdsAllApi checks if all fields for the SDS are same for fetching by ID and System
 func TestCompareSdsAllApi(t *testing.T) {
+	ctx := context.Background()
+
 	// get system
 	system := getSystem()
 	assert.NotNil(t, system)
 
 	// get all sds
-	sdss, err := system.GetAllSds()
+	sdss, err := system.GetAllSds(ctx)
 	assert.Nilf(t, err, "Could not get all sds")
 
 	for _, sds := range sdss {
 		// for every sds in the list, check that fetch by ID returns identical struct
-		sdsa, err := system.GetSdsByID(sds.ID)
+		sdsa, err := system.GetSdsByID(ctx, sds.ID)
 		assert.Nilf(t, err, "Could not get sds by ID %s", sds.ID)
 		assert.Equalf(t, true, reflect.DeepEqual(sds, sdsa), "Two forms of sds are not equal for id %s", sds.ID)
 	}
@@ -201,7 +209,7 @@ func TestDeleteSds(t *testing.T) {
 	// attempt to delete an SDS with a invalid Id
 	// this is done, in a failure mode, to prevent removing the data in existance
 	sdsID := "invalid_dc4a564f00000002"
-	err := pd.DeleteSds(sdsID)
+	err := pd.DeleteSds(context.Background(), sdsID)
 	assert.NotNil(t, err)
 }
 
@@ -215,7 +223,7 @@ func TestSetSDSIPRole(t *testing.T) {
 	sdsID := "invalid_dc4a564f00000002"
 	sdsIP := "192.168.0.203"
 	sdsRole := "all"
-	err := pd.SetSDSIPRole(sdsID, sdsIP, sdsRole)
+	err := pd.SetSDSIPRole(context.Background(), sdsID, sdsIP, sdsRole)
 	assert.NotNil(t, err)
 }
 
@@ -228,7 +236,7 @@ func TestRemoveSDSIP(t *testing.T) {
 	// this is done, in a failure mode, to prevent removing the data in existance
 	sdsID := "invalid_dc4a564f00000002"
 	sdsIP := "192.168.0.203"
-	err := pd.RemoveSDSIP(sdsID, sdsIP)
+	err := pd.RemoveSDSIP(context.Background(), sdsID, sdsIP)
 	assert.NotNil(t, err)
 }
 
@@ -240,7 +248,7 @@ func TestSetSdsName(t *testing.T) {
 	// attempt to set SDS name
 	// this is done, in a failure mode, to prevent changing the data in existance
 	sdsID := "invalid_dc4a564f00000002"
-	err := pd.SetSdsName(sdsID, "sds123")
+	err := pd.SetSdsName(context.Background(), sdsID, "sds123")
 	assert.NotNil(t, err)
 }
 
@@ -252,12 +260,14 @@ func TestSetSdsPort(t *testing.T) {
 	// attempt to set SDS port
 	// this is done, in a failure mode, to prevent changing the data in existance
 	sdsID := "Invalid_dc4a564f00000002"
-	err := pd.SetSdsPort(sdsID, 7072)
+	err := pd.SetSdsPort(context.Background(), sdsID, 7072)
 	assert.NotNil(t, err)
 }
 
 // TestFindSds finds the SDS using system instance
 func TestFindSds(t *testing.T) {
+	ctx := context.Background()
+
 	// get system
 	system := getSystem()
 	assert.NotNil(t, system)
@@ -268,12 +278,12 @@ func TestFindSds(t *testing.T) {
 		return
 	}
 
-	found, err := system.FindSds("Name", sds[0].Sds.Name)
+	found, err := system.FindSds(ctx, "Name", sds[0].Sds.Name)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, sds[0].Sds.Name, found.Name)
 
-	found, err = system.FindSds("ID", sds[0].Sds.ID)
+	found, err = system.FindSds(ctx, "ID", sds[0].Sds.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, sds[0].Sds.ID, found.ID)

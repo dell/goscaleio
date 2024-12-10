@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
@@ -20,7 +21,9 @@ import (
 )
 
 func TestCreateAndDeleteSSOUser(t *testing.T) {
-	details, err := C.CreateSSOUser(&types.SSOUserCreateParam{
+	ctx := context.Background()
+
+	details, err := C.CreateSSOUser(ctx, &types.SSOUserCreateParam{
 		UserName: "IntegrationTestSSOUser",
 		Role:     "Monitor",
 		Password: "Ssouser123!",
@@ -29,23 +32,23 @@ func TestCreateAndDeleteSSOUser(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, details)
 
-	details, err = C.GetSSOUser(details.ID)
+	details, err = C.GetSSOUser(ctx, details.ID)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, details)
 
-	details1, err := C.GetSSOUserByFilters("username", "IntegrationTestSSOUser")
+	details1, err := C.GetSSOUserByFilters(ctx, "username", "IntegrationTestSSOUser")
 	assert.Nil(t, err)
 	assert.NotEmpty(t, details1)
 
-	details, err = C.ModifySSOUser(details.ID, &types.SSOUserModifyParam{
+	details, err = C.ModifySSOUser(ctx, details.ID, &types.SSOUserModifyParam{
 		Role: "Technician",
 	})
 	assert.Nil(t, err)
 	assert.NotEmpty(t, details)
 
-	err = C.ResetSSOUserPassword(details.ID, &types.SSOUserModifyParam{Password: "Ssouser1234#"})
+	err = C.ResetSSOUserPassword(ctx, details.ID, &types.SSOUserModifyParam{Password: "Ssouser1234#"})
 	assert.Nil(t, err)
 
-	err = C.DeleteSSOUser(details.ID)
+	err = C.DeleteSSOUser(ctx, details.ID)
 	assert.Nil(t, err)
 }

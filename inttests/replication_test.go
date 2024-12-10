@@ -18,6 +18,7 @@
 package inttests
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -57,7 +58,8 @@ const (
 
 // Test GetPeerMDMs
 func TestGetPeerMDMs(t *testing.T) {
-	srcpeers, err := C.GetPeerMDMs()
+	ctx := context.Background()
+	srcpeers, err := C.GetPeerMDMs(ctx)
 	assert.Nil(t, err)
 
 	var sourceSystemID string
@@ -69,7 +71,7 @@ func TestGetPeerMDMs(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	tgtpeers, err := C2.GetPeerMDMs()
+	tgtpeers, err := C2.GetPeerMDMs(ctx)
 	assert.Nil(t, err)
 
 	var targetSystemID string
@@ -118,7 +120,7 @@ func TestGetPeerSystem(t *testing.T) {
 	srcpeer, err := getPeerMdm()
 	assert.Nil(t, err)
 
-	_, getErr := C.GetPeerMDM(srcpeer.ID)
+	_, getErr := C.GetPeerMDM(context.Background(), srcpeer.ID)
 	assert.Nil(t, getErr)
 }
 
@@ -127,7 +129,7 @@ func TestRemovePeerSystem(t *testing.T) {
 	srcpeer, err := getPeerMdm()
 	assert.Nil(t, err)
 
-	removeErr := C.RemovePeerMdm(srcpeer.ID)
+	removeErr := C.RemovePeerMdm(context.Background(), srcpeer.ID)
 	assert.Nil(t, removeErr)
 }
 
@@ -143,7 +145,7 @@ func TestAddPeerSystem(t *testing.T) {
 		Name:          "PeerSystemTestName",
 	}
 	// Add a Peer System
-	_, err := C.AddPeerMdm(peerPayload)
+	_, err := C.AddPeerMdm(context.Background(), peerPayload)
 	assert.Nil(t, err)
 }
 
@@ -151,15 +153,16 @@ func TestAddPeerSystem(t *testing.T) {
 func TestModifyPeerSystemName(t *testing.T) {
 	srcpeer, err := getPeerMdm()
 	assert.Nil(t, err)
+	ctx := context.Background()
 
 	// Modify name
-	modifyErr := C.ModifyPeerMdmName(srcpeer.ID, &siotypes.ModifyPeerMDMNameParam{
+	modifyErr := C.ModifyPeerMdmName(ctx, srcpeer.ID, &siotypes.ModifyPeerMDMNameParam{
 		NewName: "testName",
 	})
 	assert.Nil(t, modifyErr)
 
 	// Modify Name back to original
-	modifyErr = C.ModifyPeerMdmName(srcpeer.ID, &siotypes.ModifyPeerMDMNameParam{
+	modifyErr = C.ModifyPeerMdmName(ctx, srcpeer.ID, &siotypes.ModifyPeerMDMNameParam{
 		NewName: srcpeer.Name,
 	})
 }
@@ -168,15 +171,16 @@ func TestModifyPeerSystemName(t *testing.T) {
 func TestModifyPeerSystemPort(t *testing.T) {
 	srcpeer, err := getPeerMdm()
 	assert.Nil(t, err)
+	ctx := context.Background()
 
 	// Modify port
-	modifyErr := C.ModifyPeerMdmPort(srcpeer.ID, &siotypes.ModifyPeerMDMPortParam{
+	modifyErr := C.ModifyPeerMdmPort(ctx, srcpeer.ID, &siotypes.ModifyPeerMDMPortParam{
 		NewPort: "7612",
 	})
 	assert.Nil(t, modifyErr)
 
 	// Modify Name back to original
-	modifyErr = C.ModifyPeerMdmPort(srcpeer.ID, &siotypes.ModifyPeerMDMPortParam{
+	modifyErr = C.ModifyPeerMdmPort(ctx, srcpeer.ID, &siotypes.ModifyPeerMDMPortParam{
 		NewPort: fmt.Sprint(srcpeer.Port),
 	})
 }
@@ -185,15 +189,16 @@ func TestModifyPeerSystemPort(t *testing.T) {
 func TestModifyPeerSystemPerformanceParameters(t *testing.T) {
 	srcpeer, err := getPeerMdm()
 	assert.Nil(t, err)
+	ctx := context.Background()
 
 	// Modify port
-	modifyErr := C.ModifyPeerMdmPerformanceParameters(srcpeer.ID, &siotypes.ModifyPeerMdmPerformanceParametersParam{
+	modifyErr := C.ModifyPeerMdmPerformanceParameters(ctx, srcpeer.ID, &siotypes.ModifyPeerMdmPerformanceParametersParam{
 		NewPreformanceProfile: "Compact",
 	})
 	assert.Nil(t, modifyErr)
 
 	// Modify Name back to original
-	modifyErr = C.ModifyPeerMdmPerformanceParameters(srcpeer.ID, &siotypes.ModifyPeerMdmPerformanceParametersParam{
+	modifyErr = C.ModifyPeerMdmPerformanceParameters(ctx, srcpeer.ID, &siotypes.ModifyPeerMdmPerformanceParametersParam{
 		NewPreformanceProfile: srcpeer.PerfProfile,
 	})
 }
@@ -209,13 +214,13 @@ func TestModifyPeerSystemIps(t *testing.T) {
 	}
 
 	// Modify ips
-	modifyErr := C.ModifyPeerMdmIP(srcpeer.ID, ips)
+	modifyErr := C.ModifyPeerMdmIP(context.Background(), srcpeer.ID, ips)
 	assert.Nil(t, modifyErr)
 }
 
 // Make it easier to get a Peer System to run the tests against
 func getPeerMdm() (*siotypes.PeerMDM, error) {
-	srcpeers, err := C.GetPeerMDMs()
+	srcpeers, err := C.GetPeerMDMs(context.Background())
 
 	if err != nil || len(srcpeers) == 0 {
 		return nil, fmt.Errorf("no peer systems found")
@@ -226,7 +231,7 @@ func getPeerMdm() (*siotypes.PeerMDM, error) {
 // Get the Target System
 func getTargetSystem() *goscaleio.System {
 	system := goscaleio.NewSystem(C2)
-	targetSystems, _ := C2.GetSystems()
+	targetSystems, _ := C2.GetSystems(context.Background())
 
 	if len(targetSystems) > 0 {
 		system.System = targetSystems[0]
@@ -251,14 +256,14 @@ func TestGetProtectionDomain(t *testing.T) {
 	assert.NotNil(t, rep.sourceProtectionDomain)
 
 	href := "/api/instances/ProtectionDomain::" + rep.sourceProtectionDomain.ProtectionDomain.ID
-	_, err := getSystem().GetProtectionDomain(href)
+	_, err := getSystem().GetProtectionDomain(context.Background(), href)
 	assert.Nil(t, err)
 }
 
 // Get the Target Protection Domain
 func getTargetProtectionDomain() *goscaleio.ProtectionDomain {
 	targetProtectionDomainName := os.Getenv(targetProtectionDomain)
-	protectionDomains, _ := rep.targetSystem.GetProtectionDomain("")
+	protectionDomains, _ := rep.targetSystem.GetProtectionDomain(context.Background(), "")
 	for i := 0; i < len(protectionDomains); i++ {
 		if protectionDomains[i].Name == targetProtectionDomainName {
 			return goscaleio.NewProtectionDomainEx(C2, protectionDomains[i])
@@ -279,7 +284,7 @@ func TestTargetProtectionDomain(t *testing.T) {
 // Get the Target StoragePool
 func getTargetStoragePool() *goscaleio.StoragePool {
 	targetStoragePoolName := os.Getenv(targetStoragePool)
-	storagePools, _ := rep.targetProtectionDomain.GetStoragePool("")
+	storagePools, _ := rep.targetProtectionDomain.GetStoragePool(context.Background(), "")
 	for i := 0; i < len(storagePools); i++ {
 		if storagePools[i].Name == targetStoragePoolName {
 			return goscaleio.NewStoragePoolEx(C2, storagePools[i])
@@ -305,9 +310,11 @@ func TestLocateVolumesToBeReplicated(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
+	ctx := context.Background()
+
 	srcName := os.Getenv(sourceVolume)
 	assert.NotNil(t, srcName)
-	sourceVolumes, err := rep.sourceStoragePool.GetVolume("", "", "", srcName, false)
+	sourceVolumes, err := rep.sourceStoragePool.GetVolume(ctx, "", "", "", srcName, false)
 	if err != nil {
 		t.Log(err)
 	}
@@ -320,7 +327,7 @@ func TestLocateVolumesToBeReplicated(t *testing.T) {
 
 	dstName := os.Getenv(targetVolume)
 	assert.NotNil(t, dstName)
-	targetVolumes, err := rep.targetStoragePool.GetVolume("", "", "", dstName, false)
+	targetVolumes, err := rep.targetStoragePool.GetVolume(ctx, "", "", "", dstName, false)
 	if err != nil {
 		t.Log(err)
 	}
@@ -346,7 +353,7 @@ func TestCreateReplicationConsistencyGroup(t *testing.T) {
 		DestinationSystemID:      rep.targetSystem.System.ID,
 	}
 
-	rcgResp, err := C.CreateReplicationConsistencyGroup(rcgPayload)
+	rcgResp, err := C.CreateReplicationConsistencyGroup(context.Background(), rcgPayload)
 	assert.Nil(t, err)
 
 	log.Debugf("RCG ID: %s", rcgResp.ID)
@@ -361,7 +368,7 @@ func TestGetReplicationConsistencyGroups(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	rcgs, err := C.GetReplicationConsistencyGroups()
+	rcgs, err := C.GetReplicationConsistencyGroups(context.Background())
 	assert.Nil(t, err)
 	for i := 0; i < len(rcgs); i++ {
 		assert.Nil(t, err)
@@ -380,11 +387,12 @@ func TestAddReplicationPair(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
+	ctx := context.Background()
 
 	srcName := os.Getenv(sourceVolume)
 	assert.NotNil(t, srcName)
 
-	localVolumeID, err := C.FindVolumeID(srcName)
+	localVolumeID, err := C.FindVolumeID(ctx, srcName)
 	assert.Nil(t, err)
 
 	t.Logf("[TestAddReplicationPair] Local Volume ID: %s", localVolumeID)
@@ -392,12 +400,12 @@ func TestAddReplicationPair(t *testing.T) {
 	dstName := os.Getenv(targetVolume)
 	assert.NotNil(t, dstName)
 
-	remoteVolumeID, err := C2.FindVolumeID(dstName)
+	remoteVolumeID, err := C2.FindVolumeID(ctx, dstName)
 	assert.Nil(t, err)
 
 	t.Logf("[TestAddReplicationPair] Remote Volume ID: %s", remoteVolumeID)
 
-	_, err = C.GetVolume("", strings.TrimSpace(localVolumeID), "", "", false)
+	_, err = C.GetVolume(ctx, "", strings.TrimSpace(localVolumeID), "", "", false)
 	assert.Nil(t, err)
 
 	rpPayload := &siotypes.QueryReplicationPair{
@@ -408,7 +416,7 @@ func TestAddReplicationPair(t *testing.T) {
 		CopyType:                      "OnlineCopy",
 	}
 
-	rpResp, err := C.CreateReplicationPair(rpPayload)
+	rpResp, err := C.CreateReplicationPair(ctx, rpPayload)
 	assert.Nil(t, err)
 
 	t.Logf("ReplicationPairID: %s", rpResp.ID)
@@ -426,7 +434,7 @@ func TestQueryReplicationPairs(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	pairs, err := rep.rcg.GetReplicationPairs()
+	pairs, err := rep.rcg.GetReplicationPairs(context.Background())
 	assert.Nil(t, err)
 
 	for _, pair := range pairs {
@@ -442,7 +450,7 @@ func TestQueryReplicationPair(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	pair, err := C.GetReplicationPair(rep.pair.ReplicaitonPair.ID)
+	pair, err := C.GetReplicationPair(context.Background(), rep.pair.ReplicaitonPair.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, pair)
 }
@@ -453,13 +461,15 @@ func TestPauseAndResumeReplicationPair(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
+	ctx := context.Background()
+
 	// Pause
-	pairP, err := C.PausePairInitialCopy(rep.pair.ReplicaitonPair.ID)
+	pairP, err := C.PausePairInitialCopy(ctx, rep.pair.ReplicaitonPair.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, pairP)
 
 	// Resume
-	pairR, err := C.ResumePairInitialCopy(rep.pair.ReplicaitonPair.ID)
+	pairR, err := C.ResumePairInitialCopy(ctx, rep.pair.ReplicaitonPair.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, pairR)
 }
@@ -471,15 +481,16 @@ func TestQueryReplicationPairsStatistics(t *testing.T) {
 	}
 
 	assert.NotNil(t, rep.pair)
+	ctx := context.Background()
 
 	t.Logf("Waiting for Replication Pair %s to be complete.", rep.pair.ReplicaitonPair.Name)
 	for i := 0; i < 30; i++ {
-		rpResp, err := rep.pair.GetReplicationPairStatistics()
+		rpResp, err := rep.pair.GetReplicationPairStatistics(ctx)
 		assert.Nil(t, err)
 
 		t.Logf("Copied %f", rpResp.InitialCopyProgress)
 
-		group, err := C.GetReplicationConsistencyGroupByID(rep.rcgID)
+		group, err := C.GetReplicationConsistencyGroupByID(ctx, rep.rcgID)
 		assert.Nil(t, err)
 
 		// Check if complete
@@ -498,7 +509,7 @@ func TestCreateReplicationConsistencyGroupSnapshot(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	resp, err := rep.rcg.CreateReplicationConsistencyGroupSnapshot()
+	resp, err := rep.rcg.CreateReplicationConsistencyGroupSnapshot(context.Background())
 	assert.Nil(t, err)
 
 	t.Logf("Consistency Group Snapshot ID: %s", resp.SnapshotGroupID)
@@ -510,8 +521,9 @@ func TestSnapshotRetrieval(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
+	ctx := context.Background()
 
-	pairs, err := rep.rcg.GetReplicationPairs()
+	pairs, err := rep.rcg.GetReplicationPairs(ctx)
 	assert.Nil(t, err)
 
 	var vols []string
@@ -522,7 +534,7 @@ func TestSnapshotRetrieval(t *testing.T) {
 
 	actionAttributes := make(map[string]string)
 	for _, vol := range vols {
-		result, err := C2.GetVolume("", "", vol, "", false)
+		result, err := C2.GetVolume(ctx, "", "", vol, "", false)
 		if err != nil {
 			t.Errorf("Get Vols Error: %s\n", err.Error())
 		} else {
@@ -543,7 +555,7 @@ func TestExecuteFailoverOnReplicationGroup(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	err := rep.rcg.ExecuteFailoverOnReplicationGroup()
+	err := rep.rcg.ExecuteFailoverOnReplicationGroup(context.Background())
 	assert.Nil(t, err)
 }
 
@@ -556,7 +568,7 @@ func TestExecuteRestoreOnReplicationGroup(t *testing.T) {
 	err := ensureFailover(t)
 	assert.Nil(t, err)
 
-	err = rep.rcg.ExecuteRestoreOnReplicationGroup()
+	err = rep.rcg.ExecuteRestoreOnReplicationGroup(context.Background())
 	assert.Nil(t, err)
 }
 
@@ -569,7 +581,7 @@ func TestExecuteSwitchoverOnReplicationGroup(t *testing.T) {
 	err := waitForConsistency(t)
 	assert.Nil(t, err)
 
-	err = rep.rcg.ExecuteSwitchoverOnReplicationGroup(false)
+	err = rep.rcg.ExecuteSwitchoverOnReplicationGroup(context.Background(), false)
 	assert.Nil(t, err)
 }
 
@@ -582,7 +594,7 @@ func TestExecuteReverseOnReplicationGroup(t *testing.T) {
 	err := ensureFailover(t)
 	assert.Nil(t, err)
 
-	err = rep.rcg.ExecuteReverseOnReplicationGroup()
+	err = rep.rcg.ExecuteReverseOnReplicationGroup(context.Background())
 	assert.Nil(t, err)
 }
 
@@ -595,7 +607,7 @@ func TestExecutePauseOnReplicationGroup(t *testing.T) {
 	err := waitForConsistency(t)
 	assert.Nil(t, err)
 
-	err = rep.rcg.ExecutePauseOnReplicationGroup()
+	err = rep.rcg.ExecutePauseOnReplicationGroup(context.Background())
 	assert.Nil(t, err)
 }
 
@@ -605,7 +617,7 @@ func TestExecuteResumeOnReplicationGroup(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	err := rep.rcg.ExecuteResumeOnReplicationGroup()
+	err := rep.rcg.ExecuteResumeOnReplicationGroup(context.Background())
 	assert.Nil(t, err)
 }
 
@@ -614,7 +626,7 @@ func TestSetRPOOnReplicationGroup(t *testing.T) {
 	// Set the RCG context
 	TestGetReplicationConsistencyGroups(t)
 	// Update the RPO
-	err := rep.rcg.SetRPOOnReplicationGroup(siotypes.SetRPOReplicationConsistencyGroup{RpoInSeconds: "60"})
+	err := rep.rcg.SetRPOOnReplicationGroup(context.Background(), siotypes.SetRPOReplicationConsistencyGroup{RpoInSeconds: "60"})
 	assert.Nil(t, err)
 }
 
@@ -622,7 +634,7 @@ func TestSetRPOOnReplicationGroup(t *testing.T) {
 func TestSetTargetVolumeAccessModeOnReplicationGroup(t *testing.T) {
 	// Set the RCG context
 	TestGetReplicationConsistencyGroups(t)
-	err := rep.rcg.SetTargetVolumeAccessModeOnReplicationGroup(siotypes.SetTargetVolumeAccessModeOnReplicationGroup{TargetVolumeAccessMode: "ReadOnly"})
+	err := rep.rcg.SetTargetVolumeAccessModeOnReplicationGroup(context.Background(), siotypes.SetTargetVolumeAccessModeOnReplicationGroup{TargetVolumeAccessMode: "ReadOnly"})
 	assert.Nil(t, err)
 }
 
@@ -630,11 +642,13 @@ func TestSetTargetVolumeAccessModeOnReplicationGroup(t *testing.T) {
 func TestSetNewNameOnReplicationGroup(t *testing.T) {
 	// Set the RCG context
 	TestGetReplicationConsistencyGroups(t)
-	err := rep.rcg.SetNewNameOnReplicationGroup(siotypes.SetNewNameOnReplicationGroup{NewName: "UpdatedNameRCG"})
+	ctx := context.Background()
+
+	err := rep.rcg.SetNewNameOnReplicationGroup(ctx, siotypes.SetNewNameOnReplicationGroup{NewName: "UpdatedNameRCG"})
 	assert.Nil(t, err)
 	// Sleep for 10 to make sure the name is updated, then update it back to the original name
 	time.Sleep(10 * time.Second)
-	err = rep.rcg.SetNewNameOnReplicationGroup(siotypes.SetNewNameOnReplicationGroup{NewName: "inttestrcg"})
+	err = rep.rcg.SetNewNameOnReplicationGroup(ctx, siotypes.SetNewNameOnReplicationGroup{NewName: "inttestrcg"})
 	assert.Nil(t, err)
 }
 
@@ -642,7 +656,7 @@ func TestSetNewNameOnReplicationGroup(t *testing.T) {
 func TestExecuteInconsistentOnReplicationGroup(t *testing.T) {
 	// Set the RCG context
 	TestGetReplicationConsistencyGroups(t)
-	err := rep.rcg.ExecuteInconsistentOnReplicationGroup()
+	err := rep.rcg.ExecuteInconsistentOnReplicationGroup(context.Background())
 	assert.Nil(t, err)
 }
 
@@ -650,7 +664,7 @@ func TestExecuteInconsistentOnReplicationGroup(t *testing.T) {
 func TestExecuteConsistentOnReplicationGroup(t *testing.T) {
 	// Set the RCG context
 	TestGetReplicationConsistencyGroups(t)
-	err := rep.rcg.ExecuteConsistentOnReplicationGroup()
+	err := rep.rcg.ExecuteConsistentOnReplicationGroup(context.Background())
 	assert.Nil(t, err)
 }
 
@@ -658,7 +672,7 @@ func TestExecuteConsistentOnReplicationGroup(t *testing.T) {
 func TestExecuteTerminateOnReplicationGroup(t *testing.T) {
 	// Set the RCG context
 	TestGetReplicationConsistencyGroups(t)
-	err := rep.rcg.ExecuteTerminateOnReplicationGroup()
+	err := rep.rcg.ExecuteTerminateOnReplicationGroup(context.Background())
 	assert.Nil(t, err)
 }
 
@@ -666,7 +680,7 @@ func TestExecuteTerminateOnReplicationGroup(t *testing.T) {
 func TestExecuteActivateOnReplicationGroup(t *testing.T) {
 	// Set the RCG context
 	TestGetReplicationConsistencyGroups(t)
-	err := rep.rcg.ExecuteActivateOnReplicationGroup()
+	err := rep.rcg.ExecuteActivateOnReplicationGroup(context.Background())
 	assert.Nil(t, err)
 }
 
@@ -678,6 +692,7 @@ func TestResizeReplicationPair(t *testing.T) {
 
 	t.Logf("[TestResizeReplicationPair]  Failing over to get DR in Neutral state..")
 	TestExecuteFailoverOnReplicationGroup(t)
+	ctx := context.Background()
 
 	err := ensureFailover(t)
 	assert.Nil(t, err)
@@ -685,20 +700,20 @@ func TestResizeReplicationPair(t *testing.T) {
 	srcName := os.Getenv(sourceVolume)
 	assert.NotNil(t, srcName)
 
-	localVolumeID, err := C.FindVolumeID(srcName)
+	localVolumeID, err := C.FindVolumeID(ctx, srcName)
 	assert.Nil(t, err)
 
 	dstName := os.Getenv(targetVolume)
 	assert.NotNil(t, dstName)
 
-	remoteVolumeID, err := C2.FindVolumeID(dstName)
+	remoteVolumeID, err := C2.FindVolumeID(ctx, dstName)
 	assert.Nil(t, err)
 
-	sourceVol, err := C.GetVolume("", strings.TrimSpace(localVolumeID), "", "", false)
+	sourceVol, err := C.GetVolume(ctx, "", strings.TrimSpace(localVolumeID), "", "", false)
 	assert.Nil(t, err)
 	assert.NotNil(t, sourceVol)
 
-	destVol, err := C2.GetVolume("", strings.TrimSpace(remoteVolumeID), "", "", false)
+	destVol, err := C2.GetVolume(ctx, "", strings.TrimSpace(remoteVolumeID), "", "", false)
 	assert.Nil(t, err)
 	assert.NotNil(t, destVol)
 
@@ -707,7 +722,7 @@ func TestResizeReplicationPair(t *testing.T) {
 	volume.Volume = destVol[0]
 	existingSizeGB := volume.Volume.SizeInKb / (1024 * 1024)
 	newSize := existingSizeGB * 2
-	err = volume.SetVolumeSize(strconv.Itoa(int(newSize)))
+	err = volume.SetVolumeSize(ctx, strconv.Itoa(int(newSize)))
 	assert.Nil(t, err)
 
 	// Delay to ensure that the destination syncs up...
@@ -718,7 +733,7 @@ func TestResizeReplicationPair(t *testing.T) {
 	existingSizeGB = volume.Volume.SizeInKb / (1024 * 1024)
 	newSize = existingSizeGB * 2
 	// double the szie of the volume
-	err = volume.SetVolumeSize(strconv.Itoa(int(newSize)))
+	err = volume.SetVolumeSize(ctx, strconv.Itoa(int(newSize)))
 	assert.Nil(t, err)
 
 	// Restart the initial copy process?
@@ -732,8 +747,9 @@ func TestRemoveReplicationPairFromVolume(t *testing.T) {
 	if C2 == nil {
 		t.Skip("no client connection to replication target system")
 	}
+	ctx := context.Background()
 
-	pairs, err := C.GetAllReplicationPairs()
+	pairs, err := C.GetAllReplicationPairs(ctx)
 	assert.Nil(t, err)
 
 	var replicationPairID string
@@ -749,7 +765,7 @@ func TestRemoveReplicationPairFromVolume(t *testing.T) {
 		assert.NotNil(t, replicationPairID)
 	}
 
-	_, err = rep.pair.RemoveReplicationPair(true)
+	_, err = rep.pair.RemoveReplicationPair(ctx, true)
 	assert.Nil(t, err)
 
 	t.Logf("[TestRemoveReplicationPairFromVolume] Removed the following pair %s", rep.pair.ReplicaitonPair.Name)
@@ -764,7 +780,7 @@ func TestFreezeReplcationGroup(t *testing.T) {
 		t.Skip("no client connection to replication target system")
 	}
 
-	err := rep.rcg.FreezeReplicationConsistencyGroup(rep.rcgID)
+	err := rep.rcg.FreezeReplicationConsistencyGroup(context.Background(), rep.rcgID)
 	assert.Nil(t, err)
 
 	// Delay to verify on the UI.
@@ -779,7 +795,7 @@ func TestUnfreezeReplcationGroup(t *testing.T) {
 	TestGetReplicationConsistencyGroups(t)
 	assert.NotNil(t, rep.rcg)
 
-	err := rep.rcg.UnfreezeReplicationConsistencyGroup()
+	err := rep.rcg.UnfreezeReplicationConsistencyGroup(context.Background())
 	assert.Nil(t, err)
 }
 
@@ -791,7 +807,7 @@ func TestRemoveReplicationConsistencyGroup(t *testing.T) {
 	TestGetReplicationConsistencyGroups(t)
 	assert.NotNil(t, rep.rcg)
 
-	err := rep.rcg.RemoveReplicationConsistencyGroup(false)
+	err := rep.rcg.RemoveReplicationConsistencyGroup(context.Background(), false)
 	assert.Nil(t, err)
 }
 
@@ -810,7 +826,7 @@ func parseLinks(links []*siotypes.Link, t *testing.T) {
 
 func waitForConsistency(t *testing.T) error {
 	for i := 0; i < 15; i++ {
-		group, err := C.GetReplicationConsistencyGroupByID(rep.rcgID)
+		group, err := C.GetReplicationConsistencyGroupByID(context.Background(), rep.rcgID)
 		if err != nil {
 			continue
 		}
@@ -827,7 +843,7 @@ func waitForConsistency(t *testing.T) error {
 
 func ensureFailover(t *testing.T) error {
 	for i := 0; i < 30; i++ {
-		group, err := C.GetReplicationConsistencyGroupByID(rep.rcgID)
+		group, err := C.GetReplicationConsistencyGroupByID(context.Background(), rep.rcgID)
 		if err != nil {
 			return errors.New("No replication consistency groups found: %")
 		}

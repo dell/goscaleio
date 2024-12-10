@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -45,7 +46,7 @@ func NewProtectionDomainEx(client *Client, pd *types.ProtectionDomain) *Protecti
 }
 
 // CreateProtectionDomain creates a ProtectionDomain
-func (s *System) CreateProtectionDomain(name string) (string, error) {
+func (s *System) CreateProtectionDomain(ctx context.Context, name string) (string, error) {
 	defer TimeSpent("CreateProtectionDomain", time.Now())
 
 	protectionDomainParam := &types.ProtectionDomainParam{
@@ -55,7 +56,7 @@ func (s *System) CreateProtectionDomain(name string) (string, error) {
 	path := fmt.Sprintf("/api/types/ProtectionDomain/instances")
 
 	pd := types.ProtectionDomainResp{}
-	err := s.client.getJSONWithRetry(
+	err := s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, protectionDomainParam, &pd)
 	if err != nil {
 		return "", err
@@ -65,9 +66,9 @@ func (s *System) CreateProtectionDomain(name string) (string, error) {
 }
 
 // GetProtectionDomainEx fetches a ProtectionDomain by ID with embedded client
-func (s *System) GetProtectionDomainEx(id string) (*ProtectionDomain, error) {
+func (s *System) GetProtectionDomainEx(ctx context.Context, id string) (*ProtectionDomain, error) {
 	defer TimeSpent("GetProtectionDomainEx", time.Now())
-	pdResp, err := s.FindProtectionDomainByID(id)
+	pdResp, err := s.FindProtectionDomainByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -75,9 +76,9 @@ func (s *System) GetProtectionDomainEx(id string) (*ProtectionDomain, error) {
 }
 
 // DeleteProtectionDomain will delete a protection domain
-func (s *System) DeleteProtectionDomain(name string) error {
+func (s *System) DeleteProtectionDomain(ctx context.Context, name string) error {
 	// get the protection domain
-	domain, err := s.FindProtectionDomain("", name, "")
+	domain, err := s.FindProtectionDomain(ctx, "", name, "")
 	if err != nil {
 		return err
 	}
@@ -91,7 +92,7 @@ func (s *System) DeleteProtectionDomain(name string) error {
 
 	path := fmt.Sprintf("%v/action/removeProtectionDomain", link.HREF)
 
-	err = s.client.getJSONWithRetry(
+	err = s.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, protectionDomainParam, nil)
 	if err != nil {
 		return err
@@ -101,7 +102,7 @@ func (s *System) DeleteProtectionDomain(name string) error {
 }
 
 // Delete (ProtectionDomain) will delete a protection domain
-func (pd *ProtectionDomain) Delete() error {
+func (pd *ProtectionDomain) Delete(ctx context.Context) error {
 	link, err := GetLink(pd.ProtectionDomain.Links, "self")
 	if err != nil {
 		return err
@@ -111,7 +112,7 @@ func (pd *ProtectionDomain) Delete() error {
 
 	path := fmt.Sprintf("%v/action/removeProtectionDomain", link.HREF)
 
-	err = pd.client.getJSONWithRetry(
+	err = pd.client.getJSONWithRetry(ctx,
 		http.MethodPost, path, protectionDomainParam, nil)
 	if err != nil {
 		return err
@@ -121,7 +122,7 @@ func (pd *ProtectionDomain) Delete() error {
 }
 
 // GetProtectionDomain returns a ProtectionDomain
-func (s *System) GetProtectionDomain(
+func (s *System) GetProtectionDomain(ctx context.Context,
 	pdhref string,
 ) ([]*types.ProtectionDomain, error) {
 	defer TimeSpent("GetprotectionDomain", time.Now())
@@ -141,10 +142,10 @@ func (s *System) GetProtectionDomain(
 			return nil, err
 		}
 
-		err = s.client.getJSONWithRetry(
+		err = s.client.getJSONWithRetry(ctx,
 			http.MethodGet, link.HREF, nil, &pds)
 	} else {
-		err = s.client.getJSONWithRetry(
+		err = s.client.getJSONWithRetry(ctx,
 			http.MethodGet, pdhref, nil, pd)
 	}
 	if err != nil {
@@ -158,12 +159,12 @@ func (s *System) GetProtectionDomain(
 }
 
 // FindProtectionDomain returns a ProtectionDomain
-func (s *System) FindProtectionDomain(
+func (s *System) FindProtectionDomain(ctx context.Context,
 	id, name, href string,
 ) (*types.ProtectionDomain, error) {
 	defer TimeSpent("FindProtectionDomain", time.Now())
 
-	pds, err := s.GetProtectionDomain(href)
+	pds, err := s.GetProtectionDomain(ctx, href)
 	if err != nil {
 		return nil, fmt.Errorf("Error getting protection domains %s", err)
 	}
@@ -178,11 +179,11 @@ func (s *System) FindProtectionDomain(
 }
 
 // FindProtectionDomainByID returns the ProtectionDomain having a particular ID
-func (s *System) FindProtectionDomainByID(id string) (*types.ProtectionDomain, error) {
+func (s *System) FindProtectionDomainByID(ctx context.Context, id string) (*types.ProtectionDomain, error) {
 	defer TimeSpent("FindProtectionDomainByID", time.Now())
 
 	href := fmt.Sprintf("/api/instances/ProtectionDomain::%s", id)
-	pds, err := s.GetProtectionDomain(href)
+	pds, err := s.GetProtectionDomain(ctx, href)
 	if err != nil {
 		return nil, fmt.Errorf("error getting protection domain by id: %s", err)
 	}
@@ -193,7 +194,7 @@ func (s *System) FindProtectionDomainByID(id string) (*types.ProtectionDomain, e
 }
 
 // FindProtectionDomainByName returns the ProtectionDomain having a particular name
-func (s *System) FindProtectionDomainByName(name string) (*types.ProtectionDomain, error) {
+func (s *System) FindProtectionDomainByName(ctx context.Context, name string) (*types.ProtectionDomain, error) {
 	defer TimeSpent("FindProtectionDomainByName", time.Now())
 
 	var id string
@@ -201,30 +202,30 @@ func (s *System) FindProtectionDomainByName(name string) (*types.ProtectionDomai
 	body := map[string]string{
 		"name": name,
 	}
-	err := s.client.getJSONWithRetry(http.MethodPost, path, body, &id)
+	err := s.client.getJSONWithRetry(ctx, http.MethodPost, path, body, &id)
 	if err != nil {
 		return nil, fmt.Errorf("error getting protection domain by name: %s", err)
 	}
-	return s.FindProtectionDomainByID(id)
+	return s.FindProtectionDomainByID(ctx, id)
 }
 
 // SetName sets the name of the pd
-func (pd *ProtectionDomain) SetName(name string) error {
+func (pd *ProtectionDomain) SetName(ctx context.Context, name string) error {
 	path := "/api/instances/ProtectionDomain::%s/action/setProtectionDomainName"
 	nameParam := types.ProtectionDomainParam{
 		Name: name,
 	}
-	return pd.setParam(path, nameParam)
+	return pd.setParam(ctx, path, nameParam)
 }
 
 // Refresh reads and stores current values of the pd
-func (pd *ProtectionDomain) Refresh() error {
+func (pd *ProtectionDomain) Refresh(ctx context.Context) error {
 	defer TimeSpent("Refresh Protection Domain", time.Now())
 
 	path := fmt.Sprintf("/api/instances/ProtectionDomain::%s", pd.ProtectionDomain.ID)
 
 	pdResp := types.ProtectionDomain{}
-	err := pd.client.getJSONWithRetry(
+	err := pd.client.getJSONWithRetry(ctx,
 		http.MethodGet, path, &types.EmptyPayload{}, &pdResp)
 	if err != nil {
 		return err
@@ -234,66 +235,66 @@ func (pd *ProtectionDomain) Refresh() error {
 }
 
 // SetRfcacheParams sets the Read Flash Cache params of the pd
-func (pd *ProtectionDomain) SetRfcacheParams(params types.PDRfCacheParams) error {
+func (pd *ProtectionDomain) SetRfcacheParams(ctx context.Context, params types.PDRfCacheParams) error {
 	path := "/api/instances/ProtectionDomain::%s/action/setRfcacheParameters"
-	return pd.setParam(path, params)
+	return pd.setParam(ctx, path, params)
 }
 
 // SetSdsNetworkLimits sets IOPS limits on all SDS under the pd
-func (pd *ProtectionDomain) SetSdsNetworkLimits(params types.SdsNetworkLimitParams) error {
+func (pd *ProtectionDomain) SetSdsNetworkLimits(ctx context.Context, params types.SdsNetworkLimitParams) error {
 	path := "/api/instances/ProtectionDomain::%s/action/setSdsNetworkLimits"
-	return pd.setParam(path, params)
+	return pd.setParam(ctx, path, params)
 }
 
-func (pd *ProtectionDomain) setParam(path string, param any) error {
+func (pd *ProtectionDomain) setParam(ctx context.Context, path string, param any) error {
 	link := fmt.Sprintf(path, pd.ProtectionDomain.ID)
-	return pd.client.getJSONWithRetry(http.MethodPost, link, param, nil)
+	return pd.client.getJSONWithRetry(ctx, http.MethodPost, link, param, nil)
 }
 
 // Activate activates the Protection domain
-func (pd *ProtectionDomain) Activate(forceActivate bool) error {
+func (pd *ProtectionDomain) Activate(ctx context.Context, forceActivate bool) error {
 	path := "/api/instances/ProtectionDomain::%s/action/activateProtectionDomain"
-	return pd.setParam(path, map[string]string{
+	return pd.setParam(ctx, path, map[string]string{
 		"forceActivate": types.GetBoolType(forceActivate),
 	})
 }
 
 // InActivate disables the Protection domain
-func (pd *ProtectionDomain) InActivate(forceShutDown bool) error {
+func (pd *ProtectionDomain) InActivate(ctx context.Context, forceShutDown bool) error {
 	path := "/api/instances/ProtectionDomain::%s/action/inactivateProtectionDomain"
-	return pd.setParam(path, map[string]string{
+	return pd.setParam(ctx, path, map[string]string{
 		"forceShutdown": types.GetBoolType(forceShutDown),
 	})
 }
 
 // EnableRfcache enables SDS Read Flash cache for entire Protection Domain
-func (pd *ProtectionDomain) EnableRfcache() error {
+func (pd *ProtectionDomain) EnableRfcache(ctx context.Context) error {
 	path := "/api/instances/ProtectionDomain::%s/action/enableSdsRfcache"
-	return pd.setParam(path, &types.EmptyPayload{})
+	return pd.setParam(ctx, path, &types.EmptyPayload{})
 }
 
 // DisableRfcache disables SDS Read Flash cache for entire Protection Domain
-func (pd *ProtectionDomain) DisableRfcache() error {
+func (pd *ProtectionDomain) DisableRfcache(ctx context.Context) error {
 	path := "/api/instances/ProtectionDomain::%s/action/disableSdsRfcache"
-	return pd.setParam(path, &types.EmptyPayload{})
+	return pd.setParam(ctx, path, &types.EmptyPayload{})
 }
 
 // DisableFGLMcache disables Fine Granularity Metadata cache for the Protection Domain
-func (pd *ProtectionDomain) DisableFGLMcache() error {
+func (pd *ProtectionDomain) DisableFGLMcache(ctx context.Context) error {
 	path := "/api/instances/ProtectionDomain::%s/action/disableFglMetadataCache"
-	return pd.setParam(path, &types.EmptyPayload{})
+	return pd.setParam(ctx, path, &types.EmptyPayload{})
 }
 
 // EnableFGLMcache enables Fine Granularity Metadata cache for the Protection Domain
-func (pd *ProtectionDomain) EnableFGLMcache() error {
+func (pd *ProtectionDomain) EnableFGLMcache(ctx context.Context) error {
 	path := "/api/instances/ProtectionDomain::%s/action/enableFglMetadataCache"
-	return pd.setParam(path, &types.EmptyPayload{})
+	return pd.setParam(ctx, path, &types.EmptyPayload{})
 }
 
 // SetDefaultFGLMcacheSize sets the default FGL Metadata for all SDSs under the Protection Domain
-func (pd *ProtectionDomain) SetDefaultFGLMcacheSize(cacheSizeInMB int) error {
+func (pd *ProtectionDomain) SetDefaultFGLMcacheSize(ctx context.Context, cacheSizeInMB int) error {
 	path := "/api/instances/ProtectionDomain::%s/action/setDefaultFglMetadataCacheSize"
-	return pd.setParam(path, map[string]string{
+	return pd.setParam(ctx, path, map[string]string{
 		"cacheSizeInMB": strconv.Itoa(cacheSizeInMB),
 	})
 }

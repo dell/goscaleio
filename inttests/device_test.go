@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -31,7 +32,7 @@ func getAllDevices(t *testing.T) []*goscaleio.Device {
 	}
 
 	var allDevice []*goscaleio.Device
-	devices, err := pool.GetDevice()
+	devices, err := pool.GetDevice(context.Background())
 	assert.Nil(t, err)
 	assert.NotZero(t, len(devices))
 	for _, d := range devices {
@@ -49,7 +50,7 @@ func getAllDevices(t *testing.T) []*goscaleio.Device {
 func getAllDevicesFromSystem(t *testing.T) []goscaleio.Device {
 	system := getSystem()
 	var allDevice []goscaleio.Device
-	devices, err1 := system.GetAllDevice()
+	devices, err1 := system.GetAllDevice(context.Background())
 	assert.Nil(t, err1)
 	assert.NotZero(t, len(devices))
 	for _, d := range devices {
@@ -73,7 +74,7 @@ func getAllSdsDevices(t *testing.T) []*goscaleio.Device {
 	}
 
 	var allDevice []*goscaleio.Device
-	devices, err := sds.GetDevice()
+	devices, err := sds.GetDevice(context.Background())
 	assert.Nil(t, err)
 	assert.NotZero(t, len(devices))
 	for _, d := range devices {
@@ -110,12 +111,14 @@ func TestGetDeviceByAttribute(t *testing.T) {
 		return
 	}
 
-	found, err := pool.FindDevice("Name", devices[0].Device.Name)
+	ctx := context.Background()
+
+	found, err := pool.FindDevice(ctx, "Name", devices[0].Device.Name)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, devices[0].Device.Name, found.Name)
 
-	found, err = pool.FindDevice("ID", devices[0].Device.ID)
+	found, err = pool.FindDevice(ctx, "ID", devices[0].Device.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, devices[0].Device.ID, found.ID)
@@ -136,11 +139,13 @@ func TestGetDeviceByAttributeInvalid(t *testing.T) {
 		return
 	}
 
-	found, err := pool.FindDevice("Name", invalidIdentifier)
+	ctx := context.Background()
+
+	found, err := pool.FindDevice(ctx, "Name", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, found)
 
-	found, err = pool.FindDevice("ID", invalidIdentifier)
+	found, err = pool.FindDevice(ctx, "ID", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, found)
 }
@@ -148,19 +153,20 @@ func TestGetDeviceByAttributeInvalid(t *testing.T) {
 // TestGetDeviceByAttribute gets a single specific Device by attribute
 func TestGetDeviceByField(t *testing.T) {
 	system := getSystem()
-	devices, err1 := system.GetAllDevice()
+	ctx := context.Background()
+	devices, err1 := system.GetAllDevice(ctx)
 	assert.NotNil(t, devices)
 	assert.NotZero(t, len(devices))
 	if devices == nil || err1 != nil {
 		return
 	}
 
-	found, err := system.GetDeviceByField("Name", devices[0].Name)
+	found, err := system.GetDeviceByField(ctx, "Name", devices[0].Name)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, devices[0].Name, found[0].Name)
 
-	found, err = system.GetDeviceByField("ID", devices[0].ID)
+	found, err = system.GetDeviceByField(ctx, "ID", devices[0].ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, devices[0].ID, found[0].ID)
@@ -176,7 +182,7 @@ func TestAddDeviceInvalid(t *testing.T) {
 		SdsID:                 invalidIdentifier,
 	}
 
-	deviceID, err := pool.AttachDevice(dev)
+	deviceID, err := pool.AttachDevice(context.Background(), dev)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", deviceID)
 }
@@ -202,11 +208,13 @@ func TestAddDeviceValid(t *testing.T) {
 		SdsID:                 sdsID,
 	}
 
-	deviceID, err := pool.AttachDevice(dev)
+	ctx := context.Background()
+
+	deviceID, err := pool.AttachDevice(ctx, dev)
 	assert.Nil(t, err)
 	assert.NotNil(t, deviceID)
 
-	err = pool.RemoveDevice(deviceID)
+	err = pool.RemoveDevice(ctx, deviceID)
 	assert.Nil(t, err)
 }
 
@@ -223,19 +231,21 @@ func TestDeviceSetName(t *testing.T) {
 		SdsID:                 sdsID,
 	}
 
-	deviceID, err := pool.AttachDevice(dev)
+	ctx := context.Background()
+
+	deviceID, err := pool.AttachDevice(ctx, dev)
 	assert.Nil(t, err)
 	assert.NotNil(t, deviceID)
 
-	err = pool.SetDeviceName(deviceID, "device_renamed")
+	err = pool.SetDeviceName(ctx, deviceID, "device_renamed")
 	assert.Nil(t, err)
 
 	system := getSystem()
-	device, err1 := system.GetDevice(deviceID)
+	device, err1 := system.GetDevice(ctx, deviceID)
 	assert.Nil(t, err1)
 	assert.Equal(t, device.Name, "device_renamed")
 
-	err = pool.RemoveDevice(deviceID)
+	err = pool.RemoveDevice(ctx, deviceID)
 	assert.Nil(t, err)
 }
 
@@ -251,16 +261,18 @@ func TestDeviceMediaType(t *testing.T) {
 		MediaType: "HDD",
 	}
 
+	ctx := context.Background()
+
 	// create the pool
-	poolID, err := domain.CreateStoragePool(sp)
+	poolID, err := domain.CreateStoragePool(ctx, sp)
 	assert.Nil(t, err)
 	assert.NotNil(t, poolID)
 
-	poolID1, err1 := domain.ModifyStoragePoolMedia(poolID, "Transitional")
+	poolID1, err1 := domain.ModifyStoragePoolMedia(ctx, poolID, "Transitional")
 	assert.Nil(t, err1)
 	assert.NotNil(t, poolID1)
 
-	pool, err := domain.FindStoragePool(poolID, "", "")
+	pool, err := domain.FindStoragePool(ctx, poolID, "", "")
 	assert.Nil(t, err)
 	assert.NotNil(t, pool)
 
@@ -276,24 +288,24 @@ func TestDeviceMediaType(t *testing.T) {
 		MediaType:             "HDD",
 	}
 
-	deviceID, err := spInstance.AttachDevice(dev)
+	deviceID, err := spInstance.AttachDevice(ctx, dev)
 	assert.Nil(t, err)
 	assert.NotNil(t, deviceID)
 
-	err = spInstance.SetDeviceMediaType(deviceID, "SSD")
+	err = spInstance.SetDeviceMediaType(ctx, deviceID, "SSD")
 	assert.Nil(t, err)
 
 	system := getSystem()
-	device, err1 := system.GetDevice(deviceID)
+	device, err1 := system.GetDevice(ctx, deviceID)
 	assert.Nil(t, err1)
 	assert.Equal(t, device.MediaType, "SSD")
 
 	// Remove the device
-	err = spInstance.RemoveDevice(deviceID)
+	err = spInstance.RemoveDevice(ctx, deviceID)
 	assert.Nil(t, err)
 
 	// Delete the pool
-	err = domain.DeleteStoragePool(poolName)
+	err = domain.DeleteStoragePool(ctx, poolName)
 	assert.Nil(t, err)
 }
 
@@ -310,19 +322,21 @@ func TestDeviceExternalAccelerationType(t *testing.T) {
 		SdsID:                 sdsID,
 	}
 
-	deviceID, err := pool.AttachDevice(dev)
+	ctx := context.Background()
+
+	deviceID, err := pool.AttachDevice(ctx, dev)
 	assert.Nil(t, err)
 	assert.NotNil(t, deviceID)
 
-	err = pool.SetDeviceExternalAccelerationType(deviceID, "Read")
+	err = pool.SetDeviceExternalAccelerationType(ctx, deviceID, "Read")
 	assert.Nil(t, err)
 
 	system := getSystem()
-	device, err1 := system.GetDevice(deviceID)
+	device, err1 := system.GetDevice(ctx, deviceID)
 	assert.Nil(t, err1)
 	assert.Equal(t, device.ExternalAccelerationType, "Read")
 
-	err = pool.RemoveDevice(deviceID)
+	err = pool.RemoveDevice(ctx, deviceID)
 	assert.Nil(t, err)
 }
 
@@ -339,19 +353,21 @@ func TestDeviceCapacityLimit(t *testing.T) {
 		SdsID:                 sdsID,
 	}
 
-	deviceID, err := pool.AttachDevice(dev)
+	ctx := context.Background()
+
+	deviceID, err := pool.AttachDevice(ctx, dev)
 	assert.Nil(t, err)
 	assert.NotNil(t, deviceID)
 
-	err = pool.SetDeviceCapacityLimit(deviceID, "300")
+	err = pool.SetDeviceCapacityLimit(ctx, deviceID, "300")
 	assert.Nil(t, err)
 
 	system := getSystem()
-	device, err1 := system.GetDevice(deviceID)
+	device, err1 := system.GetDevice(ctx, deviceID)
 	assert.Nil(t, err1)
 	assert.Equal(t, device.CapacityLimitInKb, 314572800)
 
-	err = pool.RemoveDevice(deviceID)
+	err = pool.RemoveDevice(ctx, deviceID)
 	assert.Nil(t, err)
 }
 
@@ -368,21 +384,23 @@ func TestDeviceUpdateOriginalPathways(t *testing.T) {
 		SdsID:                 sdsID,
 	}
 
-	deviceID, err := pool.AttachDevice(dev)
+	ctx := context.Background()
+
+	deviceID, err := pool.AttachDevice(ctx, dev)
 	assert.Nil(t, err)
 	assert.NotNil(t, deviceID)
 
-	err = pool.UpdateDeviceOriginalPathways(deviceID)
+	err = pool.UpdateDeviceOriginalPathways(ctx, deviceID)
 	assert.Nil(t, err)
 
-	err = pool.RemoveDevice(deviceID)
+	err = pool.RemoveDevice(ctx, deviceID)
 	assert.Nil(t, err)
 }
 
 func TestGetDeviceByDeviceID(t *testing.T) {
 	system := getSystem()
 
-	device, _ := system.GetDevice("c7fc68a200000000")
+	device, _ := system.GetDevice(context.Background(), "c7fc68a200000000")
 	assert.NotNil(t, device)
 	assert.NotNil(t, device.SdsID)
 	assert.NotNil(t, device.StoragePoolID)
@@ -406,12 +424,12 @@ func TestGetDeviceBySdsAttribute(t *testing.T) {
 		return
 	}
 
-	found, err := sds.FindDevice("Name", devices[0].Device.Name)
+	found, err := sds.FindDevice(context.Background(), "Name", devices[0].Device.Name)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, devices[0].Device.Name, found.Name)
 
-	found, err = sds.FindDevice("ID", devices[0].Device.ID)
+	found, err = sds.FindDevice(context.Background(), "ID", devices[0].Device.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, found)
 	assert.Equal(t, devices[0].Device.ID, found.ID)
@@ -432,11 +450,11 @@ func TestGetDeviceBySdsAttributeInvalid(t *testing.T) {
 		return
 	}
 
-	found, err := sds.FindDevice("Name", invalidIdentifier)
+	found, err := sds.FindDevice(context.Background(), "Name", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, found)
 
-	found, err = sds.FindDevice("ID", invalidIdentifier)
+	found, err = sds.FindDevice(context.Background(), "ID", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, found)
 }

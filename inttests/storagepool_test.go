@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -39,7 +40,7 @@ func getStoragePoolName(t *testing.T) string {
 		return ""
 	}
 
-	pools, err := pd.GetStoragePool("")
+	pools, err := pd.GetStoragePool(context.Background(), "")
 	assert.Nil(t, err)
 	assert.NotZero(t, len(pools))
 	if pools == nil {
@@ -59,7 +60,7 @@ func getStoragePool(t *testing.T) *goscaleio.StoragePool {
 	name := getStoragePoolName(t)
 	assert.NotEqual(t, name, "")
 
-	pool, err := pd.FindStoragePool("", name, "")
+	pool, err := pd.FindStoragePool(context.Background(), "", name, "")
 	assert.Nil(t, err)
 	assert.NotNil(t, pool)
 	if pool == nil {
@@ -86,7 +87,7 @@ func TestGetStoragePools(t *testing.T) {
 	assert.NotNil(t, pd)
 
 	if pd != nil {
-		pools, err := pd.GetStoragePool("")
+		pools, err := pd.GetStoragePool(context.Background(), "")
 		assert.Nil(t, err)
 		assert.NotZero(t, len(pools))
 	}
@@ -101,7 +102,7 @@ func TestGetStoragePoolByName(t *testing.T) {
 	assert.NotNil(t, pool)
 
 	if pd != nil && pool != nil {
-		foundPool, err := pd.FindStoragePool("", pool.StoragePool.Name, "")
+		foundPool, err := pd.FindStoragePool(context.Background(), "", pool.StoragePool.Name, "")
 		assert.Nil(t, err)
 		assert.Equal(t, foundPool.Name, pool.StoragePool.Name)
 	}
@@ -116,7 +117,7 @@ func TestGetStoragePoolByID(t *testing.T) {
 	assert.NotNil(t, pool)
 
 	if pd != nil && pool != nil {
-		foundPool, err := pd.FindStoragePool(pool.StoragePool.ID, "", "")
+		foundPool, err := pd.FindStoragePool(context.Background(), pool.StoragePool.ID, "", "")
 		assert.Nil(t, err)
 		assert.Equal(t, foundPool.ID, pool.StoragePool.ID)
 	}
@@ -127,7 +128,7 @@ func TestGetStoragePoolByNameInvalid(t *testing.T) {
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 
-	pool, err := pd.FindStoragePool("", invalidIdentifier, "")
+	pool, err := pd.FindStoragePool(context.Background(), "", invalidIdentifier, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, pool)
 }
@@ -137,7 +138,7 @@ func TestGetStoragePoolByIDInvalid(t *testing.T) {
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 
-	pool, err := pd.FindStoragePool(invalidIdentifier, "", "")
+	pool, err := pd.FindStoragePool(context.Background(), invalidIdentifier, "", "")
 	assert.NotNil(t, err)
 	assert.Nil(t, pool)
 }
@@ -147,44 +148,45 @@ func TestGetStoragePoolStatistics(t *testing.T) {
 	pool := getStoragePool(t)
 	assert.NotNil(t, pool)
 
-	stats, err := pool.GetStatistics()
+	stats, err := pool.GetStatistics(context.Background())
 	assert.Nil(t, err)
 	assert.NotNil(t, stats)
 }
 
 func TestGetInstanceStoragePool(t *testing.T) {
+	ctx := context.Background()
 	name := getStoragePoolName(t)
 	assert.NotNil(t, name)
 
 	// Find by name
-	pool, err := C.FindStoragePool("", name, "", "")
+	pool, err := C.FindStoragePool(ctx, "", name, "", "")
 	assert.Nil(t, err)
 	assert.NotNil(t, pool)
 
 	// Find by ID
-	pool, err = C.FindStoragePool(pool.ID, "", "", "")
+	pool, err = C.FindStoragePool(ctx, pool.ID, "", "", "")
 	assert.Nil(t, err)
 	assert.NotNil(t, pool)
 
 	// Find by href
 	href := fmt.Sprintf("/api/instances/StoragePool::%s", pool.ID)
-	pool, err = C.FindStoragePool("", "", href, "")
+	pool, err = C.FindStoragePool(ctx, "", "", href, "")
 	assert.Nil(t, err)
 	assert.NotNil(t, pool)
 
 	// Find with invalid name
-	pool, err = C.FindStoragePool("", invalidIdentifier, "", "")
+	pool, err = C.FindStoragePool(ctx, "", invalidIdentifier, "", "")
 	assert.NotNil(t, err)
 	assert.Nil(t, pool)
 
 	// Find with invalid ID
-	pool, err = C.FindStoragePool(invalidIdentifier, "", "", "")
+	pool, err = C.FindStoragePool(ctx, invalidIdentifier, "", "", "")
 	assert.NotNil(t, err)
 	assert.Nil(t, pool)
 
 	// Find with invalid href
 	href = fmt.Sprintf("/api/badurl/willnotwork")
-	pool, err = C.FindStoragePool("", "", href, "")
+	pool, err = C.FindStoragePool(ctx, "", "", href, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, pool)
 
@@ -192,12 +194,13 @@ func TestGetInstanceStoragePool(t *testing.T) {
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 
-	pool, err = C.FindStoragePool("", name, "", pd.ProtectionDomain.ID)
+	pool, err = C.FindStoragePool(ctx, "", name, "", pd.ProtectionDomain.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, pool)
 }
 
 func TestCreateDeleteStoragePool(t *testing.T) {
+	ctx := context.Background()
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
 
@@ -209,22 +212,22 @@ func TestCreateDeleteStoragePool(t *testing.T) {
 	}
 
 	// create the pool
-	poolID, err := domain.CreateStoragePool(sp)
+	poolID, err := domain.CreateStoragePool(ctx, sp)
 	assert.Nil(t, err)
 	assert.NotNil(t, poolID)
 
 	// try to create a pool that exists
-	poolID, err = domain.CreateStoragePool(sp)
+	poolID, err = domain.CreateStoragePool(ctx, sp)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", poolID)
 
 	// delete the pool
-	err = domain.DeleteStoragePool(poolName)
+	err = domain.DeleteStoragePool(ctx, poolName)
 	assert.Nil(t, err)
 
 	// try to dleet non-existent storage pool
 	// delete the pool
-	err = domain.DeleteStoragePool(invalidIdentifier)
+	err = domain.DeleteStoragePool(ctx, invalidIdentifier)
 	assert.NotNil(t, err)
 }
 
@@ -233,7 +236,7 @@ func TestGetSDSStoragePool(t *testing.T) {
 	pool := getStoragePool(t)
 	assert.NotNil(t, pool)
 
-	stats, err := pool.GetSDSStoragePool()
+	stats, err := pool.GetSDSStoragePool(context.Background())
 	assert.Nil(t, err)
 	assert.NotNil(t, stats)
 }
@@ -242,12 +245,13 @@ func TestGetSDSStoragePool(t *testing.T) {
 func TestModifyStoragePoolName(t *testing.T) {
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
-	_, err := domain.ModifyStoragePoolName("Invalid", "STPnew")
+	_, err := domain.ModifyStoragePoolName(context.Background(), "Invalid", "STPnew")
 	assert.NotNil(t, err)
 }
 
 // Modify TestStoragePoolMediaType
 func TestStoragePoolMediaType(t *testing.T) {
+	ctx := context.Background()
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
 
@@ -259,19 +263,20 @@ func TestStoragePoolMediaType(t *testing.T) {
 	}
 
 	// create the storage pool
-	poolID, err := domain.CreateStoragePool(sp)
+	poolID, err := domain.CreateStoragePool(ctx, sp)
 	assert.Nil(t, err)
 	assert.NotNil(t, poolID)
-	_, err = domain.ModifyStoragePoolMedia(poolID, "SSD")
+	_, err = domain.ModifyStoragePoolMedia(ctx, poolID, "SSD")
 	assert.Nil(t, err)
 
 	// delete the pool
-	err = domain.DeleteStoragePool(poolName)
+	err = domain.DeleteStoragePool(ctx, poolName)
 	assert.Nil(t, err)
 }
 
 // Modify TestEnableRFCache
 func TestEnableRFCache(t *testing.T) {
+	ctx := context.Background()
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
 
@@ -283,18 +288,19 @@ func TestEnableRFCache(t *testing.T) {
 	}
 
 	// create the storage pool
-	poolID, err := domain.CreateStoragePool(sp)
+	poolID, err := domain.CreateStoragePool(ctx, sp)
 	assert.Nil(t, err)
 	assert.NotNil(t, poolID)
-	_, err = domain.EnableRFCache(poolID)
+	_, err = domain.EnableRFCache(ctx, poolID)
 	assert.Nil(t, err)
 	// delete the pool
-	err = domain.DeleteStoragePool(poolName)
+	err = domain.DeleteStoragePool(ctx, poolName)
 	assert.Nil(t, err)
 }
 
 // Test all the additional functionality for a storage pool
 func TestStoragePoolAdditionalFunctionality(t *testing.T) {
+	ctx := context.Background()
 	// get the protection domain
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
@@ -307,35 +313,35 @@ func TestStoragePoolAdditionalFunctionality(t *testing.T) {
 	}
 
 	// create the storage pool
-	poolID, err := domain.CreateStoragePool(sp)
+	poolID, err := domain.CreateStoragePool(ctx, sp)
 	assert.Nil(t, err)
 	assert.NotNil(t, poolID)
 
 	// disable the padding
-	err = domain.EnableOrDisableZeroPadding(poolID, "false")
+	err = domain.EnableOrDisableZeroPadding(ctx, poolID, "false")
 	assert.Nil(t, err)
-	pool, _ := domain.FindStoragePool(poolID, "", "")
+	pool, _ := domain.FindStoragePool(ctx, poolID, "", "")
 	// check the value
 	assert.Equal(t, pool.ZeroPaddingEnabled, false)
 
 	// Now enable the padding
-	err = domain.EnableOrDisableZeroPadding(poolID, "true")
+	err = domain.EnableOrDisableZeroPadding(ctx, poolID, "true")
 	assert.Nil(t, err)
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	// check the value
 	assert.Equal(t, pool.ZeroPaddingEnabled, true)
 
 	// Modify Replication Journal Capacity to make it 36
-	err = domain.SetReplicationJournalCapacity(poolID, "36")
+	err = domain.SetReplicationJournalCapacity(ctx, poolID, "36")
 	assert.Nil(t, err)
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	// check the value
 	assert.Equal(t, pool.ReplicationCapacityMaxRatio, 36)
 
 	// Again Modify Replication Journal Capacity to make it 0 else storage pool can't be deleted
-	err = domain.SetReplicationJournalCapacity(poolID, "0")
+	err = domain.SetReplicationJournalCapacity(ctx, poolID, "0")
 	assert.Nil(t, err)
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	// again check the value
 	assert.Equal(t, pool.ReplicationCapacityMaxRatio, 0)
 
@@ -343,9 +349,9 @@ func TestStoragePoolAdditionalFunctionality(t *testing.T) {
 	capacityAlertThreshold := &types.CapacityAlertThresholdParam{
 		CapacityAlertHighThresholdPercent: "68",
 	}
-	err = domain.SetCapacityAlertThreshold(poolID, capacityAlertThreshold)
+	err = domain.SetCapacityAlertThreshold(ctx, poolID, capacityAlertThreshold)
 	assert.Nil(t, err)
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	// check the value
 	assert.Equal(t, pool.CapacityAlertHighThreshold, 68)
 
@@ -354,24 +360,24 @@ func TestStoragePoolAdditionalFunctionality(t *testing.T) {
 		Policy:                      "favorAppIos",
 		NumOfConcurrentIosPerDevice: "18",
 	}
-	err = domain.SetProtectedMaintenanceModeIoPriorityPolicy(poolID, protectedMaintenanceModeParam)
+	err = domain.SetProtectedMaintenanceModeIoPriorityPolicy(ctx, poolID, protectedMaintenanceModeParam)
 	assert.Nil(t, err)
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	// check the value
 	assert.Equal(t, pool.ProtectedMaintenanceModeIoPriorityPolicy, "favorAppIos")
 	assert.Equal(t, pool.ProtectedMaintenanceModeIoPriorityNumOfConcurrentIosPerDevice, 18)
 
 	// set rebalance enablement value
-	err = domain.SetRebalanceEnabled(poolID, "true")
+	err = domain.SetRebalanceEnabled(ctx, poolID, "true")
 	assert.Nil(t, err)
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	// check the value
 	assert.Equal(t, pool.RebalanceEnabled, true)
 
 	// Again set rebalance enablement value
-	err = domain.SetRebalanceEnabled(poolID, "false")
+	err = domain.SetRebalanceEnabled(ctx, poolID, "false")
 	assert.Nil(t, err)
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	// check the value
 	assert.Equal(t, pool.RebalanceEnabled, false)
 
@@ -380,10 +386,10 @@ func TestStoragePoolAdditionalFunctionality(t *testing.T) {
 		Policy:                      "limitNumOfConcurrentIos",
 		NumOfConcurrentIosPerDevice: "13",
 	}
-	err = domain.SetRebalanceIoPriorityPolicy(poolID, protectedMaintenanceModeParam)
+	err = domain.SetRebalanceIoPriorityPolicy(ctx, poolID, protectedMaintenanceModeParam)
 	assert.Nil(t, err)
 	// check the value
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	assert.Equal(t, pool.RebalanceioPriorityPolicy, "limitNumOfConcurrentIos")
 	assert.Equal(t, pool.RebalanceioPriorityNumOfConcurrentIosPerDevice, 13)
 	assert.Nil(t, err)
@@ -394,61 +400,62 @@ func TestStoragePoolAdditionalFunctionality(t *testing.T) {
 		NumOfConcurrentIosPerDevice: "12",
 		BwLimitPerDeviceInKbps:      "1030",
 	}
-	err = domain.SetVTreeMigrationIOPriorityPolicy(poolID, protectedMaintenanceModeParam)
+	err = domain.SetVTreeMigrationIOPriorityPolicy(ctx, poolID, protectedMaintenanceModeParam)
 	assert.Nil(t, err)
 	// check the value
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	assert.Equal(t, pool.VtreeMigrationIoPriorityPolicy, "favorAppIos")
 	assert.Equal(t, pool.VtreeMigrationIoPriorityNumOfConcurrentIosPerDevice, 12)
 	assert.Equal(t, pool.VtreeMigrationIoPriorityBwLimitPerDeviceInKbps, 1030)
 
 	// set the spare percentage
-	err = domain.SetSparePercentage(poolID, "67")
+	err = domain.SetSparePercentage(ctx, poolID, "67")
 	assert.Nil(t, err)
 	// check the value
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	assert.Equal(t, pool.SparePercentage, 67)
 
 	// set the Rmcache write handling mode
-	err = domain.SetRMcacheWriteHandlingMode(poolID, "Cached")
+	err = domain.SetRMcacheWriteHandlingMode(ctx, poolID, "Cached")
 	assert.Nil(t, err)
 	// check the value
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	assert.Equal(t, pool.RmCacheWriteHandlingMode, "Cached")
 
 	// set the rebuild enablemenent value
-	err = domain.SetRebuildEnabled(poolID, "false")
+	err = domain.SetRebuildEnabled(ctx, poolID, "false")
 	assert.Nil(t, err)
 	// check the value
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	assert.Equal(t, pool.RebuildEnabled, false)
 
 	// set the number of parallel rebuild rebalance jobs per device
-	err = domain.SetRebuildRebalanceParallelismParam(poolID, "9")
+	err = domain.SetRebuildRebalanceParallelismParam(ctx, poolID, "9")
 	assert.Nil(t, err)
 	// check the value
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	assert.Equal(t, pool.NumofParallelRebuildRebalanceJobsPerDevice, 9)
 
 	// enable fragmentation
-	err = domain.Fragmentation(poolID, true)
+	err = domain.Fragmentation(ctx, poolID, true)
 	assert.Nil(t, err)
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	assert.Equal(t, pool.FragmentationEnabled, true)
 
 	// disable fragmentation
-	err = domain.Fragmentation(poolID, false)
+	err = domain.Fragmentation(ctx, poolID, false)
 	assert.Nil(t, err)
-	pool, _ = domain.FindStoragePool(poolID, "", "")
+	pool, _ = domain.FindStoragePool(ctx, poolID, "", "")
 	assert.Equal(t, pool.FragmentationEnabled, false)
 
 	// finally after all the operations, now delete the pool
-	err = domain.DeleteStoragePool(poolName)
+	err = domain.DeleteStoragePool(ctx, poolName)
 	assert.Nil(t, err)
 }
 
 // Modify TestDisableRFCache
 func TestDisableRFCache(t *testing.T) {
+	ctx := context.Background()
 	domain := getProtectionDomain(t)
 	assert.NotNil(t, domain)
 
@@ -460,22 +467,23 @@ func TestDisableRFCache(t *testing.T) {
 	}
 
 	// create the storage pool
-	poolID, err := domain.CreateStoragePool(sp)
+	poolID, err := domain.CreateStoragePool(ctx, sp)
 	assert.Nil(t, err)
 	assert.NotNil(t, poolID)
-	_, err = domain.DisableRFCache(poolID)
+	_, err = domain.DisableRFCache(ctx, poolID)
 	assert.Nil(t, err)
 	// delete the pool
-	err = domain.DeleteStoragePool(poolName)
+	err = domain.DeleteStoragePool(ctx, poolName)
 	assert.Nil(t, err)
 }
 
 // Modify TestModifyRmCache
 func TestModifyRmCache(t *testing.T) {
+	ctx := context.Background()
 	pd := getProtectionDomain(t)
 	name := getStoragePoolName(t)
 
-	pool, _ := pd.FindStoragePool("", name, "")
+	pool, _ := pd.FindStoragePool(ctx, "", name, "")
 
 	// create a StoragePool instance to return
 	domain := goscaleio.NewStoragePoolEx(C, pool)
@@ -484,7 +492,7 @@ func TestModifyRmCache(t *testing.T) {
 	tempPool := goscaleio.NewStoragePool(C)
 	tempPool.StoragePool = pool
 
-	err := domain.ModifyRMCache("true")
+	err := domain.ModifyRMCache(ctx, "true")
 	assert.Nil(t, err)
 }
 
@@ -495,13 +503,14 @@ func TestGetAllStoragePoolsApi(t *testing.T) {
 	assert.NotNil(t, system)
 
 	// get all storagepools on the system
-	storagepools, err := system.GetAllStoragePools()
+	storagepools, err := system.GetAllStoragePools(context.Background())
 	assert.Nil(t, err)
 	assert.NotNil(t, storagepools)
 }
 
 // TestGetStoragePoolByIDApi gets storage pool by ID
 func TestGetStoragePoolByIDApi(t *testing.T) {
+	ctx := context.Background()
 	name := getStoragePoolName(t)
 	assert.NotNil(t, name)
 
@@ -510,22 +519,22 @@ func TestGetStoragePoolByIDApi(t *testing.T) {
 	assert.NotNil(t, system)
 
 	// Find by name
-	pool, err := C.FindStoragePool("", name, "", "")
+	pool, err := C.FindStoragePool(ctx, "", name, "", "")
 	assert.Nil(t, err)
 	assert.NotNil(t, pool)
 
 	// Find by ID
-	pool1, err := system.GetStoragePoolByID(pool.ID)
+	pool1, err := system.GetStoragePoolByID(ctx, pool.ID)
 	assert.Nil(t, err)
 	assert.NotNil(t, pool1)
 
 	// Find with invalid identifier
-	pool, err = C.FindStoragePool("", invalidIdentifier, "", "")
+	pool, err = C.FindStoragePool(ctx, "", invalidIdentifier, "", "")
 	assert.NotNil(t, err)
 	assert.Nil(t, pool)
 
 	// Find by ID
-	pool1, err = system.GetStoragePoolByID(invalidIdentifier)
+	pool1, err = system.GetStoragePoolByID(ctx, invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, pool1)
 }

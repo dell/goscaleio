@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,12 +23,11 @@ import (
 )
 
 // GetNFSExport lists NFS Exports.
-func (c *Client) GetNFSExport() (nfsList []types.NFSExport, err error) {
+func (c *Client) GetNFSExport(ctx context.Context) (nfsList []types.NFSExport, err error) {
 	defer TimeSpent("GetNfsExport", time.Now())
 	path := "/rest/v1/nfs-exports?select=*"
 
-	err = c.getJSONWithRetry(
-		http.MethodGet, path, nil, &nfsList)
+	err = c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &nfsList)
 	if err != nil {
 		return nil, err
 	}
@@ -36,11 +36,11 @@ func (c *Client) GetNFSExport() (nfsList []types.NFSExport, err error) {
 }
 
 // CreateNFSExport create an NFS Export for a File System.
-func (c *Client) CreateNFSExport(createParams *types.NFSExportCreate) (respnfs *types.NFSExportCreateResponse, err error) {
+func (c *Client) CreateNFSExport(ctx context.Context, createParams *types.NFSExportCreate) (respnfs *types.NFSExportCreateResponse, err error) {
 	path := "/rest/v1/nfs-exports"
 
 	var body *types.NFSExportCreate = createParams
-	err = c.getJSONWithRetry(http.MethodPost, path, body, &respnfs)
+	err = c.getJSONWithRetry(ctx, http.MethodPost, path, body, &respnfs)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *Client) CreateNFSExport(createParams *types.NFSExportCreate) (respnfs *
 }
 
 // GetNFSExportByIDName returns NFS Export properties by name or ID
-func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NFSExport, err error) {
+func (c *Client) GetNFSExportByIDName(ctx context.Context, id string, name string) (respnfs *types.NFSExport, err error) {
 	defer TimeSpent("GetNFSExportByIDName", time.Now())
 
 	if id == "" && name == "" {
@@ -60,8 +60,7 @@ func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NF
 	if id != "" {
 		path := fmt.Sprintf("/rest/v1/nfs-exports/%s?select=*", id)
 
-		err = c.getJSONWithRetry(
-			http.MethodGet, path, nil, &respnfs)
+		err = c.getJSONWithRetry(ctx, http.MethodGet, path, nil, &respnfs)
 		if err != nil {
 			return nil, errors.New("couldn't find NFS export by ID")
 		}
@@ -70,7 +69,7 @@ func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NF
 	}
 
 	//	Get NFS export by name
-	nfsList, err := c.GetNFSExport()
+	nfsList, err := c.GetNFSExport(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -85,12 +84,11 @@ func (c *Client) GetNFSExportByIDName(id string, name string) (respnfs *types.NF
 }
 
 // DeleteNFSExport deletes the NFS export
-func (c *Client) DeleteNFSExport(id string) error {
+func (c *Client) DeleteNFSExport(ctx context.Context, id string) error {
 	defer TimeSpent("DeleteNFSExport", time.Now())
 	path := fmt.Sprintf("/rest/v1/nfs-exports/%s", id)
 
-	err := c.getJSONWithRetry(
-		http.MethodDelete, path, nil, nil)
+	err := c.getJSONWithRetry(ctx, http.MethodDelete, path, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -99,11 +97,11 @@ func (c *Client) DeleteNFSExport(id string) error {
 }
 
 // ModifyNFSExport modifies the NFS export properties
-func (c *Client) ModifyNFSExport(ModifyParams *types.NFSExportModify, id string) (err error) {
+func (c *Client) ModifyNFSExport(ctx context.Context, ModifyParams *types.NFSExportModify, id string) (err error) {
 	path := fmt.Sprintf("/rest/v1/nfs-exports/%s", id)
 
 	var body *types.NFSExportModify = ModifyParams
-	err = c.getJSONWithRetry(http.MethodPatch, path, body, nil)
+	err = c.getJSONWithRetry(ctx, http.MethodPatch, path, body, nil)
 	if err != nil {
 		return err
 	}

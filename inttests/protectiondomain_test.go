@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -23,7 +24,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// getProtectionDomainName returns GOSCALEIO_PROTECTIONDOMAIN, if set
+// getProtectionctx, returns GOSCALEIO_PROTECTIONDOMAIN, if set
 // if not set, returns the first protection domain found
 func getProtectionDomainName(t *testing.T) string {
 	if os.Getenv("GOSCALEIO_PROTECTIONDOMAIN") != "" {
@@ -31,7 +32,7 @@ func getProtectionDomainName(t *testing.T) string {
 	}
 	system := getSystem()
 	assert.NotNil(t, system)
-	pd, _ := system.GetProtectionDomain("")
+	pd, _ := system.GetProtectionDomain(context.Background(), "")
 	assert.NotNil(t, pd)
 	if pd == nil {
 		return ""
@@ -46,7 +47,7 @@ func getProtectionDomain(t *testing.T) *goscaleio.ProtectionDomain {
 
 	name := getProtectionDomainName(t)
 	assert.NotEqual(t, name, "")
-	pd, err := system.FindProtectionDomain("", name, "")
+	pd, err := system.FindProtectionDomain(context.Background(), "", name, "")
 	assert.Nil(t, err)
 	assert.NotNil(t, pd)
 	if pd == nil {
@@ -64,7 +65,7 @@ func getAllProtectionDomains(t *testing.T) []*goscaleio.ProtectionDomain {
 	assert.NotNil(t, system)
 
 	log.SetLevel(log.DebugLevel)
-	pd, err := system.GetProtectionDomain("")
+	pd, err := system.GetProtectionDomain(context.Background(), "")
 	assert.Nil(t, err)
 	assert.NotZero(t, len(pd))
 	log.SetLevel(log.InfoLevel)
@@ -99,7 +100,7 @@ func TestGetProtectionDomainByName(t *testing.T) {
 	assert.NotNil(t, pd)
 
 	if pd != nil {
-		prot, err := system.FindProtectionDomain("", pd.ProtectionDomain.Name, "")
+		prot, err := system.FindProtectionDomain(context.Background(), "", pd.ProtectionDomain.Name, "")
 		assert.Nil(t, err)
 		assert.Equal(t, pd.ProtectionDomain.Name, prot.Name)
 	}
@@ -114,7 +115,7 @@ func TestGetProtectionDomainByID(t *testing.T) {
 	assert.NotNil(t, pd)
 
 	if pd != nil {
-		prot, err := system.FindProtectionDomain(pd.ProtectionDomain.ID, "", "")
+		prot, err := system.FindProtectionDomain(context.Background(), pd.ProtectionDomain.ID, "", "")
 		assert.Nil(t, err)
 		assert.Equal(t, pd.ProtectionDomain.ID, prot.ID)
 	}
@@ -125,7 +126,7 @@ func TestGetProtectionDomainByNameInvalid(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	pd, err := system.FindProtectionDomain("", invalidIdentifier, "")
+	pd, err := system.FindProtectionDomain(context.Background(), "", invalidIdentifier, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, pd)
 }
@@ -135,7 +136,7 @@ func TestGetProtectionDomainByIDInvalid(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	pd, err := system.FindProtectionDomain(invalidIdentifier, "", "")
+	pd, err := system.FindProtectionDomain(context.Background(), invalidIdentifier, "", "")
 	assert.NotNil(t, err)
 	assert.Nil(t, pd)
 }
@@ -145,24 +146,25 @@ func TestCreateDeleteProtectionDomain(t *testing.T) {
 	assert.NotNil(t, system)
 
 	domainName := fmt.Sprintf("%s-%s", testPrefix, "Domain")
+	ctx := context.Background()
 
 	// create the pool
-	domainID, err := system.CreateProtectionDomain(domainName)
+	domainID, err := system.CreateProtectionDomain(ctx, domainName)
 	assert.Nil(t, err)
 	assert.NotNil(t, domainID)
 
 	// try to create a pool that exists
-	domainID, err = system.CreateProtectionDomain(domainName)
+	domainID, err = system.CreateProtectionDomain(ctx, domainName)
 	assert.NotNil(t, err)
 	assert.Equal(t, "", domainID)
 
 	// delete the pool
-	err = system.DeleteProtectionDomain(domainName)
+	err = system.DeleteProtectionDomain(ctx, domainName)
 	assert.Nil(t, err)
 
 	// try to delete non-existent storage pool
 	// delete the pool
-	err = system.DeleteProtectionDomain(domainName)
+	err = system.DeleteProtectionDomain(ctx, domainName)
 	assert.NotNil(t, err)
 }
 
@@ -171,24 +173,25 @@ func TestCRUDProtectionDomain(t *testing.T) {
 	assert.NotNil(t, system)
 
 	domainName := fmt.Sprintf("%s-%s", testPrefix, "Domain")
+	ctx := context.Background()
 
 	// create the pd
-	domainID, err := system.CreateProtectionDomain(domainName)
+	domainID, err := system.CreateProtectionDomain(ctx, domainName)
 	assert.Nil(t, err)
 	assert.NotNil(t, domainID)
 
-	pd, err2 := system.GetProtectionDomainEx(domainID)
+	pd, err2 := system.GetProtectionDomainEx(ctx, domainID)
 	assert.Nil(t, err2)
 
 	// change name of pd
 	newName := fmt.Sprintf("%s2-%s", testPrefix, "Domain")
-	err = pd.SetName(newName)
+	err = pd.SetName(ctx, newName)
 	assert.Nil(t, err)
 
 	// inactivate pd
-	err = pd.InActivate(false)
+	err = pd.InActivate(ctx, false)
 	assert.Nil(t, err)
-	err = pd.Refresh()
+	err = pd.Refresh(ctx)
 	assert.Nil(t, err)
 	assert.Equal(t, pd.ProtectionDomain.Name, newName)
 	assert.Equal(t, pd.ProtectionDomain.ProtectionDomainState, "Inactive")
@@ -198,97 +201,99 @@ func TestCRUDProtectionDomain(t *testing.T) {
 	testNwLimitsProtectionDomain(t, pd)
 
 	// activate pd
-	err = pd.Activate(true)
+	err = pd.Activate(ctx, true)
 	assert.Nil(t, err)
-	err = pd.Refresh()
+	err = pd.Refresh(ctx)
 	assert.Nil(t, err)
 	assert.Equal(t, pd.ProtectionDomain.ProtectionDomainState, "Active")
 
 	testFGLMCacheProtectionDomain(t, pd)
 
 	// check that finding pd by name yields same struct as refreshing
-	pdByName, err3 := system.FindProtectionDomainByName(newName)
+	pdByName, err3 := system.FindProtectionDomainByName(ctx, newName)
 	assert.Nil(t, err3)
 	assert.Equal(t, pd.ProtectionDomain, pdByName)
 
 	// delete pd
-	err = pd.Delete()
+	err = pd.Delete(ctx)
 	assert.Nil(t, err)
 }
 
 func testFGLMCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
-	err := pd.DisableFGLMcache()
+	ctx := context.Background()
+	err := pd.DisableFGLMcache(ctx)
 	assert.Nil(t, err)
-	err = pd.Refresh()
+	err = pd.Refresh(ctx)
 	assert.Nil(t, err)
 	assert.Equal(t, pd.ProtectionDomain.FglMetadataCacheEnabled, false)
 
-	err = pd.SetDefaultFGLMcacheSize(1024)
+	err = pd.SetDefaultFGLMcacheSize(ctx, 1024)
 	assert.Nil(t, err)
-	err = pd.EnableFGLMcache()
+	err = pd.EnableFGLMcache(ctx)
 	assert.Nil(t, err)
-	err = pd.Refresh()
+	err = pd.Refresh(ctx)
 	assert.Nil(t, err)
 	assert.Equal(t, pd.ProtectionDomain.FglMetadataCacheEnabled, true)
 	assert.Equal(t, pd.ProtectionDomain.FglDefaultMetadataCacheSize, 1024)
 }
 
 func testRfCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
-	err := pd.DisableRfcache()
+	ctx := context.Background()
+	err := pd.DisableRfcache(ctx)
 	assert.Nil(t, err)
-	err = pd.Refresh()
+	err = pd.Refresh(ctx)
 	assert.Nil(t, err)
 
 	p := types.PDRCModeRead
-	err = pd.SetRfcacheParams(types.PDRfCacheParams{
+	err = pd.SetRfcacheParams(ctx, types.PDRfCacheParams{
 		RfCacheOperationalMode: p,
 		RfCachePageSizeKb:      16,
 		RfCacheMaxIoSizeKb:     64,
 	})
 	assert.Nil(t, err)
-	err = pd.Refresh()
+	err = pd.Refresh(ctx)
 	assert.Nil(t, err)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheEnabled, false)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheOperationalMode, p)
 	assert.Equal(t, pd.ProtectionDomain.RfCachePageSizeKb, 16)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheMaxIoSizeKb, 64)
 
-	err = pd.SetRfcacheParams(types.PDRfCacheParams{
+	err = pd.SetRfcacheParams(ctx, types.PDRfCacheParams{
 		RfCacheOperationalMode: p,
 		RfCachePageSizeKb:      15,
 		RfCacheMaxIoSizeKb:     65,
 	})
 	assert.NotNil(t, err)
-	err = pd.Refresh()
+	err = pd.Refresh(ctx)
 	assert.Nil(t, err)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheEnabled, false)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheOperationalMode, p)
 	assert.Equal(t, pd.ProtectionDomain.RfCachePageSizeKb, 16)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheMaxIoSizeKb, 64)
 
-	err = pd.EnableRfcache()
+	err = pd.EnableRfcache(ctx)
 	assert.Nil(t, err)
-	err = pd.SetRfcacheParams(types.PDRfCacheParams{RfCachePageSizeKb: 4, RfCacheMaxIoSizeKb: 0})
+	err = pd.SetRfcacheParams(ctx, types.PDRfCacheParams{RfCachePageSizeKb: 4, RfCacheMaxIoSizeKb: 0})
 	assert.Nil(t, err)
-	err = pd.Refresh()
+	err = pd.Refresh(ctx)
 	assert.Nil(t, err)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheEnabled, true)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheOperationalMode, p)
 	assert.Equal(t, pd.ProtectionDomain.RfCachePageSizeKb, 4)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheMaxIoSizeKb, 64)
 
-	err = pd.SetRfcacheParams(types.PDRfCacheParams{RfCachePageSizeKb: 8, RfCacheMaxIoSizeKb: 32})
+	err = pd.SetRfcacheParams(ctx, types.PDRfCacheParams{RfCachePageSizeKb: 8, RfCacheMaxIoSizeKb: 32})
 	assert.Nil(t, err)
-	err = pd.Refresh()
+	err = pd.Refresh(ctx)
 	assert.Nil(t, err)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheEnabled, true)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheOperationalMode, p)
 	assert.Equal(t, pd.ProtectionDomain.RfCachePageSizeKb, 8)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheMaxIoSizeKb, 32)
 
-	err = pd.SetRfcacheParams(types.PDRfCacheParams{RfCachePageSizeKb: 16, RfCacheMaxIoSizeKb: 32})
+	err = pd.SetRfcacheParams(ctx, types.PDRfCacheParams{RfCachePageSizeKb: 16, RfCacheMaxIoSizeKb: 32})
 	assert.Nil(t, err)
-	err = pd.Refresh()
+	err = pd.Refresh(ctx)
 	assert.Nil(t, err)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheEnabled, true)
 	assert.Equal(t, pd.ProtectionDomain.RfCacheOperationalMode, p)
@@ -298,14 +303,15 @@ func testRfCacheProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
 
 func testNwLimitsProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) {
 	oldPd := *pd.ProtectionDomain
+	ctx := context.Background()
 	a, b, c := 10*1024, 16*1024, 0
-	err := pd.SetSdsNetworkLimits(types.SdsNetworkLimitParams{
+	err := pd.SetSdsNetworkLimits(ctx, types.SdsNetworkLimitParams{
 		VTreeMigrationNetworkThrottlingInKbps:           &a,
 		ProtectedMaintenanceModeNetworkThrottlingInKbps: &b,
 		OverallIoNetworkThrottlingInKbps:                &c,
 	})
 	assert.Nil(t, err)
-	err = pd.Refresh()
+	err = pd.Refresh(ctx)
 	assert.Nil(t, err)
 	assert.Equal(t, pd.ProtectionDomain.RebuildNetworkThrottlingInKbps, oldPd.RebuildNetworkThrottlingInKbps)
 	assert.Equal(t, pd.ProtectionDomain.RebalanceNetworkThrottlingInKbps, oldPd.RebalanceNetworkThrottlingInKbps)
@@ -314,14 +320,14 @@ func testNwLimitsProtectionDomain(t *testing.T, pd *goscaleio.ProtectionDomain) 
 	assert.Equal(t, pd.ProtectionDomain.OverallIoNetworkThrottlingInKbps, c)
 
 	a1, c1 := 64*1024, 100*1024
-	err = pd.SetSdsNetworkLimits(types.SdsNetworkLimitParams{
+	err = pd.SetSdsNetworkLimits(ctx, types.SdsNetworkLimitParams{
 		RebuildNetworkThrottlingInKbps:        &a1,
 		RebalanceNetworkThrottlingInKbps:      &a1,
 		VTreeMigrationNetworkThrottlingInKbps: &a1,
 		OverallIoNetworkThrottlingInKbps:      &c1,
 	})
 	assert.Nil(t, err)
-	err = pd.Refresh()
+	err = pd.Refresh(ctx)
 	assert.Nil(t, err)
 	assert.Equal(t, pd.ProtectionDomain.RebuildNetworkThrottlingInKbps, a1)
 	assert.Equal(t, pd.ProtectionDomain.RebalanceNetworkThrottlingInKbps, a1)

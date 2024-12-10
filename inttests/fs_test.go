@@ -13,6 +13,7 @@
 package inttests
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -31,7 +32,7 @@ func getFileSystemName(t *testing.T) string {
 	}
 	system := getSystem()
 	assert.NotNil(t, system)
-	filesystems, _ := system.GetAllFileSystems()
+	filesystems, _ := system.GetAllFileSystems(context.Background())
 	assert.NotNil(t, filesystems)
 	if filesystems == nil {
 		return ""
@@ -49,7 +50,7 @@ func getAllFileSystems(t *testing.T) []*goscaleio.FileSystem {
 	}
 
 	var allFs []*goscaleio.FileSystem
-	fs, err := system.GetAllFileSystems()
+	fs, err := system.GetAllFileSystems(context.Background())
 	assert.Nil(t, err)
 	assert.NotZero(t, len(fs))
 	for _, f := range fs {
@@ -76,12 +77,14 @@ func TestCreateFileSystemSnapshot(t *testing.T) {
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 
+	ctx := context.Background()
+
 	// get storage pool
 	pool := getStoragePool(t)
 	assert.NotNil(t, pool)
 	var spID string
 	if pd != nil && pool != nil {
-		sp, _ := pd.FindStoragePool(pool.StoragePool.ID, "", "")
+		sp, _ := pd.FindStoragePool(ctx, pool.StoragePool.ID, "", "")
 		assert.NotNil(t, sp)
 		spID = sp.ID
 	}
@@ -91,7 +94,7 @@ func TestCreateFileSystemSnapshot(t *testing.T) {
 	if os.Getenv("GOSCALEIO_NASSERVER") != "" {
 		nasServerName = os.Getenv("GOSCALEIO_NASSERVER")
 	}
-	nasServer, err := system.GetNASByIDName("", nasServerName)
+	nasServer, err := system.GetNASByIDName(ctx, "", nasServerName)
 	assert.NotNil(t, nasServer)
 	assert.Nil(t, err)
 
@@ -103,25 +106,25 @@ func TestCreateFileSystemSnapshot(t *testing.T) {
 	}
 
 	// create the file system
-	filesystem, err := system.CreateFileSystem(fs)
+	filesystem, err := system.CreateFileSystem(ctx, fs)
 	fsID := filesystem.ID
 	assert.Nil(t, err)
 	assert.NotNil(t, fsID)
 
-	snapResp, err := system.CreateFileSystemSnapshot(&types.CreateFileSystemSnapshotParam{
+	snapResp, err := system.CreateFileSystemSnapshot(ctx, &types.CreateFileSystemSnapshotParam{
 		Name: "test-snapshot",
 	}, fsID)
 
 	assert.NotNil(t, snapResp)
 	assert.Nil(t, err)
 
-	snap, err := system.GetFileSystemByIDName(snapResp.ID, "")
+	snap, err := system.GetFileSystemByIDName(ctx, snapResp.ID, "")
 	assert.NotNil(t, snap)
 	assert.Nil(t, err)
 
-	err = system.DeleteFileSystem(snap.Name)
+	err = system.DeleteFileSystem(ctx, snap.Name)
 	assert.Nil(t, err)
-	err = system.DeleteFileSystem(fs.Name)
+	err = system.DeleteFileSystem(ctx, fs.Name)
 	assert.Nil(t, err)
 }
 
@@ -135,12 +138,14 @@ func TestRestoreFileSystemSnapshot(t *testing.T) {
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 
+	ctx := context.Background()
+
 	// get storage pool
 	pool := getStoragePool(t)
 	assert.NotNil(t, pool)
 	var spID string
 	if pd != nil && pool != nil {
-		sp, _ := pd.FindStoragePool(pool.StoragePool.ID, "", "")
+		sp, _ := pd.FindStoragePool(ctx, pool.StoragePool.ID, "", "")
 		assert.NotNil(t, sp)
 		spID = sp.ID
 	}
@@ -150,7 +155,7 @@ func TestRestoreFileSystemSnapshot(t *testing.T) {
 	if os.Getenv("GOSCALEIO_NASSERVER") != "" {
 		nasServerName = os.Getenv("GOSCALEIO_NASSERVER")
 	}
-	nasServer, err := system.GetNASByIDName("", nasServerName)
+	nasServer, err := system.GetNASByIDName(ctx, "", nasServerName)
 	assert.NotNil(t, nasServer)
 	assert.Nil(t, err)
 
@@ -162,31 +167,31 @@ func TestRestoreFileSystemSnapshot(t *testing.T) {
 	}
 
 	// create the file system
-	filesystem, err := system.CreateFileSystem(fs)
+	filesystem, err := system.CreateFileSystem(ctx, fs)
 	fsID := filesystem.ID
 	assert.Nil(t, err)
 	assert.NotNil(t, fsID)
 	snapName := fmt.Sprintf("%s-%s", "SNAP", testPrefix)
 
-	snapResp, err := system.CreateFileSystemSnapshot(&types.CreateFileSystemSnapshotParam{
+	snapResp, err := system.CreateFileSystemSnapshot(ctx, &types.CreateFileSystemSnapshotParam{
 		Name: snapName,
 	}, fsID)
 
 	assert.NotNil(t, snapResp)
 	assert.Nil(t, err)
 
-	snap, err := system.GetFileSystemByIDName(snapResp.ID, "")
+	snap, err := system.GetFileSystemByIDName(ctx, snapResp.ID, "")
 	assert.NotNil(t, snap)
 	assert.Nil(t, err)
 
-	restoreSnap, err := system.RestoreFileSystemFromSnapshot(&types.RestoreFsSnapParam{
+	restoreSnap, err := system.RestoreFileSystemFromSnapshot(ctx, &types.RestoreFsSnapParam{
 		SnapshotID: snap.ID,
 	}, fsID)
 
 	assert.Nil(t, restoreSnap)
 	assert.Nil(t, err)
 
-	restoreSnap, err = system.RestoreFileSystemFromSnapshot(&types.RestoreFsSnapParam{
+	restoreSnap, err = system.RestoreFileSystemFromSnapshot(ctx, &types.RestoreFsSnapParam{
 		SnapshotID: snap.ID,
 		CopyName:   "copy" + snapName,
 	}, fsID)
@@ -194,17 +199,18 @@ func TestRestoreFileSystemSnapshot(t *testing.T) {
 	assert.NotNil(t, restoreSnap)
 	assert.Nil(t, err)
 
-	rSnap, err := system.GetFileSystemByIDName(restoreSnap.ID, "")
+	rSnap, err := system.GetFileSystemByIDName(ctx, restoreSnap.ID, "")
 
 	assert.NotNil(t, rSnap)
 	assert.Nil(t, err)
 
-	err = system.DeleteFileSystem(rSnap.Name)
+	err = system.DeleteFileSystem(ctx, rSnap.Name)
 	assert.Nil(t, err)
 
-	err = system.DeleteFileSystem(snap.Name)
+	err = system.DeleteFileSystem(ctx, snap.Name)
 	assert.Nil(t, err)
-	err = system.DeleteFileSystem(fs.Name)
+
+	err = system.DeleteFileSystem(ctx, fs.Name)
 	assert.Nil(t, err)
 }
 
@@ -218,12 +224,14 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 
+	ctx := context.Background()
+
 	// get storage pool
 	pool := getStoragePool(t)
 	assert.NotNil(t, pool)
 	var spID string
 	if pd != nil && pool != nil {
-		sp, _ := pd.FindStoragePool(pool.StoragePool.ID, "", "")
+		sp, _ := pd.FindStoragePool(ctx, pool.StoragePool.ID, "", "")
 		assert.NotNil(t, sp)
 		spID = sp.ID
 	}
@@ -233,7 +241,7 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 	if os.Getenv("GOSCALEIO_NASSERVER") != "" {
 		nasServerName = os.Getenv("GOSCALEIO_NASSERVER")
 	}
-	nasServer, err := system.GetNASByIDName("", nasServerName)
+	nasServer, err := system.GetNASByIDName(ctx, "", nasServerName)
 	assert.NotNil(t, nasServer)
 	assert.Nil(t, err)
 
@@ -245,29 +253,29 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 	}
 
 	// create the file system
-	filesystem, err := system.CreateFileSystem(fs)
+	filesystem, err := system.CreateFileSystem(ctx, fs)
 	fsID := filesystem.ID
 	assert.Nil(t, err)
 	assert.NotNil(t, fsID)
 
-	snapResp, err := system.CreateFileSystemSnapshot(&types.CreateFileSystemSnapshotParam{
+	snapResp, err := system.CreateFileSystemSnapshot(ctx, &types.CreateFileSystemSnapshotParam{
 		Name: "test-snapshot",
 	}, fsID)
 
 	assert.NotNil(t, snapResp)
 	assert.Nil(t, err)
 
-	snap, err := system.GetFileSystemByIDName(snapResp.ID, "")
+	snap, err := system.GetFileSystemByIDName(ctx, snapResp.ID, "")
 	assert.NotNil(t, snap)
 	assert.Nil(t, err)
 
-	snapList, err := system.GetFsSnapshotsByVolumeID(fsID)
+	snapList, err := system.GetFsSnapshotsByVolumeID(ctx, fsID)
 	assert.NotNil(t, snapList)
 	assert.Nil(t, err)
 
-	err = system.DeleteFileSystem(snap.Name)
+	err = system.DeleteFileSystem(ctx, snap.Name)
 	assert.Nil(t, err)
-	err = system.DeleteFileSystem(fs.Name)
+	err = system.DeleteFileSystem(ctx, fs.Name)
 	assert.Nil(t, err)
 }
 
@@ -279,18 +287,20 @@ func TestGetFileSystemByIDName(t *testing.T) {
 	fsName := getFileSystemName(t)
 	assert.NotZero(t, len(fsName))
 
-	filesystem, err := system.GetFileSystemByIDName("", fsName)
+	ctx := context.Background()
+
+	filesystem, err := system.GetFileSystemByIDName(ctx, "", fsName)
 	assert.Nil(t, err)
 	assert.Equal(t, fsName, filesystem.Name)
 
 	if filesystem != nil {
-		fs, err := system.GetFileSystemByIDName(filesystem.ID, "")
+		fs, err := system.GetFileSystemByIDName(ctx, filesystem.ID, "")
 		assert.Nil(t, err)
 		assert.Equal(t, filesystem.ID, fs.ID)
 	}
 
 	if len(fsName) > 0 {
-		fs, err := system.GetFileSystemByIDName("", fsName)
+		fs, err := system.GetFileSystemByIDName(ctx, "", fsName)
 		assert.Nil(t, err)
 		assert.Equal(t, fsName, fs.Name)
 	}
@@ -301,11 +311,13 @@ func TestGetFileSystemByNameIDInvalid(t *testing.T) {
 	system := getSystem()
 	assert.NotNil(t, system)
 
-	fs, err := system.GetFileSystemByIDName(invalidIdentifier, "")
+	ctx := context.Background()
+
+	fs, err := system.GetFileSystemByIDName(ctx, invalidIdentifier, "")
 	assert.NotNil(t, err)
 	assert.Nil(t, fs)
 
-	filesystem, err := system.GetFileSystemByIDName("", invalidIdentifier)
+	filesystem, err := system.GetFileSystemByIDName(ctx, "", invalidIdentifier)
 	assert.NotNil(t, err)
 	assert.Nil(t, filesystem)
 }
@@ -321,12 +333,14 @@ func TestCreateDeleteFileSystem(t *testing.T) {
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 
+	ctx := context.Background()
+
 	// get storage pool
 	pool := getStoragePool(t)
 	assert.NotNil(t, pool)
 	var spID string
 	if pd != nil && pool != nil {
-		sp, _ := pd.FindStoragePool(pool.StoragePool.ID, "", "")
+		sp, _ := pd.FindStoragePool(ctx, pool.StoragePool.ID, "", "")
 		assert.NotNil(t, sp)
 		spID = sp.ID
 	}
@@ -336,7 +350,7 @@ func TestCreateDeleteFileSystem(t *testing.T) {
 	if os.Getenv("GOSCALEIO_NASSERVER") != "" {
 		nasServerName = os.Getenv("GOSCALEIO_NASSERVER")
 	}
-	nasServer, err := system.GetNASByIDName("", nasServerName)
+	nasServer, err := system.GetNASByIDName(ctx, "", nasServerName)
 	assert.NotNil(t, nasServer)
 
 	fs := &types.FsCreate{
@@ -347,22 +361,22 @@ func TestCreateDeleteFileSystem(t *testing.T) {
 	}
 
 	// create the file system
-	filesystem, err := system.CreateFileSystem(fs)
+	filesystem, err := system.CreateFileSystem(ctx, fs)
 	fsID := filesystem.ID
 	assert.Nil(t, err)
 	assert.NotNil(t, fsID)
 
 	// try to create a file system that exists
-	filesystem, err = system.CreateFileSystem(fs)
+	filesystem, err = system.CreateFileSystem(ctx, fs)
 	assert.NotNil(t, err)
 
 	// delete the file system
-	err = system.DeleteFileSystem(fsName)
+	err = system.DeleteFileSystem(ctx, fsName)
 	assert.Nil(t, err)
 
 	// try to delete non-existent file system
 	// delete the file system
-	err = system.DeleteFileSystem(fsName)
+	err = system.DeleteFileSystem(ctx, fsName)
 	assert.NotNil(t, err)
 }
 
@@ -377,12 +391,14 @@ func TestModifyFileSystem(t *testing.T) {
 	pd := getProtectionDomain(t)
 	assert.NotNil(t, pd)
 
+	ctx := context.Background()
+
 	// get storage pool
 	pool := getStoragePool(t)
 	assert.NotNil(t, pool)
 	var spID string
 	if pd != nil && pool != nil {
-		sp, _ := pd.FindStoragePool(pool.StoragePool.ID, "", "")
+		sp, _ := pd.FindStoragePool(ctx, pool.StoragePool.ID, "", "")
 		assert.NotNil(t, sp)
 		spID = sp.ID
 	}
@@ -392,7 +408,7 @@ func TestModifyFileSystem(t *testing.T) {
 	if os.Getenv("GOSCALEIO_NASSERVER") != "" {
 		nasServerName = os.Getenv("GOSCALEIO_NASSERVER")
 	}
-	nasServer, err := system.GetNASByIDName("", nasServerName)
+	nasServer, err := system.GetNASByIDName(ctx, "", nasServerName)
 	assert.NotNil(t, nasServer)
 
 	fs := &types.FsCreate{
@@ -403,7 +419,7 @@ func TestModifyFileSystem(t *testing.T) {
 	}
 
 	// create the file system
-	filesystem, err := system.CreateFileSystem(fs)
+	filesystem, err := system.CreateFileSystem(ctx, fs)
 	fsID := filesystem.ID
 	assert.Nil(t, err)
 	assert.NotNil(t, fsID)
@@ -413,10 +429,10 @@ func TestModifyFileSystem(t *testing.T) {
 		Size:        16106127360,
 		Description: "filesystem size modified",
 	}
-	err = system.ModifyFileSystem(modifyParam, fsID)
+	err = system.ModifyFileSystem(ctx, modifyParam, fsID)
 	assert.Nil(t, err)
 
 	// negative case
-	err = system.ModifyFileSystem(modifyParam, "")
+	err = system.ModifyFileSystem(ctx, modifyParam, "")
 	assert.NotNil(t, err)
 }

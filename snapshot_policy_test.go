@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"errors"
 	"math"
 	"net/http"
@@ -67,7 +68,7 @@ func TestCreateSnapshotPolicy(t *testing.T) {
 				client: client,
 			}
 
-			ID2, errSnap = s.CreateSnapshotPolicy(tc.fs)
+			ID2, errSnap = s.CreateSnapshotPolicy(context.Background(), tc.fs)
 			if errSnap != nil {
 				if tc.expected == nil {
 					t.Errorf("Creating Snapshot Policy did not work as expected, \n\tgot: %s \n\twant: %v", errSnap, tc.expected)
@@ -114,7 +115,7 @@ func TestModifySnapshotPolicyName(t *testing.T) {
 			s := System{
 				client: client,
 			}
-			err2 := s.RenameSnapshotPolicy(tc.id, tc.name)
+			err2 := s.RenameSnapshotPolicy(context.Background(), tc.id, tc.name)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Modifying snapshot policy did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -168,7 +169,7 @@ func TestModifySnapshotPolicy(t *testing.T) {
 				client: client,
 			}
 
-			err2 := s.ModifySnapshotPolicy(tc.snap, tc.id)
+			err2 := s.ModifySnapshotPolicy(context.Background(), tc.snap, tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Modifying snapshot policy did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -227,7 +228,7 @@ func TestAssignSnapshotPolicy(t *testing.T) {
 				client: client,
 			}
 
-			err2 := s.AssignVolumeToSnapshotPolicy(tc.snap, tc.id)
+			err2 := s.AssignVolumeToSnapshotPolicy(context.Background(), tc.snap, tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Assigning volume to snapshot policy did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -297,7 +298,7 @@ func TestUnassignSnapshotPolicy(t *testing.T) {
 				client: client,
 			}
 
-			err2 := s.AssignVolumeToSnapshotPolicy(tc.snap, tc.id)
+			err2 := s.AssignVolumeToSnapshotPolicy(context.Background(), tc.snap, tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Assigning volume to snapshot policy did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -342,7 +343,7 @@ func TestPauseSnapshotPolicy(t *testing.T) {
 				client: client,
 			}
 
-			err2 := s.PauseSnapshotPolicy(tc.id)
+			err2 := s.PauseSnapshotPolicy(context.Background(), tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Pausing snapshot policy did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -387,7 +388,7 @@ func TestResumeSnapshotPolicy(t *testing.T) {
 				client: client,
 			}
 
-			err2 := s.ResumeSnapshotPolicy(tc.id)
+			err2 := s.ResumeSnapshotPolicy(context.Background(), tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Resuming snapshot policy did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -432,7 +433,7 @@ func TestDeleteSnapshotPolicy(t *testing.T) {
 				client: client,
 			}
 
-			err2 := s.RemoveSnapshotPolicy(tc.id)
+			err2 := s.RemoveSnapshotPolicy(context.Background(), tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Removing snapshot policy did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -477,7 +478,7 @@ func TestGetSourceVolume(t *testing.T) {
 				client: client,
 			}
 
-			_, err2 := s.GetSourceVolume(tc.id)
+			_, err2 := s.GetSourceVolume(context.Background(), tc.id)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Assigning volume to snapshot policy did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)

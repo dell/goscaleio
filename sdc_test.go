@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -112,7 +113,7 @@ func Test_FindVolumes(t *testing.T) {
 			}
 
 			sdcClient := NewSdc(client, &sdc)
-			vols, err := sdcClient.FindVolumes()
+			vols, err := sdcClient.FindVolumes(context.Background())
 			for _, checkFn := range checkFns {
 				checkFn(t, vols, err)
 			}
@@ -163,7 +164,7 @@ func TestRenameSdc(t *testing.T) {
 			}
 
 			// calling RenameSdc with mock value
-			err = client.RenameSdc(tc.sdcID, tc.name)
+			err = client.RenameSdc(context.Background(), tc.sdcID, tc.name)
 			if err != nil {
 				if tc.expected == nil {
 					t.Errorf("Renaming sdc did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
@@ -297,7 +298,7 @@ func TestApproveSdc(t *testing.T) {
 				System: system,
 			}
 
-			resp, err := s.ApproveSdcByGUID(testCaseGuids[name])
+			resp, err := s.ApproveSdcByGUID(context.Background(), testCaseGuids[name])
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
@@ -344,7 +345,7 @@ func TestSetRestrictedMode(t *testing.T) {
 				System: &system,
 			}
 
-			err2 := s.SetRestrictedMode(tc.mode)
+			err2 := s.SetRestrictedMode(context.Background(), tc.mode)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Modifying restricted mode did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -401,7 +402,7 @@ func TestApproveSdcbyIP(t *testing.T) {
 				System: &system,
 			}
 
-			_, err2 := s.ApproveSdc(&tc.param)
+			_, err2 := s.ApproveSdc(context.Background(), &tc.param)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Approving SDC did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
@@ -456,7 +457,7 @@ func TestSetApprovedIps(t *testing.T) {
 				System: &system,
 			}
 
-			err2 := s.SetApprovedIps(tc.SdcID, tc.SdcIps)
+			err2 := s.SetApprovedIps(context.Background(), tc.SdcID, tc.SdcIps)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Approving SDC IPs did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
