@@ -25,7 +25,6 @@ import (
 
 	types "github.com/dell/goscaleio/types/v1"
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 )
 
 // DeployService used to deploy service
@@ -460,7 +459,7 @@ func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken boo
 
 		defer func() {
 			if err := resp.Body.Close(); err != nil {
-				doLog(log.WithError(err).Error, "")
+				logger.Debug(err.Error())
 			}
 		}()
 
