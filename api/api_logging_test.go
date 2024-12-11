@@ -22,8 +22,6 @@ import (
 	"net/http"
 	"strings"
 	"testing"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func TestIsBinOctetBody(t *testing.T) {
@@ -185,12 +183,8 @@ func TestLogResponse(_ *testing.T) {
 	logResponse(context.Background(), res, nil)
 }
 
-func logChecker(level log.Level, msg string) func(func(args ...interface{}), string) {
-	return func(lf func(args ...interface{}), message string) {
-		if level != log.DebugLevel {
-			// If the log level is not DebugLevel, call the logging function with an error message
-			lf(fmt.Sprintf("Expected debug level, got %v", level))
-		}
+func logChecker(msg string) func(func(msg string, args ...any), string) {
+	return func(lf func(msg string, args ...any), message string) {
 		if !strings.Contains(msg, "GOSCALEIO HTTP REQUEST") {
 			// If the message does not contain the expected string, call the logging function with an error message
 			lf(fmt.Sprintf("Expected request log, got %s", msg))
@@ -207,7 +201,7 @@ func TestLogRequest(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	logFunc := logChecker(log.DebugLevel, "GOSCALEIO HTTP REQUEST")
+	logFunc := logChecker("GOSCALEIO HTTP REQUEST")
 	logRequest(context.Background(), req, logFunc)
 
 	// Test case: Error in dumpRequest

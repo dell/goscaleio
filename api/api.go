@@ -21,13 +21,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	types "github.com/dell/goscaleio/types/v1"
 )
@@ -46,6 +46,7 @@ const (
 var (
 	errNewClient = errors.New("missing endpoint")
 	errSysCerts  = errors.New("Unable to initialize cert pool from system")
+	logger       = slog.New(slog.NewTextHandler(os.Stderr, nil))
 )
 
 // Client is an API client.
@@ -271,7 +272,7 @@ func (c *client) DoWithHeaders(
 
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			c.doLog(log.WithError(err).Error, "")
+			c.doLog(logger.Error, err.Error())
 		}
 	}()
 
@@ -285,9 +286,7 @@ func (c *client) DoWithHeaders(
 		}
 		dec := json.NewDecoder(res.Body)
 		if err = dec.Decode(resp); err != nil && err != io.EOF {
-			c.doLog(log.WithError(err).Error,
-				fmt.Sprintf("Unable to decode response into %+v",
-					resp))
+			c.doLog(logger.Error, fmt.Sprintf("Error: %s Unable to decode response into %+v", err.Error(), resp))
 			return err
 		}
 	default:
@@ -340,7 +339,7 @@ func (c *client) DoAndGetResponseBody(
 
 		defer func() {
 			if err := r.Close(); err != nil {
-				c.doLog(log.WithError(err).Error, "")
+				c.doLog(logger.Error, err.Error())
 			}
 		}()
 
@@ -456,7 +455,7 @@ func (c *client) ParseJSONError(r *http.Response) error {
 }
 
 func (c *client) doLog(
-	l func(args ...interface{}),
+	l func(msg string, args ...any),
 	msg string,
 ) {
 	if c.debug {

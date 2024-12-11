@@ -21,8 +21,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func isBinOctetBody(h http.Header) bool {
@@ -32,10 +30,8 @@ func isBinOctetBody(h http.Header) bool {
 func logRequest(
 	_ context.Context,
 	req *http.Request,
-	lf func(func(args ...interface{}), string),
+	lf func(func(msg string, args ...any), string),
 ) {
-	log.SetLevel(log.DebugLevel)
-
 	w := &bytes.Buffer{}
 
 	fmt.Fprintln(w)
@@ -51,19 +47,16 @@ func logRequest(
 	if err := WriteIndented(w, buf); err != nil {
 		fmt.Printf("WriteIndented returned error: %s", err.Error())
 	}
-
-	fmt.Fprintln(w)
-
-	lf(log.Debug, w.String())
+	if lf != nil {
+		lf(logger.Debug, w.String())
+	}
 }
 
 func logResponse(
 	_ context.Context,
 	res *http.Response,
-	_ func(func(args ...interface{}), string),
+	lf func(func(msg string, args ...any), string),
 ) {
-	log.SetLevel(log.DebugLevel)
-
 	w := &bytes.Buffer{}
 
 	fmt.Fprintln(w)
@@ -89,8 +82,9 @@ func logResponse(
 		}
 		fmt.Fprintln(w, scanner.Text())
 	}
-
-	log.Debug(w.String())
+	if lf != nil {
+		lf(logger.Debug, w.String())
+	}
 }
 
 // WriteIndentedN indents all lines n spaces.

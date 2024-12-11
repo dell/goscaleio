@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"math"
 	"net/http"
 	"os"
@@ -30,7 +31,6 @@ import (
 
 	"github.com/dell/goscaleio/api"
 	types "github.com/dell/goscaleio/types/v1"
-	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -44,6 +44,7 @@ var (
 
 	debug, _    = strconv.ParseBool(os.Getenv("GOSCALEIO_DEBUG"))
 	showHTTP, _ = strconv.ParseBool(os.Getenv("GOSCALEIO_SHOWHTTP"))
+	logger      = slog.New(slog.NewTextHandler(os.Stderr, nil))
 )
 
 // Client defines struct for Client
@@ -79,7 +80,7 @@ func (c *Client) GetVersion() (string, error) {
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			doLog(log.WithError(err).Error, "")
+			doLog(logger.Error, err.Error())
 		}
 	}()
 	// parse the response
@@ -147,13 +148,13 @@ func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
 	resp, err := c.api.DoAndGetResponseBody(
 		context.Background(), http.MethodGet, "api/login", headers, nil, c.configConnect.Version)
 	if err != nil {
-		doLog(log.WithError(err).Error, "")
+		doLog(logger.Error, err.Error())
 		return Cluster{}, err
 	}
 
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			doLog(log.WithError(err).Error, "")
+			doLog(logger.Error, err.Error())
 		}
 	}()
 
@@ -204,9 +205,9 @@ func (c *Client) getJSONWithRetry(
 
 	// check if we need to authenticate
 	if e, ok := err.(*types.Error); ok {
-		doLog(log.WithError(err).Debug, fmt.Sprintf("Got JSON error: %+v", e))
+		doLog(logger.Debug, fmt.Sprintf("Got JSON error: %+v", e))
 		if e.HTTPStatusCode == 401 {
-			doLog(log.Info, "Need to re-auth")
+			doLog(logger.Info, "Need to re-auth")
 			// Authenticate then try again
 			if _, err := c.Authenticate(c.configConnect); err != nil {
 				return fmt.Errorf("Error Authenticating: %s", err)
@@ -215,7 +216,7 @@ func (c *Client) getJSONWithRetry(
 				context.Background(), method, uri, headers, body, resp, c.configConnect.Version)
 		}
 	}
-	doLog(log.WithError(err).Error, "returning error")
+	doLog(logger.Error, err.Error())
 
 	return err
 }
@@ -252,7 +253,7 @@ func (c *Client) getStringWithRetry(
 	checkResponse := func(resp *http.Response) (string, bool, error) {
 		defer func() {
 			if err := resp.Body.Close(); err != nil {
-				doLog(log.WithError(err).Error, "")
+				doLog(logger.Error, err.Error())
 			}
 		}()
 
@@ -282,7 +283,7 @@ func (c *Client) getStringWithRetry(
 	s, retry, httpErr := checkResponse(resp)
 	if httpErr != nil {
 		if retry {
-			doLog(log.Info, "need to re-auth")
+			doLog(logger.Info, "need to re-auth")
 			// Authenticate then try again
 			if _, err = c.Authenticate(c.configConnect); err != nil {
 				return "", fmt.Errorf("Error Authenticating: %s", err)
@@ -349,11 +350,10 @@ func NewClientWithArgs(
 		"debug":    debug,
 		"showHTTP": showHTTP,
 	}
-
-	doLog(log.WithFields(fields).Debug, "goscaleio client init")
+	doLog(logger.Debug, fmt.Sprintf("goscaleio client init, Fields: %+v", fields))
 
 	if endpoint == "" {
-		doLog(log.WithFields(fields).Error, "endpoint is required")
+		doLog(logger.Error, fmt.Sprintf("endpoint is required, Fields: %+v", fields))
 		return nil,
 			withFields(fields, "endpoint is required")
 	}
@@ -371,7 +371,7 @@ func NewClientWithArgs(
 
 	ac, err := api.New(context.Background(), endpoint, opts, debug)
 	if err != nil {
-		doLog(log.WithError(err).Error, "Unable to create HTTP client")
+		doLog(logger.Error, fmt.Sprintf("Unable to create HTTP client: %s", err.Error()))
 		return nil, err
 	}
 
@@ -430,7 +430,7 @@ func withFieldsE(
 }
 
 func doLog(
-	l func(args ...interface{}),
+	l func(msg string, args ...any),
 	msg string,
 ) {
 	if debug {
