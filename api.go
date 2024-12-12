@@ -49,6 +49,7 @@ var (
 
 // Client defines struct for Client
 type Client struct {
+	ctx           context.Context
 	configConnect *ConfigConnect
 	api           api.Client
 }
@@ -146,7 +147,9 @@ func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
 		configConnect.Username, configConnect.Password)
 
 	resp, err := c.api.DoAndGetResponseBody(
-		context.Background(), http.MethodGet, "api/login", headers, nil, c.configConnect.Version)
+		c.GetContext(), http.MethodGet, "api/login", headers, nil, c.configConnect.Version)
+	defer c.ResetContext()
+
 	if err != nil {
 		doLog(logger.Error, err.Error())
 		return Cluster{}, err
@@ -315,6 +318,23 @@ func (c *Client) GetToken() string {
 // GetConfigConnect returns Config of client
 func (c *Client) GetConfigConnect() *ConfigConnect {
 	return c.configConnect
+}
+
+func (c *Client) WithContext(ctx context.Context) *Client {
+	c.ctx = ctx
+	return c
+}
+
+func (c *Client) GetContext() context.Context {
+	if c.ctx == nil {
+		return context.Background()
+	}
+
+	return c.ctx
+}
+
+func (c *Client) ResetContext() {
+	c.ctx = nil
 }
 
 // NewClient returns a new client

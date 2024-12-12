@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -24,6 +25,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	v1 "github.com/dell/goscaleio/types/v1"
 )
@@ -539,4 +541,51 @@ func TestGetStringWithRetry(t *testing.T) {
 			_, err = client.getStringWithRetry(http.MethodPost, tt.URL, nil)
 		})
 	}
+}
+func TestWithContext(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		switch req.RequestURI {
+		case "/api/login":
+			resp.WriteHeader(http.StatusOK)
+		default:
+			resp.WriteHeader(http.StatusBadRequest)
+			resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+		}
+	}))
+
+	defer server.Close()
+
+	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	parentCtx := context.Background()
+	context, cancel := context.WithTimeout(parentCtx, 1*time.Second)
+	defer cancel()
+
+	// Test with Context
+	_, err = client.WithContext(context).Authenticate(&ConfigConnect{
+		Username: "ScaleIOUser",
+		Password: "password",
+		Endpoint: "",
+		Version:  "2.0",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	time.Sleep(2 * time.Second)
+
+	// Test with without context
+	_, err = client.Authenticate(&ConfigConnect{
+		Username: "ScaleIOUser",
+		Password: "password",
+		Endpoint: "",
+		Version:  "2.0",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }
