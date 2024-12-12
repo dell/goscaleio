@@ -88,7 +88,7 @@ func (c *Client) GetVersion(ctx context.Context) (string, error) {
 		return "", errNilReponse
 	case resp.StatusCode == http.StatusUnauthorized:
 		// Authenticate then try again
-		if _, err = c.Authenticate(ctx, c.configConnect); err == nil {
+		if _, err = c.Authenticate(ctx, c.configConnect); err != nil {
 			return "", err
 		}
 		resp, err = c.api.DoAndGetResponseBody(
