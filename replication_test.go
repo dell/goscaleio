@@ -13,7 +13,6 @@
 package goscaleio
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -75,7 +74,7 @@ func TestGetPeerMdm(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	response, err := client.GetPeerMDMs(context.Background())
+	response, err := client.GetPeerMDMs()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +83,7 @@ func TestGetPeerMdm(t *testing.T) {
 		t.Errorf("expected %d, got %d", 2, len(response))
 	}
 
-	res, err := client.GetPeerMDM(context.Background(), searchID)
+	res, err := client.GetPeerMDM(searchID)
 	if err != nil || res == nil {
 		t.Fatal(err)
 	}
@@ -119,7 +118,7 @@ func TestModifyPeerMdm(t *testing.T) {
 	}
 
 	ips := []string{"127.0.0.1", "127.0.0.2"}
-	err = client.ModifyPeerMdmIP(context.Background(), searchID, ips)
+	err = client.ModifyPeerMdmIP(searchID, ips)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +126,7 @@ func TestModifyPeerMdm(t *testing.T) {
 	modifyName := types.ModifyPeerMDMNameParam{
 		NewName: "newPeerName",
 	}
-	err = client.ModifyPeerMdmName(context.Background(), searchID, &modifyName)
+	err = client.ModifyPeerMdmName(searchID, &modifyName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,7 +134,7 @@ func TestModifyPeerMdm(t *testing.T) {
 	modifyPort := types.ModifyPeerMDMPortParam{
 		NewPort: "newPort",
 	}
-	err = client.ModifyPeerMdmPort(context.Background(), searchID, &modifyPort)
+	err = client.ModifyPeerMdmPort(searchID, &modifyPort)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,7 +142,7 @@ func TestModifyPeerMdm(t *testing.T) {
 	modifyPerf := types.ModifyPeerMdmPerformanceParametersParam{
 		NewPreformanceProfile: "Compact",
 	}
-	err = client.ModifyPeerMdmPerformanceParameters(context.Background(), searchID, &modifyPerf)
+	err = client.ModifyPeerMdmPerformanceParameters(searchID, &modifyPerf)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -198,7 +197,7 @@ func TestAddPeerMdm(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, err = client.AddPeerMdm(context.Background(), tc.addPeerMdm)
+		_, err = client.AddPeerMdm(tc.addPeerMdm)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -243,7 +242,7 @@ func TestRemovePeerMdm(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		err = client.RemovePeerMdm(context.Background(), peerID)
+		err = client.RemovePeerMdm(peerID)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -303,7 +302,7 @@ func TestGetReplicationConsistencyGroup(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	groupsResponse, err := client.GetReplicationConsistencyGroups(context.Background())
+	groupsResponse, err := client.GetReplicationConsistencyGroups()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -312,7 +311,7 @@ func TestGetReplicationConsistencyGroup(t *testing.T) {
 		t.Errorf("expected %d, got %d", 2, len(groupsResponse))
 	}
 
-	res, err := client.GetReplicationConsistencyGroupByID(context.Background(), searchID)
+	res, err := client.GetReplicationConsistencyGroupByID(searchID)
 	if err != nil || res == nil {
 		t.Fatal(err)
 	}
@@ -394,7 +393,7 @@ func TestCreateReplicationConsistencyGroup(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, err = client.CreateReplicationConsistencyGroup(context.Background(), tc.group)
+		_, err = client.CreateReplicationConsistencyGroup(tc.group)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -446,7 +445,7 @@ func TestRemoveReplicationConsistencyGroup(t *testing.T) {
 		rcg := NewReplicationConsistencyGroup(client)
 		rcg.ReplicationConsistencyGroup = tc.group
 
-		err = rcg.RemoveReplicationConsistencyGroup(context.Background(), true)
+		err = rcg.RemoveReplicationConsistencyGroup(true)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -514,7 +513,7 @@ func TestCreateReplicationPair(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, err = client.CreateReplicationPair(context.Background(), tc.replicationPair)
+		_, err = client.CreateReplicationPair(tc.replicationPair)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -570,7 +569,7 @@ func TestRemoveReplicationPair(t *testing.T) {
 		rp := NewReplicationPair(client)
 		rp.ReplicaitonPair = tc.replicationPair
 
-		_, err = rp.RemoveReplicationPair(context.Background(), true)
+		_, err = rp.RemoveReplicationPair(true)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -615,27 +614,27 @@ func TestReplicationPairActions(t *testing.T) {
 	rp := NewReplicationPair(client)
 	rp.ReplicaitonPair = replicationPair
 
-	_, err = rp.GetReplicationPairStatistics(context.Background())
+	_, err = rp.GetReplicationPairStatistics()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = client.PausePairInitialCopy(context.Background(), rpID)
+	_, err = client.PausePairInitialCopy(rpID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = client.ResumePairInitialCopy(context.Background(), rpID)
+	_, err = client.ResumePairInitialCopy(rpID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = client.GetAllReplicationPairs(context.Background())
+	_, err = client.GetAllReplicationPairs()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = client.GetReplicationPair(context.Background(), rpID)
+	_, err = client.GetReplicationPair(rpID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -694,103 +693,103 @@ func TestReplicationConsistencyGroupAction(t *testing.T) {
 		ID:   groupID,
 	}
 
-	_, err = rcg.GetReplicationPairs(context.Background())
+	_, err = rcg.GetReplicationPairs()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.FreezeReplicationConsistencyGroup(context.Background(), groupID)
+	err = rcg.FreezeReplicationConsistencyGroup(groupID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.UnfreezeReplicationConsistencyGroup(context.Background())
+	err = rcg.UnfreezeReplicationConsistencyGroup()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = rcg.CreateReplicationConsistencyGroupSnapshot(context.Background())
+	_, err = rcg.CreateReplicationConsistencyGroupSnapshot()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.ExecuteFailoverOnReplicationGroup(context.Background())
+	err = rcg.ExecuteFailoverOnReplicationGroup()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.ExecuteSwitchoverOnReplicationGroup(context.Background(), true)
+	err = rcg.ExecuteSwitchoverOnReplicationGroup(true)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.ExecuteRestoreOnReplicationGroup(context.Background())
+	err = rcg.ExecuteRestoreOnReplicationGroup()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.ExecuteReverseOnReplicationGroup(context.Background())
+	err = rcg.ExecuteReverseOnReplicationGroup()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.ExecutePauseOnReplicationGroup(context.Background())
+	err = rcg.ExecutePauseOnReplicationGroup()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.ExecuteResumeOnReplicationGroup(context.Background())
+	err = rcg.ExecuteResumeOnReplicationGroup()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = rcg.ExecuteSyncOnReplicationGroup(context.Background())
+	_, err = rcg.ExecuteSyncOnReplicationGroup()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.SetRPOOnReplicationGroup(context.Background(), types.SetRPOReplicationConsistencyGroup{
+	err = rcg.SetRPOOnReplicationGroup(types.SetRPOReplicationConsistencyGroup{
 		RpoInSeconds: "90",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.SetTargetVolumeAccessModeOnReplicationGroup(context.Background(), types.SetTargetVolumeAccessModeOnReplicationGroup{
+	err = rcg.SetTargetVolumeAccessModeOnReplicationGroup(types.SetTargetVolumeAccessModeOnReplicationGroup{
 		TargetVolumeAccessMode: "ReadOnly",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.SetNewNameOnReplicationGroup(context.Background(), types.SetNewNameOnReplicationGroup{
+	err = rcg.SetNewNameOnReplicationGroup(types.SetNewNameOnReplicationGroup{
 		NewName: "newReplicationGroup",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.ExecuteConsistentOnReplicationGroup(context.Background())
+	err = rcg.ExecuteConsistentOnReplicationGroup()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.ExecuteInconsistentOnReplicationGroup(context.Background())
+	err = rcg.ExecuteInconsistentOnReplicationGroup()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.ExecuteActivateOnReplicationGroup(context.Background())
+	err = rcg.ExecuteActivateOnReplicationGroup()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.ExecuteTerminateOnReplicationGroup(context.Background())
+	err = rcg.ExecuteTerminateOnReplicationGroup()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = rcg.GetSyncStateOnReplicationGroup(context.Background(), "syncKeyVal")
+	err = rcg.GetSyncStateOnReplicationGroup("syncKeyVal")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -13,7 +13,6 @@
 package goscaleio
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -62,7 +61,7 @@ func TestGetAllOSRepositories(t *testing.T) {
 			client: client,
 		}
 
-		_, err = s.GetAllOSRepositories(context.Background())
+		_, err = s.GetAllOSRepositories()
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -116,7 +115,7 @@ func TestGetOSRepositoryByID(t *testing.T) {
 			client: client,
 		}
 
-		_, err = s.GetOSRepositoryByID(context.Background(), tc.id)
+		_, err = s.GetOSRepositoryByID(tc.id)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -183,7 +182,7 @@ func TestCreateOSRepository(t *testing.T) {
 			client: client,
 		}
 
-		_, err = s.CreateOSRepository(context.Background(), tc.repoContent)
+		_, err = s.CreateOSRepository(tc.repoContent)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -237,7 +236,7 @@ func TestRemoveOSRepository(t *testing.T) {
 			client: client,
 		}
 
-		err = s.RemoveOSRepository(context.Background(), tc.id)
+		err = s.RemoveOSRepository(tc.id)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)

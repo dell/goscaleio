@@ -13,7 +13,6 @@
 package goscaleio
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -67,7 +66,7 @@ func TestGetScsiInitiator(t *testing.T) {
 			client: client,
 		}
 
-		system.GetScsiInitiator(context.Background())
+		system.GetScsiInitiator()
 
 		tc.server.Close()
 	}

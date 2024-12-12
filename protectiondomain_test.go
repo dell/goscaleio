@@ -13,7 +13,6 @@
 package goscaleio
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -73,7 +72,7 @@ func TestCreateProtectionDomain(t *testing.T) {
 			client: client,
 		}
 
-		_, err = s.CreateProtectionDomain(context.Background(), pdName)
+		_, err = s.CreateProtectionDomain(pdName)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -134,7 +133,7 @@ func TestGetProtectionDomainEx(t *testing.T) {
 			client: client,
 		}
 
-		_, err = s.GetProtectionDomainEx(context.Background(), pdID)
+		_, err = s.GetProtectionDomainEx(pdID)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -290,7 +289,7 @@ func TestDeleteProtectionDomain(t *testing.T) {
 			client: client,
 		}
 
-		err = s.DeleteProtectionDomain(context.Background(), pdName)
+		err = s.DeleteProtectionDomain(pdName)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -359,7 +358,7 @@ func TestProtectionDomainDelete(t *testing.T) {
 			client:           client,
 		}
 
-		err = pdClient.Delete(context.Background())
+		err = pdClient.Delete()
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -434,7 +433,7 @@ func TestFindProtectionDomainByName(t *testing.T) {
 			client: client,
 		}
 
-		_, err = s.FindProtectionDomainByName(context.Background(), domainName)
+		_, err = s.FindProtectionDomainByName(domainName)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -504,7 +503,7 @@ func TestProtectionDomainRefresh(t *testing.T) {
 			client:           client,
 		}
 
-		err = pdClient.Refresh(context.Background())
+		err = pdClient.Refresh()
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -518,7 +517,6 @@ func TestProtectionDomainRefresh(t *testing.T) {
 func TestProtectionDomainSetParamters(t *testing.T) {
 	domainHost := "localhost"
 	domainID := "12345678-1234-1234-1234-123456789012"
-	ctx := context.Background()
 
 	server := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		switch req.RequestURI {
@@ -572,19 +570,19 @@ func TestProtectionDomainSetParamters(t *testing.T) {
 
 	intPtr := 1
 
-	_ = pdClient.SetName(ctx, "myDomain")
-	_ = pdClient.SetRfcacheParams(ctx, types.PDRfCacheParams{
+	_ = pdClient.SetName("myDomain")
+	_ = pdClient.SetRfcacheParams(types.PDRfCacheParams{
 		RfCachePageSizeKb:  16,
 		RfCacheMaxIoSizeKb: 64,
 	})
-	_ = pdClient.SetSdsNetworkLimits(ctx, types.SdsNetworkLimitParams{
+	_ = pdClient.SetSdsNetworkLimits(types.SdsNetworkLimitParams{
 		RebuildNetworkThrottlingInKbps: &intPtr,
 	})
-	_ = pdClient.Activate(ctx, true)
-	_ = pdClient.InActivate(ctx, true)
-	_ = pdClient.EnableRfcache(ctx)
-	_ = pdClient.DisableRfcache(ctx)
-	_ = pdClient.DisableFGLMcache(ctx)
-	_ = pdClient.EnableFGLMcache(ctx)
-	_ = pdClient.SetDefaultFGLMcacheSize(ctx, 128)
+	_ = pdClient.Activate(true)
+	_ = pdClient.InActivate(true)
+	_ = pdClient.EnableRfcache()
+	_ = pdClient.DisableRfcache()
+	_ = pdClient.DisableFGLMcache()
+	_ = pdClient.EnableFGLMcache()
+	_ = pdClient.SetDefaultFGLMcacheSize(128)
 }
