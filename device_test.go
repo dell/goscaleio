@@ -100,7 +100,7 @@ func TestGetAllDevices(t *testing.T) {
 			expectedErr: nil,
 		},
 		"bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -159,7 +159,7 @@ func TestGetDevice(t *testing.T) {
 			expectedErr: nil,
 		},
 		"bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -240,7 +240,7 @@ func TestGetDeviceByField(t *testing.T) {
 			expectedErr: errors.New("couldn't find device"),
 		},
 		"bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -336,7 +336,7 @@ func TestSDSFindDevice(t *testing.T) {
 		},
 
 		"bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -404,7 +404,7 @@ func TestSDSGetDevice(t *testing.T) {
 			expectedErr: nil,
 		},
 		"bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -463,7 +463,7 @@ func TestStoragePoolGetDevice(t *testing.T) {
 			expectedErr: nil,
 		},
 		"bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -545,7 +545,7 @@ func TestStoragePoolFindDevice(t *testing.T) {
 		},
 
 		"bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
