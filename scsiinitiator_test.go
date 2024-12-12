@@ -46,7 +46,7 @@ func TestGetScsiInitiator(t *testing.T) {
 			expectedErr: nil,
 		},
 		"error: bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),

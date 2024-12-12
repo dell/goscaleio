@@ -43,7 +43,7 @@ func TestGetAllOSRepositories(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -80,14 +80,14 @@ func TestGetOSRepositoryByID(t *testing.T) {
 		expectedErr error
 	}
 
-	validId := "12345678-1234-1234-1234-123456789012"
+	validID := "12345678-1234-1234-1234-123456789012"
 
 	cases := []testCase{
 		{
-			id: validId,
+			id: validID,
 			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 				switch req.RequestURI {
-				case fmt.Sprintf("/api/v1/OSRepository/%s", validId):
+				case fmt.Sprintf("/api/v1/OSRepository/%s", validID):
 					resp.WriteHeader(http.StatusOK)
 				default:
 					resp.WriteHeader(http.StatusNoContent)
@@ -97,7 +97,7 @@ func TestGetOSRepositoryByID(t *testing.T) {
 		},
 		{
 			id: "invalid-id",
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"invalid id passed","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -164,7 +164,7 @@ func TestCreateOSRepository(t *testing.T) {
 				SourcePath: "source",
 				ImageType:  "ISO",
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"invalid create repo request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -201,14 +201,14 @@ func TestRemoveOSRepository(t *testing.T) {
 		expectedErr error
 	}
 
-	validId := "12345678-1234-1234-1234-123456789012"
+	validID := "12345678-1234-1234-1234-123456789012"
 
 	cases := []testCase{
 		{
-			id: validId,
+			id: validID,
 			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 				switch req.RequestURI {
-				case fmt.Sprintf("/api/v1/OSRepository/%s", validId):
+				case fmt.Sprintf("/api/v1/OSRepository/%s", validID):
 					resp.WriteHeader(http.StatusOK)
 				default:
 					resp.WriteHeader(http.StatusNoContent)
@@ -218,7 +218,7 @@ func TestRemoveOSRepository(t *testing.T) {
 		},
 		{
 			id: "invalid-id",
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"invalid id passed","httpStatusCode":400,"errorCode":0}`))
 			})),

@@ -174,7 +174,7 @@ func TestAddPeerMdm(t *testing.T) {
 		},
 		"error: no peer system ID": {
 			addPeerMdm: &types.AddPeerMdm{},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusNoContent)
 			})),
 			expectedErr: errors.New("PeerSystemID and PeerSystemIps are required"),
@@ -184,7 +184,7 @@ func TestAddPeerMdm(t *testing.T) {
 				PeerSystemID:  uuid.NewString(),
 				PeerSystemIps: []string{"127.0.0.1", "127.0.0.2"},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -229,7 +229,7 @@ func TestRemovePeerMdm(t *testing.T) {
 			expectedErr: nil,
 		},
 		"error: bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -354,7 +354,7 @@ func TestCreateReplicationConsistencyGroup(t *testing.T) {
 		},
 		"error: missing protection domain": {
 			group: &types.ReplicationConsistencyGroupCreatePayload{},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusNoContent)
 			})),
 			expectedErr: errors.New("RpoInSeconds, ProtectionDomainId, and RemoteProtectionDomainId are required"),
@@ -366,7 +366,7 @@ func TestCreateReplicationConsistencyGroup(t *testing.T) {
 				ProtectionDomainID:       uuid.NewString(),
 				RemoteProtectionDomainID: uuid.NewString(),
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusNoContent)
 			})),
 			expectedErr: errors.New("either DestinationSystemId or PeerMdmId are required"),
@@ -380,7 +380,7 @@ func TestCreateReplicationConsistencyGroup(t *testing.T) {
 				DestinationSystemID:      uuid.NewString(),
 				PeerMdmID:                uuid.NewString(),
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -421,7 +421,7 @@ func TestRemoveReplicationConsistencyGroup(t *testing.T) {
 					{Rel: "self", HREF: ref},
 				},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusNoContent)
 			})),
 			expectedErr: nil,
@@ -430,7 +430,7 @@ func TestRemoveReplicationConsistencyGroup(t *testing.T) {
 			group: &types.ReplicationConsistencyGroup{
 				Name: "myReplicationGroup",
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusNoContent)
 			})),
 			expectedErr: errors.New("Error: problem finding link"),
@@ -487,7 +487,7 @@ func TestCreateReplicationPair(t *testing.T) {
 			replicationPair: &types.QueryReplicationPair{
 				Name: "myReplicationPair",
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 			})),
 			expectedErr: errors.New("CopyType, SourceVolumeID, DestinationVolumeID, and ReplicationConsistencyGroupID are required"),
@@ -500,7 +500,7 @@ func TestCreateReplicationPair(t *testing.T) {
 				ReplicationConsistencyGroupID: uuid.NewString(),
 				CopyType:                      "Remote",
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -553,7 +553,7 @@ func TestRemoveReplicationPair(t *testing.T) {
 			replicationPair: &types.ReplicationPair{
 				Name: "myReplicationPair",
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),

@@ -55,7 +55,7 @@ func TestCreateProtectionDomain(t *testing.T) {
 			expectedErr: nil,
 		},
 		"bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -85,7 +85,7 @@ func TestCreateProtectionDomain(t *testing.T) {
 }
 
 func TestGetProtectionDomainEx(t *testing.T) {
-	pdId := "12345678-1234-1234-1234-123456789012"
+	pdID := "12345678-1234-1234-1234-123456789012"
 	type testCase struct {
 		server      *httptest.Server
 		expectedErr error
@@ -95,10 +95,10 @@ func TestGetProtectionDomainEx(t *testing.T) {
 		"succeed": {
 			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 				switch req.RequestURI {
-				case fmt.Sprintf("/api/instances/ProtectionDomain::%s", pdId):
+				case fmt.Sprintf("/api/instances/ProtectionDomain::%s", pdID):
 					resp.WriteHeader(http.StatusOK)
 					response := types.ProtectionDomain{
-						ID:   pdId,
+						ID:   pdID,
 						Name: "domain1",
 					}
 
@@ -115,7 +115,7 @@ func TestGetProtectionDomainEx(t *testing.T) {
 			expectedErr: nil,
 		},
 		"error: invalid http response": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -134,7 +134,7 @@ func TestGetProtectionDomainEx(t *testing.T) {
 			client: client,
 		}
 
-		_, err = s.GetProtectionDomainEx(context.Background(), pdId)
+		_, err = s.GetProtectionDomainEx(context.Background(), pdID)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -148,7 +148,7 @@ func TestGetProtectionDomainEx(t *testing.T) {
 func TestDeleteProtectionDomain(t *testing.T) {
 	pdName := "myDomain"
 	domainHost := "localhost"
-	pdId := "12345678-1234-1234-1234-123456789012"
+	pdID := "12345678-1234-1234-1234-123456789012"
 	type testCase struct {
 		server      *httptest.Server
 		expectedErr error
@@ -162,7 +162,7 @@ func TestDeleteProtectionDomain(t *testing.T) {
 					resp.WriteHeader(http.StatusOK)
 					response := []types.ProtectionDomain{
 						{
-							ID:   pdId,
+							ID:   pdID,
 							Name: pdName,
 							Links: []*types.Link{
 								{Rel: "self", HREF: domainHost},
@@ -227,7 +227,7 @@ func TestDeleteProtectionDomain(t *testing.T) {
 					resp.WriteHeader(http.StatusOK)
 					response := []types.ProtectionDomain{
 						{
-							ID:   pdId,
+							ID:   pdID,
 							Name: pdName,
 						},
 					}
@@ -251,7 +251,7 @@ func TestDeleteProtectionDomain(t *testing.T) {
 					resp.WriteHeader(http.StatusOK)
 					response := []types.ProtectionDomain{
 						{
-							ID:   pdId,
+							ID:   pdID,
 							Name: pdName,
 							Links: []*types.Link{
 								{Rel: "self", HREF: domainHost},
@@ -328,7 +328,7 @@ func TestProtectionDomainDelete(t *testing.T) {
 		},
 		"error: invalid domain links": {
 			protectionDomain: &types.ProtectionDomain{},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusNoContent)
 			})),
 			expectedErr: errors.New("Error: problem finding link"),
@@ -339,7 +339,7 @@ func TestProtectionDomainDelete(t *testing.T) {
 					{Rel: "self", HREF: domainHost},
 				},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"unable to remove protection domain","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -570,7 +570,7 @@ func TestProtectionDomainSetParamters(t *testing.T) {
 		client: client,
 	}
 
-	var intPtr int = 1
+	intPtr := 1
 
 	_ = pdClient.SetName(ctx, "myDomain")
 	_ = pdClient.SetRfcacheParams(ctx, types.PDRfCacheParams{
