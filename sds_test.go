@@ -89,7 +89,7 @@ func TestCreateSds(t *testing.T) {
 		},
 		"error: bad request": {
 			ipList: []string{"127.0.0.1", "127.0.0.2"},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -300,7 +300,7 @@ func TestGetSds(t *testing.T) {
 			expectedErr: nil,
 		},
 		"error: bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -351,7 +351,7 @@ func TestGetAllSds(t *testing.T) {
 			expectedErr: nil,
 		},
 		"error: bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -414,7 +414,7 @@ func TestFindSds(t *testing.T) {
 			expectedErr: nil,
 		},
 		"error: bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -499,7 +499,7 @@ func TestFindSdsSystem(t *testing.T) {
 			expectedErr: nil,
 		},
 		"error: bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -582,7 +582,7 @@ func TestGetSdsByID(t *testing.T) {
 			expectedErr: nil,
 		},
 		"error: bad request": {
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
