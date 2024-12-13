@@ -159,7 +159,7 @@ func TestWriteIndentedN(t *testing.T) {
 	}
 }
 
-func TestLogResponse(t *testing.T) {
+func TestLogResponse(_ *testing.T) {
 	// Test case: Logging a successful response
 	res := &http.Response{
 		StatusCode: http.StatusOK,
@@ -234,17 +234,17 @@ func TestLogRequest(t *testing.T) {
 }
 
 // errorReader is a custom io.Reader that always returns an error when Read is called.
-type errorReader struct {
+type ErrorReader struct {
 	err error
 }
 
 // NewErrorReader creates an instance of errorReader with the specified error.
-func NewErrorReader(err error) *errorReader {
-	return &errorReader{err: err}
+func NewErrorReader(err error) *ErrorReader {
+	return &ErrorReader{err: err}
 }
 
 // Read always returns an error (simulating a read failure).
-func (r *errorReader) Read(p []byte) (n int, err error) {
+func (r *ErrorReader) Read(_ []byte) (n int, err error) {
 	return 0, r.err
 }
 
