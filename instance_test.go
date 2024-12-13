@@ -203,6 +203,7 @@ func TestGetInstance(t *testing.T) {
 		}
 	}
 }
+
 func TestGetVolume(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(mockInstanceServerHandler))
 	defer mockServer.Close()
