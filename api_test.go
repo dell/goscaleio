@@ -148,6 +148,38 @@ func TestClientVersion(t *testing.T) {
 	if ver != "4.0" {
 		t.Fatal("Expecting version string \"4.0\", got ", ver)
 	}
+
+	// Test unauthorized authentication
+	_, err = client.Authenticate(&ConfigConnect{
+		Username: "ScaleIOUser",
+		Password: "badpassword",
+		Endpoint: "",
+		Version:  "4.0",
+	})
+	if err == nil {
+		t.Fatal(err)
+	}
+
+	// Test for version retrieval with retry
+	_, err = client.GetVersion()
+	if err != nil {
+		// Check if the error is due to unauthorized access
+		if strings.Contains(err.Error(), "Unauthorized") {
+			// retry
+			_, err = client.Authenticate(&ConfigConnect{
+				Username: "ScaleIOUser",
+				Password: "password",
+				Endpoint: "",
+				Version:  "4.0",
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			return
+		}
+		// If error is not due to unauthorized access, fail the test
+		t.Fatal(err)
+	}
 }
 
 func TestClientLogin(t *testing.T) {
@@ -158,15 +190,15 @@ func TestClientLogin(t *testing.T) {
 				resp.WriteHeader(http.StatusOK)
 				resp.Write([]byte(`"2.0"`))
 			case "/api/login":
-				//accept := req.Header.Get("Accept")
+				// accept := req.Header.Get("Accept")
 				// check Accept header
-				//if ver := strings.Split(accept, ";"); len(ver) != 2 {
+				// if ver := strings.Split(accept, ";"); len(ver) != 2 {
 				//	t.Fatal("Expecting Accept header to include version")
-				//} else {
+				// } else {
 				//	if !strings.HasPrefix(ver[1], "version=") {
 				//		t.Fatal("Header Accept must include version")
-				//	}
-				//}
+				//	 }
+				// }
 
 				uname, pwd, basic := req.BasicAuth()
 				if !basic {
@@ -273,7 +305,7 @@ func Test_updateHeaders(_ *testing.T) {
 	wg.Wait()
 }
 
-func Test_getJSONWithRetry(t *testing.T) {
+func TestGetJSONWithRetry(t *testing.T) {
 	t.Run("retried request is similar to the original", func(t *testing.T) {
 		var (
 			paths     []string      // record the requested paths in order.

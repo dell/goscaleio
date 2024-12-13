@@ -54,6 +54,37 @@ func TestNewGateway(t *testing.T) {
 	assert.Equal(t, "4.0", gc.version, "Unexpected version")
 }
 
+func TestNewGatewayInsecure(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && r.URL.Path == "/rest/auth/login" {
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintln(w, `{"access_token":"mock_access_token"}`)
+			return
+		}
+		if r.Method == http.MethodGet && r.URL.Path == "/api/version" {
+			w.Header().Set("Content-Type", "text/plain")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintln(w, "4.0")
+			return
+		}
+		http.NotFound(w, r)
+	}))
+
+	defer server.Close()
+
+	gc, err := NewGateway(server.URL, "test_username", "test_password", true, false)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	assert.Nil(t, err, "Unexpected error")
+	assert.NotNil(t, gc, "GatewayClient is nil")
+	assert.Equal(t, "mock_access_token", gc.token, "Unexpected access token")
+	assert.Equal(t, "4.0", gc.version, "Unexpected version")
+}
+
 // TestGetVersion tests the GetVersion function.
 func TestGetVersion(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

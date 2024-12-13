@@ -114,7 +114,7 @@ func (c *Client) FindVolumeID(volumename string) (string, error) {
 		Name: volumename,
 	}
 
-	path := fmt.Sprintf("/api/types/Volume/instances/action/queryIdByKey")
+	path := "/api/types/Volume/instances/action/queryIdByKey"
 
 	volumeID, err := c.getStringWithRetry(http.MethodPost, path,
 		volumeQeryIDByKeyParam)

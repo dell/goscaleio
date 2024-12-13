@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"encoding/json"
 	"errors"
 	"math"
 	"net/http"
@@ -25,6 +26,7 @@ import (
 
 var (
 	ID    string
+	Name  string
 	errFs error
 )
 
@@ -323,6 +325,64 @@ func TestGetAllFaultSetsSds(t *testing.T) {
 					if err2.Error() != tc.expected.Error() {
 						t.Errorf("Getting sds related with fault set did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
 					}
+				}
+			}
+		})
+	}
+}
+
+func TestGetFaultSetByName(t *testing.T) {
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"success": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case "/api/types/FaultSet/instances":
+					resp.WriteHeader(http.StatusOK)
+					response := []types.FaultSet{
+						{ID: "mock-fault-set-id", Name: "mock-fault-set-name"},
+					}
+
+					content, err := json.Marshal(response)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+				default:
+					resp.WriteHeader(http.StatusNoContent)
+				}
+			})),
+			expectedErr: nil,
+		},
+		"bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: errors.New("bad request"),
+		},
+	}
+
+	for id, tc := range cases {
+		t.Run(id, func(t *testing.T) {
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client.configConnect.Version = "4.0"
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+			}
+			_, err = s.GetFaultSetByName("mock-fault-set-name")
+			if err != nil {
+				if tc.expectedErr.Error() != err.Error() {
+					t.Fatal(err)
 				}
 			}
 		})
