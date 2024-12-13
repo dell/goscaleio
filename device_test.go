@@ -274,7 +274,6 @@ func TestGetDeviceByField(t *testing.T) {
 					}
 				}
 			}
-
 		})
 	}
 }
@@ -365,7 +364,6 @@ func TestSDSFindDevice(t *testing.T) {
 					}
 				}
 			}
-
 		})
 	}
 }
@@ -574,7 +572,6 @@ func TestStoragePoolFindDevice(t *testing.T) {
 					}
 				}
 			}
-
 		})
 	}
 }

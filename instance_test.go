@@ -335,7 +335,6 @@ func TestFindStoragePool(t *testing.T) {
 			error:              "",
 		},
 		{
-
 			name:               "storage pool valid href valid",
 			poolid:             "mock-storage-pool-id",
 			poolname:           "mock-storage-pool-name",
@@ -344,7 +343,6 @@ func TestFindStoragePool(t *testing.T) {
 			error:              "",
 		},
 		{
-
 			name:               "storage pool invalid",
 			poolid:             "mock-storage-pool-invalid-id",
 			poolname:           "mock-storage-pool-invalid-name",
@@ -359,7 +357,6 @@ func TestFindStoragePool(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-
 		_, err = client.FindStoragePool(tc.poolid, tc.poolname, tc.storagepoolhref, tc.protectiondomainid)
 		if err != nil {
 			if tc.error != err.Error() {
