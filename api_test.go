@@ -180,7 +180,6 @@ func TestClientVersion(t *testing.T) {
 		// If error is not due to unauthorized access, fail the test
 		t.Fatal(err)
 	}
-
 }
 
 func TestClientLogin(t *testing.T) {

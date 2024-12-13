@@ -255,9 +255,6 @@ func TestGetDeviceByField(t *testing.T) {
 
 	for id, tc := range cases {
 		t.Run(id, func(t *testing.T) {
-			//ts, checkFns := tc(t)
-			//defer ts.Close()
-
 			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
 			client.configConnect.Version = "4.0"
 			if err != nil {
