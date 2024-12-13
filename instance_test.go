@@ -412,14 +412,14 @@ func TestCreateVolume(t *testing.T) {
 
 	tests := []struct {
 		name             string
-		volumeparam      types.VolumeParam
+		volumeparam      *types.VolumeParam
 		protectiondomain string
 		storagepoolname  string
 		error            string
 	}{
 		{
 			name: "valid volume create",
-			volumeparam: types.VolumeParam{
+			volumeparam: &types.VolumeParam{
 				Name:               "mock-volume-name",
 				VolumeSizeInKb:     "1024",
 				StoragePoolID:      "mock-storage-pool-id",
@@ -437,7 +437,7 @@ func TestCreateVolume(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, err = client.CreateVolume(context.Background(), &tc.volumeparam, tc.storagepoolname, tc.protectiondomain)
+		_, err = client.CreateVolume(tc.volumeparam, tc.storagepoolname, tc.protectiondomain)
 		if err != nil {
 			if tc.error != err.Error() {
 				t.Fatal(err)
