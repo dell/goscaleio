@@ -28,7 +28,6 @@ import (
 
 	"github.com/dell/goscaleio"
 	siotypes "github.com/dell/goscaleio/types/v1"
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -349,7 +348,6 @@ func TestCreateReplicationConsistencyGroup(t *testing.T) {
 	rcgResp, err := C.CreateReplicationConsistencyGroup(rcgPayload)
 	assert.Nil(t, err)
 
-	log.Debugf("RCG ID: %s", rcgResp.ID)
 	rep.rcgID = rcgResp.ID
 
 	time.Sleep(5 * time.Second)
