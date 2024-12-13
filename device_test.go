@@ -13,7 +13,6 @@
 package goscaleio
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -118,7 +117,7 @@ func TestGetAllDevices(t *testing.T) {
 			client: client,
 		}
 
-		_, err = s.GetAllDevice(context.Background())
+		_, err = s.GetAllDevice()
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -177,7 +176,7 @@ func TestGetDevice(t *testing.T) {
 			client: client,
 		}
 
-		_, err = s.GetDevice(context.Background(), "1")
+		_, err = s.GetDevice("1")
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
@@ -271,7 +270,7 @@ func TestGetDeviceByField(t *testing.T) {
 
 			temp := deviceFields[id]
 			for fieldKey, fieldValue := range temp {
-				_, err = s.GetDeviceByField(context.Background(), fieldKey, fieldValue)
+				_, err = s.GetDeviceByField(fieldKey, fieldValue)
 				if err != nil {
 					if tc.expectedErr.Error() != err.Error() {
 						t.Fatal(err)
@@ -362,7 +361,7 @@ func TestSDSFindDevice(t *testing.T) {
 			sds.Sds.Name = "mock-sds-name"
 			sds.Sds.ID = "mock-sds-id"
 			for fieldKey, fieldValue := range deviceFields[id] {
-				_, err = sds.FindDevice(context.Background(), fieldKey, fieldValue)
+				_, err = sds.FindDevice(fieldKey, fieldValue)
 				if err != nil {
 					if tc.expectedErr.Error() != err.Error() {
 						t.Fatal(err)
@@ -423,7 +422,7 @@ func TestSDSGetDevice(t *testing.T) {
 			sds := NewSds(client)
 			sds.Sds.Name = "mock-sds-name"
 			sds.Sds.ID = "mock-sds-id"
-			_, err = sds.GetDevice(context.Background())
+			_, err = sds.GetDevice()
 			if err != nil {
 				if tc.expectedErr.Error() != err.Error() {
 					t.Fatal(err)
@@ -482,7 +481,7 @@ func TestStoragePoolGetDevice(t *testing.T) {
 			pool := NewStoragePool(client)
 			pool.StoragePool.Name = "mock-storage-pool-name"
 
-			_, err = pool.GetDevice(context.Background())
+			_, err = pool.GetDevice()
 			if err != nil {
 				if tc.expectedErr.Error() != err.Error() {
 					t.Fatal(err)
@@ -571,7 +570,7 @@ func TestStoragePoolFindDevice(t *testing.T) {
 			pool.StoragePool.Name = "mock-storage-pool-name"
 			pool.StoragePool.ID = "mock-storage-pool-id"
 			for fieldKey, fieldValue := range deviceFields[id] {
-				_, err = pool.FindDevice(context.Background(), fieldKey, fieldValue)
+				_, err = pool.FindDevice(fieldKey, fieldValue)
 				if err != nil {
 					if tc.expectedErr.Error() != err.Error() {
 						t.Fatal(err)
@@ -635,7 +634,7 @@ func TestStoragePoolSetDeviceName(t *testing.T) {
 
 			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
 			storagePool := NewStoragePool(client)
-			err := storagePool.SetDeviceName(context.Background(), "mock-device-id", "mock-device-name")
+			err := storagePool.SetDeviceName("mock-device-id", "mock-device-name")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -696,7 +695,7 @@ func TestStoragePoolSetMediaType(t *testing.T) {
 
 			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
 			storagePool := NewStoragePool(client)
-			err := storagePool.SetDeviceMediaType(context.Background(), "mock-device-id", "mock-media-type")
+			err := storagePool.SetDeviceMediaType("mock-device-id", "mock-media-type")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -757,7 +756,7 @@ func TestStoragePoolSetDeviceExternalAccelerationType(t *testing.T) {
 
 			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
 			storagePool := NewStoragePool(client)
-			err := storagePool.SetDeviceExternalAccelerationType(context.Background(), "mock-device-id", "mock-acceleration-type")
+			err := storagePool.SetDeviceExternalAccelerationType("mock-device-id", "mock-acceleration-type")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -818,7 +817,7 @@ func TestStoragePoolSetDeviceCapacityLimit(t *testing.T) {
 
 			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
 			storagePool := NewStoragePool(client)
-			err := storagePool.SetDeviceCapacityLimit(context.Background(), "mock-device-id", "100G")
+			err := storagePool.SetDeviceCapacityLimit("mock-device-id", "100G")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -879,7 +878,7 @@ func TestStoragePoolUpdateDeviceOriginalPathways(t *testing.T) {
 
 			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
 			storagePool := NewStoragePool(client)
-			err := storagePool.UpdateDeviceOriginalPathways(context.Background(), "mock-device-id")
+			err := storagePool.UpdateDeviceOriginalPathways("mock-device-id")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -940,7 +939,7 @@ func TestStoragePoolRemoveDevice(t *testing.T) {
 
 			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
 			storagePool := NewStoragePool(client)
-			err := storagePool.RemoveDevice(context.Background(), "mock-device-id")
+			err := storagePool.RemoveDevice("mock-device-id")
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
@@ -1003,7 +1002,7 @@ func TestStoragePoolAttachDevice(t *testing.T) {
 			deviceParam := &types.DeviceParam{
 				Name: "mock-device-name",
 			}
-			_, err := storagePool.AttachDevice(context.Background(), deviceParam)
+			_, err := storagePool.AttachDevice(deviceParam)
 
 			for _, checkFn := range checkFns {
 				checkFn(t, err)

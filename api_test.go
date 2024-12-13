@@ -150,7 +150,7 @@ func TestClientVersion(t *testing.T) {
 	}
 
 	// Test unauthorized authentication
-	_, err = client.Authenticate(context.Background(), &ConfigConnect{
+	_, err = client.Authenticate(&ConfigConnect{
 		Username: "ScaleIOUser",
 		Password: "badpassword",
 		Endpoint: "",
@@ -161,12 +161,12 @@ func TestClientVersion(t *testing.T) {
 	}
 
 	// Test for version retrieval with retry
-	_, err = client.GetVersion(context.Background())
+	_, err = client.GetVersion()
 	if err != nil {
 		// Check if the error is due to unauthorized access
 		if strings.Contains(err.Error(), "Unauthorized") {
 			//retry
-			_, err = client.Authenticate(context.Background(), &ConfigConnect{
+			_, err = client.Authenticate(&ConfigConnect{
 				Username: "ScaleIOUser",
 				Password: "password",
 				Endpoint: "",

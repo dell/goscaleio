@@ -13,7 +13,6 @@
 package goscaleio
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"math"
@@ -380,7 +379,7 @@ func TestGetFaultSetByName(t *testing.T) {
 			s := System{
 				client: client,
 			}
-			_, err = s.GetFaultSetByName(context.Background(), "mock-fault-set-name")
+			_, err = s.GetFaultSetByName("mock-fault-set-name")
 			if err != nil {
 				if tc.expectedErr.Error() != err.Error() {
 					t.Fatal(err)

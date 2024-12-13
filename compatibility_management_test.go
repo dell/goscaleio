@@ -13,7 +13,6 @@
 package goscaleio
 
 import (
-	"context"
 	"encoding/json"
 	"math"
 	"net/http"
@@ -73,7 +72,7 @@ func TestGetCompatibility(t *testing.T) {
 			client: client,
 		}
 
-		_, err = s.GetCompatibilityManagement(context.Background())
+		_, err = s.GetCompatibilityManagement()
 		if err != nil {
 			if tc.error != err.Error() {
 				t.Fatal(err)
@@ -109,7 +108,7 @@ func TestSetCompatibility(t *testing.T) {
 			client: client,
 		}
 
-		_, err = s.SetCompatibilityManagement(context.Background(), &tc.compatibilitymanagement)
+		_, err = s.SetCompatibilityManagement(&tc.compatibilitymanagement)
 		if err != nil {
 			if tc.error != err.Error() {
 				t.Fatal(err)

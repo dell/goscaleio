@@ -13,7 +13,6 @@
 package goscaleio
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -196,7 +195,7 @@ func TestGetInstance(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		_, err = client.GetInstance(context.Background(), tc.systemhref)
+		_, err = client.GetInstance(tc.systemhref)
 		if err != nil {
 			if tc.error != err.Error() {
 				t.Fatal(err)
@@ -270,7 +269,7 @@ func TestGetVolume(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, err = client.GetVolume(context.Background(), tc.volumehref, tc.volumeid, tc.ancestorevolumeid, tc.volumename, tc.snapshots)
+		_, err = client.GetVolume(tc.volumehref, tc.volumeid, tc.ancestorevolumeid, tc.volumename, tc.snapshots)
 		if err != nil {
 			if tc.error != err.Error() {
 				t.Fatal(err)
@@ -306,7 +305,7 @@ func TestGetStoragePool(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, err = client.GetStoragePool(context.Background(), tc.storagepoolhref)
+		_, err = client.GetStoragePool(tc.storagepoolhref)
 		if err != nil {
 			if tc.error != err.Error() {
 				t.Fatal(err)
@@ -361,7 +360,7 @@ func TestFindStoragePool(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, err = client.FindStoragePool(context.Background(), tc.poolid, tc.poolname, tc.storagepoolhref, tc.protectiondomainid)
+		_, err = client.FindStoragePool(tc.poolid, tc.poolname, tc.storagepoolhref, tc.protectiondomainid)
 		if err != nil {
 			if tc.error != err.Error() {
 				t.Fatal(err)
@@ -397,7 +396,7 @@ func TestGetStoragePoolVolumes(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, err = client.GetStoragePoolVolumes(context.Background(), tc.storagepoolid)
+		_, err = client.GetStoragePoolVolumes(tc.storagepoolid)
 		if err != nil {
 			if tc.error != err.Error() {
 				t.Fatal(err)
@@ -476,7 +475,7 @@ func TestGetSnapshotPolicyI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, err = client.GetSnapshotPolicy(context.Background(), tc.snapshotpolicyname, tc.snapshotpolicyid)
+		_, err = client.GetSnapshotPolicy(tc.snapshotpolicyname, tc.snapshotpolicyid)
 		if err != nil {
 			if tc.error != err.Error() {
 				t.Fatal(err)
