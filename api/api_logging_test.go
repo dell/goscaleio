@@ -281,7 +281,7 @@ func TestDrainBody(t *testing.T) {
 	}
 
 	// Test case: b.ReadFrom returns an error
-	b = io.NopCloser(errReader{})
+	b = io.NopCloser(&ErrorReader{})
 	r1, r2, err = drainBody(b)
 	if r1 != nil {
 		t.Errorf("Expected r1 to be nil, got %v", r1)
@@ -305,10 +305,4 @@ func TestDrainBody(t *testing.T) {
 	if err != nil {
 		t.Error("Expected err to be nil")
 	}
-}
-
-type errReader struct{}
-
-func (errReader) Read(p []byte) (n int, err error) {
-	return 0, errors.New("read error")
 }
