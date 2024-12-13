@@ -275,7 +275,7 @@ func TestDrainBody(t *testing.T) {
 	}
 
 	// Test case: b.ReadFrom returns an error
-	b = io.NopCloser(&ErrorReader{})
+	b = io.NopCloser(NewErrorReader(fmt.Errorf("simulated error while reading body")))
 	r1, r2, err = drainBody(b)
 	if r1 != nil {
 		t.Errorf("Expected r1 to be nil, got %v", r1)
