@@ -561,7 +561,7 @@ func TestWithContext(t *testing.T) {
 	}
 
 	parentCtx := context.Background()
-	context, cancel := context.WithTimeout(parentCtx, 1*time.Second)
+	context, cancel := context.WithTimeout(parentCtx, 10*time.Millisecond)
 	defer cancel()
 
 	// Test with Context
@@ -575,7 +575,8 @@ func TestWithContext(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(2 * time.Second)
+	// Delay to test calls without context paramter set.
+	time.Sleep(1 * time.Second)
 
 	// Test with without context
 	_, err = client.Authenticate(&ConfigConnect{
@@ -587,5 +588,4 @@ func TestWithContext(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 }

@@ -66,16 +66,13 @@ type ConfigConnect struct {
 	Insecure bool
 }
 
-// ClientPersistent defines struct for ClientPersistent
-type ClientPersistent struct {
-	configConnect *ConfigConnect
-	client        *Client
-}
-
 // GetVersion returns version
 func (c *Client) GetVersion() (string, error) {
+	ctx := c.GetContext()
+	defer c.ResetContext()
+
 	resp, err := c.api.DoAndGetResponseBody(
-		context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
+		ctx, http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
 	if err != nil {
 		return "", err
 	}
@@ -94,7 +91,7 @@ func (c *Client) GetVersion() (string, error) {
 			return "", err
 		}
 		resp, err = c.api.DoAndGetResponseBody(
-			context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
+			ctx, http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
 		if err != nil {
 			return "", err
 		}
@@ -200,8 +197,11 @@ func (c *Client) getJSONWithRetry(
 	headers[api.HeaderKeyContentType] = conHeader
 	addMetaData(headers, body)
 
+	ctx := c.GetContext()
+	defer c.ResetContext()
+
 	err := c.api.DoWithHeaders(
-		context.Background(), method, uri, headers, body, resp, c.configConnect.Version)
+		ctx, method, uri, headers, body, resp, c.configConnect.Version)
 	if err == nil {
 		return nil
 	}
@@ -216,7 +216,7 @@ func (c *Client) getJSONWithRetry(
 				return fmt.Errorf("Error Authenticating: %s", err)
 			}
 			return c.api.DoWithHeaders(
-				context.Background(), method, uri, headers, body, resp, c.configConnect.Version)
+				ctx, method, uri, headers, body, resp, c.configConnect.Version)
 		}
 	}
 	doLog(logger.Error, err.Error())
@@ -253,6 +253,9 @@ func (c *Client) getStringWithRetry(
 	headers[api.HeaderKeyContentType] = conHeader
 	addMetaData(headers, body)
 
+	ctx := c.GetContext()
+	defer c.ResetContext()
+
 	checkResponse := func(resp *http.Response) (string, bool, error) {
 		defer func() {
 			if err := resp.Body.Close(); err != nil {
@@ -279,7 +282,7 @@ func (c *Client) getStringWithRetry(
 	}
 
 	resp, err := c.api.DoAndGetResponseBody(
-		context.Background(), method, uri, headers, body, c.configConnect.Version)
+		ctx, method, uri, headers, body, c.configConnect.Version)
 	if err != nil {
 		return "", err
 	}
@@ -292,7 +295,7 @@ func (c *Client) getStringWithRetry(
 				return "", fmt.Errorf("Error Authenticating: %s", err)
 			}
 			resp, err = c.api.DoAndGetResponseBody(
-				context.Background(), method, uri, headers, body, c.configConnect.Version)
+				ctx, method, uri, headers, body, c.configConnect.Version)
 			if err != nil {
 				return "", err
 			}
