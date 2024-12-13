@@ -165,7 +165,7 @@ func TestClientVersion(t *testing.T) {
 	if err != nil {
 		// Check if the error is due to unauthorized access
 		if strings.Contains(err.Error(), "Unauthorized") {
-			//retry
+			// retry
 			_, err = client.Authenticate(&ConfigConnect{
 				Username: "ScaleIOUser",
 				Password: "password",
@@ -191,15 +191,15 @@ func TestClientLogin(t *testing.T) {
 				resp.WriteHeader(http.StatusOK)
 				resp.Write([]byte(`"2.0"`))
 			case "/api/login":
-				//accept := req.Header.Get("Accept")
+				// accept := req.Header.Get("Accept")
 				// check Accept header
-				//if ver := strings.Split(accept, ";"); len(ver) != 2 {
+				// if ver := strings.Split(accept, ";"); len(ver) != 2 {
 				//	t.Fatal("Expecting Accept header to include version")
-				//} else {
+				// } else {
 				//	if !strings.HasPrefix(ver[1], "version=") {
 				//		t.Fatal("Header Accept must include version")
-				//	}
-				//}
+				//	 }
+				// }
 
 				uname, pwd, basic := req.BasicAuth()
 				if !basic {
