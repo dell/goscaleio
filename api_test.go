@@ -561,11 +561,11 @@ func TestWithContext(t *testing.T) {
 	}
 
 	parentCtx := context.Background()
-	context, cancel := context.WithTimeout(parentCtx, 10*time.Millisecond)
+	ctx, cancel := context.WithTimeout(parentCtx, 10*time.Millisecond)
 	defer cancel()
 
 	// Test with Context
-	_, err = client.WithContext(context).Authenticate(&ConfigConnect{
+	_, err = client.WithContext(ctx).Authenticate(&ConfigConnect{
 		Username: "ScaleIOUser",
 		Password: "password",
 		Endpoint: "",
