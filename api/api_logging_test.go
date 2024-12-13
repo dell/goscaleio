@@ -222,7 +222,7 @@ func TestLogRequest(t *testing.T) {
 
 	logRequest(context.Background(), req, logFunc)
 
-	//Test case: Error in WriteIndented
+	// Test case: Error in WriteIndented
 	req, err = http.NewRequest("GET", "https://example.com/instances", nil)
 	if err != nil {
 		t.Fatal(err)
