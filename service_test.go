@@ -248,58 +248,186 @@ func TestDeployService(t *testing.T) {
 }
 
 func TestUpdateService(t *testing.T) {
-	responseJSONFile := "response/update_service_response.json"
-	responseData, err := ioutil.ReadFile(responseJSONFile)
-	if err != nil {
-		t.Fatalf("Failed to read response JSON file: %v", err)
-	}
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "/Api/V1/Deployment/") {
-			if r.Method == http.MethodGet {
-				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(responseData))
-				return
-			} else if r.Method == http.MethodPut {
-				w.WriteHeader(http.StatusOK)
-				responseJSON := `{"StatusCode":200,"Messages":[{"DisplayMessage":"Service updated successfully"}]}`
-				w.Write([]byte(responseJSON))
-				return
-			}
-		}
-		http.NotFound(w, r)
-	}))
-	defer server.Close()
-
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
-	}
-
 	deploymentID := "12345"
 	deploymentName := "Updated Deployment"
 	deploymentDesc := "Updated Deployment Description"
 	nodes := "4"
 	nodename := "pfmc-k8s-20230809-160-1"
 
-	serviceResponse, err := gc.UpdateService(deploymentID, deploymentName, deploymentDesc, nodes, nodename)
+	type testCase struct {
+		version     string
+		nodeCount   string
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	responseJSONFile := "response/update_service_response.json"
+	responseData, err := ioutil.ReadFile(responseJSONFile)
 	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
+		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
 
-	if serviceResponse == nil {
-		t.Error("Service response is nil")
+	cases := map[string]testCase{
+		"succeed: 3.7 version": {
+			version:   "3.7",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				if strings.Contains(req.URL.Path, "/Api/V1/Deployment/") {
+					if req.Method == http.MethodGet {
+						resp.WriteHeader(http.StatusOK)
+						resp.Write([]byte(responseData))
+						return
+					} else if req.Method == http.MethodPut {
+						resp.WriteHeader(http.StatusOK)
+						responseJSON := `{"StatusCode":200,"Messages":[{"DisplayMessage":"Service updated successfully"}]}`
+						resp.Write([]byte(responseJSON))
+						return
+					}
+				}
+			})),
+			expectedErr: nil,
+		},
+		"succeed: 4.0 version": {
+			version:   "4.0",
+			nodeCount: "3",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				if strings.Contains(req.URL.Path, "/Api/V1/Deployment/") {
+					if req.Method == http.MethodGet {
+						resp.WriteHeader(http.StatusOK)
+						resp.Write([]byte(responseData))
+						return
+					} else if req.Method == http.MethodPut {
+						resp.WriteHeader(http.StatusOK)
+						responseJSON := `{"StatusCode":200,"Messages":[{"DisplayMessage":"Service updated successfully"}]}`
+						resp.Write([]byte(responseJSON))
+						return
+					}
+				}
+			})),
+			expectedErr: nil,
+		},
+		"succeed: no nodeDiff": {
+			version:   "4.0",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				if strings.Contains(req.URL.Path, "/Api/V1/Deployment/") {
+					if req.Method == http.MethodGet {
+						resp.WriteHeader(http.StatusOK)
+						resp.Write([]byte(responseData))
+						return
+					} else if req.Method == http.MethodPut {
+						resp.WriteHeader(http.StatusOK)
+						responseJSON := `{"StatusCode":200,"Messages":[{"DisplayMessage":"Service updated successfully"}]}`
+						resp.Write([]byte(responseJSON))
+						return
+					}
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: get deployment error - unmarshalling": {
+			version:   "4.0",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				if strings.Contains(req.URL.Path, "/Api/V1/Deployment/") {
+					if req.Method == http.MethodGet {
+						resp.WriteHeader(http.StatusBadRequest)
+						return
+					}
+				}
+			})),
+			expectedErr: fmt.Errorf("Error While Parsing Response Data For Deployment: unexpected end of JSON input"),
+		},
+		"error: get deployment error": {
+			version:   "4.0",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				if strings.Contains(req.URL.Path, "/Api/V1/Deployment/") {
+					if req.Method == http.MethodGet {
+						resp.WriteHeader(http.StatusBadRequest)
+						responseJSON := `{"StatusCode":400,"Messages":[{"DisplayMessage":"Service deployed unsuccessfully"}]}`
+						resp.Write([]byte(responseJSON))
+						return
+					}
+				}
+			})),
+			expectedErr: fmt.Errorf("Error While Parsing Response Data For Deployment: Service deployed unsuccessfully"),
+		},
+		"error: removing nodes not supported": {
+			version:   "4.0",
+			nodeCount: "0",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				if strings.Contains(req.URL.Path, "/Api/V1/Deployment/") {
+					if req.Method == http.MethodGet {
+						resp.WriteHeader(http.StatusOK)
+						resp.Write([]byte(responseData))
+						return
+					} else if req.Method == http.MethodPut {
+						resp.WriteHeader(http.StatusOK)
+						responseJSON := `{"StatusCode":200,"Messages":[{"DisplayMessage":"Service updated successfully"}]}`
+						resp.Write([]byte(responseJSON))
+						return
+					}
+				}
+			})),
+			expectedErr: fmt.Errorf("Removing node(s) is not supported"),
+		},
+		"error: failed update - unmarshalling": {
+			version:   "4.0",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				if strings.Contains(req.URL.Path, "/Api/V1/Deployment/") {
+					if req.Method == http.MethodGet {
+						resp.WriteHeader(http.StatusOK)
+						resp.Write([]byte(responseData))
+						return
+					} else if req.Method == http.MethodPut {
+						resp.WriteHeader(http.StatusBadRequest)
+						return
+					}
+				}
+			})),
+			expectedErr: fmt.Errorf("Error While Parsing Response Data For Deployment: unexpected end of JSON input"),
+		},
+		"error: failed update": {
+			version:   "4.0",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				if strings.Contains(req.URL.Path, "/Api/V1/Deployment/") {
+					if req.Method == http.MethodGet {
+						resp.WriteHeader(http.StatusOK)
+						resp.Write([]byte(responseData))
+						return
+					} else if req.Method == http.MethodPut {
+						resp.WriteHeader(http.StatusBadRequest)
+						responseJSON := `{"StatusCode":400,"Messages":[{"DisplayMessage":"Service failed to update"}]}`
+						resp.Write([]byte(responseJSON))
+						return
+					}
+				}
+			})),
+			expectedErr: fmt.Errorf("Error While Parsing Response Data For Deployment: Service failed to update"),
+		},
 	}
 
-	if serviceResponse.StatusCode != 200 {
-		t.Errorf("Expected status code 200, got %d", serviceResponse.StatusCode)
-	}
+	for _, tc := range cases {
+		gc := &GatewayClient{
+			http:     &http.Client{},
+			host:     tc.server.URL,
+			username: "test_username",
+			password: "test_password",
+			version:  tc.version,
+		}
 
-	assert.NotNil(t, serviceResponse, "Expected non-nil response")
-	assert.Equal(t, 200, serviceResponse.StatusCode, "Expected status code 200")
-	assert.Equal(t, "Service updated successfully", serviceResponse.Messages[0].DisplayMessage, "Expected message 'Service updated successfully'")
+		defer tc.server.Close()
+
+		_, err := gc.UpdateService(deploymentID, deploymentName, deploymentDesc, tc.nodeCount, nodename)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		}
+	}
 }
 
 func TestGetServiceDetailsByID(t *testing.T) {
@@ -414,6 +542,38 @@ func TestGetAllServiceDetails(t *testing.T) {
 
 	assert.NotNil(t, serviceResponse, "Expected non-nil response")
 	assert.EqualValues(t, serviceResponse[0].DeploymentName, "TestCreate")
+
+	gc.version = "4.0"
+	_, err = gc.GetAllServiceDetails()
+	assert.Nil(t, err)
+
+	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.Path, "/Api/V1/Deployment") {
+			if r.Method == http.MethodGet {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+		}
+		http.NotFound(w, r)
+	}))
+
+	gc.host = server.URL
+	_, err = gc.GetAllServiceDetails()
+	assert.NotNil(t, err)
+
+	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.Path, "/Api/V1/Deployment") {
+			if r.Method == http.MethodGet {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+		}
+		http.NotFound(w, r)
+	}))
+
+	gc.host = server.URL
+	_, err = gc.GetAllServiceDetails()
+	assert.NotNil(t, err)
 }
 
 func TestDeleteService(t *testing.T) {
