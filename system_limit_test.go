@@ -230,7 +230,7 @@ func TestGetMaxVol(t *testing.T) {
 					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
 				}
 
-				// Simulate a successful response for GetSystemLimits.
+				// Empty response without any valid payload.
 				resp := types.QuerySystemLimitsResponse{}
 
 				respData, err := json.Marshal(resp)
