@@ -91,7 +91,6 @@ func TestGetUser(t *testing.T) {
 	for name, tc := range cases {
 		tc := tc
 		t.Run(name, func(_ *testing.T) {
-
 			defer tc.server.Close()
 
 			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
