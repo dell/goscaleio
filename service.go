@@ -423,16 +423,6 @@ func (gc *GatewayClient) UpdateService(deploymentID, deploymentName, deploymentD
 	return &deploymentResponse, nil
 }
 
-// Function to check if string is not present in list
-func contains(list []string, str string) bool {
-	for _, s := range list {
-		if s == str {
-			return true
-		}
-	}
-	return false
-}
-
 // GetServiceDetailsByID retrieves service details by deployment ID.
 func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken bool) (*types.ServiceResponse, error) {
 	defer TimeSpent("GetServiceDetailsByID", time.Now())
