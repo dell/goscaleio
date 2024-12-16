@@ -14,12 +14,14 @@ package goscaleio
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
+	"github.com/google/uuid"
 )
 
 var (
@@ -242,72 +244,59 @@ func TestAssignSnapshotPolicy(t *testing.T) {
 }
 
 func TestUnassignSnapshotPolicy(t *testing.T) {
+	policyID := uuid.NewString()
+	systemID := uuid.NewString()
 	type testCase struct {
-		id       string
-		snap     *types.AssignVolumeToSnapshotPolicyParam
-		expected error
+		server      *httptest.Server
+		expectedErr error
 	}
-	cases := []testCase{
-		{
-			id: ID2,
-			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeID:            "edba1bff00000001",
-				AutoSnapshotRemovalAction: "Remove",
-			},
-			expected: nil,
+
+	cases := map[string]testCase{
+		"success": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/SnapshotPolicy::%s/action/removeSourceVolumeFromSnapshotPolicy", policyID):
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
 		},
-		{
-			id: "Invalid",
-			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeID:            "edba1bff00000001",
-				AutoSnapshotRemovalAction: "Remove",
-			},
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
-		},
-		{
-			id: ID2,
-			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeID:            "edba1bff000000",
-				AutoSnapshotRemovalAction: "Remove",
-			},
-			expected: errors.New("Invalid volume. Please try again with a valid ID or name"),
-		},
-		{
-			id: ID2,
-			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeID:            "edba1bff000000",
-				AutoSnapshotRemovalAction: "Invalid",
-			},
-			expected: errors.New("autoSnapshotRemovalAction should get one of the following values: Remove, Detach, but its value is Invalid"),
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
-	}))
-	defer svr.Close()
 
 	for _, tc := range cases {
-		tc := tc
-		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-			if err != nil {
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tc.server.Close()
+
+		system := System{
+			System: &types.System{
+				ID: systemID,
+			},
+			client: client,
+		}
+
+		params := &types.AssignVolumeToSnapshotPolicyParam{
+			SourceVolumeID: uuid.NewString(),
+		}
+
+		err = system.UnassignVolumeFromSnapshotPolicy(params, policyID)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
 				t.Fatal(err)
 			}
-
-			s := System{
-				client: client,
-			}
-
-			err2 := s.AssignVolumeToSnapshotPolicy(tc.snap, tc.id)
-			if err2 != nil {
-				if tc.expected == nil {
-					t.Errorf("Assigning volume to snapshot policy did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
-				} else {
-					if err2.Error() != tc.expected.Error() {
-						t.Errorf("Assigning volume to snapshot policy did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
-					}
-				}
-			}
-		})
+		}
 	}
 }
 
