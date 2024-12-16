@@ -143,3 +143,127 @@ func TestGetSystemLimits(t *testing.T) {
 		})
 	}
 }
+
+func TestGetMaxVol(t *testing.T) {
+	type checkFn func(*testing.T, string, error)
+	check := func(fns ...checkFn) []checkFn { return fns }
+
+	hasNoError := func(t *testing.T, _ string, err error) {
+		if err != nil {
+			t.Fatalf("expected no error")
+		}
+	}
+
+	hasError := func(t *testing.T, _ string, err error) {
+		if err == nil {
+			t.Fatalf("expected error")
+		}
+	}
+
+	checkLimitMaxVal := func(expectedMaxVal string) func(t *testing.T, maxvol string, err error) {
+		return func(t *testing.T, maxvol string, err error) {
+			if err == nil {
+				assert.Equal(t, expectedMaxVal, maxvol)
+			}
+		}
+	}
+
+	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
+		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
+			href := "/api/instances/System/action/querySystemLimits"
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodPost, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				// Simulate a successful response for GetSystemLimits.
+				resp := types.QuerySystemLimitsResponse{
+					SystemLimitEntryList: []types.SystemLimits{
+						{
+							Type:        "volumeSizeGb",
+							Description: "Maximum volume size in GB",
+							MaxVal:      "1024",
+						},
+					},
+				}
+
+				respData, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				fmt.Fprintln(w, string(respData))
+			}))
+
+			return ts, check(hasNoError, checkLimitMaxVal("1024"))
+		},
+		"not found": func(t *testing.T) (*httptest.Server, []checkFn) {
+			href := "/api/instances/System/action/querySystemLimits"
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodPost, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				http.Error(w, "nas not found", http.StatusNotFound)
+			}))
+
+			return ts, check(hasError)
+		},
+		"couldn't get max vol size": func(t *testing.T) (*httptest.Server, []checkFn) {
+			href := "/api/instances/System/action/querySystemLimits"
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodPost, r.Method))
+				}
+
+				if r.URL.Path != href {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", href, r.URL.Path))
+				}
+
+				// Simulate a successful response for GetSystemLimits.
+				resp := types.QuerySystemLimitsResponse{}
+
+				respData, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				fmt.Fprintln(w, string(respData))
+			}))
+
+			return ts, check(hasError)
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			ts, checkFns := tc(t)
+			defer ts.Close()
+
+			// Create a test client and call GetMaxVol.
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client.configConnect.Version = "4.0"
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			sys := System{
+				client: client,
+			}
+
+			resp, err := sys.client.GetMaxVol()
+			for _, checkFn := range checkFns {
+				checkFn(t, resp, err)
+			}
+		})
+	}
+}
