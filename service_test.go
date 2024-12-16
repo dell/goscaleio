@@ -616,7 +616,7 @@ func TestDeleteService(t *testing.T) {
 		},
 		"error: couldn't delete service": {
 			version: "3.7",
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -794,7 +794,7 @@ func TestGetServiceComplianceDetailsByFilter(t *testing.T) {
 			version: "3.7",
 			filter:  "IpAddress",
 			value:   "127.0.0.1",
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				content, err := json.Marshal(complianceReports)
 				if err != nil {
 					t.Fatal(err)
@@ -809,7 +809,7 @@ func TestGetServiceComplianceDetailsByFilter(t *testing.T) {
 			version: "3.7",
 			filter:  "ServiceTag",
 			value:   "myServiceTag",
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				content, err := json.Marshal(complianceReports)
 				if err != nil {
 					t.Fatal(err)
@@ -824,7 +824,7 @@ func TestGetServiceComplianceDetailsByFilter(t *testing.T) {
 			version: "3.7",
 			filter:  "Compliant",
 			value:   "true",
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				content, err := json.Marshal(complianceReports)
 				if err != nil {
 					t.Fatal(err)
@@ -839,7 +839,7 @@ func TestGetServiceComplianceDetailsByFilter(t *testing.T) {
 			version: "3.7",
 			filter:  "HostName",
 			value:   "myHostName",
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				content, err := json.Marshal(complianceReports)
 				if err != nil {
 					t.Fatal(err)
@@ -854,7 +854,7 @@ func TestGetServiceComplianceDetailsByFilter(t *testing.T) {
 			version: "3.7",
 			filter:  "ID",
 			value:   complianceID,
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				content, err := json.Marshal(complianceReports)
 				if err != nil {
 					t.Fatal(err)
@@ -869,7 +869,7 @@ func TestGetServiceComplianceDetailsByFilter(t *testing.T) {
 			version: "3.7",
 			filter:  "ID",
 			value:   complianceID,
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				content, err := json.Marshal([]types.ComplianceReport{})
 				if err != nil {
 					t.Fatal(err)
@@ -884,7 +884,7 @@ func TestGetServiceComplianceDetailsByFilter(t *testing.T) {
 			version: "3.7",
 			filter:  "InvalidFilter",
 			value:   "InvalidValue",
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				content, err := json.Marshal(complianceReports)
 				if err != nil {
 					t.Fatal(err)
