@@ -265,7 +265,7 @@ func TestRemoveUser(t *testing.T) {
 		"user not found": {
 			id:       "eeb2dec800000005",
 			expected: errors.New("User not found. Please check that you have the correct user name"),
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte(`{"message":"User not found. Please check that you have the correct user name","httpStatusCode":400,"errorCode":0}`))
 			})),
