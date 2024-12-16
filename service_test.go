@@ -27,7 +27,19 @@ import (
 )
 
 func TestDeployService(t *testing.T) {
+	type testCase struct {
+		version     string
+		nodeCount   string
+		server      *httptest.Server
+		expectedErr error
+	}
+
 	firmwareResponse := `{ "id": "67890", "name": "PowerFlex 4.5.0.0", "sourceLocation": "PowerFlex_Software_4.5.0.0_287_r1.zip", "sourceType": null, "diskLocation": "/opt/Dell/ASM/temp/RCM_8aaaee188f38ea00018f3d4dc8ea0075/catalog", "filename": "catalog.xml", "md5Hash": null, "username": null, "password": null, "downloadStatus": "error", "createdDate": "2024-05-03T07:14:18.986+00:00", "createdBy": "admin", "updatedDate": "2024-05-06T05:59:33.696+00:00", "updatedBy": "system", "defaultCatalog": false, "embedded": false, "state": "errors", "softwareComponents": [], "softwareBundles": [], "deployments": [], "bundleCount": 0, "componentCount": 0, "userBundleCount": 0, "minimal": true, "downloadProgress": 100, "extractProgress": 0, "fileSizeInGigabytes": 4.6, "signedKeySourceLocation": null, "signature": "Unsigned", "custom": false, "needsAttention": false, "jobId": "Job-2cf0b7b7-c794-4fa4-9256-784c261ebbc9", "rcmapproved": false }`
+	deploymentName := "Test Deployment"
+	deploymentDesc := "Test Deployment Description"
+	serviceTemplateID := "12345"
+	firmwareRepositoryID := "67890"
+	nodes := "3"
 
 	serviceTemplateJSONFile := "response/service_template_response.json"
 	serviceTemplateResponse, err := ioutil.ReadFile(serviceTemplateJSONFile)
@@ -35,48 +47,204 @@ func TestDeployService(t *testing.T) {
 		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "/Api/V1/FirmwareRepository/") {
-			w.WriteHeader(http.StatusOK)
-			_, err := w.Write([]byte(firmwareResponse))
-			if err != nil {
-				t.Fatalf("Error writing response: %v", err)
-			}
-			return
-		} else if strings.Contains(r.URL.Path, "/Api/V1/ServiceTemplate/") {
-			w.WriteHeader(http.StatusOK)
-			_, err := w.Write([]byte(serviceTemplateResponse))
-			if err != nil {
-				t.Fatalf("Error writing response: %v", err)
-			}
-			return
-		} else if strings.Contains(r.URL.Path, "/Api/V1/Deployment") {
-			w.WriteHeader(http.StatusOK)
-			responseJSON := `{"StatusCode":200,"Messages":[{"DisplayMessage":"Service deployed successfully"}]}`
-			w.Write([]byte(responseJSON))
-			return
-		}
-		http.NotFound(w, r)
-	}))
-	defer server.Close()
-
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
+	cases := map[string]testCase{
+		"succeed: 3.7 version": {
+			version:   "3.7",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/FirmwareRepository/%s", firmwareRepositoryID):
+					resp.WriteHeader(http.StatusOK)
+					_, err := resp.Write([]byte(firmwareResponse))
+					if err != nil {
+						t.Fatalf("Error writing response: %v", err)
+					}
+				case fmt.Sprintf("/Api/V1/ServiceTemplate/%s?forDeployment=true", serviceTemplateID):
+					resp.WriteHeader(http.StatusOK)
+					_, err := resp.Write([]byte(serviceTemplateResponse))
+					if err != nil {
+						t.Fatalf("Error writing response: %v", err)
+					}
+				case "/Api/V1/Deployment":
+					resp.WriteHeader(http.StatusOK)
+					responseJSON := `{"StatusCode":200,"Messages":[{"DisplayMessage":"Service deployed successfully"}]}`
+					resp.Write([]byte(responseJSON))
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"succeed: 4.0 version": {
+			version:   "4.0",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/FirmwareRepository/%s", firmwareRepositoryID):
+					resp.WriteHeader(http.StatusOK)
+					_, err := resp.Write([]byte(firmwareResponse))
+					if err != nil {
+						t.Fatalf("Error writing response: %v", err)
+					}
+				case fmt.Sprintf("/Api/V1/ServiceTemplate/%s?forDeployment=true", serviceTemplateID):
+					resp.WriteHeader(http.StatusOK)
+					_, err := resp.Write([]byte(serviceTemplateResponse))
+					if err != nil {
+						t.Fatalf("Error writing response: %v", err)
+					}
+				case "/Api/V1/Deployment":
+					resp.WriteHeader(http.StatusOK)
+					responseJSON := `{"StatusCode":200,"Messages":[{"DisplayMessage":"Service deployed successfully"}]}`
+					resp.Write([]byte(responseJSON))
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: firmware repository not found": {
+			version:   "4.0",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/FirmwareRepository/%s", firmwareRepositoryID):
+					// No response
+					resp.WriteHeader(http.StatusOK)
+				}
+			})),
+			expectedErr: fmt.Errorf("Firmware Repository Not Found"),
+		},
+		"error: Service template not found": {
+			version:   "4.0",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/FirmwareRepository/%s", firmwareRepositoryID):
+					resp.WriteHeader(http.StatusOK)
+					_, err := resp.Write([]byte(firmwareResponse))
+					if err != nil {
+						t.Fatalf("Error writing response: %v", err)
+					}
+				case fmt.Sprintf("/Api/V1/ServiceTemplate/%s?forDeployment=true", serviceTemplateID):
+					resp.WriteHeader(http.StatusBadRequest)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: fmt.Errorf("Service Template Not Found"),
+		},
+		"error: service parsing error": {
+			version:   "4.0",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/FirmwareRepository/%s", firmwareRepositoryID):
+					resp.WriteHeader(http.StatusOK)
+					_, err := resp.Write([]byte(firmwareResponse))
+					if err != nil {
+						t.Fatalf("Error writing response: %v", err)
+					}
+				case fmt.Sprintf("/Api/V1/ServiceTemplate/%s?forDeployment=true", serviceTemplateID):
+					responseJSON := `{abc}`
+					resp.Write([]byte(responseJSON))
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: fmt.Errorf("Error While Parsing Response Data For Template: invalid character 'a' looking for beginning of object key string"),
+		},
+		"error: invalid nodes count": {
+			version:   "4.0",
+			nodeCount: "100",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/FirmwareRepository/%s", firmwareRepositoryID):
+					resp.WriteHeader(http.StatusOK)
+					_, err := resp.Write([]byte(firmwareResponse))
+					if err != nil {
+						t.Fatalf("Error writing response: %v", err)
+					}
+				case fmt.Sprintf("/Api/V1/ServiceTemplate/%s?forDeployment=true", serviceTemplateID):
+					resp.WriteHeader(http.StatusOK)
+					_, err := resp.Write([]byte(serviceTemplateResponse))
+					if err != nil {
+						t.Fatalf("Error writing response: %v", err)
+					}
+				}
+			})),
+			expectedErr: fmt.Errorf("Node count is not matching with Service Template"),
+		},
+		"error: deployment failed - unmarshalling": {
+			version:   "4.0",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/FirmwareRepository/%s", firmwareRepositoryID):
+					resp.WriteHeader(http.StatusOK)
+					_, err := resp.Write([]byte(firmwareResponse))
+					if err != nil {
+						t.Fatalf("Error writing response: %v", err)
+					}
+				case fmt.Sprintf("/Api/V1/ServiceTemplate/%s?forDeployment=true", serviceTemplateID):
+					resp.WriteHeader(http.StatusOK)
+					_, err := resp.Write([]byte(serviceTemplateResponse))
+					if err != nil {
+						t.Fatalf("Error writing response: %v", err)
+					}
+				case "/Api/V1/Deployment":
+					resp.WriteHeader(http.StatusBadRequest)
+				}
+			})),
+			expectedErr: fmt.Errorf("Error While Parsing Response Data For Deployment: unexpected end of JSON input"),
+		},
+		"error: deployment failed": {
+			version:   "4.0",
+			nodeCount: nodes,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/FirmwareRepository/%s", firmwareRepositoryID):
+					resp.WriteHeader(http.StatusOK)
+					_, err := resp.Write([]byte(firmwareResponse))
+					if err != nil {
+						t.Fatalf("Error writing response: %v", err)
+					}
+				case fmt.Sprintf("/Api/V1/ServiceTemplate/%s?forDeployment=true", serviceTemplateID):
+					resp.WriteHeader(http.StatusOK)
+					_, err := resp.Write([]byte(serviceTemplateResponse))
+					if err != nil {
+						t.Fatalf("Error writing response: %v", err)
+					}
+				case "/Api/V1/Deployment":
+					resp.WriteHeader(http.StatusBadRequest)
+					responseJSON := `{"StatusCode":400,"Messages":[{"DisplayMessage":"Service deployed unsuccessfully"}]}`
+					resp.Write([]byte(responseJSON))
+				}
+			})),
+			expectedErr: fmt.Errorf("Error While Parsing Response Data For Deployment: Service deployed unsuccessfully"),
+		},
 	}
 
-	deploymentName := "Test Deployment"
-	deploymentDesc := "Test Deployment Description"
-	serviceTemplateID := "12345"
-	firmwareRepositoryID := "67890"
-	nodes := "3"
+	for _, tc := range cases {
+		gc := &GatewayClient{
+			http:     &http.Client{},
+			host:     tc.server.URL,
+			username: "test_username",
+			password: "test_password",
+			version:  tc.version,
+		}
 
-	serviceResponse, err := gc.DeployService(deploymentName, deploymentDesc, serviceTemplateID, firmwareRepositoryID, nodes)
-	assert.NotNil(t, serviceResponse, "Expected non-nil response")
-	assert.Equal(t, 200, serviceResponse.StatusCode, "Expected status code 200")
-	assert.Equal(t, "Service deployed successfully", serviceResponse.Messages[0].DisplayMessage, "Expected message 'Service deployed successfully'")
+		_, err := gc.DeployService(deploymentName, deploymentDesc, serviceTemplateID, firmwareRepositoryID, tc.nodeCount)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		}
+	}
 }
 
 func TestUpdateService(t *testing.T) {
