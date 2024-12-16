@@ -13,12 +13,16 @@
 package goscaleio
 
 import (
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	types "github.com/dell/goscaleio/types/v1"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -242,4 +246,343 @@ func TestGetAllServiceDetails(t *testing.T) {
 
 	assert.NotNil(t, serviceResponse, "Expected non-nil response")
 	assert.EqualValues(t, serviceResponse[0].DeploymentName, "TestCreate")
+}
+
+func TestDeleteService(t *testing.T) {
+	serviceID := uuid.NewString()
+	serversInInventory := "myService"
+	serversManagedState := "myServiceState"
+
+	type testCase struct {
+		version     string
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"succeed: 3.7 version": {
+			version: "3.7",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/Deployment/%s?serversInInventory=%s&serversManagedState=%s", serviceID, serversInInventory, serversManagedState):
+					resp.WriteHeader(http.StatusNoContent)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"succeed: 4.0 version": {
+			version: "4.0",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/Deployment/%s?serversInInventory=%s&serversManagedState=%s", serviceID, serversInInventory, serversManagedState):
+					resp.WriteHeader(http.StatusNoContent)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: couldn't delete service": {
+			version: "3.7",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("Couldn't delete service"),
+		},
+	}
+
+	for _, tc := range cases {
+		gc := &GatewayClient{
+			http:     &http.Client{},
+			host:     tc.server.URL,
+			username: "test_username",
+			password: "test_password",
+			version:  tc.version,
+		}
+
+		_, err := gc.DeleteService(serviceID, serversInInventory, serversManagedState)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
+func TestGetServiceComplianceDetails(t *testing.T) {
+	deploymentID := uuid.NewString()
+
+	type testCase struct {
+		version     string
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"succeed: 3.7 version": {
+			version: "3.7",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/Deployment/%s/firmware/compliancereport", deploymentID):
+					content, err := json.Marshal([]types.ComplianceReport{
+						{
+							ID:        uuid.NewString(),
+							Compliant: true,
+						},
+						{
+							ID:        uuid.NewString(),
+							Compliant: false,
+						},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"succeed: 4.0 version": {
+			version: "4.0",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/Deployment/%s/firmware/compliancereport", deploymentID):
+					content, err := json.Marshal([]types.ComplianceReport{
+						{
+							ID:        uuid.NewString(),
+							Compliant: true,
+						},
+						{
+							ID:        uuid.NewString(),
+							Compliant: false,
+						},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: error parsing response": {
+			version: "3.7",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("Couldn't find compliance report for given deployment"),
+		},
+		"error: couldn't find compliance report": {
+			version: "3.7",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/Deployment/%s/firmware/compliancereport", deploymentID):
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: fmt.Errorf("Error while parsing response data for compliance report: unexpected end of JSON input"),
+		},
+		"error: empty compliance report": {
+			version: "3.7",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/Api/V1/Deployment/%s/firmware/compliancereport", deploymentID):
+					content, err := json.Marshal([]types.ComplianceReport{})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: fmt.Errorf("Couldn't find compliance report for given deployment"),
+		},
+	}
+
+	for _, tc := range cases {
+		gc := &GatewayClient{
+			http:     &http.Client{},
+			host:     tc.server.URL,
+			username: "test_username",
+			password: "test_password",
+			version:  tc.version,
+		}
+
+		_, err := gc.GetServiceComplianceDetails(deploymentID)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
+func TestGetServiceComplianceDetailsByFilter(t *testing.T) {
+	deploymentID := uuid.NewString()
+	complianceID := uuid.NewString()
+	complianceReports := []types.ComplianceReport{
+		{
+			ID:         complianceID,
+			IPAddress:  "127.0.0.1",
+			Compliant:  true,
+			ServiceTag: "myServiceTag",
+			HostName:   "myHostName",
+		},
+	}
+
+	type testCase struct {
+		version     string
+		filter      string
+		value       string
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"success: IP Address": {
+			version: "3.7",
+			filter:  "IpAddress",
+			value:   "127.0.0.1",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				content, err := json.Marshal(complianceReports)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				resp.Write(content)
+				resp.WriteHeader(http.StatusOK)
+			})),
+			expectedErr: nil,
+		},
+		"success: Service Tag": {
+			version: "3.7",
+			filter:  "ServiceTag",
+			value:   "myServiceTag",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				content, err := json.Marshal(complianceReports)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				resp.Write(content)
+				resp.WriteHeader(http.StatusOK)
+			})),
+			expectedErr: nil,
+		},
+		"success: Compliant": {
+			version: "3.7",
+			filter:  "Compliant",
+			value:   "true",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				content, err := json.Marshal(complianceReports)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				resp.Write(content)
+				resp.WriteHeader(http.StatusOK)
+			})),
+			expectedErr: nil,
+		},
+		"success: Host Name": {
+			version: "3.7",
+			filter:  "HostName",
+			value:   "myHostName",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				content, err := json.Marshal(complianceReports)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				resp.Write(content)
+				resp.WriteHeader(http.StatusOK)
+			})),
+			expectedErr: nil,
+		},
+		"success: ID": {
+			version: "3.7",
+			filter:  "ID",
+			value:   complianceID,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				content, err := json.Marshal(complianceReports)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				resp.Write(content)
+				resp.WriteHeader(http.StatusOK)
+			})),
+			expectedErr: nil,
+		},
+		"error: empty compliance report": {
+			version: "3.7",
+			filter:  "ID",
+			value:   complianceID,
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				content, err := json.Marshal([]types.ComplianceReport{})
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				resp.Write(content)
+				resp.WriteHeader(http.StatusOK)
+			})),
+			expectedErr: fmt.Errorf("Couldn't find compliance report for the given deployment"),
+		},
+		"error: invalid filter": {
+			version: "3.7",
+			filter:  "InvalidFilter",
+			value:   "InvalidValue",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				content, err := json.Marshal(complianceReports)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				resp.Write(content)
+				resp.WriteHeader(http.StatusOK)
+			})),
+			expectedErr: fmt.Errorf("Invalid filter provided"),
+		},
+	}
+
+	for _, tc := range cases {
+		gc := &GatewayClient{
+			http:     &http.Client{},
+			host:     tc.server.URL,
+			username: "test_username",
+			password: "test_password",
+			version:  tc.version,
+		}
+
+		_, err := gc.GetServiceComplianceDetailsByFilter(deploymentID, tc.filter, tc.value)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		}
+	}
 }
