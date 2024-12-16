@@ -115,8 +115,8 @@ func TestGetNasByIDName(t *testing.T) {
 			}))
 			return ts, &system, check(hasError)
 		},
-		"error due to missing nas name": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+		"error due to missing nas name": func(_ *testing.T) (*httptest.Server, *types.System, []checkFn) {
+			ts := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {}))
 			return ts, nil, check(hasError)
 		},
 		"not found": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
@@ -190,8 +190,8 @@ func TestGetNasByIDName(t *testing.T) {
 			}))
 			return ts, &system, check(hasNoError, checkRespID("5e8d8e8e-671b-336f-db4e-cee0fbdc981e"))
 		},
-		"error due to missing id": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+		"error due to missing id": func(_ *testing.T) (*httptest.Server, *types.System, []checkFn) {
+			ts := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {}))
 			return ts, nil, check(hasError)
 		},
 		"not found": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
@@ -391,7 +391,7 @@ func TestDeleteNAS(t *testing.T) {
 	}
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, *types.System, []checkFn){
-		"success": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+		"success": func(_ *testing.T) (*httptest.Server, *types.System, []checkFn) {
 			systemID := "0000aaacccddd1111"
 			system := types.System{
 				ID: systemID,
@@ -404,7 +404,7 @@ func TestDeleteNAS(t *testing.T) {
 
 			return ts, &system, check(hasNoError)
 		},
-		"bad request": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+		"bad request": func(_ *testing.T) (*httptest.Server, *types.System, []checkFn) {
 			systemID := "0000aaacccddd1111"
 			system := types.System{
 				ID: systemID,
@@ -581,8 +581,8 @@ func TestGeFileInterfaace(t *testing.T) {
 			}))
 			return ts, &system, check(hasNoError, checkRespID("5e8d8e8e-671b-336f-db4e-cee0fbdc981e"))
 		},
-		"error due to missing id": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+		"error due to missing id": func(_ *testing.T) (*httptest.Server, *types.System, []checkFn) {
+			ts := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {}))
 			return ts, nil, check(hasError)
 		},
 		"not found": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
