@@ -24,7 +24,7 @@ import (
 // GetTreeQuota gets list of tree Quota
 func (s *System) GetTreeQuota() (treeQuotaList []types.TreeQuota, err error) {
 	defer TimeSpent("GetTreeQuota", time.Now())
-	path := fmt.Sprintf("/rest/v1/file-tree-quotas?select=*")
+	path := "/rest/v1/file-tree-quotas?select=*"
 
 	err = s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &treeQuotaList)
@@ -51,7 +51,7 @@ func (s *System) GetTreeQuotaByID(id string) (treeQuota *types.TreeQuota, err er
 
 // CreateTreeQuota create an tree quota for a File System.
 func (s *System) CreateTreeQuota(createParams *types.TreeQuotaCreate) (resp *types.TreeQuotaCreateResponse, err error) {
-	path := fmt.Sprintf("/rest/v1/file-tree-quotas")
+	path := "/rest/v1/file-tree-quotas"
 
 	var body *types.TreeQuotaCreate = createParams
 	err = s.client.getJSONWithRetry(http.MethodPost, path, body, &resp)
