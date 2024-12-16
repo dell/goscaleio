@@ -25,7 +25,7 @@ func TestCreateUser(t *testing.T) {
 				UserRole: "Monitor",
 				Password: "default",
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusCreated)
 			})),
 		},
@@ -36,7 +36,7 @@ func TestCreateUser(t *testing.T) {
 				Password: "password",
 			},
 			expected: errors.New("userRole should get on Monitor, Configure, Administrator, Security, FrontendConfig, BackendConfig, but its value is Role"),
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte(`{"message":"userRole should get on Monitor, Configure, Administrator, Security, FrontendConfig, BackendConfig, but its value is Role","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -74,14 +74,14 @@ func TestGetUser(t *testing.T) {
 			id:       "eeb2dec800000001",
 			name:     "",
 			expected: nil,
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			})),
 		},
 		"error with API call": {
 			id:       "eeb2dec800000001",
 			name:     "",
 			expected: fmt.Errorf("unable to get user"),
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte(`{"message":"unable to get user","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -226,7 +226,7 @@ func TestGetUserByIDName(t *testing.T) {
 			id:       "",
 			name:     "",
 			expected: errors.New("user name or ID is mandatory, please enter a valid value"),
-			server:   httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})),
+			server:   httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {})),
 		},
 	}
 
