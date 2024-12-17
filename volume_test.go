@@ -22,6 +22,7 @@ import (
 
 	types "github.com/dell/goscaleio/types/v1"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetVolumeStatistics(t *testing.T) {
@@ -344,4 +345,47 @@ func TestGetVolumeSP(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetLocalVolumeMapByRegex(t *testing.T) {
+	type testCase struct {
+		directoryPrefix string
+		systenIDRegex   string
+		volumeIDRegex   string
+		expectedLength  int
+	}
+
+	cases := map[string]testCase{
+		"success: mocked location": {
+			directoryPrefix: "mocks",
+			systenIDRegex:   "",
+			volumeIDRegex:   "",
+			expectedLength:  1,
+		},
+		"success: empty response": {
+			directoryPrefix: "mocks",
+			systenIDRegex:   "mySystemID*",
+			volumeIDRegex:   "myVolumeID*",
+			expectedLength:  0,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+
+			FSDevDirectoryPrefix = tc.directoryPrefix
+
+			mappedVolumes, err := GetLocalVolumeMapByRegex(tc.systenIDRegex, tc.volumeIDRegex)
+			assert.Nil(t, err)
+			assert.Equal(t, tc.expectedLength, len(mappedVolumes))
+		})
+	}
+}
+
+func TestGetLocalVolumeMap(t *testing.T) {
+	FSDevDirectoryPrefix = "mocks"
+
+	mappedVolumes, err := GetLocalVolumeMap()
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(mappedVolumes))
 }
