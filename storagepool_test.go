@@ -94,11 +94,11 @@ func TestCreateStoragePool(t *testing.T) {
 			}))
 			return ts, &protectionDomain, check(hasNoError, checkResp("1a2b345c-123a-123a-ab1c-abc1fd234567e"))
 		},
-		"bad request": func(t *testing.T) (*httptest.Server, *types.ProtectionDomain, []checkFn) {
+		"bad request": func(*testing.T) (*httptest.Server, *types.ProtectionDomain, []checkFn) {
 			protectionDomain := types.ProtectionDomain{
 				Name: "domain1",
 			}
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
 			return ts, &protectionDomain, check(hasError)
@@ -180,8 +180,8 @@ func TestModifyStoragePoolName(t *testing.T) {
 			}))
 			return ts, check(hasNoError, checkResp(poolID))
 		},
-		"bad request": func(t *testing.T) (*httptest.Server, []checkFn) {
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		"bad request": func(*testing.T) (*httptest.Server, []checkFn) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
 			return ts, check(hasError)
@@ -311,8 +311,8 @@ func TestModifyStoragePoolMedia(t *testing.T) {
 			}))
 			return ts, check(hasNoError, checkResp(poolID))
 		},
-		"bad request": func(t *testing.T) (*httptest.Server, []checkFn) {
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		"bad request": func(*testing.T) (*httptest.Server, []checkFn) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
 			return ts, check(hasError)
@@ -342,7 +342,7 @@ func TestModifyStoragePoolMedia(t *testing.T) {
 }
 
 func TestSetReplicationJournalCapacity(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
@@ -357,7 +357,7 @@ func TestSetReplicationJournalCapacity(t *testing.T) {
 }
 
 func TestEnableOrDisableZeroPadding(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
@@ -371,7 +371,7 @@ func TestEnableOrDisableZeroPadding(t *testing.T) {
 }
 
 func TestSetCapacityAlertThreshold(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
@@ -387,7 +387,7 @@ func TestSetCapacityAlertThreshold(t *testing.T) {
 }
 
 func TestSetProtectedMaintenanceModeIoPriorityPolicy(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
@@ -422,7 +422,7 @@ func TestGetPoolStorage(t *testing.T) {
 					},
 				},
 			},
-			ts: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				resp := []types.StoragePool{
 					{
 						ID:   poolID,
@@ -446,7 +446,7 @@ func TestGetPoolStorage(t *testing.T) {
 			protectionDomain: &types.ProtectionDomain{
 				Name: "domain1",
 			},
-			ts: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				resp := types.StoragePool{
 					ID:   poolID,
 					Name: "pool1",
@@ -538,12 +538,12 @@ func TestGetStoragePoolByID(t *testing.T) {
 			}))
 			return ts, &system, check(hasNoError, checkResp("1a2b345c-123a-123a-ab1c-abc1fd234567e"))
 		},
-		"bad request": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+		"bad request": func(*testing.T) (*httptest.Server, *types.System, []checkFn) {
 			systemID := "0000aaacccddd1111"
 			system := types.System{
 				ID: systemID,
 			}
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
 			return ts, &system, check(hasError)
@@ -628,12 +628,12 @@ func TestGetAllStoragePools(t *testing.T) {
 			}))
 			return ts, &system, check(hasNoError, checkResp("1a2b345c-123a-123a-ab1c-abc1fd234567e"))
 		},
-		"bad request": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
+		"bad request": func(*testing.T) (*httptest.Server, *types.System, []checkFn) {
 			systemID := "0000aaacccddd1111"
 			system := types.System{
 				ID: systemID,
 			}
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
 			return ts, &system, check(hasError)
@@ -664,7 +664,7 @@ func TestGetAllStoragePools(t *testing.T) {
 }
 
 func TestSetRebalanceEnabled(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
@@ -679,7 +679,7 @@ func TestSetRebalanceEnabled(t *testing.T) {
 }
 
 func TestSetRebalanceIoPriorityPolicy(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
@@ -695,7 +695,7 @@ func TestSetRebalanceIoPriorityPolicy(t *testing.T) {
 }
 
 func TestSetVTreeMigrationIOPriorityPolicy(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
@@ -711,7 +711,7 @@ func TestSetVTreeMigrationIOPriorityPolicy(t *testing.T) {
 }
 
 func TestSetSparePercentage(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
@@ -726,7 +726,7 @@ func TestSetSparePercentage(t *testing.T) {
 }
 
 func TestSetRMcacheWriteHandlingMode(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
@@ -753,7 +753,7 @@ func TestModifyRMCache(t *testing.T) {
 		},
 	}
 
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
@@ -771,7 +771,7 @@ func TestModifyRMCache(t *testing.T) {
 }
 
 func TestSetRebuildEnabled(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
@@ -786,7 +786,7 @@ func TestSetRebuildEnabled(t *testing.T) {
 }
 
 func TestSetRebuildRebalanceParallelismParam(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
@@ -822,7 +822,7 @@ func TestEnableRFCache(t *testing.T) {
 		}
 	}
 
-	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
+	tests := map[string]func(*testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
 			href := fmt.Sprintf("/api/instances/StoragePool::%v/action/enableRfcache", poolID)
 
@@ -849,8 +849,8 @@ func TestEnableRFCache(t *testing.T) {
 			}))
 			return ts, check(hasNoError, checkResp("1a2b345c-123a-123a-ab1c-abc1fd234567e"))
 		},
-		"bad request": func(t *testing.T) (*httptest.Server, []checkFn) {
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		"bad request": func(*testing.T) (*httptest.Server, []checkFn) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
 			return ts, check(hasError)
@@ -928,8 +928,8 @@ func TestDisableRFCache(t *testing.T) {
 			}))
 			return ts, check(hasNoError, checkResp("1a2b345c-123a-123a-ab1c-abc1fd234567e"))
 		},
-		"bad request": func(t *testing.T) (*httptest.Server, []checkFn) {
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		"bad request": func(*testing.T) (*httptest.Server, []checkFn) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
 			return ts, check(hasError)
@@ -1054,9 +1054,9 @@ func TestGetStatistics(t *testing.T) {
 			}))
 			return ts, &storagePool, check(hasNoError, checkResp(1))
 		},
-		"bad request": func(t *testing.T) (*httptest.Server, *types.StoragePool, []checkFn) {
+		"bad request": func(*testing.T) (*httptest.Server, *types.StoragePool, []checkFn) {
 			storagePool := types.StoragePool{}
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
 			return ts, &storagePool, check(hasError)
@@ -1138,9 +1138,9 @@ func TestGetSDSStoragePool(t *testing.T) {
 			}))
 			return ts, &storagePool, check(hasNoError, checkResp(sdsID))
 		},
-		"bad request": func(t *testing.T) (*httptest.Server, *types.StoragePool, []checkFn) {
+		"bad request": func(*testing.T) (*httptest.Server, *types.StoragePool, []checkFn) {
 			storagePool := types.StoragePool{}
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
 			return ts, &storagePool, check(hasError)
