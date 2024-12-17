@@ -13,12 +13,17 @@
 package goscaleio
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 
+	types "github.com/dell/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -252,28 +257,48 @@ func TestDeletePackage(t *testing.T) {
 }
 
 func TestBeginInstallation(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/im/types/Configuration/actions/install") {
-			w.WriteHeader(http.StatusAccepted)
-			return
-		}
-		http.NotFound(w, r)
-	}))
-
-	defer server.Close()
-
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
+	tests := map[string]struct {
+		server  *httptest.Server
+		version string
+	}{
+		"success with version 4.0": {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/im/types/Configuration/actions/install") {
+					w.WriteHeader(http.StatusAccepted)
+					return
+				}
+				http.NotFound(w, r)
+			})),
+			version: "4.0",
+		},
+		"success with version < 4.0": {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/im/types/Configuration/actions/install") {
+					w.WriteHeader(http.StatusAccepted)
+					return
+				}
+				http.NotFound(w, r)
+			})),
+			version: "3.6",
+		},
 	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			defer tt.server.Close()
 
-	_, err := gc.BeginInstallation("", "mdm_user", "mdm_password", "lia_password", true, true, true, false)
-	assert.Error(t, err)
+			gc := &GatewayClient{
+				http:     &http.Client{},
+				host:     tt.server.URL,
+				username: "test_username",
+				password: "test_password",
+				version:  tt.version,
+			}
 
-	expectedErrorMsg := "unexpected end of JSON input"
-	assert.EqualError(t, err, expectedErrorMsg)
+			resp, err := gc.BeginInstallation("{}", "mdm_user", "mdm_password", "lia_password", true, true, true, false)
+			assert.Nil(t, err)
+			assert.Equal(t, 200, resp.StatusCode)
+		})
+	}
 }
 
 func TestMoveToNextPhase(t *testing.T) {
@@ -313,6 +338,7 @@ func TestRetryPhase(t *testing.T) {
 		host:     server.URL,
 		username: "test_username",
 		password: "test_password",
+		version:  "4.0",
 	}
 
 	gatewayResponse, err := gc.RetryPhase()
@@ -409,6 +435,7 @@ func TestCheckForCompletionQueueCommands(t *testing.T) {
 		host:     server.URL,
 		username: "test_username",
 		password: "test_password",
+		version:  "4.0",
 	}
 
 	gatewayResponse, err := gc.CheckForCompletionQueueCommands("Query")
@@ -497,4 +524,214 @@ func TestRenewInstallationCookie(t *testing.T) {
 
 	err := gc.RenewInstallationCookie(5)
 	assert.NoError(t, err)
+}
+
+func TestValidateMDMDetails(t *testing.T) {
+	tests := map[string]struct {
+		mdmTopologyParam []byte
+		server           *httptest.Server
+		expectedResponse *types.GatewayResponse
+		version          string
+		expectedErr      error
+	}{
+		"success with version 4.0": {
+			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				resp := types.MDMTopologyDetails{
+					SdcIps: []string{"10.0.0.1", "10.0.0.2"},
+				}
+
+				data, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				w.WriteHeader(http.StatusOK)
+				w.Write(data)
+			})),
+			expectedResponse: &types.GatewayResponse{
+				StatusCode: 200,
+				Data:       "10.0.0.1,10.0.0.2",
+			},
+			version:     "4.0",
+			expectedErr: nil,
+		},
+		"success with version < 4.0": {
+			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				resp := types.MDMTopologyDetails{
+					SdcIps: []string{"10.0.0.1", "10.0.0.2"},
+				}
+
+				data, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				w.WriteHeader(http.StatusOK)
+				w.Write(data)
+			})),
+			expectedResponse: &types.GatewayResponse{
+				StatusCode: 200,
+				Data:       "10.0.0.1,10.0.0.2",
+			},
+			version:     "3.6",
+			expectedErr: nil,
+		},
+		"error primary mdm ip": {
+			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.2"]}`),
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			})),
+
+			expectedErr: errors.New("Wrong Primary MDM IP, Please provide valid Primary MDM IP"),
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			defer tt.server.Close()
+
+			gc := &GatewayClient{
+				http:     &http.Client{},
+				host:     tt.server.URL,
+				username: "test_username",
+				password: "test_password",
+				version:  tt.version,
+			}
+
+			res, err := gc.ValidateMDMDetails(tt.mdmTopologyParam)
+
+			if tt.expectedErr != nil {
+				assert.EqualError(t, err, tt.expectedErr.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, res)
+				assert.Equal(t, tt.expectedResponse, res)
+			}
+		})
+	}
+}
+
+func TestGetClusterDetails(t *testing.T) {
+	tests := map[string]struct {
+		mdmTopologyParam   []byte
+		requireJSONOutput  bool
+		server             *httptest.Server
+		version            string
+		expectedErr        error
+		expectedStatusCode int
+		expectedResponse   *types.GatewayResponse
+	}{
+		"success with version 4.0": {
+			mdmTopologyParam:  []byte(`{"mdmIps": ["192.168.0.1"]}`),
+			requireJSONOutput: false,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				resp := types.MDMTopologyDetails{
+					SdcIps: []string{"10.0.0.1", "10.0.0.2"},
+				}
+				data, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				w.WriteHeader(http.StatusOK)
+				w.Write(data)
+			})),
+			version:            "4.0",
+			expectedErr:        nil,
+			expectedStatusCode: http.StatusOK,
+			expectedResponse: &types.GatewayResponse{
+				StatusCode: 200,
+				ClusterDetails: types.MDMTopologyDetails{
+					SdcIps: []string{"10.0.0.1", "10.0.0.2"},
+				},
+			},
+		},
+		"error getting cluster details": {
+			mdmTopologyParam:   []byte(`{"invalid": "data"}`),
+			requireJSONOutput:  false,
+			expectedErr:        errors.New("Error Getting Cluster Details"),
+			expectedStatusCode: http.StatusBadRequest,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// no response
+			})),
+			expectedResponse: &types.GatewayResponse{
+				StatusCode:     200,
+				ClusterDetails: types.MDMTopologyDetails{},
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			defer tt.server.Close()
+
+			gc := &GatewayClient{
+				http:     &http.Client{},
+				host:     tt.server.URL,
+				username: "test_username",
+				password: "test_password",
+				version:  tt.version,
+			}
+
+			res, err := gc.GetClusterDetails(tt.mdmTopologyParam, tt.requireJSONOutput)
+
+			if tt.expectedErr != nil {
+				assert.EqualError(t, err, tt.expectedErr.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, res)
+				assert.Equal(t, tt.expectedStatusCode, res.StatusCode)
+				assert.Equal(t, tt.expectedResponse, res)
+			}
+		})
+	}
+}
+
+func TestParseJSONError(t *testing.T) {
+	tests := map[string]struct {
+		name        string
+		response    *http.Response
+		expectedErr error
+	}{
+		"JSON response": {
+			response: &http.Response{
+				StatusCode: http.StatusBadRequest,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       ioutil.NopCloser(strings.NewReader(`{"message":"Bad Request"}`)),
+			},
+			expectedErr: &types.Error{
+				HTTPStatusCode: http.StatusBadRequest,
+				Message:        "Bad Request",
+			},
+		},
+		"HTML response": {
+			response: &http.Response{
+				StatusCode: http.StatusBadRequest,
+				Status:     "Bad Request",
+				Header:     http.Header{"Content-Type": []string{"text/html"}},
+				Body:       ioutil.NopCloser(strings.NewReader("<html><body>Bad Request</body></html>")),
+			},
+			expectedErr: &types.Error{
+				HTTPStatusCode: http.StatusBadRequest,
+				Message:        "Bad Request",
+			},
+		},
+		"No content type": {
+			response: &http.Response{
+				StatusCode: http.StatusBadRequest,
+				Body:       ioutil.NopCloser(strings.NewReader(`{"message":"Bad Request"}`)),
+			},
+			expectedErr: &types.Error{
+				HTTPStatusCode: http.StatusBadRequest,
+				Message:        "Bad Request",
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := ParseJSONError(tt.response)
+			if !reflect.DeepEqual(err, tt.expectedErr) {
+				t.Errorf("Expected error %v, got %v", tt.expectedErr, err)
+			}
+		})
+	}
 }
