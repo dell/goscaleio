@@ -21,9 +21,10 @@ import (
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
+	"github.com/google/uuid"
 )
 
-func Test_GetVolumeStatistics(t *testing.T) {
+func TestGetVolumeStatistics(t *testing.T) {
 	type checkFn func(*testing.T, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
 
@@ -129,6 +130,217 @@ func Test_GetVolumeStatistics(t *testing.T) {
 			_, err = volClient.GetVolumeStatistics()
 			for _, checkFn := range checkFns {
 				checkFn(t, err)
+			}
+		})
+	}
+}
+
+func TestGetVolumeSP(t *testing.T) {
+	searchVolumeID := uuid.NewString()
+	storagePoolID := uuid.NewString()
+	type testCase struct {
+		storagePool  types.StoragePool
+		volumeHref   string
+		volumeName   string
+		getSnapshots bool
+		server       *httptest.Server
+		expectedErr  error
+	}
+
+	cases := map[string]testCase{
+		"success: via volume name": {
+			volumeHref:   "",
+			volumeName:   "myVolumeName",
+			getSnapshots: false,
+			storagePool: types.StoragePool{
+				Links: []*types.Link{
+					{
+						Rel:  "/api/StoragePool/relationship/Volume",
+						HREF: fmt.Sprintf("/api/instances/StoragePool::%s/relationships/Volume", storagePoolID),
+					},
+				},
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case "/api/types/Volume/instances/action/queryIdByKey":
+					resp.WriteHeader(http.StatusOK)
+					resp.Write([]byte(searchVolumeID))
+				case fmt.Sprintf("/api/instances/Volume::%s", searchVolumeID):
+					resp.WriteHeader(http.StatusOK)
+					content, err := json.Marshal(types.Volume{
+						Name: "myVolume",
+						ID:   searchVolumeID,
+					})
+					if err != nil {
+						t.Fatalf("failed to marshal volume: %v", err)
+					}
+					resp.Write(content)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"success: via empty volumehref": {
+			volumeHref:   "",
+			volumeName:   "",
+			getSnapshots: false,
+			storagePool: types.StoragePool{
+				Links: []*types.Link{
+					{
+						Rel:  "/api/StoragePool/relationship/Volume",
+						HREF: fmt.Sprintf("/api/instances/StoragePool::%s/relationships/Volume", storagePoolID),
+					},
+				},
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case "/api/types/Volume/instances/action/queryIdByKey":
+					resp.WriteHeader(http.StatusOK)
+					resp.Write([]byte(searchVolumeID))
+				case fmt.Sprintf("/api/instances/StoragePool::%s/relationships/Volume", storagePoolID):
+					resp.WriteHeader(http.StatusOK)
+					content, err := json.Marshal([]types.Volume{{
+						Name: "myVolume",
+						ID:   searchVolumeID,
+					}})
+					if err != nil {
+						t.Fatalf("failed to marshal volume: %v", err)
+					}
+					resp.Write(content)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"success: via volumehref": {
+			volumeHref:   fmt.Sprintf("/api/instances/StoragePool::%s/relationships/Volume", storagePoolID),
+			volumeName:   "",
+			getSnapshots: false,
+			storagePool:  types.StoragePool{},
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case "/api/types/Volume/instances/action/queryIdByKey":
+					resp.WriteHeader(http.StatusOK)
+					resp.Write([]byte(searchVolumeID))
+				case fmt.Sprintf("/api/instances/StoragePool::%s/relationships/Volume", storagePoolID):
+					resp.WriteHeader(http.StatusOK)
+					content, err := json.Marshal(types.Volume{
+						Name: "myVolume",
+						ID:   searchVolumeID,
+					})
+					if err != nil {
+						t.Fatalf("failed to marshal volume: %v", err)
+					}
+					resp.Write(content)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"success: unable to find ID": {
+			volumeHref:   "",
+			volumeName:   "myVolumeName",
+			getSnapshots: false,
+			storagePool: types.StoragePool{
+				Links: []*types.Link{
+					{
+						Rel:  "/api/StoragePool/relationship/Volume",
+						HREF: fmt.Sprintf("/api/instances/StoragePool::%s/relationships/Volume", storagePoolID),
+					},
+				},
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case "/api/types/Volume/instances/action/queryIdByKey":
+					resp.WriteHeader(http.StatusNotFound)
+					resp.Write([]byte(`{"message":"Not found","httpStatusCode":404,"errorCode":0}`))
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			volumeHref:   "",
+			volumeName:   "myVolumeName",
+			getSnapshots: false,
+			storagePool: types.StoragePool{
+				Links: []*types.Link{
+					{
+						Rel:  "/api/StoragePool/relationship/Volume",
+						HREF: fmt.Sprintf("/api/instances/StoragePool::%s/relationships/Volume", storagePoolID),
+					},
+				},
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case "/api/types/Volume/instances/action/queryIdByKey":
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: fmt.Errorf("Error: problem finding volume: bad request"),
+		},
+		"error: via volumehref": {
+			volumeHref:   "",
+			volumeName:   "",
+			getSnapshots: false,
+			storagePool:  types.StoragePool{},
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("Error: problem finding link"),
+		},
+		"error: getting volume instance": {
+			volumeHref:   "",
+			volumeName:   "myVolumeName",
+			getSnapshots: false,
+			storagePool:  types.StoragePool{},
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case "/api/types/Volume/instances/action/queryIdByKey":
+					resp.WriteHeader(http.StatusOK)
+					resp.Write([]byte(searchVolumeID))
+				case fmt.Sprintf("/api/instances/Volume::%s", searchVolumeID):
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			defer tc.server.Close()
+
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			sp := NewStoragePool(client)
+			sp.StoragePool = &tc.storagePool
+
+			_, err = sp.GetVolume(tc.volumeHref, "", "", tc.volumeName, tc.getSnapshots)
+			if err != nil {
+				if tc.expectedErr.Error() != err.Error() {
+					t.Fatal(err)
+				}
 			}
 		})
 	}
