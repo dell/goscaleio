@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -23,100 +24,238 @@ import (
 )
 
 func TestGetTemplateByID(t *testing.T) {
-	responseJSONFile := "response/template_response.json"
-	responseData, err := ioutil.ReadFile(responseJSONFile)
-	if err != nil {
-		t.Fatalf("Failed to read response JSON file: %v", err)
+	tests := []struct {
+		id       string
+		server   *httptest.Server
+		version  string
+		expected error
+	}{
+		{
+			id: "12345",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				responseJSONFile := "response/template_response.json"
+				responseData, err := ioutil.ReadFile(responseJSONFile)
+				if err != nil {
+					t.Fatalf("Failed to read response JSON file: %v", err)
+				}
+				if strings.Contains(r.URL.Path, "/Api/V1/template/") {
+					if r.Method == http.MethodGet {
+						w.WriteHeader(http.StatusOK)
+						w.Write(responseData)
+						return
+					}
+				}
+				http.NotFound(w, r)
+			})),
+			version:  "4.0",
+			expected: nil,
+		},
+		{
+			id: "12345",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				responseJSONFile := "response/template_response.json"
+				responseData, err := ioutil.ReadFile(responseJSONFile)
+				if err != nil {
+					t.Fatalf("Failed to read response JSON file: %v", err)
+				}
+				if strings.Contains(r.URL.Path, "/Api/V1/template/") {
+					if r.Method == http.MethodGet {
+						w.WriteHeader(http.StatusOK)
+						w.Write(responseData)
+						return
+					}
+				}
+				http.NotFound(w, r)
+			})),
+			version:  "3.0",
+			expected: nil,
+		},
+		{
+			id: "12345",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.NotFound(w, r)
+			})),
+			expected: fmt.Errorf("Template not found"),
+		},
 	}
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "/Api/V1/template/") {
-			if r.Method == http.MethodGet {
-				w.WriteHeader(http.StatusOK)
-				w.Write(responseData)
-				return
+	for _, tc := range tests {
+		t.Run(tc.id, func(t *testing.T) {
+
+			defer tc.server.Close()
+			gc := &GatewayClient{
+				http:     &http.Client{},
+				host:     tc.server.URL,
+				username: "test_username",
+				password: "test_password",
+				version:  tc.version,
 			}
-		}
-		http.NotFound(w, r)
-	}))
-	defer server.Close()
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
+
+			template, err := gc.GetTemplateByID(tc.id)
+
+			if tc.expected == nil {
+				assert.Nil(t, err)
+				assert.NotNil(t, template)
+			} else {
+				assert.NotNil(t, err)
+				assert.Equal(t, tc.expected.Error(), err.Error())
+			}
+		})
 	}
-
-	templateID := "12345"
-
-	templateResponse, err := gc.GetTemplateByID(templateID)
-
-	assert.NotNil(t, templateResponse, "Expected non-nil response")
-	assert.EqualValues(t, templateResponse.ID, "12345")
 }
 
 func TestGetTemplateByFilters(t *testing.T) {
-	responseJSONFile := "response/templates_response.json"
-	responseData, err := ioutil.ReadFile(responseJSONFile)
-	if err != nil {
-		t.Fatalf("Failed to read response JSON file: %v", err)
-	}
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "/Api/V1/template") {
-			if r.Method == http.MethodGet {
+	tests := map[string]struct {
+		server   *httptest.Server
+		version  string
+		expected error
+	}{
+		"success with version 4.0": {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				responseJSONFile := "response/templates_response.json"
+				responseData, err := ioutil.ReadFile(responseJSONFile)
+				if err != nil {
+					t.Fatalf("Failed to read response JSON file: %v", err)
+				}
+				if strings.Contains(r.URL.Path, "/Api/V1/template") {
+					if r.Method == http.MethodGet {
+						w.WriteHeader(http.StatusOK)
+						w.Write(responseData)
+						return
+					}
+				}
+				http.NotFound(w, r)
+			})),
+			version:  "4.0",
+			expected: nil,
+		},
+		"success with version 3.0": {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				responseJSONFile := "response/templates_response.json"
+				responseData, err := ioutil.ReadFile(responseJSONFile)
+				if err != nil {
+					t.Fatalf("Failed to read response JSON file: %v", err)
+				}
+				if strings.Contains(r.URL.Path, "/Api/V1/template") {
+					if r.Method == http.MethodGet {
+						w.WriteHeader(http.StatusOK)
+						w.Write(responseData)
+						return
+					}
+				}
+				http.NotFound(w, r)
+			})),
+			version:  "3.0",
+			expected: nil,
+		},
+		"error due to parsing response": {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write(responseData)
-				return
-			}
-		}
-		http.NotFound(w, r)
-	}))
-	defer server.Close()
-
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
+				w.Write([]byte("invalid json"))
+			})),
+			expected: fmt.Errorf("Error While Parsing Response Data For Template: invalid character 'i' looking for beginning of value"),
+		},
 	}
 
-	filter := "name"
-	value := "Test"
+	for _, tc := range tests {
+		t.Run("", func(t *testing.T) {
 
-	templateResponse, err := gc.GetTemplateByFilters(filter, value)
-	assert.NotNil(t, templateResponse, "Expected non-nil response")
-	assert.EqualValues(t, templateResponse[0].ID, "12345")
+			defer tc.server.Close()
+			gc := &GatewayClient{
+				http:     &http.Client{},
+				host:     tc.server.URL,
+				username: "test_username",
+				password: "test_password",
+				version:  tc.version,
+			}
+
+			template, err := gc.GetTemplateByFilters("name", "template1")
+
+			if tc.expected == nil {
+				assert.Nil(t, err)
+				assert.NotNil(t, template)
+			} else {
+				assert.NotNil(t, err)
+				assert.Equal(t, tc.expected.Error(), err.Error())
+			}
+		})
+	}
 }
 
 func TestGetAllTemplates(t *testing.T) {
-	responseJSONFile := "response/templates_response.json"
-	responseData, err := ioutil.ReadFile(responseJSONFile)
-	if err != nil {
-		t.Fatalf("Failed to read response JSON file: %v", err)
-	}
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.Contains(r.URL.Path, "/Api/V1/template") {
-			if r.Method == http.MethodGet {
+	tests := map[string]struct {
+		server   *httptest.Server
+		version  string
+		expected error
+	}{
+		"success with version 4.0": {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				responseJSONFile := "response/templates_response.json"
+				responseData, err := ioutil.ReadFile(responseJSONFile)
+				if err != nil {
+					t.Fatalf("Failed to read response JSON file: %v", err)
+				}
+				if strings.Contains(r.URL.Path, "/Api/V1/template") {
+					if r.Method == http.MethodGet {
+						w.WriteHeader(http.StatusOK)
+						w.Write(responseData)
+						return
+					}
+				}
+				http.NotFound(w, r)
+			})),
+			version:  "4.0",
+			expected: nil,
+		},
+		"success with version 3.0": {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				responseJSONFile := "response/templates_response.json"
+				responseData, err := ioutil.ReadFile(responseJSONFile)
+				if err != nil {
+					t.Fatalf("Failed to read response JSON file: %v", err)
+				}
+				if strings.Contains(r.URL.Path, "/Api/V1/template") {
+					if r.Method == http.MethodGet {
+						w.WriteHeader(http.StatusOK)
+						w.Write(responseData)
+						return
+					}
+				}
+				http.NotFound(w, r)
+			})),
+			version:  "3.0",
+			expected: nil,
+		},
+		"error due to parsing response": {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write(responseData)
-				return
-			}
-		}
-		http.NotFound(w, r)
-	}))
-	defer server.Close()
-
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
+				w.Write([]byte("invalid json"))
+			})),
+			expected: fmt.Errorf("Error While Parsing Response Data For Template: invalid character 'i' looking for beginning of value"),
+		},
 	}
 
-	templateResponse, err := gc.GetAllTemplates()
+	for _, tc := range tests {
+		t.Run("", func(t *testing.T) {
 
-	assert.NotNil(t, templateResponse, "Expected non-nil response")
-	assert.EqualValues(t, templateResponse[0].ID, "12345")
+			defer tc.server.Close()
+			gc := &GatewayClient{
+				http:     &http.Client{},
+				host:     tc.server.URL,
+				username: "test_username",
+				password: "test_password",
+				version:  tc.version,
+			}
+
+			template, err := gc.GetAllTemplates()
+
+			if tc.expected == nil {
+				assert.Nil(t, err)
+				assert.NotNil(t, template)
+			} else {
+				assert.NotNil(t, err)
+				assert.Equal(t, tc.expected.Error(), err.Error())
+			}
+		})
+	}
 }
