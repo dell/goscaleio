@@ -536,7 +536,7 @@ func TestValidateMDMDetails(t *testing.T) {
 	}{
 		"success with version 4.0": {
 			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				resp := types.MDMTopologyDetails{
 					SdcIps: []string{"10.0.0.1", "10.0.0.2"},
 				}
@@ -557,7 +557,7 @@ func TestValidateMDMDetails(t *testing.T) {
 		},
 		"success with version < 4.0": {
 			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				resp := types.MDMTopologyDetails{
 					SdcIps: []string{"10.0.0.1", "10.0.0.2"},
 				}
@@ -578,7 +578,7 @@ func TestValidateMDMDetails(t *testing.T) {
 		},
 		"error primary mdm ip": {
 			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.2"]}`),
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			})),
 
 			expectedErr: errors.New("Wrong Primary MDM IP, Please provide valid Primary MDM IP"),
@@ -623,7 +623,7 @@ func TestGetClusterDetails(t *testing.T) {
 		"success with version 4.0": {
 			mdmTopologyParam:  []byte(`{"mdmIps": ["192.168.0.1"]}`),
 			requireJSONOutput: false,
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				resp := types.MDMTopologyDetails{
 					SdcIps: []string{"10.0.0.1", "10.0.0.2"},
 				}
@@ -649,7 +649,7 @@ func TestGetClusterDetails(t *testing.T) {
 			requireJSONOutput:  false,
 			expectedErr:        errors.New("Error Getting Cluster Details"),
 			expectedStatusCode: http.StatusBadRequest,
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 				// no response
 			})),
 			expectedResponse: &types.GatewayResponse{
