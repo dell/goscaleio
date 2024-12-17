@@ -81,7 +81,6 @@ func TestGetTemplateByID(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.id, func(t *testing.T) {
-
 			defer tc.server.Close()
 			gc := &GatewayClient{
 				http:     &http.Client{},
@@ -149,7 +148,7 @@ func TestGetTemplateByFilters(t *testing.T) {
 			expected: nil,
 		},
 		"error due to parsing response": {
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte("invalid json"))
 			})),
@@ -159,7 +158,6 @@ func TestGetTemplateByFilters(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run("", func(t *testing.T) {
-
 			defer tc.server.Close()
 			gc := &GatewayClient{
 				http:     &http.Client{},
@@ -227,7 +225,7 @@ func TestGetAllTemplates(t *testing.T) {
 			expected: nil,
 		},
 		"error due to parsing response": {
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte("invalid json"))
 			})),
@@ -237,7 +235,6 @@ func TestGetAllTemplates(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run("", func(t *testing.T) {
-
 			defer tc.server.Close()
 			gc := &GatewayClient{
 				http:     &http.Client{},
