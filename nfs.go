@@ -104,7 +104,6 @@ func (s *System) DeleteNAS(id string) error {
 
 	err := s.client.getJSONWithRetry(http.MethodDelete, path, nil, nil)
 	if err != nil {
-		fmt.Println("err", err)
 		return err
 	}
 
