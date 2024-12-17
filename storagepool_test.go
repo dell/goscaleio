@@ -1,14 +1,27 @@
+// Copyright © 2019 - 2022 Dell Inc. or its subsidiaries. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//      http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package goscaleio
 
 import (
 	"encoding/json"
 	"fmt"
-	types "github.com/dell/goscaleio/types/v1"
-	"github.com/stretchr/testify/assert"
 	"math"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	types "github.com/dell/goscaleio/types/v1"
+	"github.com/stretchr/testify/assert"
 )
 
 func SetUpProtectionDomain(url string) (ProtectionDomain, error) {
@@ -53,7 +66,6 @@ func TestCreateStoragePool(t *testing.T) {
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, *types.ProtectionDomain, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, *types.ProtectionDomain, []checkFn) {
-
 			href := "/api/types/StoragePool/instances"
 			protectionDomain := types.ProtectionDomain{
 				Name: "domain1",
@@ -145,10 +157,8 @@ func TestModifyStoragePoolName(t *testing.T) {
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/api/instances/StoragePool::%v/action/setStoragePoolName", poolID)
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 				if r.Method != http.MethodPost {
 					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
 				}
@@ -171,7 +181,6 @@ func TestModifyStoragePoolName(t *testing.T) {
 			return ts, check(hasNoError, checkResp(poolID))
 		},
 		"bad request": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
@@ -202,7 +211,6 @@ func TestModifyStoragePoolName(t *testing.T) {
 }
 
 func TestDeleteStoragePool(t *testing.T) {
-
 	poolID := "1a2b345c-123a-123a-ab1c-abc1fd234567e"
 	protectionDomain := &types.ProtectionDomain{
 		Name: "domain1",
@@ -227,7 +235,8 @@ func TestDeleteStoragePool(t *testing.T) {
 							HREF: fmt.Sprintf("/api/instances/StoragePool::%s", poolID),
 						},
 					},
-				}}
+				},
+			}
 			respData, err := json.Marshal(resp)
 			if err != nil {
 				t.Fatal(err)
@@ -279,10 +288,8 @@ func TestModifyStoragePoolMedia(t *testing.T) {
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/api/instances/StoragePool::%v/action/setMediaType", poolID)
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 				if r.Method != http.MethodPost {
 					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
 				}
@@ -305,7 +312,6 @@ func TestModifyStoragePoolMedia(t *testing.T) {
 			return ts, check(hasNoError, checkResp(poolID))
 		},
 		"bad request": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
@@ -336,7 +342,6 @@ func TestModifyStoragePoolMedia(t *testing.T) {
 }
 
 func TestSetReplicationJournalCapacity(t *testing.T) {
-
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
@@ -352,7 +357,6 @@ func TestSetReplicationJournalCapacity(t *testing.T) {
 }
 
 func TestEnableOrDisableZeroPadding(t *testing.T) {
-
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
@@ -367,7 +371,6 @@ func TestEnableOrDisableZeroPadding(t *testing.T) {
 }
 
 func TestSetCapacityAlertThreshold(t *testing.T) {
-
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
@@ -384,7 +387,6 @@ func TestSetCapacityAlertThreshold(t *testing.T) {
 }
 
 func TestSetProtectedMaintenanceModeIoPriorityPolicy(t *testing.T) {
-
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
@@ -401,7 +403,6 @@ func TestSetProtectedMaintenanceModeIoPriorityPolicy(t *testing.T) {
 }
 
 func TestGetPoolStorage(t *testing.T) {
-
 	poolID := "1a2b345c-123a-123a-ab1c-abc1fd234567e"
 	tests := []struct {
 		name             string
@@ -465,7 +466,6 @@ func TestGetPoolStorage(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			ts := tt.ts
 			defer ts.Close()
 
@@ -539,7 +539,6 @@ func TestGetStoragePoolByID(t *testing.T) {
 			return ts, &system, check(hasNoError, checkResp("1a2b345c-123a-123a-ab1c-abc1fd234567e"))
 		},
 		"bad request": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
-
 			systemID := "0000aaacccddd1111"
 			system := types.System{
 				ID: systemID,
@@ -630,7 +629,6 @@ func TestGetAllStoragePools(t *testing.T) {
 			return ts, &system, check(hasNoError, checkResp("1a2b345c-123a-123a-ab1c-abc1fd234567e"))
 		},
 		"bad request": func(t *testing.T) (*httptest.Server, *types.System, []checkFn) {
-
 			systemID := "0000aaacccddd1111"
 			system := types.System{
 				ID: systemID,
@@ -666,7 +664,6 @@ func TestGetAllStoragePools(t *testing.T) {
 }
 
 func TestSetRebalanceEnabled(t *testing.T) {
-
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
@@ -744,7 +741,6 @@ func TestSetRMcacheWriteHandlingMode(t *testing.T) {
 }
 
 func TestModifyRMCache(t *testing.T) {
-
 	poolID := "1a2b345c-123a-123a-ab1c-abc1fd234567e"
 	storagePool := &types.StoragePool{
 		Name: "pool1",
@@ -828,7 +824,6 @@ func TestEnableRFCache(t *testing.T) {
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/api/instances/StoragePool::%v/action/enableRfcache", poolID)
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -855,7 +850,6 @@ func TestEnableRFCache(t *testing.T) {
 			return ts, check(hasNoError, checkResp("1a2b345c-123a-123a-ab1c-abc1fd234567e"))
 		},
 		"bad request": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
@@ -909,7 +903,6 @@ func TestDisableRFCache(t *testing.T) {
 
 	tests := map[string]func(t *testing.T) (*httptest.Server, []checkFn){
 		"success": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			href := fmt.Sprintf("/api/instances/StoragePool::%v/action/disableRfcache", poolID)
 
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -936,7 +929,6 @@ func TestDisableRFCache(t *testing.T) {
 			return ts, check(hasNoError, checkResp("1a2b345c-123a-123a-ab1c-abc1fd234567e"))
 		},
 		"bad request": func(t *testing.T) (*httptest.Server, []checkFn) {
-
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}))
@@ -959,6 +951,217 @@ func TestDisableRFCache(t *testing.T) {
 			}
 
 			resp, err := pd.DisableRFCache(poolID)
+			for _, checkFn := range checkFns {
+				checkFn(t, resp, err)
+			}
+		})
+	}
+}
+
+func TestFragmentation(t *testing.T) {
+	poolID := ""
+	tests := []struct {
+		name  string
+		path  string
+		value bool
+	}{
+		{
+			name:  "Enable Fragmentation",
+			path:  fmt.Sprintf("/api/instances/StoragePool::%v/action/enableFragmentation", poolID),
+			value: true,
+		},
+		{
+			name:  "Disable Fragmentation",
+			path:  fmt.Sprintf("/api/instances/StoragePool::%v/action/disableFragmentation", poolID),
+			value: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+				if r.URL.Path != tt.path {
+					t.Fatal(fmt.Errorf("wrong path. Expected %s; but got %s", tt.path, r.URL.Path))
+				}
+				w.WriteHeader(http.StatusNoContent)
+			}))
+			defer ts.Close()
+
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			pd := ProtectionDomain{
+				client: client,
+			}
+			err = pd.Fragmentation(poolID, tt.value)
+			assert.Nil(t, err)
+		})
+	}
+}
+
+func TestGetStatistics(t *testing.T) {
+	poolID := "1a2b345c-123a-123a-ab1c-abc1fd234567e"
+	type checkFn func(*testing.T, *types.Statistics, error)
+	check := func(fns ...checkFn) []checkFn { return fns }
+
+	hasNoError := func(t *testing.T, _ *types.Statistics, err error) {
+		if err != nil {
+			t.Fatalf("expected no error")
+		}
+	}
+	hasError := func(t *testing.T, _ *types.Statistics, err error) {
+		if err == nil {
+			t.Fatalf("expected error")
+		}
+	}
+
+	checkResp := func(numOfSDC int) func(t *testing.T, resp *types.Statistics, err error) {
+		return func(t *testing.T, resp *types.Statistics, _ error) {
+			assert.Equal(t, numOfSDC, resp.NumOfSdc)
+		}
+	}
+
+	tests := map[string]func(t *testing.T) (*httptest.Server, *types.StoragePool, []checkFn){
+		"success": func(t *testing.T) (*httptest.Server, *types.StoragePool, []checkFn) {
+			storagePool := types.StoragePool{
+				Links: []*types.Link{
+					{
+						Rel:  "/api/StoragePool/relationship/Statistics",
+						HREF: fmt.Sprintf("/api/instances/StoragePool::%s", poolID),
+					},
+				},
+			}
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+
+				resp := types.Statistics{
+					NumOfSdc: 1,
+				}
+				respData, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				_, err = fmt.Fprintln(w, string(respData))
+				if err != nil {
+					return
+				}
+			}))
+			return ts, &storagePool, check(hasNoError, checkResp(1))
+		},
+		"bad request": func(t *testing.T) (*httptest.Server, *types.StoragePool, []checkFn) {
+			storagePool := types.StoragePool{}
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusBadRequest)
+			}))
+			return ts, &storagePool, check(hasError)
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			ts, storagePool, checkFns := tc(t)
+			defer ts.Close()
+
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			sp := StoragePool{
+				client:      client,
+				StoragePool: storagePool,
+			}
+			resp, err := sp.GetStatistics()
+			for _, checkFn := range checkFns {
+				checkFn(t, resp, err)
+			}
+		})
+	}
+}
+
+func TestGetSDSStoragePool(t *testing.T) {
+	sdsID := "1a2b345c-123a-123a-ab1c-abc1fd234567e"
+	type checkFn func(*testing.T, []types.Sds, error)
+	check := func(fns ...checkFn) []checkFn { return fns }
+
+	hasNoError := func(t *testing.T, _ []types.Sds, err error) {
+		if err != nil {
+			t.Fatalf("expected no error")
+		}
+	}
+	hasError := func(t *testing.T, _ []types.Sds, err error) {
+		if err == nil {
+			t.Fatalf("expected error")
+		}
+	}
+
+	checkResp := func(sdsID string) func(t *testing.T, resp []types.Sds, err error) {
+		return func(t *testing.T, resp []types.Sds, _ error) {
+			assert.Equal(t, sdsID, resp[0].ID)
+		}
+	}
+
+	tests := map[string]func(t *testing.T) (*httptest.Server, *types.StoragePool, []checkFn){
+		"success": func(t *testing.T) (*httptest.Server, *types.StoragePool, []checkFn) {
+			storagePool := types.StoragePool{
+				Links: []*types.Link{
+					{
+						Rel:  "/api/StoragePool/relationship/SpSds",
+						HREF: fmt.Sprintf("/api/instances/StoragePool::%s", sdsID),
+					},
+				},
+			}
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodGet {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", http.MethodGet, r.Method))
+				}
+
+				resp := []types.Sds{
+					{
+						ID: sdsID,
+					},
+				}
+				respData, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				_, err = fmt.Fprintln(w, string(respData))
+				if err != nil {
+					return
+				}
+			}))
+			return ts, &storagePool, check(hasNoError, checkResp(sdsID))
+		},
+		"bad request": func(t *testing.T) (*httptest.Server, *types.StoragePool, []checkFn) {
+			storagePool := types.StoragePool{}
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusBadRequest)
+			}))
+			return ts, &storagePool, check(hasError)
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			ts, storagePool, checkFns := tc(t)
+			defer ts.Close()
+
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			sp := StoragePool{
+				client:      client,
+				StoragePool: storagePool,
+			}
+			resp, err := sp.GetSDSStoragePool()
 			for _, checkFn := range checkFns {
 				checkFn(t, resp, err)
 			}
