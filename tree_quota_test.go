@@ -28,6 +28,7 @@ import (
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -291,6 +292,159 @@ func TestModifyTreeQuota(t *testing.T) {
 					if err.Error() != tc.expected.Error() {
 						t.Errorf("Modifying FS did not work as expected, \n\tgot: %s \n\twant: %s", err, tc.expected)
 					}
+				}
+			}
+		})
+	}
+}
+
+func TestGetTreeQuota(t *testing.T) {
+	systemID := uuid.NewString()
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"success": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case "/rest/v1/file-tree-quotas?select=*":
+					resp.WriteHeader(http.StatusOK)
+					content, err := json.Marshal([]types.TreeQuota{
+						{
+							ID: systemID,
+						},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer tc.server.Close()
+
+			system := System{
+				System: &types.System{
+					ID: systemID,
+				},
+				client: client,
+			}
+
+			_, err = system.GetTreeQuota()
+			if err != nil {
+				if tc.expectedErr.Error() != err.Error() {
+					t.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
+func TestGetTreeQuotaByFSID(t *testing.T) {
+	searchFsID := uuid.NewString()
+	systemID := uuid.NewString()
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"success": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case "/rest/v1/file-tree-quotas?select=*":
+					resp.WriteHeader(http.StatusOK)
+					content, err := json.Marshal([]types.TreeQuota{
+						{
+							ID:            uuid.NewString(),
+							FileSysytemID: searchFsID,
+						},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+		"error: couldn't find tree quota": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case "/rest/v1/file-tree-quotas?select=*":
+					resp.WriteHeader(http.StatusOK)
+					content, err := json.Marshal([]types.TreeQuota{
+						{
+							ID:            uuid.NewString(),
+							FileSysytemID: uuid.NewString(),
+						},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: errors.New("couldn't find tree quota by filesystem ID"),
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer tc.server.Close()
+
+			system := System{
+				System: &types.System{
+					ID: systemID,
+				},
+				client: client,
+			}
+
+			_, err = system.GetTreeQuotaByFSID(searchFsID)
+			if err != nil {
+				if tc.expectedErr.Error() != err.Error() {
+					t.Fatal(err)
 				}
 			}
 		})
