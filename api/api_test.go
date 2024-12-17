@@ -29,8 +29,7 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	tests := []struct {
-		name         string
+	tests := map[string]struct {
 		method       string
 		path         string
 		headers      map[string]string
@@ -38,8 +37,7 @@ func TestGet(t *testing.T) {
 		expectedErr  error
 		expectedBody string
 	}{
-		{
-			name:         "successful GET request",
+		"successful GET request": {
 			method:       http.MethodGet,
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
@@ -47,8 +45,7 @@ func TestGet(t *testing.T) {
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
-		{
-			name:         "failed GET request",
+		"failed GET request": {
 			method:       http.MethodGet,
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
@@ -58,8 +55,8 @@ func TestGet(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			// Create a test server to handle the request
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				for k, v := range tt.headers {
@@ -123,8 +120,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestPost(t *testing.T) {
-	tests := []struct {
-		name         string
+	tests := map[string]struct {
 		method       string
 		path         string
 		headers      map[string]string
@@ -132,8 +128,7 @@ func TestPost(t *testing.T) {
 		expectedErr  error
 		expectedBody string
 	}{
-		{
-			name:         "successful POST request",
+		"successful POST request": {
 			method:       http.MethodPost,
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
@@ -141,8 +136,7 @@ func TestPost(t *testing.T) {
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
-		{
-			name:         "failed POST request",
+		"failed POST request": {
 			method:       http.MethodPost,
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
@@ -152,8 +146,8 @@ func TestPost(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			// Create a test server to handle the request
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != tt.method {
@@ -218,8 +212,7 @@ func TestPost(t *testing.T) {
 }
 
 func TestPut(t *testing.T) {
-	tests := []struct {
-		name         string
+	tests := map[string]struct {
 		method       string
 		path         string
 		headers      map[string]string
@@ -227,8 +220,7 @@ func TestPut(t *testing.T) {
 		expectedErr  error
 		expectedBody string
 	}{
-		{
-			name:         "successful PUT request",
+		"successful PUT request": {
 			method:       http.MethodPut,
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
@@ -236,8 +228,7 @@ func TestPut(t *testing.T) {
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
-		{
-			name:         "failed PUT request",
+		"failed PUT request": {
 			method:       http.MethodPut,
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
@@ -247,8 +238,8 @@ func TestPut(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			// Create a test server to handle the request
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != tt.method {
@@ -313,24 +304,21 @@ func TestPut(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	tests := []struct {
-		name        string
+	tests := map[string]struct {
 		method      string
 		path        string
 		headers     map[string]string
 		body        interface{}
 		expectedErr error
 	}{
-		{
-			name:        "successful DELETE request",
+		"successful DELETE request": {
 			method:      http.MethodDelete,
 			path:        "/api/test",
 			headers:     map[string]string{"Content-Type": "application/json"},
 			body:        nil,
 			expectedErr: nil,
 		},
-		{
-			name:        "failed DELETE request",
+		"failed DELETE request": {
 			method:      http.MethodDelete,
 			path:        "/api/test",
 			headers:     map[string]string{"Content-Type": "application/json"},
@@ -339,8 +327,8 @@ func TestDelete(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			// Create a test server to handle the request
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != tt.method {
@@ -392,24 +380,21 @@ func TestDelete(t *testing.T) {
 }
 
 func TestDo(t *testing.T) {
-	tests := []struct {
-		name         string
+	tests := map[string]struct {
 		method       string
 		path         string
 		body         interface{}
 		expectedErr  error
 		expectedBody string
 	}{
-		{
-			name:         "successful GET request",
+		"successful GET request": {
 			method:       http.MethodGet,
 			path:         "/api/test",
 			body:         nil,
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
-		{
-			name:         "failed GET request",
+		"failed GET request": {
 			method:       http.MethodGet,
 			path:         "/api/test",
 			body:         nil,
@@ -418,8 +403,8 @@ func TestDo(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			// Create a test server to handle the request
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != tt.method {
@@ -478,8 +463,7 @@ func TestDo(t *testing.T) {
 }
 
 func TestDoWithHeaders(t *testing.T) {
-	tests := []struct {
-		name         string
+	tests := map[string]struct {
 		method       string
 		path         string
 		headers      map[string]string
@@ -487,8 +471,7 @@ func TestDoWithHeaders(t *testing.T) {
 		expectedErr  error
 		expectedBody string
 	}{
-		{
-			name:         "successful GET request",
+		"successful GET request": {
 			method:       http.MethodGet,
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
@@ -496,8 +479,7 @@ func TestDoWithHeaders(t *testing.T) {
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
-		{
-			name:         "successful POST request",
+		"successful POST request": {
 			method:       http.MethodPost,
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
@@ -505,8 +487,7 @@ func TestDoWithHeaders(t *testing.T) {
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
-		{
-			name:         "successful PUT request",
+		"successful PUT request": {
 			method:       http.MethodPut,
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
@@ -514,8 +495,7 @@ func TestDoWithHeaders(t *testing.T) {
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
-		{
-			name:        "successful DELETE request",
+		"successful DELETE request": {
 			method:      http.MethodDelete,
 			path:        "/api/test",
 			headers:     map[string]string{"Content-Type": "application/json"},
@@ -524,8 +504,8 @@ func TestDoWithHeaders(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			// Create a test server to handle the request
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != tt.method {
@@ -610,8 +590,7 @@ func (r *TestReadCloser) Close() error {
 }
 
 func TestDoAndGetResponseBody(t *testing.T) {
-	tests := []struct {
-		name         string
+	tests := map[string]struct {
 		method       string
 		path         string
 		headers      map[string]string
@@ -619,8 +598,7 @@ func TestDoAndGetResponseBody(t *testing.T) {
 		expectedErr  error
 		expectedBody string
 	}{
-		{
-			name:         "successful GET request",
+		"successful GET request": {
 			method:       http.MethodGet,
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
@@ -628,8 +606,7 @@ func TestDoAndGetResponseBody(t *testing.T) {
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
-		{
-			name:         "successful GET request",
+		"successful GET request with custom body": {
 			method:       http.MethodGet,
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
@@ -637,9 +614,7 @@ func TestDoAndGetResponseBody(t *testing.T) {
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
-
-		{
-			name:    "successful GET request",
+		"successful GET request with readcloser body": {
 			method:  http.MethodGet,
 			path:    "/api/test",
 			headers: map[string]string{"Content-Type": "application/json"},
@@ -651,8 +626,8 @@ func TestDoAndGetResponseBody(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			// Create a test server to handle the request
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.Method != tt.method {
@@ -721,13 +696,12 @@ func TestDoAndGetResponseBody(t *testing.T) {
 }
 
 func TestParseJSONError(t *testing.T) {
-	tests := []struct {
+	tests := map[string]struct {
 		name        string
 		response    *http.Response
 		expectedErr error
 	}{
-		{
-			name: "JSON response",
+		"JSON response": {
 			response: &http.Response{
 				StatusCode: http.StatusBadRequest,
 				Header:     http.Header{"Content-Type": []string{"application/json"}},
@@ -738,8 +712,7 @@ func TestParseJSONError(t *testing.T) {
 				Message:        "Bad Request",
 			},
 		},
-		{
-			name: "HTML response",
+		"HTML response": {
 			response: &http.Response{
 				StatusCode: http.StatusBadRequest,
 				Status:     "Bad Request",
@@ -751,8 +724,7 @@ func TestParseJSONError(t *testing.T) {
 				Message:        "Bad Request",
 			},
 		},
-		{
-			name: "No content type",
+		"No content type": {
 			response: &http.Response{
 				StatusCode: http.StatusBadRequest,
 				Body:       ioutil.NopCloser(strings.NewReader(`{"message":"Bad Request"}`)),
@@ -764,8 +736,8 @@ func TestParseJSONError(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			c := &client{}
 			err := c.ParseJSONError(tt.response)
 			if !reflect.DeepEqual(err, tt.expectedErr) {
