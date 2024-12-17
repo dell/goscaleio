@@ -288,7 +288,7 @@ func TestGetMDMClusterDetails(t *testing.T) {
 			expected: &types.MdmCluster{
 				ID: "mdm-cluster-id",
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				data, err := json.Marshal(types.MdmCluster{
 					ID: "mdm-cluster-id",
@@ -302,7 +302,7 @@ func TestGetMDMClusterDetails(t *testing.T) {
 		},
 		"error with API call": {
 			expected: nil,
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 			})),
 			err: errors.New("EOF"),
@@ -311,7 +311,6 @@ func TestGetMDMClusterDetails(t *testing.T) {
 
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-
 			defer tc.server.Close()
 
 			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
@@ -613,7 +612,7 @@ func TestGetStatistics(t *testing.T) {
 			system: &System{
 				System: &types.System{
 					Links: []*types.Link{
-						&types.Link{
+						{
 							Rel:  "/api/System/relationship/Statistics",
 							HREF: "/api/System/relationship/Statistics/system-1",
 						},
@@ -648,7 +647,7 @@ func TestGetStatistics(t *testing.T) {
 				},
 			},
 			expected: nil,
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			})),
 			err: fmt.Errorf("Error: problem finding link"),
 		},
@@ -664,7 +663,7 @@ func TestGetStatistics(t *testing.T) {
 				},
 			},
 			expected: nil,
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 			})),
 			err: fmt.Errorf("EOF"),
@@ -742,7 +741,7 @@ func TestCreateSnapshotConsistencyGroup(t *testing.T) {
 				},
 			},
 			expected: nil,
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			})),
 			err: fmt.Errorf("Error: problem finding link"),
 		},
@@ -758,7 +757,7 @@ func TestCreateSnapshotConsistencyGroup(t *testing.T) {
 				},
 			},
 			expected: nil,
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 			})),
 			err: fmt.Errorf("EOF"),
