@@ -1,7 +1,9 @@
 package goscaleio
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"net/http"
 	"net/http/httptest"
@@ -61,27 +63,47 @@ func TestModifyPerformanceProfile(t *testing.T) {
 
 func TestAddStandByMDM(t *testing.T) {
 	type testCase struct {
-		ips      []string
-		role     string
-		expected error
+		ips           []string
+		role          string
+		server        *httptest.Server
+		expected      string
+		expectedError error
 	}
 
-	cases := []testCase{
-		{
-			[]string{"10.xx.xx.xxx"},
-			"Manager",
-			errors.New("An invalid IP or host-name specified"),
+	cases := map[string]testCase{
+		"success": {
+			ips:  []string{"10.xx.xx.xxx"},
+			role: "Manager",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				data, err := json.Marshal(types.Mdm{
+					ID: "mdm-id-1",
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				w.Write(data)
+			})),
+			expected:      "mdm-id-1",
+			expectedError: nil,
+		},
+		"error with API call": {
+			ips:  []string{"10.xx.xx.xxx"},
+			role: "Manager",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			})),
+			expected:      "",
+			expectedError: fmt.Errorf("EOF"),
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
-	}))
-	defer svr.Close()
-
-	for _, tc := range cases {
+	for name, tc := range cases {
 		tc := tc
-		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+		defer tc.server.Close()
+
+		t.Run(name, func(_ *testing.T) {
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -94,16 +116,9 @@ func TestAddStandByMDM(t *testing.T) {
 				IPs:  tc.ips,
 				Role: tc.role,
 			}
-			_, err = s.AddStandByMdm(&payload)
-			if err != nil {
-				if tc.expected == nil {
-					t.Errorf("Adding standby mdm did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
-				} else {
-					if err.Error() != tc.expected.Error() {
-						t.Errorf("Adding standby mdm did not work as expected, \n\tgot: %s \n\twant: %s", err, tc.expected)
-					}
-				}
-			}
+			result, err := s.AddStandByMdm(&payload)
+			assert.Equal(t, tc.expected, result)
+			assert.Equal(t, tc.expectedError, err)
 		})
 	}
 }
@@ -264,24 +279,56 @@ func TestSwitchClusterMode(t *testing.T) {
 }
 
 func TestGetMDMClusterDetails(t *testing.T) {
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	}))
-	defer svr.Close()
-
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "3.6"
-	if err != nil {
-		t.Fatal(err)
+	testCases := map[string]struct {
+		expected *types.MdmCluster
+		server   *httptest.Server
+		err      error
+	}{
+		"success": {
+			expected: &types.MdmCluster{
+				ID: "mdm-cluster-id",
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				data, err := json.Marshal(types.MdmCluster{
+					ID: "mdm-cluster-id",
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				w.Write(data)
+			})),
+			err: nil,
+		},
+		"error with API call": {
+			expected: nil,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			})),
+			err: errors.New("EOF"),
+		},
 	}
 
-	s := System{
-		client: client,
-	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			defer tc.server.Close()
 
-	mdmDetails, err1 := s.GetMDMClusterDetails()
-	assert.NotNil(t, mdmDetails)
-	assert.Nil(t, err1)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client.configConnect.Version = "3.6"
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+			}
+
+			mdmDetails, err := s.GetMDMClusterDetails()
+
+			assert.Equal(t, tc.expected, mdmDetails)
+			assert.Equal(t, tc.err, err)
+		})
+	}
 }
 
 func TestRenameMdm(t *testing.T) {
@@ -336,6 +383,404 @@ func TestRenameMdm(t *testing.T) {
 						t.Errorf("Renaming MDM did not work as expected, \n\tgot: %s \n\twant: %s", err, tc.expected)
 					}
 				}
+			}
+		})
+	}
+}
+
+func TestGetSystems(t *testing.T) {
+	// Define test cases
+	testCases := []struct {
+		name     string
+		input    *Client
+		expected []*types.System
+		server   *httptest.Server
+		err      error
+	}{
+		{
+			name:  "Test case 1",
+			input: &Client{},
+			expected: []*types.System{
+				{
+					ID:   "system1",
+					Name: "System 1",
+				},
+				{
+					ID:   "system2",
+					Name: "System 2",
+				},
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				data, err := json.Marshal([]*types.System{
+					{
+						ID:   "system1",
+						Name: "System 1",
+					},
+					{
+						ID:   "system2",
+						Name: "System 2",
+					},
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				w.Write(data)
+			})),
+			err: nil,
+		},
+		{
+			name:     "Test case 2",
+			input:    &Client{},
+			expected: nil,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			})),
+			err: errors.New("err: problem getting instances: EOF"),
+		},
+	}
+
+	// Run test cases
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			defer tc.server.Close()
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+
+			// Call the GetSystems function
+			result, err := client.GetSystems()
+
+			// Assert the results
+			if tc.err != nil {
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestFindSystem(t *testing.T) {
+	// Define test cases
+	testCases := map[string]struct {
+		instanceID string
+		name       string
+		href       string
+		expected   *types.System
+		server     *httptest.Server
+		err        error
+	}{
+		"success find by instanceID": {
+			instanceID: "system1",
+			name:       "",
+			href:       "",
+			expected: &types.System{
+				ID:   "system1",
+				Name: "System 1",
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.RequestURI {
+				case "/api/types/System/instances":
+					w.WriteHeader(http.StatusOK)
+					data, err := json.Marshal([]*types.System{
+						{
+							ID:   "system1",
+							Name: "System 1",
+						},
+						{
+							ID:   "system2",
+							Name: "System 2",
+						},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+					w.Write(data)
+				default:
+					w.WriteHeader(http.StatusInternalServerError)
+				}
+			})),
+			err: nil,
+		},
+		"success find by name": {
+			instanceID: "",
+			name:       "System 2",
+			href:       "",
+			expected: &types.System{
+				ID:   "system2",
+				Name: "System 2",
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.RequestURI {
+				case "/api/types/System/instances":
+					w.WriteHeader(http.StatusOK)
+					data, err := json.Marshal([]*types.System{
+						{
+							ID:   "system1",
+							Name: "System 1",
+						},
+						{
+							ID:   "system2",
+							Name: "System 2",
+						},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+					w.Write(data)
+				default:
+					w.WriteHeader(http.StatusInternalServerError)
+				}
+			})),
+			err: nil,
+		},
+		"error unable to find matching system by instanceID or name": {
+			instanceID: "",
+			name:       "System 3",
+			href:       "",
+			expected:   &types.System{},
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.RequestURI {
+				case "/api/types/System/instances":
+					w.WriteHeader(http.StatusOK)
+					data, err := json.Marshal([]*types.System{
+						{
+							ID:   "system1",
+							Name: "System 1",
+						},
+						{
+							ID:   "system2",
+							Name: "System 2",
+						},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+					w.Write(data)
+				default:
+					w.WriteHeader(http.StatusInternalServerError)
+				}
+			})),
+			err: fmt.Errorf("err: systemid or systemname not found"),
+		},
+		"error from API call": {
+			instanceID: "",
+			name:       "",
+			href:       "",
+			expected:   &types.System{},
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.RequestURI {
+				case "/api/types/System/instances":
+					w.WriteHeader(http.StatusInternalServerError)
+				default:
+					w.WriteHeader(http.StatusInternalServerError)
+				}
+			})),
+			err: fmt.Errorf("err: problem getting instances: EOF"),
+		},
+	}
+
+	// Run test cases
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			defer tc.server.Close()
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+
+			// Call the GetSystems function
+			result, err := client.FindSystem(tc.instanceID, tc.name, tc.href)
+
+			// Assert the results
+			if tc.err != nil {
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expected, result.System)
+			}
+		})
+	}
+}
+
+func TestGetStatistics(t *testing.T) {
+	// Define test cases
+	testCases := map[string]struct {
+		system   *System
+		expected *types.Statistics
+		server   *httptest.Server
+		err      error
+	}{
+		"success": {
+			system: &System{
+				System: &types.System{
+					Links: []*types.Link{
+						{
+							Rel:  "/api/System/relationship/Statistics",
+							HREF: "/api/System/relationship/Statistics/system-1",
+						},
+					},
+				},
+			},
+			expected: &types.Statistics{
+				NumOfStoragePools: 3,
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.RequestURI {
+				case "/api/System/relationship/Statistics/system-1":
+					data, err := json.Marshal(types.Statistics{
+						NumOfStoragePools: 3,
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+					w.Write(data)
+				default:
+					w.WriteHeader(http.StatusInternalServerError)
+				}
+			})),
+			err: nil,
+		},
+		"error due to no links in system": {
+			system: &System{
+				System: &types.System{
+					Links: []*types.Link{
+						{},
+					},
+				},
+			},
+			expected: nil,
+			server: httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+			})),
+			err: fmt.Errorf("Error: problem finding link"),
+		},
+		"error with API call": {
+			system: &System{
+				System: &types.System{
+					Links: []*types.Link{
+						{
+							Rel:  "/api/System/relationship/Statistics",
+							HREF: "/api/System/relationship/Statistics/system-1",
+						},
+					},
+				},
+			},
+			expected: nil,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			})),
+			err: fmt.Errorf("EOF"),
+		},
+	}
+
+	// Run test cases
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			defer tc.server.Close()
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+
+			tc.system.client = client
+
+			// Call the GetStatistics function
+			result, err := tc.system.GetStatistics()
+
+			// Assert the results
+			if tc.err != nil {
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestCreateSnapshotConsistencyGroup(t *testing.T) {
+	// Define test cases
+	testCases := map[string]struct {
+		system   *System
+		expected *types.SnapshotVolumesResp
+		server   *httptest.Server
+		err      error
+	}{
+		"success": {
+			system: &System{
+				System: &types.System{
+					Links: []*types.Link{
+						{
+							Rel:  "self",
+							HREF: "/api/System/instances/system-1",
+						},
+					},
+				},
+			},
+			expected: &types.SnapshotVolumesResp{
+				VolumeIDList:    []string{"volume-1", "volume-2"},
+				SnapshotGroupID: "group-1",
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.RequestURI {
+				case "/api/System/instances/system-1/action/snapshotVolumes":
+					data, err := json.Marshal(&types.SnapshotVolumesResp{
+						VolumeIDList:    []string{"volume-1", "volume-2"},
+						SnapshotGroupID: "group-1",
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+					w.Write(data)
+				default:
+					w.WriteHeader(http.StatusInternalServerError)
+				}
+			})),
+			err: nil,
+		},
+		"error due to no links in system": {
+			system: &System{
+				System: &types.System{
+					Links: []*types.Link{
+						{},
+					},
+				},
+			},
+			expected: nil,
+			server: httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+			})),
+			err: fmt.Errorf("Error: problem finding link"),
+		},
+		"error with API call": {
+			system: &System{
+				System: &types.System{
+					Links: []*types.Link{
+						{
+							Rel:  "self",
+							HREF: "/api/System/instances/system-1",
+						},
+					},
+				},
+			},
+			expected: nil,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			})),
+			err: fmt.Errorf("EOF"),
+		},
+	}
+
+	// Run test cases
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			defer tc.server.Close()
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+
+			tc.system.client = client
+
+			// Call the CreateSnapshotConsistencyGroup function
+			result, err := tc.system.CreateSnapshotConsistencyGroup(&types.SnapshotVolumesParam{})
+
+			// Assert the results
+			if tc.err != nil {
+				assert.EqualError(t, err, tc.err.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expected, result)
 			}
 		})
 	}
