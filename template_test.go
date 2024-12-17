@@ -24,13 +24,13 @@ import (
 )
 
 func TestGetTemplateByID(t *testing.T) {
-	tests := []struct {
+	tests := map[string]struct {
 		id       string
 		server   *httptest.Server
 		version  string
 		expected error
 	}{
-		{
+		"success version 4.0": {
 			id: "12345",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				responseJSONFile := "response/template_response.json"
@@ -50,7 +50,7 @@ func TestGetTemplateByID(t *testing.T) {
 			version:  "4.0",
 			expected: nil,
 		},
-		{
+		"success version < 4.0": {
 			id: "12345",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				responseJSONFile := "response/template_response.json"
@@ -70,7 +70,7 @@ func TestGetTemplateByID(t *testing.T) {
 			version:  "3.0",
 			expected: nil,
 		},
-		{
+		"error due to template not found": {
 			id: "12345",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				http.NotFound(w, r)
@@ -79,8 +79,8 @@ func TestGetTemplateByID(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.id, func(t *testing.T) {
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 			gc := &GatewayClient{
 				http:     &http.Client{},

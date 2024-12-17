@@ -600,7 +600,7 @@ func TestFindSystem(t *testing.T) {
 	}
 }
 
-func TestGetStatistics(t *testing.T) {
+func TestSystemGetStatistics(t *testing.T) {
 	// Define test cases
 	testCases := map[string]struct {
 		system   *System
