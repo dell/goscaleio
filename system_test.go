@@ -642,7 +642,7 @@ func TestGetStatistics(t *testing.T) {
 			system: &System{
 				System: &types.System{
 					Links: []*types.Link{
-						&types.Link{},
+						{},
 					},
 				},
 			},
@@ -655,7 +655,7 @@ func TestGetStatistics(t *testing.T) {
 			system: &System{
 				System: &types.System{
 					Links: []*types.Link{
-						&types.Link{
+						{
 							Rel:  "/api/System/relationship/Statistics",
 							HREF: "/api/System/relationship/Statistics/system-1",
 						},
@@ -704,7 +704,7 @@ func TestCreateSnapshotConsistencyGroup(t *testing.T) {
 			system: &System{
 				System: &types.System{
 					Links: []*types.Link{
-						&types.Link{
+						{
 							Rel:  "self",
 							HREF: "/api/System/instances/system-1",
 						},
@@ -736,7 +736,7 @@ func TestCreateSnapshotConsistencyGroup(t *testing.T) {
 			system: &System{
 				System: &types.System{
 					Links: []*types.Link{
-						&types.Link{},
+						{},
 					},
 				},
 			},
@@ -749,7 +749,7 @@ func TestCreateSnapshotConsistencyGroup(t *testing.T) {
 			system: &System{
 				System: &types.System{
 					Links: []*types.Link{
-						&types.Link{
+						{
 							Rel:  "self",
 							HREF: "/api/System/instances/system-1",
 						},
