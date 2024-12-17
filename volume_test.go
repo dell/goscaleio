@@ -297,7 +297,7 @@ func TestGetVolumeSP(t *testing.T) {
 			volumeName:   "",
 			getSnapshots: false,
 			storagePool:  types.StoragePool{},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -372,7 +372,6 @@ func TestGetLocalVolumeMapByRegex(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-
 			FSDevDirectoryPrefix = tc.directoryPrefix
 
 			mappedVolumes, err := GetLocalVolumeMapByRegex(tc.systenIDRegex, tc.volumeIDRegex)
@@ -508,7 +507,7 @@ func TestGetVTree(t *testing.T) {
 			volume: types.Volume{
 				ID: uuid.NewString(),
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -524,7 +523,7 @@ func TestGetVTree(t *testing.T) {
 					},
 				},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -588,7 +587,7 @@ func TestRemoveVolume(t *testing.T) {
 			volume: types.Volume{
 				ID: uuid.NewString(),
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -604,7 +603,7 @@ func TestRemoveVolume(t *testing.T) {
 					},
 				},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -662,7 +661,7 @@ func TestSetVolumeName(t *testing.T) {
 			volume: types.Volume{
 				ID: volumeID,
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -732,7 +731,7 @@ func TestSetVolumeSize(t *testing.T) {
 					},
 				},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -742,7 +741,7 @@ func TestSetVolumeSize(t *testing.T) {
 			volume: types.Volume{
 				ID: uuid.NewString(),
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -814,7 +813,7 @@ func TestLockAutoSnapshot(t *testing.T) {
 					},
 				},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -825,7 +824,7 @@ func TestLockAutoSnapshot(t *testing.T) {
 				ID:         uuid.NewString(),
 				VolumeType: "Snapshot",
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -836,7 +835,7 @@ func TestLockAutoSnapshot(t *testing.T) {
 				ID:         uuid.NewString(),
 				VolumeType: "Volume",
 			},
-			server:      httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {})),
+			server:      httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {})),
 			expectedErr: fmt.Errorf("Volume type should be snapshot"),
 		},
 	}
@@ -905,7 +904,7 @@ func TestUnlockAutoSnapshot(t *testing.T) {
 					},
 				},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -916,7 +915,7 @@ func TestUnlockAutoSnapshot(t *testing.T) {
 				ID:         uuid.NewString(),
 				VolumeType: "Snapshot",
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -927,7 +926,7 @@ func TestUnlockAutoSnapshot(t *testing.T) {
 				ID:         uuid.NewString(),
 				VolumeType: "Volume",
 			},
-			server:      httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {})),
+			server:      httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {})),
 			expectedErr: fmt.Errorf("Volume type should be snapshot"),
 		},
 	}
@@ -994,7 +993,7 @@ func TestSetVolumeAccessModeLimit(t *testing.T) {
 					},
 				},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -1004,7 +1003,7 @@ func TestSetVolumeAccessModeLimit(t *testing.T) {
 			volume: types.Volume{
 				ID: uuid.NewString(),
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -1074,7 +1073,7 @@ func TestSetSnapshotSecurity(t *testing.T) {
 					},
 				},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -1084,7 +1083,7 @@ func TestSetSnapshotSecurity(t *testing.T) {
 			volume: types.Volume{
 				ID: uuid.NewString(),
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -1154,7 +1153,7 @@ func TestSetVolumeMappingAccessMode(t *testing.T) {
 					},
 				},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -1164,7 +1163,7 @@ func TestSetVolumeMappingAccessMode(t *testing.T) {
 			volume: types.Volume{
 				ID: uuid.NewString(),
 			},
-			server:      httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {})),
+			server:      httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {})),
 			expectedErr: fmt.Errorf("Error: problem finding link"),
 		},
 	}
@@ -1231,7 +1230,7 @@ func TestSetVolumeUseRmCache(t *testing.T) {
 					},
 				},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -1241,7 +1240,7 @@ func TestSetVolumeUseRmCache(t *testing.T) {
 			volume: types.Volume{
 				ID: uuid.NewString(),
 			},
-			server:      httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {})),
+			server:      httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {})),
 			expectedErr: fmt.Errorf("Error: problem finding link"),
 		},
 	}
@@ -1308,7 +1307,7 @@ func TestSetCompressionMethod(t *testing.T) {
 					},
 				},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
@@ -1318,7 +1317,7 @@ func TestSetCompressionMethod(t *testing.T) {
 			volume: types.Volume{
 				ID: uuid.NewString(),
 			},
-			server:      httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {})),
+			server:      httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {})),
 			expectedErr: fmt.Errorf("Error: problem finding link"),
 		},
 	}
@@ -1373,7 +1372,7 @@ func TestUnmarkForReplication(t *testing.T) {
 			volume: types.Volume{
 				ID: volumeID,
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
 				resp.WriteHeader(http.StatusBadRequest)
 				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
 			})),
