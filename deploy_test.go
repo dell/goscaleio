@@ -218,6 +218,7 @@ func TestGetPackageDetails(t *testing.T) {
 		host:     server.URL,
 		username: "test_username",
 		password: "test_password",
+		version:  "4.0",
 	}
 
 	packageDetails, err := gc.GetPackageDetails()
@@ -459,6 +460,7 @@ func TestUninstallCluster(t *testing.T) {
 		host:     server.URL,
 		username: "test_username",
 		password: "test_password",
+		version:  "4.0",
 	}
 
 	jsonStr := `{
