@@ -413,3 +413,130 @@ func testjsonEncode(t *testing.T, w io.Writer, v interface{}) {
 		t.Fatal(err)
 	}
 }
+
+func TestWithFields(t *testing.T) {
+	tests := []struct {
+		name   string
+		fields map[string]interface{}
+	}{
+		{
+			name:   "No fields",
+			fields: nil,
+		},
+		{
+			name: "With fields",
+			fields: map[string]interface{}{
+				"key1": "test1",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := withFields(tt.fields, "")
+			if err == nil {
+				t.Errorf("withFieldsE() expected error got nil")
+			}
+		})
+	}
+}
+
+func TestNewClientWithArgs(t *testing.T) {
+	tests := []struct {
+		name     string
+		endpoint string
+		wantErr  bool
+	}{
+		{
+			name:     "success",
+			endpoint: "/testing",
+			wantErr:  false,
+		},
+		{
+			name:     "failure",
+			endpoint: "",
+			wantErr:  true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := NewClientWithArgs(tt.endpoint, "3.5", math.MaxInt64, true, false)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewClientWithArgs() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestWithFieldsE(t *testing.T) {
+	tests := []struct {
+		name   string
+		fields map[string]interface{}
+		inner  error
+	}{
+		{
+			name:   "No fields",
+			fields: nil,
+			inner:  fmt.Errorf("test"),
+		},
+		{
+			name: "With fields",
+			fields: map[string]interface{}{
+				"key1": "test1",
+			},
+			inner: fmt.Errorf("test"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := withFieldsE(tt.fields, "", tt.inner)
+			if err == nil {
+				t.Errorf("withFieldsE() expected error got nil")
+			}
+		})
+	}
+}
+
+func TestGetStringWithRetry(t *testing.T) {
+	tests := []struct {
+		name string
+		URL  string
+	}{
+		{
+			name: "Unauthorized, Need re-auth",
+			URL:  "/testing",
+		},
+		{
+			name: "Re-authentication not required",
+			URL:  "/success",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.URL.Path {
+				case "/success":
+					w.WriteHeader(http.StatusOK)
+				case "/testing":
+					w.WriteHeader(http.StatusUnauthorized)
+					testjsonEncode(t, w, testBuildError(http.StatusUnauthorized))
+				case "/api/login":
+					_, err := fmt.Fprintf(w, `"fakesessiontoken"`)
+					if err != nil {
+						return
+					}
+				default:
+					t.Fatalf("unexpected path: %q", r.URL.Path)
+				}
+			}))
+			defer ts.Close()
+			client, err := NewClientWithArgs(ts.URL, "3.5", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, err = client.getStringWithRetry(http.MethodPost, tt.URL, nil)
+		})
+	}
+}
