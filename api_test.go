@@ -542,6 +542,7 @@ func TestGetStringWithRetry(t *testing.T) {
 		})
 	}
 }
+
 func TestWithContext(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		switch req.RequestURI {

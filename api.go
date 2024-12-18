@@ -148,7 +148,6 @@ func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
 
 	resp, err := c.api.DoAndGetResponseBody(
 		ctx, http.MethodGet, "api/login", headers, nil, c.configConnect.Version)
-
 	if err != nil {
 		doLog(logger.Error, err.Error())
 		return Cluster{}, err
