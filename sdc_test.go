@@ -473,7 +473,7 @@ func TestSetApprovedIps(t *testing.T) {
 
 func TestDeleteSdc(t *testing.T) {
 	type testCase struct {
-		Id       string
+		ID       string
 		expected error
 	}
 
@@ -485,11 +485,11 @@ func TestDeleteSdc(t *testing.T) {
 
 	cases := []testCase{
 		{
-			Id:       "127.0.0.1",
+			ID:       "127.0.0.1",
 			expected: nil,
 		},
 		{
-			Id:       "10.10.10.10",
+			ID:       "10.10.10.10",
 			expected: errors.New("Request message is not valid: The following parameter(s) must be part of the request body: sdcId"),
 		},
 	}
@@ -510,7 +510,7 @@ func TestDeleteSdc(t *testing.T) {
 				System: &system,
 			}
 
-			err2 := s.DeleteSdc(tc.Id)
+			err2 := s.DeleteSdc(tc.ID)
 			if err2 != nil {
 				if tc.expected == nil {
 					t.Errorf("Approving SDC IPs did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
