@@ -442,7 +442,6 @@ func TestWithFields(t *testing.T) {
 }
 
 func TestNewClientWithArgs(t *testing.T) {
-
 	tests := []struct {
 		name     string
 		endpoint string
@@ -500,7 +499,6 @@ func TestWithFieldsE(t *testing.T) {
 }
 
 func TestGetStringWithRetry(t *testing.T) {
-
 	tests := []struct {
 		name string
 		URL  string
@@ -517,9 +515,7 @@ func TestGetStringWithRetry(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 				switch r.URL.Path {
 				case "/success":
 					w.WriteHeader(http.StatusOK)
