@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -305,59 +306,6 @@ func TestApproveSdc(t *testing.T) {
 	}
 }
 
-func TestSetRestrictedMode(t *testing.T) {
-	type testCase struct {
-		mode     string
-		expected error
-	}
-
-	system := types.System{
-		ID:                       "0000aaabbbccc1111",
-		RestrictedSdcModeEnabled: true,
-		RestrictedSdcMode:        "Guid",
-	}
-
-	cases := []testCase{
-		{
-			mode:     "Guid",
-			expected: nil,
-		},
-		{
-			mode:     "random",
-			expected: errors.New("restrictedSdcMode should get one of the following values: None, Guid, ApprovedIp, but its value is random"),
-		},
-	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
-	}))
-	defer svr.Close()
-
-	for _, tc := range cases {
-		tc := tc
-		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			s := System{
-				client: client,
-				System: &system,
-			}
-
-			err2 := s.SetRestrictedMode(tc.mode)
-			if err2 != nil {
-				if tc.expected == nil {
-					t.Errorf("Modifying restricted mode did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
-				} else {
-					if err2.Error() != tc.expected.Error() {
-						t.Errorf("Modifying restricted mode did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
-					}
-				}
-			}
-		})
-	}
-}
-
 func TestApproveSdcbyIP(t *testing.T) {
 	type testCase struct {
 		param    types.ApproveSdcParam
@@ -408,6 +356,59 @@ func TestApproveSdcbyIP(t *testing.T) {
 				} else {
 					if err2.Error() != tc.expected.Error() {
 						t.Errorf("Approving SDC did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestSetRestrictedMode(t *testing.T) {
+	type testCase struct {
+		mode     string
+		expected error
+	}
+
+	system := types.System{
+		ID:                       "0000aaabbbccc1111",
+		RestrictedSdcModeEnabled: true,
+		RestrictedSdcMode:        "Guid",
+	}
+
+	cases := []testCase{
+		{
+			mode:     "Guid",
+			expected: nil,
+		},
+		{
+			mode:     "random",
+			expected: errors.New("restrictedSdcMode should get one of the following values: None, Guid, ApprovedIp, but its value is random"),
+		},
+	}
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	}))
+	defer svr.Close()
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(_ *testing.T) {
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+				System: &system,
+			}
+
+			err2 := s.SetRestrictedMode(tc.mode)
+			if err2 != nil {
+				if tc.expected == nil {
+					t.Errorf("Modifying restricted mode did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
+				} else {
+					if err2.Error() != tc.expected.Error() {
+						t.Errorf("Modifying restricted mode did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
 					}
 				}
 			}
@@ -467,5 +468,734 @@ func TestSetApprovedIps(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestDeleteSdc(t *testing.T) {
+	type testCase struct {
+		ID       string
+		expected error
+	}
+
+	system := types.System{
+		ID:                       "0000aaabbbccc1111",
+		RestrictedSdcModeEnabled: true,
+		RestrictedSdcMode:        "Guid",
+	}
+
+	cases := []testCase{
+		{
+			ID:       "127.0.0.1",
+			expected: nil,
+		},
+		{
+			ID:       "10.10.10.10",
+			expected: errors.New("Request message is not valid: The following parameter(s) must be part of the request body: sdcId"),
+		},
+	}
+	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	}))
+	defer svr.Close()
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(_ *testing.T) {
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := System{
+				client: client,
+				System: &system,
+			}
+
+			err2 := s.DeleteSdc(tc.ID)
+			if err2 != nil {
+				if tc.expected == nil {
+					t.Errorf("Approving SDC IPs did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
+				} else {
+					if err2.Error() != tc.expected.Error() {
+						t.Errorf("Approving SDC IPs did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestGetSdcIDByIP(t *testing.T) {
+	ip := "127.0.0.1"
+	systemID := uuid.NewString()
+	type testCase struct {
+		server        *httptest.Server
+		expectedErr   error
+		finalResponse string
+	}
+
+	cases := map[string]testCase{
+		"succeed": {
+			finalResponse: "123",
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case "/api/types/Sdc/instances/action/queryIdByKey":
+					resp.Write([]byte("123"))
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+	}
+
+	for _, tc := range cases {
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tc.server.Close()
+
+		system := System{
+			System: &types.System{
+				ID: systemID,
+			},
+			client: client,
+		}
+
+		response, err := system.GetSdcIDByIP(ip)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		} else {
+			if tc.finalResponse != response {
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
+func TestFindSdc(t *testing.T) {
+	systemID := uuid.NewString()
+	searchSdcID := uuid.NewString()
+	testSdc := []types.Sdc{
+		{
+			Name: "FirstTest",
+			ID:   searchSdcID,
+		},
+		{
+			Name: "SecondTest",
+			ID:   searchSdcID,
+		},
+	}
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"succeed": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/System::%v/relationships/Sdc", systemID):
+					content, err := json.Marshal(testSdc)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+		"error: could not find sdc": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/System::%v/relationships/Sdc", systemID):
+					content, err := json.Marshal([]types.Sdc{
+						{
+							ID: uuid.NewString(),
+						},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: fmt.Errorf("Couldn't find SDC"),
+		},
+	}
+
+	for _, tc := range cases {
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tc.server.Close()
+
+		system := System{
+			System: &types.System{
+				ID: systemID,
+			},
+			client: client,
+		}
+
+		res, err := system.FindSdc("ID", searchSdcID)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		} else {
+			if res.Sdc.ID != searchSdcID {
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
+func TestGetSdcByID(t *testing.T) {
+	systemID := uuid.NewString()
+	searchSdcID := uuid.NewString()
+	testSdc := types.Sdc{
+		ID: searchSdcID,
+	}
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"succeed": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/Sdc::%v", searchSdcID):
+					content, err := json.Marshal(testSdc)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+	}
+
+	for _, tc := range cases {
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tc.server.Close()
+
+		system := System{
+			System: &types.System{
+				ID: systemID,
+			},
+			client: client,
+		}
+
+		res, err := system.GetSdcByID(searchSdcID)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		} else {
+			if res.Sdc.ID != searchSdcID {
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
+func TestChangeSdcName(t *testing.T) {
+	systemID := uuid.NewString()
+	sdcName := uuid.NewString()
+	searchSdcID := uuid.NewString()
+	testSdc := types.Sdc{
+		Name: sdcName,
+		ID:   searchSdcID,
+	}
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"succeed": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcName", searchSdcID):
+					content, err := json.Marshal(testSdc)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+	}
+
+	for _, tc := range cases {
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tc.server.Close()
+
+		system := System{
+			System: &types.System{
+				ID: systemID,
+			},
+			client: client,
+		}
+
+		res, err := system.ChangeSdcName(searchSdcID, "NameSDC")
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		} else {
+			if res.Sdc.Name != sdcName {
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
+func TestChangeSdcPerfProfile(t *testing.T) {
+	systemID := uuid.NewString()
+	searchsdcID := uuid.NewString()
+	perfProfile := uuid.NewString()
+	testSdc := types.Sdc{
+		ID:          searchsdcID,
+		PerfProfile: perfProfile,
+	}
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"succeed": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcPerformanceParameters", searchsdcID):
+					content, err := json.Marshal(testSdc)
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+	}
+
+	for _, tc := range cases {
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tc.server.Close()
+
+		system := System{
+			System: &types.System{
+				ID: systemID,
+			},
+			client: client,
+		}
+
+		res, err := system.ChangeSdcPerfProfile(searchsdcID, "Perf Profile")
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		} else {
+			if res.Sdc.PerfProfile != perfProfile {
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
+func TestGetSatistics(t *testing.T) {
+	sdcID := uuid.NewString()
+	mapVolumes := 3
+	testSdc := types.SdcStatistics{
+		NumOfMappedVolumes: mapVolumes,
+	}
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+		sdc         types.Sdc
+	}
+
+	cases := map[string]testCase{
+		"succeed": {
+			sdc: types.Sdc{
+				ID: uuid.NewString(),
+				Links: []*types.Link{
+					{
+						Rel:  "/api/Sdc/relationship/Statistics",
+						HREF: fmt.Sprintf("/api/instances/Sdc::%s/relationships/Statistics", sdcID),
+					},
+				},
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/Sdc::%s/relationships/Statistics", sdcID):
+					resp.WriteHeader(http.StatusOK)
+					content, err := json.Marshal(testSdc)
+					if err != nil {
+						t.Fatalf("failed to marshal volume: %v", err)
+					}
+					resp.Write(content)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			sdc: types.Sdc{
+				ID: uuid.NewString(),
+				Links: []*types.Link{
+					{
+						Rel:  "/api/Sdc/relationship/Statistics",
+						HREF: fmt.Sprintf("/api/instances/Sdc::%s/relationships/Statistics", sdcID),
+					},
+				},
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+		"error: bad link": {
+			sdc: types.Sdc{
+				ID: uuid.NewString(),
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("Error: problem finding link"),
+		},
+	}
+
+	for _, tc := range cases {
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tc.server.Close()
+
+		sdc := Sdc{
+			Sdc:    &tc.sdc,
+			client: client,
+		}
+
+		res, err := sdc.GetStatistics()
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		} else {
+			if res.NumOfMappedVolumes != mapVolumes {
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
+func TestMapVolumeSdc(t *testing.T) {
+	volumeID := uuid.NewString()
+	mapVolumeSdcParam := &types.MapVolumeSdcParam{}
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"succeed": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/Volume::%s/action/addMappedSdc", volumeID):
+					content, err := json.Marshal(types.Sdc{
+						ID: volumeID,
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+		"error: could not find sdc": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/Volume::%s/action/addMappedSdc", volumeID):
+					content, err := json.Marshal([]types.Sdc{
+						{
+							ID: uuid.NewString(),
+						},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: fmt.Errorf("Couldn't find SDC"),
+		},
+	}
+
+	for _, tc := range cases {
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tc.server.Close()
+
+		volume := Volume{
+			Volume: &types.Volume{
+				ID: volumeID,
+			},
+			client: client,
+		}
+
+		err = volume.MapVolumeSdc(mapVolumeSdcParam)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
+func TestUnMapVolumeSdc(t *testing.T) {
+	volumeID := uuid.NewString()
+	unMapVolumeSdcParam := &types.UnmapVolumeSdcParam{}
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"succeed": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/Volume::%s/action/removeMappedSdc", volumeID):
+					content, err := json.Marshal(types.Sdc{
+						ID: volumeID,
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+	}
+
+	for _, tc := range cases {
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tc.server.Close()
+
+		volume := Volume{
+			Volume: &types.Volume{
+				ID: volumeID,
+			},
+			client: client,
+		}
+
+		err = volume.UnmapVolumeSdc(unMapVolumeSdcParam)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
+func TestSetMappedSdcLimits(t *testing.T) {
+	volumeID := uuid.NewString()
+	setMapVolumeSdcParam := &types.SetMappedSdcLimitsParam{}
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"succeed": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/Volume::%s/action/setMappedSdcLimits", volumeID):
+					content, err := json.Marshal(types.Sdc{
+						ID: volumeID,
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+		"error: could not find sdc": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/Volume::%s/action/setMappedSdcLimits", volumeID):
+					content, err := json.Marshal([]types.Sdc{
+						{
+							ID: uuid.NewString(),
+						},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: fmt.Errorf("Couldn't find SDC"),
+		},
+	}
+
+	for _, tc := range cases {
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tc.server.Close()
+
+		volume := Volume{
+			Volume: &types.Volume{
+				ID: volumeID,
+			},
+			client: client,
+		}
+
+		err = volume.SetMappedSdcLimits(setMapVolumeSdcParam)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		}
 	}
 }
