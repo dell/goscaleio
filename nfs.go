@@ -66,7 +66,7 @@ func (s *System) GetNASByIDName(id string, name string) (*types.NAS, error) {
 	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &nasList)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not find NAS server by name: %s, err: %s", name, err.Error())
 	}
 
 	name = strings.ToLower(name)

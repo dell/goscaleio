@@ -49,6 +49,7 @@ var (
 
 // Client defines struct for Client
 type Client struct {
+	ctx           context.Context
 	configConnect *ConfigConnect
 	api           api.Client
 }
@@ -65,16 +66,13 @@ type ConfigConnect struct {
 	Insecure bool
 }
 
-// ClientPersistent defines struct for ClientPersistent
-type ClientPersistent struct {
-	configConnect *ConfigConnect
-	client        *Client
-}
-
 // GetVersion returns version
 func (c *Client) GetVersion() (string, error) {
+	ctx := c.Context()
+	defer c.ResetContext()
+
 	resp, err := c.api.DoAndGetResponseBody(
-		context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
+		ctx, http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
 	if err != nil {
 		return "", err
 	}
@@ -93,7 +91,7 @@ func (c *Client) GetVersion() (string, error) {
 			return "", err
 		}
 		resp, err = c.api.DoAndGetResponseBody(
-			context.Background(), http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
+			ctx, http.MethodGet, "/api/version", nil, nil, c.configConnect.Version)
 		if err != nil {
 			return "", err
 		}
@@ -145,8 +143,11 @@ func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
 	headers["Authorization"] = "Basic " + basicAuth(
 		configConnect.Username, configConnect.Password)
 
+	ctx := c.Context()
+	defer c.ResetContext()
+
 	resp, err := c.api.DoAndGetResponseBody(
-		context.Background(), http.MethodGet, "api/login", headers, nil, c.configConnect.Version)
+		ctx, http.MethodGet, "api/login", headers, nil, c.configConnect.Version)
 	if err != nil {
 		doLog(logger.Error, err.Error())
 		return Cluster{}, err
@@ -197,8 +198,11 @@ func (c *Client) getJSONWithRetry(
 	headers[api.HeaderKeyContentType] = conHeader
 	addMetaData(headers, body)
 
+	ctx := c.Context()
+	defer c.ResetContext()
+
 	err := c.api.DoWithHeaders(
-		context.Background(), method, uri, headers, body, resp, c.configConnect.Version)
+		ctx, method, uri, headers, body, resp, c.configConnect.Version)
 	if err == nil {
 		return nil
 	}
@@ -213,7 +217,7 @@ func (c *Client) getJSONWithRetry(
 				return fmt.Errorf("Error Authenticating: %s", err)
 			}
 			return c.api.DoWithHeaders(
-				context.Background(), method, uri, headers, body, resp, c.configConnect.Version)
+				ctx, method, uri, headers, body, resp, c.configConnect.Version)
 		}
 	}
 	doLog(logger.Error, err.Error())
@@ -250,6 +254,9 @@ func (c *Client) getStringWithRetry(
 	headers[api.HeaderKeyContentType] = conHeader
 	addMetaData(headers, body)
 
+	ctx := c.Context()
+	defer c.ResetContext()
+
 	checkResponse := func(resp *http.Response) (string, bool, error) {
 		defer func() {
 			if err := resp.Body.Close(); err != nil {
@@ -276,7 +283,7 @@ func (c *Client) getStringWithRetry(
 	}
 
 	resp, err := c.api.DoAndGetResponseBody(
-		context.Background(), method, uri, headers, body, c.configConnect.Version)
+		ctx, method, uri, headers, body, c.configConnect.Version)
 	if err != nil {
 		return "", err
 	}
@@ -289,7 +296,7 @@ func (c *Client) getStringWithRetry(
 				return "", fmt.Errorf("Error Authenticating: %s", err)
 			}
 			resp, err = c.api.DoAndGetResponseBody(
-				context.Background(), method, uri, headers, body, c.configConnect.Version)
+				ctx, method, uri, headers, body, c.configConnect.Version)
 			if err != nil {
 				return "", err
 			}
@@ -315,6 +322,23 @@ func (c *Client) GetToken() string {
 // GetConfigConnect returns Config of client
 func (c *Client) GetConfigConnect() *ConfigConnect {
 	return c.configConnect
+}
+
+func (c *Client) WithContext(ctx context.Context) *Client {
+	c.ctx = ctx
+	return c
+}
+
+func (c *Client) Context() context.Context {
+	if c.ctx != nil {
+		return c.ctx
+	}
+
+	return context.Background()
+}
+
+func (c *Client) ResetContext() {
+	c.ctx = nil
 }
 
 // NewClient returns a new client
