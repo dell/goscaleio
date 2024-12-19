@@ -17,6 +17,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"math/rand/v2"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -528,17 +529,18 @@ func TestGetSdcIDByIP(t *testing.T) {
 	ip := "127.0.0.1"
 	systemID := uuid.NewString()
 	type testCase struct {
-		server      *httptest.Server
-		expectedErr error
+		server        *httptest.Server
+		expectedErr   error
+		finalResponse string
 	}
 
 	cases := map[string]testCase{
 		"succeed": {
+			finalResponse: "123",
 			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 				switch req.RequestURI {
 				case "/api/types/Sdc/instances/action/queryIdByKey":
-					sdcID := uuid.NewString()
-					resp.Write([]byte(sdcID))
+					resp.Write([]byte("123"))
 					resp.WriteHeader(http.StatusOK)
 				default:
 					resp.WriteHeader(http.StatusBadRequest)
@@ -570,9 +572,13 @@ func TestGetSdcIDByIP(t *testing.T) {
 			client: client,
 		}
 
-		_, err = system.GetSdcIDByIP(ip)
+		response, err := system.GetSdcIDByIP(ip)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		} else {
+			if tc.finalResponse != response {
 				t.Fatal(err)
 			}
 		}
@@ -582,6 +588,16 @@ func TestGetSdcIDByIP(t *testing.T) {
 func TestFindSdc(t *testing.T) {
 	systemID := uuid.NewString()
 	searchSdcID := uuid.NewString()
+	testSdc := []types.Sdc{
+		{
+			Name: "FirstTest",
+			ID:   searchSdcID,
+		},
+		{
+			Name: "SecondTest",
+			ID:   searchSdcID,
+		},
+	}
 	type testCase struct {
 		server      *httptest.Server
 		expectedErr error
@@ -592,11 +608,7 @@ func TestFindSdc(t *testing.T) {
 			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 				switch req.RequestURI {
 				case fmt.Sprintf("/api/instances/System::%v/relationships/Sdc", systemID):
-					content, err := json.Marshal([]types.Sdc{
-						{
-							ID: searchSdcID,
-						},
-					})
+					content, err := json.Marshal(testSdc)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -655,9 +667,13 @@ func TestFindSdc(t *testing.T) {
 			client: client,
 		}
 
-		_, err = system.FindSdc("ID", searchSdcID)
+		res, err := system.FindSdc("ID", searchSdcID)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		} else {
+			if res.Sdc.ID != searchSdcID {
 				t.Fatal(err)
 			}
 		}
@@ -667,6 +683,9 @@ func TestFindSdc(t *testing.T) {
 func TestGetSdcByID(t *testing.T) {
 	systemID := uuid.NewString()
 	searchSdcID := uuid.NewString()
+	testSdc := types.Sdc{
+		ID: searchSdcID,
+	}
 	type testCase struct {
 		server      *httptest.Server
 		expectedErr error
@@ -677,9 +696,7 @@ func TestGetSdcByID(t *testing.T) {
 			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 				switch req.RequestURI {
 				case fmt.Sprintf("/api/instances/Sdc::%v", searchSdcID):
-					content, err := json.Marshal(types.Sdc{
-						ID: searchSdcID,
-					})
+					content, err := json.Marshal(testSdc)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -716,9 +733,13 @@ func TestGetSdcByID(t *testing.T) {
 			client: client,
 		}
 
-		_, err = system.GetSdcByID(searchSdcID)
+		res, err := system.GetSdcByID(searchSdcID)
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		} else {
+			if res.Sdc.ID != searchSdcID {
 				t.Fatal(err)
 			}
 		}
@@ -727,7 +748,12 @@ func TestGetSdcByID(t *testing.T) {
 
 func TestChangeSdcName(t *testing.T) {
 	systemID := uuid.NewString()
+	sdcName := uuid.NewString()
 	searchSdcID := uuid.NewString()
+	testSdc := types.Sdc{
+		Name: sdcName,
+		ID:   searchSdcID,
+	}
 	type testCase struct {
 		server      *httptest.Server
 		expectedErr error
@@ -738,9 +764,7 @@ func TestChangeSdcName(t *testing.T) {
 			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 				switch req.RequestURI {
 				case fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcName", searchSdcID):
-					content, err := json.Marshal(types.Sdc{
-						ID: searchSdcID,
-					})
+					content, err := json.Marshal(testSdc)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -777,9 +801,13 @@ func TestChangeSdcName(t *testing.T) {
 			client: client,
 		}
 
-		_, err = system.ChangeSdcName(searchSdcID, "NameSDC")
+		res, err := system.ChangeSdcName(searchSdcID, "NameSDC")
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		} else {
+			if res.Sdc.Name != sdcName {
 				t.Fatal(err)
 			}
 		}
@@ -788,7 +816,12 @@ func TestChangeSdcName(t *testing.T) {
 
 func TestChangeSdcPerfProfile(t *testing.T) {
 	systemID := uuid.NewString()
-	sdcID := uuid.NewString()
+	searchsdcID := uuid.NewString()
+	perfProfile := uuid.NewString()
+	testSdc := types.Sdc{
+		ID:          searchsdcID,
+		PerfProfile: perfProfile,
+	}
 	type testCase struct {
 		server      *httptest.Server
 		expectedErr error
@@ -798,10 +831,8 @@ func TestChangeSdcPerfProfile(t *testing.T) {
 		"succeed": {
 			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 				switch req.RequestURI {
-				case fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcPerformanceParameters", sdcID):
-					content, err := json.Marshal(types.Sdc{
-						ID: sdcID,
-					})
+				case fmt.Sprintf("/api/instances/Sdc::%v/action/setSdcPerformanceParameters", searchsdcID):
+					content, err := json.Marshal(testSdc)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -838,9 +869,13 @@ func TestChangeSdcPerfProfile(t *testing.T) {
 			client: client,
 		}
 
-		_, err = system.ChangeSdcPerfProfile(sdcID, "Perf Profile")
+		res, err := system.ChangeSdcPerfProfile(searchsdcID, "Perf Profile")
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		} else {
+			if res.Sdc.PerfProfile != perfProfile {
 				t.Fatal(err)
 			}
 		}
@@ -849,6 +884,10 @@ func TestChangeSdcPerfProfile(t *testing.T) {
 
 func TestGetSatistics(t *testing.T) {
 	sdcID := uuid.NewString()
+	mapVolumes := rand.Int()
+	testSdc := types.SdcStatistics{
+		NumOfMappedVolumes: mapVolumes,
+	}
 	type testCase struct {
 		server      *httptest.Server
 		expectedErr error
@@ -870,9 +909,7 @@ func TestGetSatistics(t *testing.T) {
 				switch req.RequestURI {
 				case fmt.Sprintf("/api/instances/Sdc::%s/relationships/Statistics", sdcID):
 					resp.WriteHeader(http.StatusOK)
-					content, err := json.Marshal(types.SdcStatistics{
-						NumOfMappedVolumes: 1,
-					})
+					content, err := json.Marshal(testSdc)
 					if err != nil {
 						t.Fatalf("failed to marshal volume: %v", err)
 					}
@@ -924,9 +961,13 @@ func TestGetSatistics(t *testing.T) {
 			client: client,
 		}
 
-		_, err = sdc.GetStatistics()
+		res, err := sdc.GetStatistics()
 		if err != nil {
 			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		} else {
+			if res.NumOfMappedVolumes != mapVolumes {
 				t.Fatal(err)
 			}
 		}
