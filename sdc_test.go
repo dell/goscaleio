@@ -17,7 +17,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"math/rand/v2"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -884,7 +883,7 @@ func TestChangeSdcPerfProfile(t *testing.T) {
 
 func TestGetSatistics(t *testing.T) {
 	sdcID := uuid.NewString()
-	mapVolumes := rand.Int()
+	mapVolumes := 3
 	testSdc := types.SdcStatistics{
 		NumOfMappedVolumes: mapVolumes,
 	}
