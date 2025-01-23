@@ -69,7 +69,7 @@ func (c *Client) GetVolume(
 			return nil, nil
 		}
 		if err != nil {
-			return nil, fmt.Errorf("Error: problem finding volume: %s", err)
+			return nil, fmt.Errorf("Error: problem finding volume: %v", err)
 		}
 	}
 
@@ -118,7 +118,6 @@ func (c *Client) FindVolumeID(volumename string) (string, error) {
 
 	volumeID, err := c.getStringWithRetry(http.MethodPost, path,
 		volumeQeryIDByKeyParam)
-	fmt.Printf("[FindVolumeID] volumeID: %+v\n", volumeID)
 	if err != nil {
 		return "", err
 	}

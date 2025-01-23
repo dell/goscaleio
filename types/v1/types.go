@@ -51,7 +51,6 @@ type Error struct {
 
 func (e Error) Error() string {
 	if e.Message == errorWithDetails && len(e.ErrorDetails) > 0 {
-		fmt.Printf("goscaleio.Error Error with details  %#v\n", e)
 		if e.ErrorDetails[0].ErrorMessage != "" {
 			e.Message = e.ErrorDetails[0].ErrorMessage
 			return e.ErrorDetails[0].ErrorMessage
