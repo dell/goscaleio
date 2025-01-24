@@ -43,13 +43,13 @@ func (s *System) GetResourceCredentials() (*types.ResourceCredentials, error) {
 }
 
 // GetResourceCredential returns a specific credential using resource credential ID
-func (s *System) GetResourceCredential(id string) (*types.CredObj, error) {
+func (s *System) GetResourceCredential(id string) (*types.ResourceCredential, error) {
 	defer TimeSpent("GetResourceCredential", time.Now())
 
 	path := fmt.Sprintf(
 		"/api/v1/Credential/%v", id)
 
-	var credentialResult types.CredObj
+	var credentialResult types.ResourceCredential
 	err := s.client.getJSONWithRetry(
 		http.MethodGet, path, nil, &credentialResult)
 	if err != nil {
