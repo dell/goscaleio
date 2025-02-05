@@ -462,6 +462,112 @@ func TestDo(t *testing.T) {
 	}
 }
 
+func TestDoXMLRequest(t *testing.T) {
+	tests := map[string]struct {
+		method       string
+		path         string
+		body         interface{}
+		expectedErr  error
+		expectedBody string
+	}{
+		"successful GET request": {
+			method:       http.MethodGet,
+			path:         "/api/test",
+			body:         nil,
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"successful Post request Body not Nil": {
+			method: http.MethodPost,
+			path:   "/api/test",
+			body: types.SwitchCredentialWrapper{
+				IomCredential: types.IomCredential{
+					Username: "test",
+					Password: "test",
+				},
+			},
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"successful Post request Body without begining slash": {
+			method: http.MethodPost,
+			path:   "api/test",
+			body: types.SwitchCredentialWrapper{
+				IomCredential: types.IomCredential{
+					Username: "test",
+					Password: "test",
+				},
+			},
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"Fail Invalid Body": {
+			method:       http.MethodPost,
+			path:         "api/test",
+			body:         map[string]string{"test": "test"},
+			expectedErr:  fmt.Errorf("xml: unsupported type: map[string]string"),
+			expectedBody: "",
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			// Create a test server to handle the request
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != tt.method {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", tt.method, r.Method))
+				}
+
+				if tt.expectedErr != nil {
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write([]byte(tt.expectedErr.Error()))
+				} else {
+					w.WriteHeader(http.StatusOK)
+					w.Write([]byte(tt.expectedBody))
+				}
+			}))
+			defer ts.Close()
+
+			// Create a new client and set the host to the test server
+			c, err := New(context.Background(), ts.URL, ClientOptions{}, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Call the DoWithHeaders function with the test parameters
+			var resp interface{}
+			_, err = c.DoXMLRequest(
+				context.Background(),
+				tt.method,
+				tt.path,
+				"3.6",
+				tt.body,
+				&resp,
+			)
+
+			// Check if the error matches the expected error
+			if tt.expectedErr != nil {
+				if err == nil || err.Error() != tt.expectedErr.Error() {
+					t.Errorf("expected error %v, got %v", tt.expectedErr, err)
+				}
+			} else if err != nil {
+				t.Errorf("unexpected error: %v", err)
+			}
+
+			// Check if the response body matches the expected body
+			if tt.expectedBody != "" {
+				b, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if string(b) != tt.expectedBody {
+					t.Errorf("expected response body %s, got %s", tt.expectedBody, string(b))
+				}
+			}
+		})
+	}
+}
+
 func TestDoWithHeaders(t *testing.T) {
 	tests := map[string]struct {
 		method       string

@@ -1,4 +1,4 @@
-// Copyright © 2019 - 2022 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2019 - 2025 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
@@ -108,6 +109,13 @@ type Client interface {
 
 	// ParseJSONError parses the JSON in r into an error object
 	ParseJSONError(r *http.Response) error
+
+	// DoXMLRequest sends an HTTP request to the API.
+	DoXMLRequest(
+		ctx context.Context,
+		method, path, version string,
+		body, response interface{},
+	) (*http.Response, error)
 }
 
 type client struct {
@@ -430,6 +438,111 @@ func (c *client) SetToken(token string) {
 
 func (c *client) GetToken() string {
 	return c.token
+}
+
+func (c *client) DoXMLRequest(
+	ctx context.Context,
+	method, path, version string,
+	body, resp interface{},
+) (*http.Response, error) {
+	var (
+		err                error
+		req                *http.Request
+		res                *http.Response
+		ubf                = &bytes.Buffer{}
+		luri               = len(path)
+		hostEndsWithSlash  = endsWithSlash(c.host)
+		uriBeginsWithSlash = beginsWithSlash(path)
+	)
+	ubf.WriteString(c.host)
+
+	if !hostEndsWithSlash && (luri > 0) {
+		ubf.WriteString("/")
+	}
+
+	if luri > 0 {
+		if uriBeginsWithSlash {
+			ubf.WriteString(path[1:])
+		} else {
+			ubf.WriteString(path)
+		}
+	}
+
+	u, err := url.Parse(ubf.String())
+	if err != nil {
+		return nil, err
+	}
+	if body != nil {
+		xmlBody, err := xml.Marshal(body)
+		if err != nil {
+			c.doLog(logger.Error, fmt.Sprintf("Error marshaling XML: %v", err))
+			return nil, err
+		}
+
+		// Create the HTTP request
+		req, err = http.NewRequest(method, u.String(), bytes.NewBuffer(xmlBody))
+		if err != nil {
+			c.doLog(logger.Error, fmt.Sprintf("Error creating request: %v", err))
+			return nil, err
+		}
+	} else {
+		req, err = http.NewRequest(method, u.String(), nil)
+		if err != nil {
+			c.doLog(logger.Error, fmt.Sprintf("Error creating request: %v", err))
+			return nil, err
+		}
+	}
+
+	req.Header.Set("Content-Type", "application/xml")
+	// add headers to the request
+	if version != "" {
+		ver, err := strconv.ParseFloat(version, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		// set the auth token
+		if c.token != "" {
+			// use Bearer Authentication if the powerflex array
+			// version >= 4.0
+			if ver >= 4.0 {
+				bearer := "Bearer " + c.token
+				req.Header.Set("Authorization", bearer)
+			} else {
+				req.SetBasicAuth("", c.token)
+			}
+		}
+
+	} else {
+		if c.token != "" {
+			req.SetBasicAuth("", c.token)
+		}
+	}
+
+	// send the request
+	req = req.WithContext(ctx)
+	if res, err = c.http.Do(req); err != nil {
+		return nil, err
+	}
+
+	// parse the response
+	switch {
+	case res == nil:
+		return nil, nil
+	case res.StatusCode >= 200 && res.StatusCode <= 299:
+		if resp == nil {
+			return nil, nil
+		}
+		dec := json.NewDecoder(res.Body)
+		if err = dec.Decode(resp); err != nil && err != io.EOF {
+			c.doLog(logger.Error, fmt.Sprintf("Error: %s Unable to decode response into %+v", err.Error(), resp))
+			return nil, err
+		}
+	default:
+		return nil, c.ParseJSONError(res)
+	}
+
+	return res, err
 }
 
 func (c *client) ParseJSONError(r *http.Response) error {

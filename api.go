@@ -1,4 +1,4 @@
-// Copyright © 2019 - 2022 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2019 - 2025 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -187,6 +187,14 @@ func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
 func basicAuth(username, password string) string {
 	auth := username + ":" + password
 	return base64.StdEncoding.EncodeToString([]byte(auth))
+}
+
+func (c *Client) xmlRequest(method, uri string, body, resp interface{}) (*http.Response, error) {
+	response, err := c.api.DoXMLRequest(context.Background(), method, uri, c.configConnect.Version, body, resp)
+	if err != nil {
+		doLog(logger.Error, err.Error())
+	}
+	return response, err
 }
 
 func (c *Client) getJSONWithRetry(
