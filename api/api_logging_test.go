@@ -107,6 +107,16 @@ func TestDumpRequest(t *testing.T) {
 		t.Errorf("Expected %q, got %q", expected, string(b))
 	}
 
+	// Test case: Request empty path
+	req, err = http.NewRequest("GET", "", strings.NewReader("Hello, world!"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = dumpRequest(req, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// Test case: Request with connection close
 	req, err = http.NewRequest("DELETE", "http://example.com/instances", nil)
 	if err != nil {
@@ -155,6 +165,14 @@ func TestWriteIndentedN(t *testing.T) {
 	if b.String() != expected {
 		t.Errorf("Expected: %s, got: %s", expected, b.String())
 	}
+
+	// Test case: Multiple lines
+
+	w := &MockWriter{err: errors.New("write error")}
+	err = WriteIndentedN(w, []byte("Line 1"), 1)
+	if err == nil || err.Error() != "write error" {
+		t.Fatalf("expected 'write error', got %v", err)
+	}
 }
 
 func TestLogResponse(_ *testing.T) {
@@ -179,6 +197,14 @@ func TestLogResponse(_ *testing.T) {
 		StatusCode: http.StatusOK,
 		Header:     http.Header{"Content-Type": []string{"application/octet-stream"}},
 		Body:       io.NopCloser(bytes.NewReader([]byte{0x01, 0x02, 0x03})),
+	}
+	logResponse(context.Background(), res, nil)
+
+	// Test case: Failed response with binary content and error body
+	res = &http.Response{
+		StatusCode: http.StatusNoContent,
+		Header:     http.Header{"Content-Type": []string{"text/plain"}},
+		Body:       io.NopCloser(NewErrorReader(fmt.Errorf("simulated error while reading body"))),
 	}
 	logResponse(context.Background(), res, nil)
 }
@@ -288,15 +314,47 @@ func TestDrainBody(t *testing.T) {
 	}
 
 	// Test case: b.Close returns an error
-	b = io.NopCloser(strings.NewReader("test"))
-	r1, r2, err = drainBody(b)
-	if r1 == nil {
-		t.Error("Expected r1 to not be nil")
+	b = &MockReadCloser{data: "Test data", closeErr: errors.New("close error")}
+	_, _, err = drainBody(b)
+	if err == nil || err.Error() != "close error" {
+		t.Fatalf("expected 'close error', got %v", err)
 	}
-	if r2 == nil {
-		t.Error("Expected r2 to not be nil")
+}
+
+// MockReadCloser simulates an io.ReadCloser with configurable behavior.
+type MockReadCloser struct {
+	data     string
+	readErr  error
+	closeErr error
+	read     bool
+}
+
+// Read simulates reading behavior.
+func (m *MockReadCloser) Read(p []byte) (int, error) {
+	if m.readErr != nil {
+		return 0, m.readErr // Simulate read error
 	}
-	if err != nil {
-		t.Error("Expected err to be nil")
+	if m.read {
+		return 0, io.EOF // Simulate end of file after first read
 	}
+	m.read = true
+	copy(p, m.data)
+	return len(m.data), nil
+}
+
+// Close simulates closing behavior.
+func (m *MockReadCloser) Close() error {
+	return m.closeErr
+}
+
+func TestProcessReadCloser_CloseError(t *testing.T) {
+
+}
+
+type MockWriter struct {
+	err error
+}
+
+func (m *MockWriter) Write(p []byte) (int, error) {
+	return 0, m.err // Always return an error
 }
