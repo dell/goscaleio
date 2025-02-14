@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -143,28 +144,88 @@ func TestUploadPackages(t *testing.T) {
 }
 
 func TestParseCSV(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost && r.URL.Path == "/im/types/Configuration/instances/actions/parseFromCSV" {
+	t.Run("successful parse with bearer token", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
-			return
+			w.Write([]byte(`{"masterMdm": "data"}`))
+		}))
+		defer server.Close()
+
+		file, err := os.CreateTemp("", "test_file.csv")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
 		}
-		http.NotFound(w, r)
-	}))
+		defer file.Close()
 
-	defer server.Close()
+		_, err = file.WriteString("header1,header2\nvalue1,value2")
+		if err != nil {
+			t.Fatalf("Failed to write to temp file: %v", err)
+		}
 
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
-	}
+		defer os.Remove(file.Name())
 
-	_, err := gc.ParseCSV("test_file.csv")
-	assert.Error(t, err)
+		gc := &GatewayClient{
+			http:    server.Client(),
+			host:    server.URL,
+			version: "4.0",
+			token:   "test_token",
+		}
 
-	expectedErrorMsg := "open test_file.csv: no such file or directory"
-	assert.EqualError(t, err, expectedErrorMsg)
+		response, err := gc.ParseCSV(file.Name())
+		assert.NoError(t, err)
+		assert.Equal(t, 200, response.StatusCode)
+	})
+	t.Run("successful parse with basic auth", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"masterMdm": "data"}`))
+		}))
+		defer server.Close()
+
+		file, err := os.CreateTemp("", "test_file.csv")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer file.Close()
+
+		_, err = file.WriteString("header1,header2\nvalue1,value2")
+		if err != nil {
+			t.Fatalf("Failed to write to temp file: %v", err)
+		}
+
+		defer os.Remove(file.Name())
+
+		gc := &GatewayClient{
+			http:     server.Client(),
+			host:     server.URL,
+			username: "test_username",
+			password: "test_password",
+		}
+
+		response, err := gc.ParseCSV(file.Name())
+		assert.NoError(t, err)
+		assert.Equal(t, 200, response.StatusCode)
+	})
+	t.Run("file not found", func(t *testing.T) {
+		gc := &GatewayClient{}
+		_, err := gc.ParseCSV("nonexistent.csv")
+		assert.Error(t, err)
+	})
+	t.Run("http response error", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"message": "error"}`))
+		}))
+		defer server.Close()
+
+		gc := &GatewayClient{
+			http: server.Client(),
+			host: server.URL,
+		}
+
+		_, err := gc.ParseCSV("test_file.csv")
+		assert.Error(t, err)
+	})
 }
 
 func TestGetPackageDetails(t *testing.T) {
