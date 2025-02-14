@@ -1199,3 +1199,27 @@ func TestSetMappedSdcLimits(t *testing.T) {
 		}
 	}
 }
+
+func TestGetSdcLocalGUID(t *testing.T) {
+	// Test case: successful execution
+	expectedGUID := "271bad82-08ee-44f2-a2b1-7e2787c27be1"
+	out := []byte(expectedGUID + "\n")
+	execCmdOriginal := execCmd
+	execCmd = func(name string, arg ...string) ([]byte, error) {
+		return out, nil
+	}
+	defer func() { execCmd = execCmdOriginal }()
+
+	guid, err := GetSdcLocalGUID()
+	assert.NoError(t, err)
+	assert.Equal(t, expectedGUID, guid)
+
+	// Test case: error in exec.Command
+	expectedErr := errors.New("exec.Command failed")
+	execCmd = func(name string, arg ...string) ([]byte, error) {
+		return nil, expectedErr
+	}
+
+	_, err = GetSdcLocalGUID()
+	assert.Error(t, err)
+}

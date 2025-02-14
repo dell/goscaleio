@@ -212,7 +212,7 @@ func (gc *GatewayClient) GetVersion() (string, error) {
 	return version, nil
 }
 
-// UploadPackages used for upload packge to gateway server
+// UploadPackages used for upload package to gateway server
 func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
@@ -223,6 +223,9 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 
 		info, err := os.Stat(filePath)
 		if err != nil {
+			if os.IsNotExist(err) {
+				return &gatewayResponse, fmt.Errorf("file %s does not exist", filePath)
+			}
 			return &gatewayResponse, err
 		}
 
@@ -278,10 +281,10 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 		if err != nil {
-			return &gatewayResponse, fmt.Errorf("Error For Uploading Package: %s", err)
+			return &gatewayResponse, fmt.Errorf("failed to parse response body: %v", err)
 		}
 
-		return &gatewayResponse, fmt.Errorf("Error For Uploading Package: %s", gatewayResponse.Message)
+		return &gatewayResponse, fmt.Errorf("received bad response: %s", gatewayResponse.Message)
 	}
 
 	gatewayResponse.StatusCode = 200
@@ -1294,7 +1297,7 @@ func setCookie(header http.Header, host string) error {
 func loadConfig() (*CookieConfig, error) {
 	configFile, _ := getConfigPath()
 	if _, err := os.Stat(filepath.Clean(configFile)); err == nil {
-		data, err := ioutil.ReadFile(configFile)
+		data, err := os.ReadFile(configFile)
 		if err != nil {
 			return nil, err
 		}

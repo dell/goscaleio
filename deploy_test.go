@@ -119,9 +119,14 @@ func TestGetVersion(t *testing.T) {
 
 // TestUploadPackages tests the UploadPackages function.
 func TestUploadPackages(t *testing.T) {
+	respStatus := http.StatusOK
+	respMessage := ""
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost && r.URL.Path == "/im/types/installationPackages/instances/actions/uploadPackages" {
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(respStatus)
+			if respMessage != "" {
+				w.Write([]byte(respMessage))
+			}
 			return
 		}
 		http.NotFound(w, r)
@@ -136,20 +141,85 @@ func TestUploadPackages(t *testing.T) {
 		password: "test_password",
 	}
 
-	_, err := gc.UploadPackages([]string{"mock_file.tar"})
-	assert.Error(t, err)
+	t.Run("file does not exist", func(t *testing.T) {
+		_, err := gc.UploadPackages([]string{"mock_file.tar"})
+		assert.Error(t, err)
 
-	expectedErrorMsg := "stat mock_file.tar: no such file or directory"
-	assert.EqualError(t, err, expectedErrorMsg)
+		expectedErrorMsg := "file mock_file.tar does not exist"
+		assert.EqualError(t, err, expectedErrorMsg)
+	})
+
+	t.Run("wrong file type", func(t *testing.T) {
+		name := "test_file.log"
+		err := os.WriteFile(name, []byte("package data"), 0644)
+		assert.NoError(t, err)
+		defer os.Remove(name)
+
+		_, err = gc.UploadPackages([]string{name})
+		assert.ErrorContains(t, err, "invalid file type")
+	})
+
+	t.Run("successful upload", func(t *testing.T) {
+		name := "test_file.tar"
+		err := os.WriteFile(name, []byte("package data"), 0644)
+		assert.NoError(t, err)
+
+		defer os.Remove(name)
+
+		_, err = gc.UploadPackages([]string{name})
+		assert.NoError(t, err)
+
+		gc.version = "4.0"
+		defer func() {
+			gc.version = ""
+		}()
+
+		_, err = gc.UploadPackages([]string{name})
+		assert.NoError(t, err)
+	})
+
+	t.Run("bad response code", func(t *testing.T) {
+		name := "test_file.tar"
+		err := os.WriteFile(name, []byte("package data"), 0644)
+		assert.NoError(t, err)
+		defer os.Remove(name)
+
+		// Induce a bad response code
+		respStatus = http.StatusConflict
+		defer func() {
+			respStatus = http.StatusOK
+		}()
+
+		_, err = gc.UploadPackages([]string{name})
+		assert.ErrorContains(t, err, "failed to parse response body")
+
+		// Induce a bad response code with message
+		respMessage = `{"message":"induced failure"}`
+		defer func() {
+			respMessage = ""
+		}()
+
+		_, err = gc.UploadPackages([]string{name})
+		assert.ErrorContains(t, err, "received bad response")
+	})
+
 }
 
 func TestParseCSV(t *testing.T) {
-	t.Run("successful parse with bearer token", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
+	respStatus := http.StatusOK
+	respBody := "-"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(respStatus)
+		if respBody != "-" {
+			w.Write([]byte(respBody))
+		} else {
 			w.Write([]byte(`{"masterMdm": "data"}`))
-		}))
-		defer server.Close()
+		}
+	}))
+	defer server.Close()
+
+	t.Run("successful parse with bearer token", func(t *testing.T) {
 
 		file, err := os.CreateTemp("", "test_file.csv")
 		if err != nil {
@@ -175,12 +245,8 @@ func TestParseCSV(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 200, response.StatusCode)
 	})
+
 	t.Run("successful parse with basic auth", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"masterMdm": "data"}`))
-		}))
-		defer server.Close()
 
 		file, err := os.CreateTemp("", "test_file.csv")
 		if err != nil {
@@ -206,26 +272,68 @@ func TestParseCSV(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 200, response.StatusCode)
 	})
+
+	t.Run("bad response code", func(t *testing.T) {
+		name := "test_file.csv"
+
+		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0644)
+		assert.NoError(t, err)
+		defer os.Remove(name)
+
+		gc := &GatewayClient{
+			http:     server.Client(),
+			host:     server.URL,
+			username: "test_username",
+			password: "test_password",
+		}
+
+		// Induce a bad response code with json message
+		respStatus = http.StatusInternalServerError
+		respBody = `{"message": "error"}`
+		defer func() {
+			respStatus = http.StatusOK
+			respBody = "-"
+		}()
+
+		_, err = gc.ParseCSV(name)
+		assert.Error(t, err)
+
+		// Induce a bad response code with malformed json message
+		respBody = `malformed json`
+		_, err = gc.ParseCSV(name)
+		assert.Error(t, err)
+	})
+
+	t.Run("good response code, but no mdm", func(t *testing.T) {
+		name := "test_file.csv"
+		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0644)
+		assert.NoError(t, err)
+		defer os.Remove(name)
+
+		gc := &GatewayClient{
+			http:     server.Client(),
+			host:     server.URL,
+			username: "test_username",
+			password: "test_password",
+		}
+
+		// Induce a dummy response body
+		respBody = `{}`
+		defer func() {
+			respStatus = http.StatusOK
+			respBody = "-"
+		}()
+
+		_, err = gc.ParseCSV(name)
+		assert.Error(t, err)
+	})
+
 	t.Run("file not found", func(t *testing.T) {
 		gc := &GatewayClient{}
 		_, err := gc.ParseCSV("nonexistent.csv")
 		assert.Error(t, err)
 	})
-	t.Run("http response error", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(`{"message": "error"}`))
-		}))
-		defer server.Close()
 
-		gc := &GatewayClient{
-			http: server.Client(),
-			host: server.URL,
-		}
-
-		_, err := gc.ParseCSV("test_file.csv")
-		assert.Error(t, err)
-	})
 }
 
 func TestGetPackageDetails(t *testing.T) {

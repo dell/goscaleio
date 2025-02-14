@@ -22,12 +22,13 @@ import (
 	"net/http/httptest"
 	"os"
 	"reflect"
-	"strings"
 	"sync"
 	"testing"
 	"time"
 
 	v1 "github.com/dell/goscaleio/types/v1"
+	"github.com/stretchr/testify/assert"
+	"strings"
 )
 
 func setupClient(t *testing.T, hostAddr string) *Client {
@@ -66,11 +67,30 @@ func handleAuthToken(resp http.ResponseWriter, req *http.Request) {
 	resp.Write([]byte(`"012345678901234567890123456789"`))
 }
 
-func TestClientVersion(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(
+type goScaleioTestServer struct {
+	*httptest.Server
+	// Server will return this as http code if injectErrorNum > 0
+	injectError int
+	// The number of times to inject the error
+	injectErrorNum int
+	// If not "-", server will use it as resp body once only
+	injectResp string
+}
+
+func newGoScaleioTestServer() *goScaleioTestServer {
+	ts := &goScaleioTestServer{
+		injectError: 0,
+		injectResp:  "-",
+	}
+	ts.Server = httptest.NewServer(http.HandlerFunc(
 		func(resp http.ResponseWriter, req *http.Request) {
 			switch req.RequestURI {
 			case "/api/version":
+				if ts.injectErrorNum > 0 {
+					resp.WriteHeader(ts.injectError)
+					ts.injectErrorNum--
+					return
+				}
 				// Check for valid authentication token
 				authHeader := req.Header.Get("Authorization")
 				if authHeader != "Bearer valid_token" {
@@ -80,14 +100,24 @@ func TestClientVersion(t *testing.T) {
 						resp.Write([]byte(`Unauthorized 401`))
 						return
 					}
-					// For any other case, respond with version 4.0
+					// For any other case, respond with version
 					resp.WriteHeader(http.StatusOK)
-					resp.Write([]byte(`"4.0"`))
+					if ts.injectResp != "-" {
+						resp.Write([]byte(ts.injectResp))
+						ts.injectResp = "-"
+					} else {
+						resp.Write([]byte(`"4.0"`))
+					}
 					return
 				}
 				// Respond with version 4.0
 				resp.WriteHeader(http.StatusOK)
-				resp.Write([]byte(`"4.0"`))
+				if ts.injectResp != "-" {
+					resp.Write([]byte(ts.injectResp))
+					ts.injectResp = "-"
+				} else {
+					resp.Write([]byte(`"4.0"`))
+				}
 			case "/api/login":
 				// Check basic authentication
 				uname, pwd, basic := req.BasicAuth()
@@ -106,150 +136,202 @@ func TestClientVersion(t *testing.T) {
 				}
 				// Respond with a valid token
 				resp.WriteHeader(http.StatusOK)
-				resp.Write([]byte(`"012345678901234567890123456789"`))
+				if ts.injectResp != "-" {
+					resp.Write([]byte(ts.injectResp))
+					ts.injectResp = "-"
+				} else {
+					resp.Write([]byte(`"012345678901234567890123456789"`))
+				}
 			default:
 				// Respond with 404 Not Found for any other endpoint
 				http.Error(resp, "Expecting endpoint /api/login got "+req.RequestURI, http.StatusNotFound)
 			}
 		},
 	))
+
+	return ts
+}
+
+func TestClientVersion(t *testing.T) {
+	server := newGoScaleioTestServer()
 	defer server.Close()
 
 	// Set the environment variable for the endpoint
 	os.Setenv("GOSCALEIO_ENDPOINT", server.URL+"/api")
 
-	// Initialize the client
-	client, err := NewClient()
-	if err != nil {
-		t.Fatal(err)
-	}
+	t.Run("successful authentication", func(t *testing.T) {
+		client, err := NewClient()
+		assert.NoError(t, err)
 
-	// Test successful authentication
-	_, err = client.Authenticate(&ConfigConnect{
-		Username: "ScaleIOUser",
-		Password: "password",
-		Endpoint: "",
-		Version:  "4.0",
+		// Test successful authentication
+		_, err = client.Authenticate(&ConfigConnect{
+			Username: "ScaleIOUser",
+			Password: "password",
+			Version:  "4.0",
+		})
+		assert.NoError(t, err)
+
+		ver, err := client.GetVersion()
+		assert.NoError(t, err)
+		assert.Equal(t, "4.0", ver)
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
 
-	// Test for version retrieval
-	ver, err := client.GetVersion()
-	if err != nil {
-		// Check if the error is due to unauthorized access
-		if strings.Contains(err.Error(), "Unauthorized") {
-			// If unauthorized, test passes
-			return
-		}
-		// If error is not due to unauthorized access, fail the test
-		t.Fatal(err)
-	}
+	t.Run("auto re-authentication", func(t *testing.T) {
+		client, err := NewClient()
+		assert.NoError(t, err)
 
-	if ver != "4.0" {
-		t.Fatal("Expecting version string \"4.0\", got ", ver)
-	}
+		_, err = client.Authenticate(&ConfigConnect{
+			Username: "ScaleIOUser",
+			Password: "password",
+			Version:  "4.0",
+		})
+		assert.NoError(t, err)
 
-	// Test unauthorized authentication
-	_, err = client.Authenticate(&ConfigConnect{
-		Username: "ScaleIOUser",
-		Password: "badpassword",
-		Endpoint: "",
-		Version:  "4.0",
+		server.injectError = http.StatusUnauthorized
+		server.injectErrorNum = 1
+
+		// Expect to get StatusUnauthorized, then auto-reauthenticate and retry get version
+		ver, err := client.GetVersion()
+		assert.NoError(t, err)
+		assert.Equal(t, "4.0", ver)
 	})
-	if err == nil {
-		t.Fatal(err)
-	}
 
-	// Test for version retrieval with retry
-	_, err = client.GetVersion()
-	if err != nil {
-		// Check if the error is due to unauthorized access
-		if strings.Contains(err.Error(), "Unauthorized") {
-			// retry
-			_, err = client.Authenticate(&ConfigConnect{
-				Username: "ScaleIOUser",
-				Password: "password",
-				Endpoint: "",
-				Version:  "4.0",
-			})
-			if err != nil {
-				t.Fatal(err)
-			}
-			return
-		}
-		// If error is not due to unauthorized access, fail the test
-		t.Fatal(err)
-	}
+	t.Run("server returns error status", func(t *testing.T) {
+		client, err := NewClient()
+		assert.NoError(t, err)
+
+		_, err = client.Authenticate(&ConfigConnect{
+			Username: "ScaleIOUser",
+			Password: "password",
+			Version:  "4.0",
+		})
+		assert.NoError(t, err)
+
+		server.injectError = http.StatusBadRequest
+		server.injectErrorNum = 2
+
+		// Expect to get StatusUnauthorized, then auto-reauthenticate and retry get version
+		ver, err := client.GetVersion()
+		assert.Error(t, err)
+		assert.Equal(t, "", ver)
+
+		err = client.updateVersion()
+		assert.Error(t, err)
+	})
+
+	t.Run("request after failed authentication", func(t *testing.T) {
+		// Initialize the client
+		client, err := NewClient()
+		assert.NoError(t, err)
+
+		// Test unauthorized authentication
+		_, err = client.Authenticate(&ConfigConnect{
+			Username: "ScaleIOUser",
+			Password: "badpassword",
+		})
+		assert.Error(t, err)
+
+		// Try to get version after failed authentication
+		_, err = client.GetVersion()
+		assert.ErrorContains(t, err, "Unauthorized")
+
+		// Re-authenticate properly this time
+		_, err = client.Authenticate(&ConfigConnect{
+			Username: "ScaleIOUser",
+			Password: "password",
+		})
+		assert.NoError(t, err)
+
+		ver, err := client.GetVersion()
+		assert.NoError(t, err)
+		assert.Equal(t, "4.0", ver)
+	})
+
+	t.Run("authenticate with malformed version", func(t *testing.T) {
+		os.Setenv("GOSCALEIO_VERSION", "malformed")
+		defer os.Unsetenv("GOSCALEIO_VERSION")
+
+		// Initialize the client
+		client, err := NewClient()
+		assert.NoError(t, err)
+
+		// Test client configured with bad version
+		_, err = client.Authenticate(&ConfigConnect{
+			Username: "ScaleIOUser",
+			Password: "password",
+		})
+		assert.Error(t, err)
+	})
+
+	t.Run("get version with malformed version", func(t *testing.T) {
+		os.Setenv("GOSCALEIO_VERSION", "malformed")
+		defer os.Unsetenv("GOSCALEIO_VERSION")
+
+		// Initialize the client
+		client, err := NewClient()
+		assert.NoError(t, err)
+
+		// Test client configured with bad version
+		_, err = client.GetVersion()
+		assert.Error(t, err)
+	})
+
+	t.Run("server returns malformed version", func(t *testing.T) {
+		// Initialize the client
+		client, err := NewClient()
+		assert.NoError(t, err)
+
+		_, err = client.Authenticate(&ConfigConnect{
+			Username: "ScaleIOUser",
+			Password: "password",
+		})
+		assert.NoError(t, err)
+
+		server.injectResp = "malformed"
+
+		ver, err := client.GetVersion()
+		assert.NoError(t, err)
+		assert.Equal(t, "malformed", ver)
+	})
+
 }
 
 func TestClientLogin(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(
-		func(resp http.ResponseWriter, req *http.Request) {
-			switch req.RequestURI {
-			case "/api/version":
-				resp.WriteHeader(http.StatusOK)
-				resp.Write([]byte(`"2.0"`))
-			case "/api/login":
-				// accept := req.Header.Get("Accept")
-				// check Accept header
-				// if ver := strings.Split(accept, ";"); len(ver) != 2 {
-				//	t.Fatal("Expecting Accept header to include version")
-				// } else {
-				//	if !strings.HasPrefix(ver[1], "version=") {
-				//		t.Fatal("Header Accept must include version")
-				//	 }
-				// }
 
-				uname, pwd, basic := req.BasicAuth()
-				if !basic {
-					t.Fatal("Client only support basic auth")
-				}
-
-				if uname != "ScaleIOUser" || pwd != "password" {
-					resp.WriteHeader(http.StatusUnauthorized)
-					resp.Write([]byte(`{"message":"Unauthorized","httpStatusCode":401,"errorCode":0}`))
-					return
-				}
-				resp.WriteHeader(http.StatusOK)
-				resp.Write([]byte(`"012345678901234567890123456789"`))
-			default:
-				t.Fatal("Expecting endpoint /api/login got", req.RequestURI)
-			}
-		},
-	))
+	server := newGoScaleioTestServer()
 	defer server.Close()
-	hostAddr := server.URL
-	os.Setenv("GOSCALEIO_ENDPOINT", hostAddr+"/api")
-	client, err := NewClient()
-	if err != nil {
-		t.Fatal(err)
-	}
-	// test ok
-	_, err = client.Authenticate(&ConfigConnect{
-		Username: "ScaleIOUser",
-		Password: "password",
-		Endpoint: "",
-		Version:  "2.0",
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if client.GetToken() != "012345678901234567890123456789" {
-		t.Fatal("Expecting token 012345678901234567890123456789, got", client.GetToken())
-	}
 
-	// test bad login
-	_, err = client.Authenticate(&ConfigConnect{
-		Username: "ScaleIOUser",
-		Password: "badPassWord",
-		Endpoint: "",
-		Version:  "2.0",
+	os.Setenv("GOSCALEIO_ENDPOINT", server.URL+"/api")
+
+	t.Run("successful login", func(t *testing.T) {
+		client, err := NewClient()
+		assert.NoError(t, err)
+
+		_, err = client.Authenticate(&ConfigConnect{
+			Username: "ScaleIOUser",
+			Password: "password",
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, "012345678901234567890123456789", client.GetToken())
+
+		client.SetToken("012345678901234567890123456789")
+
+		cc := client.GetConfigConnect()
+		assert.NotNil(t, cc)
+		assert.Equal(t, "ScaleIOUser", cc.Username)
+		assert.Equal(t, "4.0", cc.Version)
 	})
-	if err == nil {
-		t.Fatal("Expecting an error for bad Login, but did not")
-	}
+
+	t.Run("failed login", func(t *testing.T) {
+		client, err := NewClient()
+		assert.NoError(t, err)
+
+		_, err = client.Authenticate(&ConfigConnect{
+			Username: "ScaleIOUser",
+			Password: "badPassWord",
+		})
+		assert.Error(t, err)
+	})
 }
 
 type stubTypeWithMetaData struct{}
@@ -447,6 +529,7 @@ func TestNewClientWithArgs(t *testing.T) {
 	tests := []struct {
 		name     string
 		endpoint string
+		setEnv   func()
 		wantErr  bool
 	}{
 		{
@@ -457,7 +540,10 @@ func TestNewClientWithArgs(t *testing.T) {
 		{
 			name:     "failure",
 			endpoint: "",
-			wantErr:  true,
+			setEnv: func() {
+				os.Setenv("GOSCALEIO_SHOWHTTP", "true")
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -589,4 +675,32 @@ func TestWithContext(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+type failingReadCloser struct{}
+
+func (r *failingReadCloser) Read(p []byte) (n int, err error) {
+	return 0, io.ErrUnexpectedEOF
+}
+
+func (r *failingReadCloser) Close() error {
+	return io.ErrUnexpectedEOF
+}
+
+func TestExtractString(t *testing.T) {
+	res := &http.Response{
+		Body: &failingReadCloser{},
+	}
+
+	// Body read error
+	_, err := extractString(res)
+	assert.Error(t, err)
+
+	// Successful extraction
+	res = &http.Response{
+		Body: io.NopCloser(strings.NewReader(`{"message":"success"}`)),
+	}
+	s, err := extractString(res)
+	assert.NoError(t, err)
+	assert.Equal(t, `{"message":"success"}`, s)
 }

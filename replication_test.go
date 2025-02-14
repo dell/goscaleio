@@ -23,6 +23,7 @@ import (
 
 	types "github.com/dell/goscaleio/types/v1"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetPeerMdm(t *testing.T) {
@@ -793,4 +794,8 @@ func TestReplicationConsistencyGroupAction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestNewPeerMDM(t *testing.T) {
+	assert.NotNil(t, NewPeerMDM(nil, nil))
 }
