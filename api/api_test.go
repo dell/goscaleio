@@ -789,6 +789,16 @@ func TestDoWithHeaders(t *testing.T) {
 			version:     "invalid_version",
 			expectedErr: fmt.Errorf("strconv.ParseFloat: parsing \"invalid_version\": invalid syntax"),
 		},
+		"read close error": {
+			method: http.MethodGet,
+			path:   "/api/test",
+			body: &TestReadCloser{
+				reader:   strings.NewReader("Test request body"),
+				closeErr: errors.New("transport connection broken"),
+			},
+			version:     "4.0",
+			expectedErr: errors.New("transport connection broken"),
+		},
 	}
 
 	for name, tt := range tests {
@@ -839,7 +849,7 @@ func TestDoWithHeaders(t *testing.T) {
 
 			// Check if the error matches the expected error
 			if tt.expectedErr != nil {
-				if err == nil || err.Error() != tt.expectedErr.Error() {
+				if err == nil || !strings.Contains(err.Error(), tt.expectedErr.Error()) {
 					t.Errorf("expected error %v, got %v", tt.expectedErr, err)
 				}
 			} else if err != nil {

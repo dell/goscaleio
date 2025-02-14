@@ -166,10 +166,23 @@ func TestWriteIndentedN(t *testing.T) {
 		t.Errorf("Expected: %s, got: %s", expected, b.String())
 	}
 
-	// Test case: Multiple lines
-
-	w := &TestWriter{err: errors.New("write error")}
+	// Test case: write error
+	w := &TestWriter{maxWrites: 0}
 	err = WriteIndentedN(w, []byte("Line 1"), 1)
+	if err == nil || err.Error() != "write error" {
+		t.Fatalf("expected 'write error', got %v", err)
+	}
+
+	// Test case: write error with 0 spaces and 0 allowed writes
+	w = &TestWriter{maxWrites: 0}
+	err = WriteIndentedN(w, []byte("Line 1"), 0)
+	if err == nil || err.Error() != "write error" {
+		t.Fatalf("expected 'write error', got %v", err)
+	}
+
+	// Test case: write error with 0 spaces and 1 successful write
+	w = &TestWriter{maxWrites: 3}
+	err = WriteIndentedN(w, []byte("Line 1\nLine 2\nLine 3\nLine 4"), 0)
 	if err == nil || err.Error() != "write error" {
 		t.Fatalf("expected 'write error', got %v", err)
 	}
@@ -322,12 +335,14 @@ func TestDrainBody(t *testing.T) {
 }
 
 type TestWriter struct {
-	err error
+	maxWrites int // Maximum of successful writes
+	count     int
 }
 
 func (w *TestWriter) Write(p []byte) (int, error) {
-	if w.err != nil {
-		return 0, w.err // Return an error
+	if w.count >= w.maxWrites {
+		return 0, errors.New("write error")
 	}
+	w.count++
 	return len(p), nil
 }
