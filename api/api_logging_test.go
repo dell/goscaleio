@@ -168,7 +168,7 @@ func TestWriteIndentedN(t *testing.T) {
 
 	// Test case: Multiple lines
 
-	w := &MockWriter{err: errors.New("write error")}
+	w := &TestWriter{err: errors.New("write error")}
 	err = WriteIndentedN(w, []byte("Line 1"), 1)
 	if err == nil || err.Error() != "write error" {
 		t.Fatalf("expected 'write error', got %v", err)
@@ -314,47 +314,20 @@ func TestDrainBody(t *testing.T) {
 	}
 
 	// Test case: b.Close returns an error
-	b = &MockReadCloser{data: "Test data", closeErr: errors.New("close error")}
+	b = &TestReadCloser{reader: io.NopCloser(strings.NewReader("test")), closeErr: errors.New("close error")}
 	_, _, err = drainBody(b)
 	if err == nil || err.Error() != "close error" {
 		t.Fatalf("expected 'close error', got %v", err)
 	}
 }
 
-// MockReadCloser simulates an io.ReadCloser with configurable behavior.
-type MockReadCloser struct {
-	data     string
-	readErr  error
-	closeErr error
-	read     bool
-}
-
-// Read simulates reading behavior.
-func (m *MockReadCloser) Read(p []byte) (int, error) {
-	if m.readErr != nil {
-		return 0, m.readErr // Simulate read error
-	}
-	if m.read {
-		return 0, io.EOF // Simulate end of file after first read
-	}
-	m.read = true
-	copy(p, m.data)
-	return len(m.data), nil
-}
-
-// Close simulates closing behavior.
-func (m *MockReadCloser) Close() error {
-	return m.closeErr
-}
-
-func TestProcessReadCloser_CloseError(t *testing.T) {
-
-}
-
-type MockWriter struct {
+type TestWriter struct {
 	err error
 }
 
-func (m *MockWriter) Write(p []byte) (int, error) {
-	return 0, m.err // Always return an error
+func (w *TestWriter) Write(p []byte) (int, error) {
+	if w.err != nil {
+		return 0, w.err // Return an error
+	}
+	return len(p), nil
 }

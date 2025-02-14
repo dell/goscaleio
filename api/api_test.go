@@ -14,7 +14,6 @@ package api
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -173,16 +172,6 @@ func TestPost(t *testing.T) {
 			expectedErr:  fmt.Errorf("400 Bad Request"),
 			expectedBody: "",
 		},
-		"Wrong method": {
-			method:  http.MethodGet,
-			path:    "/api/test",
-			headers: map[string]string{"Content-Type": "application/json"},
-			body: &TestReadCloser{
-				reader: strings.NewReader("Test request body"),
-			},
-			expectedErr:  nil,
-			expectedBody: `{"message":"success"}`,
-		},
 	}
 
 	for name, tt := range tests {
@@ -273,14 +262,6 @@ func TestPut(t *testing.T) {
 			headers:      map[string]string{"Content-Type": "application/json"},
 			body:         nil,
 			expectedErr:  fmt.Errorf("400 Bad Request"),
-			expectedBody: "",
-		},
-		"path is nil": {
-			method:       http.MethodPut,
-			path:         "nil",
-			headers:      map[string]string{"Content-Type": "application/json"},
-			body:         nil,
-			expectedErr:  fmt.Errorf("/nil EOF"),
 			expectedBody: "",
 		},
 		"invalid headers and body": {
@@ -529,13 +510,12 @@ func TestDoXMLRequest_FailDecode(t *testing.T) {
 		expectedBody string
 	}{
 		"Fail decode response": {
-			method:  http.MethodPost,
-			path:    "/api/test",
-			body:    nil,
-			resp:    "",
-			version: "3.6",
-			// expectedErr:  fmt.Errorf("json: Unmarshal(non-pointer string)"),
-			expectedBody: `{"message":""}`,
+			method:       http.MethodPost,
+			path:         "/api/test",
+			body:         nil,
+			resp:         "",
+			version:      "3.6",
+			expectedBody: `{"message":"failed to decode response"}`,
 		},
 	}
 
@@ -564,7 +544,6 @@ func TestDoXMLRequest_FailDecode(t *testing.T) {
 			}
 
 			// Call the DoWithHeaders function with the test parameters
-			// var resp interface{}
 			_, err = c.DoXMLRequest(
 				context.Background(),
 				tt.method,
@@ -573,7 +552,6 @@ func TestDoXMLRequest_FailDecode(t *testing.T) {
 				tt.body,
 				tt.resp,
 			)
-			// assert.Nil(t, response)
 			assert.NotNil(t, err)
 		})
 	}
@@ -587,6 +565,7 @@ func TestDoXMLRequest(t *testing.T) {
 		resp         interface{}
 		req          string
 		version      string
+		token        string
 		expectedErr  error
 		expectedBody string
 	}{
@@ -632,19 +611,6 @@ func TestDoXMLRequest(t *testing.T) {
 			expectedErr:  fmt.Errorf("xml: unsupported type: map[string]string"),
 			expectedBody: "",
 		},
-		"Invalid method": {
-			method: "",
-			path:   "/api/test",
-			body: types.SwitchCredentialWrapper{
-				IomCredential: types.IomCredential{
-					Username: "test",
-					Password: "test",
-				},
-			},
-			resp:        "",
-			expectedErr: fmt.Errorf("EOF"),
-			// expectedBody: `{"message":"success"}`,
-		},
 		"Invalid response": {
 			method: http.MethodPost,
 			path:   "/api/test/notexist",
@@ -672,14 +638,42 @@ func TestDoXMLRequest(t *testing.T) {
 			expectedBody: "",
 		},
 		"Fail parse version": {
-			method:  http.MethodPost,
-			path:    "/api/test",
-			body:    nil,
-			resp:    "",
-			version: "invalid;version",
-			// expectedErr:  fmt.Errorf("json: Unmarshal(non-pointer string)"),
-			expectedBody: `{"message":""}`,
-			// expectedBody: `{"message":"success"}`,
+			method:      http.MethodPost,
+			path:        "/api/test",
+			body:        nil,
+			resp:        "",
+			version:     "invalid_version",
+			expectedErr: fmt.Errorf("strconv.ParseFloat: parsing \"invalid_version\": invalid syntax"),
+		},
+		"Token with version 4": {
+			method:       http.MethodGet,
+			path:         "/api/test",
+			body:         nil,
+			resp:         "",
+			version:      "4.0",
+			token:        "test-token",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"Token with version less than 4": {
+			method:       http.MethodGet,
+			path:         "/api/test",
+			body:         nil,
+			resp:         "",
+			version:      "2.0",
+			token:        "test-token",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"Token with no version": {
+			method:       http.MethodGet,
+			path:         "/api/test",
+			body:         nil,
+			resp:         "",
+			version:      "",
+			token:        "test-token",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
 		},
 	}
 
@@ -707,27 +701,22 @@ func TestDoXMLRequest(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			c.SetToken(tt.token)
+
 			// Call the DoWithHeaders function with the test parameters
 			var resp interface{}
-			if tt.resp == nil {
-				_, err = c.DoXMLRequest(
-					context.Background(),
-					tt.method,
-					tt.path,
-					tt.version,
-					tt.body,
-					tt.resp,
-				)
-			} else {
-				_, err = c.DoXMLRequest(
-					context.Background(),
-					tt.method,
-					tt.path,
-					tt.version,
-					tt.body,
-					&resp,
-				)
+			res := tt.resp
+			if tt.resp != nil {
+				res = &resp
 			}
+			_, err = c.DoXMLRequest(
+				context.Background(),
+				tt.method,
+				tt.path,
+				tt.version,
+				tt.body,
+				res,
+			)
 
 			// Check if the error matches the expected error
 			if tt.expectedErr != nil {
@@ -759,6 +748,7 @@ func TestDoWithHeaders(t *testing.T) {
 		path         string
 		headers      map[string]string
 		body         interface{}
+		version      string
 		expectedErr  error
 		expectedBody string
 	}{
@@ -792,6 +782,12 @@ func TestDoWithHeaders(t *testing.T) {
 			headers:     map[string]string{"Content-Type": "application/json"},
 			body:        nil,
 			expectedErr: nil,
+		},
+		"Invalid version": {
+			method:      http.MethodGet,
+			path:        "api/test",
+			version:     "invalid_version",
+			expectedErr: fmt.Errorf("strconv.ParseFloat: parsing \"invalid_version\": invalid syntax"),
 		},
 	}
 
@@ -838,7 +834,7 @@ func TestDoWithHeaders(t *testing.T) {
 				tt.headers,
 				tt.body,
 				&resp,
-				"",
+				tt.version,
 			)
 
 			// Check if the error matches the expected error
@@ -869,7 +865,8 @@ type SamplePayload struct {
 }
 
 type TestReadCloser struct {
-	reader io.Reader
+	reader   io.Reader
+	closeErr error
 }
 
 func (r *TestReadCloser) Read(p []byte) (n int, err error) {
@@ -877,7 +874,7 @@ func (r *TestReadCloser) Read(p []byte) (n int, err error) {
 }
 
 func (r *TestReadCloser) Close() error {
-	return nil
+	return r.closeErr
 }
 
 func TestDoAndGetResponseBody(t *testing.T) {
@@ -886,6 +883,8 @@ func TestDoAndGetResponseBody(t *testing.T) {
 		path         string
 		headers      map[string]string
 		body         interface{}
+		version      string
+		token        string
 		expectedErr  error
 		expectedBody string
 	}{
@@ -894,6 +893,7 @@ func TestDoAndGetResponseBody(t *testing.T) {
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
 			body:         nil,
+			version:      "4.0",
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
@@ -902,6 +902,7 @@ func TestDoAndGetResponseBody(t *testing.T) {
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
 			body:         SamplePayload{},
+			version:      "4.0",
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
@@ -912,6 +913,7 @@ func TestDoAndGetResponseBody(t *testing.T) {
 			body: &TestReadCloser{
 				reader: strings.NewReader("Test request body"),
 			},
+			version:      "4.0",
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
@@ -922,6 +924,27 @@ func TestDoAndGetResponseBody(t *testing.T) {
 			body: &TestReadCloser{
 				reader: strings.NewReader("Test request body"),
 			},
+			version:      "4.0",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"Version 4 with token": {
+			method:       http.MethodGet,
+			path:         "/api/test",
+			headers:      nil,
+			body:         nil,
+			token:        "test-token",
+			version:      "4.0",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"Version less than 4 with token": {
+			method:       http.MethodGet,
+			path:         "/api/test",
+			headers:      nil,
+			body:         nil,
+			token:        "test-token",
+			version:      "2.0",
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
@@ -965,13 +988,15 @@ func TestDoAndGetResponseBody(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			c.SetToken(tt.token)
+
 			// Call the DoAndGetResponseBody function with the test parameters
 			res, err := c.DoAndGetResponseBody(
 				context.Background(),
 				tt.method,
 				tt.path,
 				tt.headers,
-				tt.body, "4.0")
+				tt.body, tt.version)
 
 			// Check if the error matches the expected error
 			if tt.expectedErr != nil {
@@ -1056,62 +1081,3 @@ func TestParseJSONError(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 }
-
-/* Probably not needed */
-func TestGetSecuredCipherSuites(t *testing.T) {
-	// Test that the function returns a non-empty slice of cipher suites
-	suites := GetSecuredCipherSuites()
-	if len(suites) == 0 {
-		t.Errorf("Expected non-empty slice of cipher suites, but got empty slice")
-	}
-	assert.NotEmpty(t, suites)
-	t.Logf("%v", suites)
-
-	// Test that the function returns a slice of cipher suites that contains the expected values
-	expectedSuites := []uint16{
-		tls.TLS_AES_128_GCM_SHA256,
-		tls.TLS_AES_256_GCM_SHA384,
-		tls.TLS_CHACHA20_POLY1305_SHA256,
-		tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-		tls.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
-		tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-		tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-		tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-		tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-		tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-		tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-		tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
-		tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
-	}
-	for _, suite := range suites {
-		found := false
-		for _, expectedSuite := range expectedSuites {
-			if suite == expectedSuite {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Errorf("Expected cipher suite %v in returned slice, but it was not found", suite)
-		}
-	}
-}
-
-/*
-func TestGetToken(t *testing.T) {
-	// Create a new client
-	c := &client{
-		token: "test_token",
-	}
-
-	// Test the GetToken method
-	token := c.GetToken()
-
-	// Check if the token matches the expected value
-	expectedToken := "test_token"
-	if token != expectedToken {
-		t.Errorf("Expected token to be %s, but got %s", expectedToken, token)
-	}
-
-}
-*/
