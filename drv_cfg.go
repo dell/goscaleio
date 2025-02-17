@@ -60,11 +60,15 @@ func DrvCfgIsSDCInstalled() bool {
 		return true
 	}
 	// Check to see if the SDC device is available
-	info, err := os.Stat(SDCDevice)
+	info, err := statFileFunc(SDCDevice)
 	if err != nil {
 		return false
 	}
 	return !info.IsDir()
+}
+
+var statFileFunc = func(path string) (os.FileInfo, error) {
+	return os.Stat(path)
 }
 
 // DrvCfgQueryGUID will return the GUID of the locally installed SDC
@@ -148,8 +152,7 @@ func DrvCfgQuerySystems() (*[]ConfiguredCluster, error) {
 		return &clusters, nil
 	}
 
-	cmd := exec.Command("chroot", "/noderoot", drvCfg, "--query_mdm")
-	output, err := cmd.CombinedOutput()
+	output, err := executeFunc("chroot", "/noderoot", drvCfg, "--query_mdm")
 	if err != nil {
 		return nil, fmt.Errorf("DrvCfgQuerySystems: Request to query MDM failed : %v", err)
 	}
@@ -173,6 +176,10 @@ func DrvCfgQuerySystems() (*[]ConfiguredCluster, error) {
 	}
 
 	return &clusters, nil
+}
+
+var executeFunc = func(name string, arg ...string) ([]byte, error) {
+	return exec.Command(name, arg...).CombinedOutput()
 }
 
 func ioctl(fd, op, arg uintptr) error {

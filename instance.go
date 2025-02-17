@@ -221,10 +221,14 @@ func NewSnapshotPolicy(client *Client) *SnapshotPolicy {
 
 // FindSnapshotPolicyID retruns a Snapshot Policy ID based on name
 func (c *Client) FindSnapshotPolicyID(spname string) (string, error) {
+	return findSnapshotPolicyByIDFunc(c, spname)
+}
+
+var findSnapshotPolicyByIDFunc = func(c *Client, spid string) (string, error) {
 	defer TimeSpent("FindSnapshotPolicyID", time.Now())
 
 	SnapshotPolicyQueryIDByKeyParam := &types.SnapshotPolicyQueryIDByKeyParam{
-		Name: spname,
+		Name: spid,
 	}
 
 	path := fmt.Sprintf("/api/types/SnapshotPolicy/instances/action/queryIdByKey")
