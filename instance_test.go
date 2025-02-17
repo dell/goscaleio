@@ -208,6 +208,19 @@ func TestGetInstance(t *testing.T) {
 func TestGetVolume(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(mockInstanceServerHandler))
 	defer mockServer.Close()
+	client, _ := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+
+	defaultFindVolumeID := findVolumeIDFunc
+	defaultGetJsonRetry := getJSONWithRetryFunc
+	afterEach := func() {
+		findVolumeIDFunc = defaultFindVolumeID
+		getJSONWithRetryFunc = defaultGetJsonRetry
+		freshclient, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		client = freshclient
+	}
 
 	tests := []struct {
 		name              string
@@ -217,7 +230,22 @@ func TestGetVolume(t *testing.T) {
 		ancestorevolumeid string
 		snapshots         bool
 		error             string
+		setup             func()
 	}{
+		/*{ // TODO: Something is broken in this test.
+			name:              "inject unknown error in getJSONWithRetry",
+			volumeid:          "",
+			volumehref:        "",
+			ancestorevolumeid: "mock-volume-id",
+			volumename:        "mock-volume-name",
+			snapshots:         true,
+			error:             "Unknown - GJWR",
+			setup: func() {
+				getJSONWithRetryFunc = func(_ *Client, _, _ string, _, _ interface{}) error {
+					return errors.New("Unknown - GJWR")
+				}
+			},
+		},*/
 		{
 			name:              "get volume name not null",
 			volumeid:          "",
@@ -263,15 +291,43 @@ func TestGetVolume(t *testing.T) {
 			snapshots:         true,
 			error:             "volume not found",
 		},
+		{
+			name:              "inject error in FindVolumeID",
+			volumeid:          "",
+			volumehref:        "",
+			ancestorevolumeid: "mock-volume-id",
+			volumename:        "mock-volume-name",
+			snapshots:         true,
+			error:             "",
+			setup: func() {
+				findVolumeIDFunc = func(c *Client, volumename string) (string, error) {
+					return "", errors.New("Not found")
+				}
+			},
+		},
+		{
+			name:              "inject unknown error in FindVolumeID",
+			volumeid:          "",
+			volumehref:        "",
+			ancestorevolumeid: "mock-volume-id",
+			volumename:        "mock-volume-name",
+			snapshots:         true,
+			error:             "Error: problem finding volume: Unknown - FVIF",
+			setup: func() {
+				findVolumeIDFunc = func(c *Client, volumename string) (string, error) {
+					return "", errors.New("Unknown - FVIF")
+				}
+			},
+		},
 	}
 
 	for _, tc := range tests {
-		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
-		if err != nil {
-			t.Fatal(err)
+		defer afterEach()
+		if tc.setup != nil {
+			tc.setup()
 		}
 
-		_, err = client.GetVolume(tc.volumehref, tc.volumeid, tc.ancestorevolumeid, tc.volumename, tc.snapshots)
+		_, err := client.GetVolume(tc.volumehref, tc.volumeid, tc.ancestorevolumeid, tc.volumename, tc.snapshots)
 		if err != nil {
 			if tc.error != err.Error() {
 				t.Fatal(err)
