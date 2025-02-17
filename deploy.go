@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -1321,7 +1320,7 @@ func writeConfig(config *CookieConfig) error {
 	}
 	// #nosec G306
 	configFile, _ := getConfigPath()
-	err = ioutil.WriteFile(configFile, data, 0o600)
+	err = os.WriteFile(configFile, data, 0o600)
 	if err != nil {
 		return err
 	}

@@ -561,57 +561,166 @@ func TestClearQueueCommand(t *testing.T) {
 }
 
 func TestMoveToIdlePhase(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	t.Run("happy path with basic auth", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost && r.URL.Path == "/im/types/ProcessPhase/actions/moveToIdlePhase" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
 		http.NotFound(w, r)
-	}))
-	defer server.Close()
+		}))
+		defer server.Close()
 
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
-	}
+		gc := &GatewayClient{
+			http:     &http.Client{},
+			host:     server.URL,
+			username: "test_username",
+			password: "test_password",
+		}
 
-	gatewayResponse, err := gc.MoveToIdlePhase()
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+		gatewayResponse, err := gc.MoveToIdlePhase()
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("happy path with bearer token", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodPost && r.URL.Path == "/im/types/ProcessPhase/actions/moveToIdlePhase" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			http.NotFound(w, r)
+		}))
+		defer server.Close()
+
+		gc := &GatewayClient{
+			http:     &http.Client{},
+			host:     server.URL,
+			username: "test_username",
+			password: "test_password",
+			version:  "4.0",
+		}
+
+		gatewayResponse, err := gc.MoveToIdlePhase()
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("fail to move to idle phase", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			response := types.GatewayResponse{
+				Message: "Bad Request",
+        	}
+        	_ = json.NewEncoder(w).Encode(response)
+		}))
+		defer server.Close()
+
+		gc := &GatewayClient{
+			http:     &http.Client{},
+			host:     server.URL,
+			username: "test_username",
+			password: "test_password",
+			version:  "4.0",
+		}
+
+		gatewayResponse, err := gc.MoveToIdlePhase()
+		assert.Nil(t, err)
+		assert.Equal(t, "Bad Request", gatewayResponse.Message)
+		assert.NotEqual(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
 }
 
 func TestCheckForCompletionQueueCommands(t *testing.T) {
-	responseJSON := `{
+	t.Run("happy path", func(t *testing.T) {
+		responseJSON := `{
 		"MDM Commands": []
-	}`
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet && r.URL.Path == "/im/types/Command/instances" {
-			w.WriteHeader(http.StatusOK)
-			_, err := w.Write([]byte(responseJSON))
-			if err != nil {
-				t.Fatalf("Error writing response: %v", err)
+		}`
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodGet && r.URL.Path == "/im/types/Command/instances" {
+				w.WriteHeader(http.StatusOK)
+				_, err := w.Write([]byte(responseJSON))
+				if err != nil {
+					t.Fatalf("Error writing response: %v", err)
+				}
+				return
 			}
-			return
+			http.NotFound(w, r)
+		}))
+		defer server.Close()
+
+		gc := &GatewayClient{
+			http:     &http.Client{},
+			host:     server.URL,
+			username: "test_username",
+			password: "test_password",
+			version:  "4.0",
 		}
-		http.NotFound(w, r)
-	}))
-	defer server.Close()
 
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
-		version:  "4.0",
-	}
+		gatewayResponse, err := gc.CheckForCompletionQueueCommands("Query")
+		assert.NoError(t, err)
+		assert.NotNil(t, gatewayResponse)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("pending command", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			response := map[string][]interface{}{
+				"commands": {
+					map[string]interface{}{
+						"AllowedPhase":           "test-pending",
+						"CommandState":           "pending",
+						"Message":                "error message",
+					},
+				},
+			}
+			_ = json.NewEncoder(w).Encode(response)
+		}))
+		defer server.Close()
 
-	gatewayResponse, err := gc.CheckForCompletionQueueCommands("Query")
-	assert.NoError(t, err)
-	assert.NotNil(t, gatewayResponse)
-	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+		gc := &GatewayClient{
+			http:     &http.Client{},
+			host:     server.URL,
+			username: "test_username",
+			password: "test_password",
+			version:  "4.0",
+		}
+
+		gatewayResponse, err := gc.CheckForCompletionQueueCommands("test-pending")
+		assert.Nil(t, err)
+		assert.Equal(t, "Running", gatewayResponse.Data)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+
+		t.Run("failed command", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			response := map[string][]interface{}{
+				"commands": {
+					map[string]interface{}{
+						"AllowedPhase":           "test-failed",
+						"CommandState":           "failed",
+						"Message":                "error message",
+					},
+				},
+			}
+			_ = json.NewEncoder(w).Encode(response)
+		}))
+		defer server.Close()
+
+		gc := &GatewayClient{
+			http:     &http.Client{},
+			host:     server.URL,
+			username: "test_username",
+			password: "test_password",
+			version:  "4.0",
+		}
+
+		gatewayResponse, err := gc.CheckForCompletionQueueCommands("test-failed")
+		assert.Nil(t, err)
+		assert.Equal(t, "Failed", gatewayResponse.Data)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+
 }
 
 func TestUninstallCluster(t *testing.T) {
