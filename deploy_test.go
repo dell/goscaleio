@@ -390,40 +390,105 @@ func TestGetPackageDetails(t *testing.T) {
 		version:  "4.0",
 	}
 
-	packageDetails, err := gc.GetPackageDetails()
-	assert.NoError(t, err)
-	assert.NotNil(t, packageDetails)
+	t.Run("successful response with bearer token", func(t *testing.T) {
+		packageDetails, err := gc.GetPackageDetails()
+		assert.NoError(t, err)
+		assert.NotNil(t, packageDetails)
+	})
+	t.Run("successful response with basic auth", func(t *testing.T) {
+		gc.version = "3.0"
+		packageDetails, err := gc.GetPackageDetails()
+		assert.NoError(t, err)
+		assert.NotNil(t, packageDetails)
+	})
+	t.Run("HTTP request creation error", func(t *testing.T) {
+        gc.host = "http://[::1]:namedport"
+        _, err := gc.GetPackageDetails()
+        assert.NotNil(t, err)
+    })
+	t.Run("Error unmarshalling response", func(t *testing.T) {
+        server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+            w.WriteHeader(http.StatusOK)
+            w.Write([]byte(`invalid json`))
+        }))
+        defer server.Close()
+
+        gc.host = server.URL
+        _, err := gc.GetPackageDetails()
+        assert.NotNil(t, err)
+        assert.Contains(t, err.Error(), "Error For Get Package Details")
+    })
 }
 
 func TestDeletePackage(t *testing.T) {
-	responseJSON := `{
+	t.Run("successful response with basic auth", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+            w.WriteHeader(http.StatusOK)
+        }))
+        defer server.Close()
+
+        gc := &GatewayClient{
+            http:        &http.Client{},
+            host:        server.URL,
+            version:     "4.0",
+            token:       "dummy_token",
+        }
+
+		packageResponse, err := gc.DeletePackage("test_package")
+		assert.NoError(t, err)
+		assert.Equal(t, 200, packageResponse.StatusCode)
+	})
+	t.Run("successful response with bearer token", func(t *testing.T) {
+		responseJSON := `{
 		"StatusCode": 200
-	}`
+		}`
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "DELETE" && strings.HasPrefix(r.URL.Path, "/im/types/installationPackages/instances/actions/delete") {
-			w.WriteHeader(http.StatusOK)
-			_, err := w.Write([]byte(responseJSON))
-			if err != nil {
-				t.Fatalf("Error writing response: %v", err)
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == "DELETE" && strings.HasPrefix(r.URL.Path, "/im/types/installationPackages/instances/actions/delete") {
+				w.WriteHeader(http.StatusOK)
+				_, err := w.Write([]byte(responseJSON))
+				if err != nil {
+					t.Fatalf("Error writing response: %v", err)
+				}
+				return
 			}
-			return
-		}
-		http.NotFound(w, r)
-	}))
+			http.NotFound(w, r)
+		}))
 
-	defer server.Close()
+		defer server.Close()
 
-	gc := &GatewayClient{
+		gc := &GatewayClient{
 		http:     &http.Client{},
 		host:     server.URL,
+		version: "3.0",
 		username: "test_username",
 		password: "test_password",
 	}
+		packageResponse, err := gc.DeletePackage("test_package")
+		assert.NoError(t, err)
+		assert.Equal(t, 200, packageResponse.StatusCode)
+	})
+	t.Run("non 200 status code", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
+                response := types.GatewayResponse{
+                    Message: "Bad Request",
+                }
+            _ = json.NewEncoder(w).Encode(response)
+		}))
+		defer server.Close()
 
-	packageResponse, err := gc.DeletePackage("test_package")
-	assert.NoError(t, err)
-	assert.Equal(t, 200, packageResponse.StatusCode)
+		gc := &GatewayClient{
+            http:        &http.Client{},
+            host:        server.URL,
+            version:     "4.0",
+            token:       "dummy_token",
+        }
+
+		packageResponse, err := gc.DeletePackage("test_package")
+		assert.NoError(t, err)
+		assert.Equal(t, "Bad Request", packageResponse.Message)
+	})
 }
 
 func TestBeginInstallation(t *testing.T) {
@@ -863,6 +928,20 @@ func TestValidateMDMDetails(t *testing.T) {
 
 			expectedErr: errors.New("Wrong Primary MDM IP, Please provide valid Primary MDM IP"),
 		},
+		"non 200 status code": {
+			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
+				response := types.GatewayResponse{
+					Message: "Bad Request",
+				}
+				_ = json.NewEncoder(w).Encode(response)
+			})),
+			expectedResponse: &types.GatewayResponse{
+				Message: "Bad Request",
+			},
+			expectedErr: nil,
+		},
 	}
 
 	for name, tt := range tests {
@@ -937,6 +1016,60 @@ func TestGetClusterDetails(t *testing.T) {
 				ClusterDetails: types.MDMTopologyDetails{},
 			},
 		},
+		"non 200 status code": {
+			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
+				response := types.GatewayResponse{
+					Message: "Bad Request",
+				}
+				_ = json.NewEncoder(w).Encode(response)
+			})),
+			expectedResponse: &types.GatewayResponse{
+				Message: "Bad Request",
+			},
+			expectedErr: nil,
+		},
+		"success with JSON output": {
+			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
+            requireJSONOutput: true,
+            server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+                resp := `{"sdcIps":["10.0.0.1","10.0.0.2"]}`
+                w.WriteHeader(http.StatusOK)
+                w.Write([]byte(resp))
+            })),
+            expectedResponse: &types.GatewayResponse{
+                StatusCode: 200,
+                Data:       `{"sdcIps":["10.0.0.1","10.0.0.2"]}`,
+            },
+            version:     "4.0",
+            expectedErr:        nil,
+			expectedStatusCode: http.StatusOK,
+		},
+		"success with structured output": {
+            mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
+            requireJSONOutput: false,
+            server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+                resp := types.MDMTopologyDetails{
+                    SdcIps: []string{"10.0.0.1", "10.0.0.2"},
+                }
+                data, err := json.Marshal(resp)
+                if err != nil {
+                    t.Fatal(err)
+                }
+                w.WriteHeader(http.StatusOK)
+                w.Write(data)
+            })),
+            expectedResponse: &types.GatewayResponse{
+                StatusCode: 200,
+                ClusterDetails: types.MDMTopologyDetails{
+                    SdcIps: []string{"10.0.0.1", "10.0.0.2"},
+                },
+            },
+            version:     "4.0",
+            expectedErr:        nil,
+			expectedStatusCode: http.StatusOK,
+        },
 	}
 
 	for name, tt := range tests {
