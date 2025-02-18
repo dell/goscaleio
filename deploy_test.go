@@ -402,37 +402,37 @@ func TestGetPackageDetails(t *testing.T) {
 		assert.NotNil(t, packageDetails)
 	})
 	t.Run("HTTP request creation error", func(t *testing.T) {
-        gc.host = "http://[::1]:namedport"
-        _, err := gc.GetPackageDetails()
-        assert.NotNil(t, err)
-    })
+		gc.host = "http://[::1]:namedport"
+		_, err := gc.GetPackageDetails()
+		assert.NotNil(t, err)
+	})
 	t.Run("Error unmarshalling response", func(t *testing.T) {
-        server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-            w.WriteHeader(http.StatusOK)
-            w.Write([]byte(`invalid json`))
-        }))
-        defer server.Close()
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`invalid json`))
+		}))
+		defer server.Close()
 
-        gc.host = server.URL
-        _, err := gc.GetPackageDetails()
-        assert.NotNil(t, err)
-        assert.Contains(t, err.Error(), "Error For Get Package Details")
-    })
+		gc.host = server.URL
+		_, err := gc.GetPackageDetails()
+		assert.NotNil(t, err)
+		assert.Contains(t, err.Error(), "Error For Get Package Details")
+	})
 }
 
 func TestDeletePackage(t *testing.T) {
 	t.Run("successful response with basic auth", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-            w.WriteHeader(http.StatusOK)
-        }))
-        defer server.Close()
+			w.WriteHeader(http.StatusOK)
+		}))
+		defer server.Close()
 
-        gc := &GatewayClient{
-            http:        &http.Client{},
-            host:        server.URL,
-            version:     "4.0",
-            token:       "dummy_token",
-        }
+		gc := &GatewayClient{
+			http:    &http.Client{},
+			host:    server.URL,
+			version: "4.0",
+			token:   "dummy_token",
+		}
 
 		packageResponse, err := gc.DeletePackage("test_package")
 		assert.NoError(t, err)
@@ -458,12 +458,12 @@ func TestDeletePackage(t *testing.T) {
 		defer server.Close()
 
 		gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		version: "3.0",
-		username: "test_username",
-		password: "test_password",
-	}
+			http:     &http.Client{},
+			host:     server.URL,
+			version:  "3.0",
+			username: "test_username",
+			password: "test_password",
+		}
 		packageResponse, err := gc.DeletePackage("test_package")
 		assert.NoError(t, err)
 		assert.Equal(t, 200, packageResponse.StatusCode)
@@ -471,19 +471,19 @@ func TestDeletePackage(t *testing.T) {
 	t.Run("non 200 status code", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
-                response := types.GatewayResponse{
-                    Message: "Bad Request",
-                }
-            _ = json.NewEncoder(w).Encode(response)
+			response := types.GatewayResponse{
+				Message: "Bad Request",
+			}
+			_ = json.NewEncoder(w).Encode(response)
 		}))
 		defer server.Close()
 
 		gc := &GatewayClient{
-            http:        &http.Client{},
-            host:        server.URL,
-            version:     "4.0",
-            token:       "dummy_token",
-        }
+			http:    &http.Client{},
+			host:    server.URL,
+			version: "4.0",
+			token:   "dummy_token",
+		}
 
 		packageResponse, err := gc.DeletePackage("test_package")
 		assert.NoError(t, err)
@@ -493,8 +493,11 @@ func TestDeletePackage(t *testing.T) {
 
 func TestBeginInstallation(t *testing.T) {
 	tests := map[string]struct {
-		server  *httptest.Server
-		version string
+		server           *httptest.Server
+		version          string
+		expectedResponse *types.GatewayResponse
+		expectedErr      error
+		expectedStatus   int
 	}{
 		"success with version 4.0": {
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -504,7 +507,8 @@ func TestBeginInstallation(t *testing.T) {
 				}
 				http.NotFound(w, r)
 			})),
-			version: "4.0",
+			version:        "4.0",
+			expectedStatus: http.StatusOK,
 		},
 		"success with version < 4.0": {
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -514,7 +518,21 @@ func TestBeginInstallation(t *testing.T) {
 				}
 				http.NotFound(w, r)
 			})),
-			version: "3.6",
+			version:        "3.6",
+			expectedStatus: http.StatusOK,
+		},
+		"non 200 status code": {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
+				response := types.GatewayResponse{
+					Message: "Bad Request",
+				}
+				_ = json.NewEncoder(w).Encode(response)
+			})),
+			expectedResponse: &types.GatewayResponse{
+				Message: "Bad Request",
+			},
+			expectedErr: nil,
 		},
 	}
 	for name, tt := range tests {
@@ -531,7 +549,7 @@ func TestBeginInstallation(t *testing.T) {
 
 			resp, err := gc.BeginInstallation("{}", "mdm_user", "mdm_password", "lia_password", true, true, true, false)
 			assert.Nil(t, err)
-			assert.Equal(t, 200, resp.StatusCode)
+			assert.Equal(t, tt.expectedStatus, resp.StatusCode)
 		})
 	}
 }
@@ -547,15 +565,45 @@ func TestMoveToNextPhase(t *testing.T) {
 	defer server.Close()
 
 	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
+		http: &http.Client{},
+		host: server.URL,
 	}
 
-	gatewayResponse, err := gc.MoveToNextPhase()
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	t.Run("successful response with basic auth", func(t *testing.T) {
+		gc.username = "test_username"
+		gc.password = "test_password"
+
+		gatewayResponse, err := gc.MoveToNextPhase()
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("successful response with bearer token", func(t *testing.T) {
+		gc.version = "4.0"
+		gc.token = "dummy_token"
+
+		gatewayResponse, err := gc.MoveToNextPhase()
+		assert.NoError(t, err)
+		assert.NotNil(t, gatewayResponse)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("non 200 status code", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
+			response := types.GatewayResponse{
+				Message: "Bad Request",
+			}
+			_ = json.NewEncoder(w).Encode(response)
+		}))
+		defer server.Close()
+
+		gc.host = server.URL
+		gc.version = "4.0"
+		gc.token = "dummy_token"
+
+		gatewayResponse, err := gc.MoveToNextPhase()
+		assert.NoError(t, err)
+		assert.Equal(t, "Bad Request", gatewayResponse.Message)
+	})
 }
 
 func TestRetryPhase(t *testing.T) {
@@ -569,16 +617,45 @@ func TestRetryPhase(t *testing.T) {
 	defer server.Close()
 
 	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
-		version:  "4.0",
+		http: &http.Client{},
+		host: server.URL,
 	}
 
-	gatewayResponse, err := gc.RetryPhase()
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	t.Run("successful response with basic auth", func(t *testing.T) {
+		gc.username = "test_username"
+		gc.password = "test_password"
+
+		gatewayResponse, err := gc.RetryPhase()
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("successful response with bearer token", func(t *testing.T) {
+		gc.version = "4.0"
+		gc.token = "dummy_token"
+
+		gatewayResponse, err := gc.RetryPhase()
+		assert.NoError(t, err)
+		assert.NotNil(t, gatewayResponse)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("non 200 status code", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
+			response := types.GatewayResponse{
+				Message: "Bad Request",
+			}
+			_ = json.NewEncoder(w).Encode(response)
+		}))
+		defer server.Close()
+
+		gc.host = server.URL
+		gc.version = "4.0"
+		gc.token = "dummy_token"
+
+		gatewayResponse, err := gc.RetryPhase()
+		assert.NoError(t, err)
+		assert.Equal(t, "Bad Request", gatewayResponse.Message)
+	})
 }
 
 func TestAbortOperation(t *testing.T) {
@@ -592,15 +669,45 @@ func TestAbortOperation(t *testing.T) {
 	defer server.Close()
 
 	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
+		http: &http.Client{},
+		host: server.URL,
 	}
 
-	gatewayResponse, err := gc.AbortOperation()
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	t.Run("successful response with basic auth", func(t *testing.T) {
+		gc.username = "test_username"
+		gc.password = "test_password"
+
+		gatewayResponse, err := gc.AbortOperation()
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("successful response with bearer token", func(t *testing.T) {
+		gc.version = "4.0"
+		gc.token = "dummy_token"
+
+		gatewayResponse, err := gc.AbortOperation()
+		assert.NoError(t, err)
+		assert.NotNil(t, gatewayResponse)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("non 200 status code", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
+			response := types.GatewayResponse{
+				Message: "Bad Request",
+			}
+			_ = json.NewEncoder(w).Encode(response)
+		}))
+		defer server.Close()
+
+		gc.host = server.URL
+		gc.version = "4.0"
+		gc.token = "dummy_token"
+
+		gatewayResponse, err := gc.AbortOperation()
+		assert.NoError(t, err)
+		assert.Equal(t, "Bad Request", gatewayResponse.Message)
+	})
 }
 
 func TestClearQueueCommand(t *testing.T) {
@@ -614,25 +721,55 @@ func TestClearQueueCommand(t *testing.T) {
 	defer server.Close()
 
 	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
+		http: &http.Client{},
+		host: server.URL,
 	}
 
-	gatewayResponse, err := gc.ClearQueueCommand()
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	t.Run("successful response with basic auth", func(t *testing.T) {
+		gc.username = "test_username"
+		gc.password = "test_password"
+
+		gatewayResponse, err := gc.ClearQueueCommand()
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("successful response with bearer token", func(t *testing.T) {
+		gc.version = "4.0"
+		gc.token = "dummy_token"
+
+		gatewayResponse, err := gc.ClearQueueCommand()
+		assert.NoError(t, err)
+		assert.NotNil(t, gatewayResponse)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("non 200 status code", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
+			response := types.GatewayResponse{
+				Message: "Bad Request",
+			}
+			_ = json.NewEncoder(w).Encode(response)
+		}))
+		defer server.Close()
+
+		gc.host = server.URL
+		gc.version = "4.0"
+		gc.token = "dummy_token"
+
+		gatewayResponse, err := gc.ClearQueueCommand()
+		assert.NoError(t, err)
+		assert.Equal(t, "Bad Request", gatewayResponse.Message)
+	})
 }
 
 func TestMoveToIdlePhase(t *testing.T) {
 	t.Run("happy path with basic auth", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost && r.URL.Path == "/im/types/ProcessPhase/actions/moveToIdlePhase" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		http.NotFound(w, r)
+			if r.Method == http.MethodPost && r.URL.Path == "/im/types/ProcessPhase/actions/moveToIdlePhase" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			http.NotFound(w, r)
 		}))
 		defer server.Close()
 
@@ -675,8 +812,8 @@ func TestMoveToIdlePhase(t *testing.T) {
 			w.WriteHeader(http.StatusBadRequest)
 			response := types.GatewayResponse{
 				Message: "Bad Request",
-        	}
-        	_ = json.NewEncoder(w).Encode(response)
+			}
+			_ = json.NewEncoder(w).Encode(response)
 		}))
 		defer server.Close()
 
@@ -732,9 +869,9 @@ func TestCheckForCompletionQueueCommands(t *testing.T) {
 			response := map[string][]interface{}{
 				"commands": {
 					map[string]interface{}{
-						"AllowedPhase":           "test-pending",
-						"CommandState":           "pending",
-						"Message":                "error message",
+						"AllowedPhase": "test-pending",
+						"CommandState": "pending",
+						"Message":      "error message",
 					},
 				},
 			}
@@ -756,15 +893,15 @@ func TestCheckForCompletionQueueCommands(t *testing.T) {
 		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 	})
 
-		t.Run("failed command", func(t *testing.T) {
+	t.Run("failed command", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			response := map[string][]interface{}{
 				"commands": {
 					map[string]interface{}{
-						"AllowedPhase":           "test-failed",
-						"CommandState":           "failed",
-						"Message":                "error message",
+						"AllowedPhase": "test-failed",
+						"CommandState": "failed",
+						"Message":      "error message",
 					},
 				},
 			}
@@ -799,11 +936,8 @@ func TestUninstallCluster(t *testing.T) {
 	defer server.Close()
 
 	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
-		version:  "4.0",
+		http: &http.Client{},
+		host: server.URL,
 	}
 
 	jsonStr := `{
@@ -812,7 +946,7 @@ func TestUninstallCluster(t *testing.T) {
 		"systemId": null,
 		"ingressIp": null,
 		"mdmIPs": []
-		}`
+	}`
 	mdmUsername := "mdm_username"
 	mdmPassword := "mdm_password"
 	liaPassword := "lia_password"
@@ -820,9 +954,42 @@ func TestUninstallCluster(t *testing.T) {
 	allowNonSecureCommunicationWithLia := true
 	disableNonMgmtComponentsAuth := true
 
-	gatewayResponse, err := gc.UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, false)
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	t.Run("successful repsonse with bearer token", func(t *testing.T) {
+		gc.version = "4.0"
+		gc.token = "dummy_token"
+
+		gatewayResponse, err := gc.UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, false)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("successful repsonse with basic auth", func(t *testing.T) {
+		gc.username = "test_username"
+		gc.password = "test_password"
+		gc.version = "3.0"
+
+		gatewayResponse, err := gc.UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, false)
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+
+	t.Run("non 200 status code", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
+			response := types.GatewayResponse{
+				Message: "Bad Request",
+			}
+			_ = json.NewEncoder(w).Encode(response)
+		}))
+		defer server.Close()
+
+		gc.host = server.URL
+		gc.version = "4.0"
+		gc.token = "dummy_token"
+
+		gatewayResponse, err := gc.UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, false)
+		assert.NoError(t, err)
+		assert.Equal(t, "Bad Request", gatewayResponse.Message)
+	})
 }
 
 func TestRenewInstallationCookie(t *testing.T) {
@@ -922,14 +1089,14 @@ func TestValidateMDMDetails(t *testing.T) {
 			expectedErr: nil,
 		},
 		"error primary mdm ip": {
-			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.2"]}`),
+			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["10.10.0.2"]}`),
 			server: httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 			})),
 
 			expectedErr: errors.New("Wrong Primary MDM IP, Please provide valid Primary MDM IP"),
 		},
 		"non 200 status code": {
-			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
+			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["10.10.0.1"]}`),
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
 				response := types.GatewayResponse{
@@ -1031,45 +1198,45 @@ func TestGetClusterDetails(t *testing.T) {
 			expectedErr: nil,
 		},
 		"success with JSON output": {
-			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
-            requireJSONOutput: true,
-            server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-                resp := `{"sdcIps":["10.0.0.1","10.0.0.2"]}`
-                w.WriteHeader(http.StatusOK)
-                w.Write([]byte(resp))
-            })),
-            expectedResponse: &types.GatewayResponse{
-                StatusCode: 200,
-                Data:       `{"sdcIps":["10.0.0.1","10.0.0.2"]}`,
-            },
-            version:     "4.0",
-            expectedErr:        nil,
+			mdmTopologyParam:  []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["10.10.0.1"]}`),
+			requireJSONOutput: true,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				resp := `{"sdcIps":["10.0.0.1","10.0.0.2"]}`
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(resp))
+			})),
+			expectedResponse: &types.GatewayResponse{
+				StatusCode: 200,
+				Data:       `{"sdcIps":["10.0.0.1","10.0.0.2"]}`,
+			},
+			version:            "4.0",
+			expectedErr:        nil,
 			expectedStatusCode: http.StatusOK,
 		},
 		"success with structured output": {
-            mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
-            requireJSONOutput: false,
-            server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-                resp := types.MDMTopologyDetails{
-                    SdcIps: []string{"10.0.0.1", "10.0.0.2"},
-                }
-                data, err := json.Marshal(resp)
-                if err != nil {
-                    t.Fatal(err)
-                }
-                w.WriteHeader(http.StatusOK)
-                w.Write(data)
-            })),
-            expectedResponse: &types.GatewayResponse{
-                StatusCode: 200,
-                ClusterDetails: types.MDMTopologyDetails{
-                    SdcIps: []string{"10.0.0.1", "10.0.0.2"},
-                },
-            },
-            version:     "4.0",
-            expectedErr:        nil,
+			mdmTopologyParam:  []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["10.10.0.1"]}`),
+			requireJSONOutput: false,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				resp := types.MDMTopologyDetails{
+					SdcIps: []string{"10.0.0.1", "10.0.0.2"},
+				}
+				data, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				w.WriteHeader(http.StatusOK)
+				w.Write(data)
+			})),
+			expectedResponse: &types.GatewayResponse{
+				StatusCode: 200,
+				ClusterDetails: types.MDMTopologyDetails{
+					SdcIps: []string{"10.0.0.1", "10.0.0.2"},
+				},
+			},
+			version:            "4.0",
+			expectedErr:        nil,
 			expectedStatusCode: http.StatusOK,
-        },
+		},
 	}
 
 	for name, tt := range tests {
