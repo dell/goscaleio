@@ -71,8 +71,12 @@ var statFileFunc = func(path string) (os.FileInfo, error) {
 	return os.Stat(path)
 }
 
+var openFileFunc = func(name string) (*os.File, error) {
+	return os.Open(name)
+}
+
 // DrvCfgQueryGUID will return the GUID of the locally installed SDC
-func DrvCfgQueryGUID() (string, error) {
+func DrvCfgQueryGUID(syscaller Syscaller) (string, error) {
 	if SCINIMockMode == true {
 		return mockGUID, nil
 	}
@@ -89,7 +93,7 @@ func DrvCfgQueryGUID() (string, error) {
 
 	buf := [1]ioctlGUID{}
 	// #nosec CWE-242, validated buffer is large enough to hold data
-	err = ioctl(f.Fd(), opCode, uintptr(unsafe.Pointer(&buf[0])))
+	err = ioctl(syscaller, f.Fd(), opCode, uintptr(unsafe.Pointer(&buf[0])))
 	if err != nil {
 		return "", fmt.Errorf("QueryGUID error: %v", err)
 	}
@@ -97,6 +101,9 @@ func DrvCfgQueryGUID() (string, error) {
 	rc, err := strconv.ParseInt(hex.EncodeToString(buf[0].rc[0:1]), 16, 64)
 	if rc != 65 {
 		return "", fmt.Errorf("Request to query GUID failed, RC=%d", rc)
+	}
+	if err != nil {
+		return "", fmt.Errorf("QueryGUID error: %v", err)
 	}
 
 	g := hex.EncodeToString(buf[0].uuid[:len(buf[0].uuid)])
@@ -106,7 +113,7 @@ func DrvCfgQueryGUID() (string, error) {
 }
 
 // DrvCfgQueryRescan preforms a rescan
-func DrvCfgQueryRescan() (string, error) {
+func DrvCfgQueryRescan(syscaller Syscaller) (string, error) {
 	f, err := os.Open(SDCDevice)
 	if err != nil {
 		return "", fmt.Errorf("Powerflex SDC is not installed")
@@ -120,7 +127,7 @@ func DrvCfgQueryRescan() (string, error) {
 
 	var rc int64
 	// #nosec CWE-242, validated buffer is large enough to hold data
-	err = ioctl(f.Fd(), opCode, uintptr(unsafe.Pointer(&rc)))
+	err = ioctl(syscaller, f.Fd(), opCode, uintptr(unsafe.Pointer(&rc)))
 	if err != nil {
 		return "", fmt.Errorf("Rescan error: %v", err)
 	}
@@ -182,10 +189,21 @@ var executeFunc = func(name string, arg ...string) ([]byte, error) {
 	return exec.Command(name, arg...).CombinedOutput()
 }
 
-func ioctl(fd, op, arg uintptr) error {
-	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, fd, op, arg)
-	if ep != 0 {
-		return syscall.Errno(ep)
+// Syscaller is an interface for syscall.Syscall
+type Syscaller interface {
+	Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno)
+}
+
+// RealSyscall implements Syscaller using the real syscall.Syscall
+type RealSyscall struct{}
+
+func (r RealSyscall) Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
+	return syscall.Syscall(trap, a1, a2, a3)
+}
+func ioctl(syscaller Syscaller, fd, op, arg uintptr) error {
+	_, _, errno := syscaller.Syscall(syscall.SYS_IOCTL, fd, op, arg)
+	if errno != 0 {
+		return errno
 	}
 	return nil
 }
