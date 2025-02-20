@@ -80,7 +80,7 @@ func DrvCfgQueryGUID(syscaller Syscaller) (string, error) {
 	if SCINIMockMode == true {
 		return mockGUID, nil
 	}
-	f, err := os.Open(SDCDevice)
+	f, err := openFileFunc(SDCDevice)
 	if err != nil {
 		return "", err
 	}
@@ -91,23 +91,26 @@ func DrvCfgQueryGUID(syscaller Syscaller) (string, error) {
 
 	opCode := _IO(_IOCTLBase, _IOCTLQueryGUID)
 
-	buf := [1]ioctlGUID{}
+	buf := &ioctlGUID{}
 	// #nosec CWE-242, validated buffer is large enough to hold data
-	err = ioctl(syscaller, f.Fd(), opCode, uintptr(unsafe.Pointer(&buf[0])))
+	err = ioctlWrapper(syscaller, f.Fd(), opCode, uintptr(unsafe.Pointer(buf)))
 	if err != nil {
 		return "", fmt.Errorf("QueryGUID error: %v", err)
 	}
 
-	rc, err := strconv.ParseInt(hex.EncodeToString(buf[0].rc[0:1]), 16, 64)
+	rc, err := strconv.ParseInt(hex.EncodeToString(buf.rc[0:1]), 16, 64)
+	if err != nil {
+		return "", fmt.Errorf("Failed to parse return code: %v", err)
+	}
 	if rc != 65 {
 		return "", fmt.Errorf("Request to query GUID failed, RC=%d", rc)
 	}
-	if err != nil {
-		return "", fmt.Errorf("QueryGUID error: %v", err)
-	}
 
-	g := hex.EncodeToString(buf[0].uuid[:len(buf[0].uuid)])
+	g := hex.EncodeToString(buf.uuid[:len(buf.uuid)])
 	u, err := uuid.Parse(g)
+	if err != nil {
+		return "", fmt.Errorf("Failed to parse UUID: %v", err)
+	}
 	discoveredGUID := strings.ToUpper(u.String())
 	return discoveredGUID, nil
 }
@@ -127,7 +130,7 @@ func DrvCfgQueryRescan(syscaller Syscaller) (string, error) {
 
 	var rc int64
 	// #nosec CWE-242, validated buffer is large enough to hold data
-	err = ioctl(syscaller, f.Fd(), opCode, uintptr(unsafe.Pointer(&rc)))
+	err = ioctlWrapper(syscaller, f.Fd(), opCode, uintptr(unsafe.Pointer(&rc)))
 	if err != nil {
 		return "", fmt.Errorf("Rescan error: %v", err)
 	}
@@ -200,7 +203,8 @@ type RealSyscall struct{}
 func (r RealSyscall) Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
 	return syscall.Syscall(trap, a1, a2, a3)
 }
-func ioctl(syscaller Syscaller, fd, op, arg uintptr) error {
+
+var ioctlWrapper = func(syscaller Syscaller, fd, op, arg uintptr) error {
 	_, _, errno := syscaller.Syscall(syscall.SYS_IOCTL, fd, op, arg)
 	if errno != 0 {
 		return errno
