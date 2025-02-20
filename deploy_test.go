@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -91,30 +92,135 @@ func TestNewGatewayInsecure(t *testing.T) {
 	assert.Equal(t, "4.0", gc.version, "Unexpected version")
 }
 
+// errorTransport simulates an error during response body reading
+type errorTransport struct{}
+
+func (t *errorTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(&errorReader{}),
+	}, nil
+}
+
+type errorReader struct{}
+
+func (r *errorReader) Read(p []byte) (n int, err error) {
+	return 0, errBodyRead
+}
+
+func (r *errorReader) Close() error {
+	return nil
+}
+
 // TestGetVersion tests the GetVersion function.
 func TestGetVersion(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodGet && r.URL.Path == "/api/version" {
-			w.Header().Set("Content-Type", "text/plain")
-			w.WriteHeader(http.StatusOK)
-			fmt.Fprintln(w, "4.0")
-			return
-		}
-		http.NotFound(w, r)
-	}))
 
-	defer server.Close()
-
-	gc := &GatewayClient{
-		http:     &http.Client{},
-		host:     server.URL,
-		username: "test_username",
-		password: "test_password",
+	tests := []struct {
+		name        string
+		setup       func() *GatewayClient
+		expected    string
+		expectedErr string
+	}{
+		{
+			name: "successful retrieval with basic auth",
+			setup: func() *GatewayClient {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					if r.Method == http.MethodGet && r.URL.Path == "/api/version" {
+						w.Header().Set("Content-Type", "text/plain")
+						w.WriteHeader(http.StatusOK)
+						fmt.Fprintln(w, "4.0")
+						return
+					}
+					http.NotFound(w, r)
+				}))
+				return &GatewayClient{
+					host:     server.URL,
+					http:     server.Client(),
+					username: "test_username",
+					password: "test_password",
+				}
+			},
+			expected:    "4.0",
+			expectedErr: "",
+		},
+		{
+			name: "successful retrieval with bearer token",
+			setup: func() *GatewayClient {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					if r.Method == http.MethodGet && r.URL.Path == "/api/version" {
+						w.Header().Set("Content-Type", "text/plain")
+						w.WriteHeader(http.StatusOK)
+						fmt.Fprintln(w, "4.0")
+						return
+					}
+					http.NotFound(w, r)
+				}))
+				return &GatewayClient{
+					host:  server.URL,
+					http:  server.Client(),
+					token: "dummy_token",
+				}
+			},
+			expected:    "4.0",
+			expectedErr: "",
+		},
+		{
+			name: "http request creation error",
+			setup: func() *GatewayClient {
+				return &GatewayClient{
+					host: "http://[::1]:namedport",
+					http: &http.Client{},
+				}
+			},
+			expected:    "",
+			expectedErr: "invalid port \":namedport\" after host",
+		},
+		{
+			name: "non-2xx status code",
+			setup: func() *GatewayClient {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					http.Error(w, "error", http.StatusBadRequest)
+				}))
+				return &GatewayClient{
+					host: server.URL,
+					http: server.Client(),
+				}
+			},
+			expected:    "",
+			expectedErr: "",
+		},
+		{
+			name: "error extracting version string",
+			setup: func() *GatewayClient {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(http.StatusOK)
+					w.Write([]byte(`{"version": "invalid"}`))
+				}))
+				return &GatewayClient{
+					host: server.URL,
+					http: &http.Client{
+						Transport: &errorTransport{},
+					},
+				}
+			},
+			expected:    "",
+			expectedErr: "error reading body",
+		},
 	}
 
-	version, err := gc.GetVersion()
-	assert.NoError(t, err)
-	assert.Equal(t, "4.0", version)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gc := tt.setup()
+			version, err := gc.GetVersion()
+			if tt.expectedErr != "" {
+				assert.NotNil(t, err)
+				assert.Contains(t, err.Error(), tt.expectedErr)
+			} else {
+				assert.Nil(t, err)
+				assert.Equal(t, tt.expected, version)
+			}
+		})
+	}
 }
 
 // TestUploadPackages tests the UploadPackages function.
