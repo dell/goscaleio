@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -56,7 +57,7 @@ type ioctlGUID struct {
 
 // DrvCfgIsSDCInstalled will check to see if the SDC kernel module is loaded
 func DrvCfgIsSDCInstalled() bool {
-	if SCINIMockMode == true {
+	if SCINIMockMode {
 		return true
 	}
 	// Check to see if the SDC device is available
@@ -72,12 +73,12 @@ var statFileFunc = func(path string) (os.FileInfo, error) {
 }
 
 var openFileFunc = func(name string) (*os.File, error) {
-	return os.Open(name)
+	return os.Open(filepath.Clean(name))
 }
 
 // DrvCfgQueryGUID will return the GUID of the locally installed SDC
 func DrvCfgQueryGUID(syscaller Syscaller) (string, error) {
-	if SCINIMockMode == true {
+	if SCINIMockMode {
 		return mockGUID, nil
 	}
 	f, err := openFileFunc(SDCDevice)
@@ -91,9 +92,9 @@ func DrvCfgQueryGUID(syscaller Syscaller) (string, error) {
 
 	opCode := _IO(_IOCTLBase, _IOCTLQueryGUID)
 
-	buf := &ioctlGUID{}
+	var buf ioctlGUID
 	// #nosec CWE-242, validated buffer is large enough to hold data
-	err = ioctlWrapper(syscaller, f.Fd(), opCode, uintptr(unsafe.Pointer(buf)))
+	err = ioctlWrapper(syscaller, f.Fd(), opCode, &buf)
 	if err != nil {
 		return "", fmt.Errorf("QueryGUID error: %v", err)
 	}
@@ -128,13 +129,13 @@ func DrvCfgQueryRescan(syscaller Syscaller) (string, error) {
 
 	opCode := _IO(_IOCTLBase, _IOCTLRescan)
 
-	var rc int64
+	var rcBuf ioctlGUID
 	// #nosec CWE-242, validated buffer is large enough to hold data
-	err = ioctlWrapper(syscaller, f.Fd(), opCode, uintptr(unsafe.Pointer(&rc)))
+	err = ioctlWrapper(syscaller, f.Fd(), opCode, &rcBuf)
 	if err != nil {
 		return "", fmt.Errorf("Rescan error: %v", err)
 	}
-	rcCode := strconv.FormatInt(rc, 10)
+	rcCode := strconv.FormatInt(int64(rcBuf.rc[0]), 10)
 
 	return rcCode, err
 }
@@ -151,7 +152,7 @@ type ConfiguredCluster struct {
 func DrvCfgQuerySystems() (*[]ConfiguredCluster, error) {
 	clusters := make([]ConfiguredCluster, 0)
 
-	if SCINIMockMode == true {
+	if SCINIMockMode {
 		systemID := mockSystem
 		sdcID := mockGUID
 		aCluster := ConfiguredCluster{
@@ -204,8 +205,9 @@ func (r RealSyscall) Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscal
 	return syscall.Syscall(trap, a1, a2, a3)
 }
 
-var ioctlWrapper = func(syscaller Syscaller, fd, op, arg uintptr) error {
-	_, _, errno := syscaller.Syscall(syscall.SYS_IOCTL, fd, op, arg)
+var ioctlWrapper = func(syscaller Syscaller, fd, op uintptr, arg *ioctlGUID) error {
+	// conversion of a Pointer to uintptr must appear in the call itself when calling syscall.Syscall
+	_, _, errno := syscaller.Syscall(syscall.SYS_IOCTL, fd, op, uintptr(unsafe.Pointer(arg)))
 	if errno != 0 {
 		return errno
 	}

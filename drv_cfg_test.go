@@ -173,8 +173,8 @@ func TestDrvCfgQueryGUID(t *testing.T) {
 		{
 			name: "Invalid_RC",
 			mockSyscall: func(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
-				buf := (*ioctlGUID)(unsafe.Pointer(a3))
-				buf.rc[0] = 0x00 // Set an invalid return code
+				var buf ioctlGUID
+				buf.rc[0] = 0x00                        // Set an invalid return code
 				return 0, 0, 0
 			},
 			mockOpen: func(name string) (*os.File, error) {
@@ -185,7 +185,7 @@ func TestDrvCfgQueryGUID(t *testing.T) {
 		{
 			name: "Successful query",
 			mockSyscall: func(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
-				buf := (*ioctlGUID)(unsafe.Pointer(a3))
+				var buf ioctlGUID
 				buf.rc[0] = 0x41
 				uuidBytes, _ := uuid.Parse("D7C07724-A481-42D6-B1A7-0739A3F28BB0")
 				copy(buf.uuid[:], uuidBytes[:])
@@ -205,7 +205,7 @@ func TestDrvCfgQueryGUID(t *testing.T) {
 			openFileFunc = tt.mockOpen
 
 			// Mock the ioctlWrapper function
-			ioctlWrapper = func(syscaller Syscaller, fd, op, arg uintptr) error {
+			ioctlWrapper = func(_ Syscaller, _, _ uintptr, arg *ioctlGUID) error {
 				if tt.name == "Ioctl_error" {
 					return syscall.EIO // Simulate an I/O error
 				}

@@ -25,8 +25,9 @@ import (
 
 // TestGetDrvCfgGUID will return the SDC GUID for the locally installed SDC
 func TestGetDrvCfgGUID(t *testing.T) {
+	syscaller := goscaleio.RealSyscall{}
 	goscaleio.SDCDevice = goscaleio.IOCTLDevice
-	guid, err := goscaleio.DrvCfgQueryGUID()
+	guid, err := goscaleio.DrvCfgQueryGUID(syscaller)
 
 	// The response depends on the installation state of the SDC
 	if goscaleio.DrvCfgIsSDCInstalled() {
@@ -44,8 +45,9 @@ func TestGetDrvCfgGUID(t *testing.T) {
 
 // TestGetDrvCfgGUIDSDCNotInstalled will check the SDC GUID, when the SDC is not installed
 func TestGetDrvCfgGUIDSDCNotInstalled(t *testing.T) {
+	syscaller := goscaleio.RealSyscall{}
 	goscaleio.SDCDevice = "/fff/dddddd/dddd"
-	guid, err := goscaleio.DrvCfgQueryGUID()
+	guid, err := goscaleio.DrvCfgQueryGUID(syscaller)
 
 	assert.Empty(t, guid)
 	assert.NotNil(t, err)
@@ -100,8 +102,9 @@ func TestGetDrvCfgSystemsSDCNotInstalled(t *testing.T) {
 }
 
 func TestGetDrvCfgQueryRescan(t *testing.T) {
+	syscaller := goscaleio.RealSyscall{}
 	goscaleio.SDCDevice = goscaleio.IOCTLDevice
-	rc, err := goscaleio.DrvCfgQueryRescan()
+	rc, err := goscaleio.DrvCfgQueryRescan(syscaller)
 
 	// The response depends on the installation state of the SDC
 	if goscaleio.DrvCfgIsSDCInstalled() {
@@ -119,8 +122,9 @@ func TestGetDrvCfgQueryRescan(t *testing.T) {
 
 // TestGetSrvCfgSystemsSDCNotInstalled will check the PowerFlex systems when the SDC is not installed
 func TestGetDrvCfgQueryRescanSDCNotInstalled(t *testing.T) {
+	syscaller := goscaleio.RealSyscall{}
 	goscaleio.SDCDevice = "/fff/dddddd/dddd"
-	systems, err := goscaleio.DrvCfgQueryRescan()
+	systems, err := goscaleio.DrvCfgQueryRescan(syscaller)
 
 	// SDC is not installed, should get no ConfiguredSystems and an error
 	assert.Empty(t, systems)
