@@ -55,6 +55,11 @@ type ioctlGUID struct {
 	netIDTime  uint32
 }
 
+// Syscaller is an interface for syscall.Syscall
+type Syscaller interface {
+	Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno)
+}
+
 // DrvCfgIsSDCInstalled will check to see if the SDC kernel module is loaded
 func DrvCfgIsSDCInstalled() bool {
 	if SCINIMockMode {
@@ -118,7 +123,7 @@ func DrvCfgQueryGUID(syscaller Syscaller) (string, error) {
 
 // DrvCfgQueryRescan preforms a rescan
 func DrvCfgQueryRescan(syscaller Syscaller) (string, error) {
-	f, err := os.Open(SDCDevice)
+	f, err := openFileFunc(SDCDevice)
 	if err != nil {
 		return "", fmt.Errorf("Powerflex SDC is not installed")
 	}
@@ -193,12 +198,8 @@ var executeFunc = func(name string, arg ...string) ([]byte, error) {
 	return exec.Command(name, arg...).CombinedOutput()
 }
 
-// Syscaller is an interface for syscall.Syscall
-type Syscaller interface {
-	Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno)
-}
-
 // RealSyscall implements Syscaller using the real syscall.Syscall
+// Used in inttests
 type RealSyscall struct{}
 
 func (r RealSyscall) Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {

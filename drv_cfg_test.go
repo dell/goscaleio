@@ -1,11 +1,12 @@
 package goscaleio
 
 import (
-	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"syscall"
 	"testing"
+	"time"
 	"unsafe"
 
 	"github.com/google/uuid"
@@ -24,6 +25,18 @@ func (m MockSyscall) Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscal
 	}
 	return 0, 0, m.ReturnErrno
 }
+
+
+type mockFileInfo struct {
+	isDir bool
+}
+
+func (m *mockFileInfo) Name() string       { return "" }
+func (m *mockFileInfo) Size() int64        { return 0 }
+func (m *mockFileInfo) Mode() fs.FileMode  { return 0 }
+func (m *mockFileInfo) ModTime() time.Time { return time.Time{} }
+func (m *mockFileInfo) IsDir() bool        { return m.isDir }
+func (m *mockFileInfo) Sys() interface{}   { return nil }
 
 func TestDrvCfgQuerySystems(t *testing.T) {
 	defaultExecFunc := executeFunc
@@ -125,6 +138,28 @@ func TestDrvCfgIsSDCInstalled(t *testing.T) {
 			name:        "failing test - no SDC",
 			expectedOut: false,
 		},
+		{
+			name: "SDC device is a directory",
+			setup: func() {
+				statFileFunc = func(name string) (fs.FileInfo, error) {
+					return &mockFileInfo{
+						isDir: true,
+					}, nil
+				}
+			},
+			expectedOut: false,
+		},
+		{
+			name: "SDC device is not a directory",
+			setup: func() {
+				statFileFunc = func(name string) (os.FileInfo, error) {
+					return &mockFileInfo{
+						isDir: false,
+					}, nil
+				}
+			},
+			expectedOut: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -174,7 +209,7 @@ func TestDrvCfgQueryGUID(t *testing.T) {
 			name: "Invalid_RC",
 			mockSyscall: func(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
 				var buf ioctlGUID
-				buf.rc[0] = 0x00                        // Set an invalid return code
+				buf.rc[0] = 0x00 // Set an invalid return code
 				return 0, 0, 0
 			},
 			mockOpen: func(name string) (*os.File, error) {
@@ -237,38 +272,67 @@ func TestDrvCfgQueryGUID(t *testing.T) {
 }
 
 func TestDrvCfgQueryRescan(t *testing.T) {
-	defaultOsOpen := openFileFunc
-	afterEach := func() {
-		openFileFunc = defaultOsOpen
-	}
 	tests := []struct {
 		name        string
-		setup       func()
+		mockOpen    func(name string) (*os.File, error)
 		expectedOut string
 		expectError bool
+		errMessage  string
 	}{
 		{
 			name: "error opening SDC device",
-			setup: func() {
-				defaultOsOpen = func(_ string) (*os.File, error) {
-					return nil, errors.New("open error")
-				}
+			mockOpen: func(name string) (*os.File, error) {
+				return nil, fmt.Errorf("open device error")
 			},
 			expectedOut: "",
 			expectError: true,
+			errMessage:  "Powerflex SDC is not installed",
+		},
+		{
+			name: "successful rescan",
+			mockOpen: func(name string) (*os.File, error) {
+				return os.NewFile(0, name), nil
+			},
+			expectedOut: "1",
+			expectError: false,
+		},
+		{
+			name: "rescan error",
+			mockOpen: func(name string) (*os.File, error) {
+				return os.NewFile(0, name), nil
+			},
+			expectedOut: "",
+			expectError: true,
+			errMessage:  "Rescan error: input/output error",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.setup != nil {
-				tt.setup()
+			originalOpenFileFunc := openFileFunc
+			defer func() {
+				openFileFunc = originalOpenFileFunc
+			}()
+
+			openFileFunc = tt.mockOpen
+
+			// Mock the ioctlWrapper function
+			ioctlWrapper = func(_ Syscaller, _, _ uintptr, arg *ioctlGUID) error {
+				if tt.name == "rescan error" {
+					return syscall.EIO // Simulate an I/O error
+				}
+				arg.rc[0] = 1 // Mock return code for successful rescan
+				return nil
 			}
-			defer afterEach()
-			syscaller := MockSyscall{ReturnErrno: 0}
+
+			syscaller := MockSyscall{
+				ReturnErrno: 0,
+			}
+
 			out, err := DrvCfgQueryRescan(syscaller)
 			if tt.expectError {
 				assert.NotNil(t, err)
+				assert.Equal(t, tt.errMessage, err.Error())
 			} else {
 				assert.Nil(t, err)
 			}
@@ -277,48 +341,40 @@ func TestDrvCfgQueryRescan(t *testing.T) {
 	}
 }
 
-// func TestIoctlWrapper(t *testing.T) {
-// 	tests := []struct {
-// 		fd, op, arg uintptr
-// 		mockErrno   syscall.Errno
-// 		expectedErr error
-// 	}{
-// 		{
-// 			1,
-// 			2,
-// 			uintptr(unsafe.Pointer(&ioctlGUID{})),
-// 			0,
-// 			nil,
-// 		},
-// 		{
-// 			4,
-// 			5,
-// 			uintptr(unsafe.Pointer(&ioctlGUID{})),
-// 			syscall.EINVAL,
-// 			syscall.EINVAL,
-// 		},
-// 	}
+func TestIoctlWrapper(t *testing.T) {
+	tests := []struct {
+		name        string
+		mockSyscall func(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno)
+		expectError bool
+		errMessage  string
+	}{
+		{
+			name: "ioctl call returns error",
+			mockSyscall: func(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
+				return 0, 0, syscall.EIO
+			},
+			expectError: true,
+			errMessage:  "input/output error",
+		},
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(fmt.Sprintf("fd=%d,op=%d,arg=%d", tt.fd, tt.op, tt.arg), func(t *testing.T) {
-// 			fmt.Printf("Testing with fd=%d, op=%d, arg=%d, mockErrno=%d\n", tt.fd, tt.op, tt.arg, tt.mockErrno)
-// 			mockSyscall := MockSyscall{
-// 				SyscallFunc: func(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
-// 					fmt.Printf("MockSyscall called with trap=%d, a1=%d, a2=%d, a3=%d\n", trap, a1, a2, a3)
-// 					if tt.mockErrno != 0 {
-// 						fmt.Printf("Returning mockErrno=%d\n", tt.mockErrno)
-// 						return 0, 0, tt.mockErrno
-// 					}
-// 					return 0, 0, 0
-// 				},
-// 			}
-// 			err := ioctlWrapper(mockSyscall, tt.fd, tt.op, tt.arg)
-// 			if !errors.Is(err, tt.expectedErr) {
-// 				t.Errorf("expected %v, got %v", tt.expectedErr, err)
-// 			}
-// 		})
-// 	}
-// }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			syscaller := MockSyscall{
+				SyscallFunc: tt.mockSyscall,
+			}
+			arg := &ioctlGUID{}
+
+			err := ioctlWrapper(syscaller, 0, 0, arg)
+			if tt.expectError {
+				assert.NotNil(t, err)
+				assert.Equal(t, tt.errMessage, err.Error())
+			} else {
+				assert.Nil(t, err)
+			}
+		})
+	}
+}
 
 func Test_IO(t *testing.T) {
 	tests := []struct {
