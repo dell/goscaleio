@@ -172,11 +172,17 @@ func TestModifySSOUser(t *testing.T) {
 			user: types.SSOUserModifyParam{
 				Role: "Monitor1",
 			},
-			id:       "eeb2dec800000001",
-			expected: errors.New("Invalid enum value"),
+			id:       "Invalid",
+			expected: errors.New("500 Internal Server Error"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/rest/v1/users/eeb2dec800000001" {
+			w.WriteHeader(http.StatusOK)
+		} else if r.URL.Path == "/rest/v1/users/Invalid" {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "Invalid enum value"}`))
+		}
 	}))
 	defer svr.Close()
 
@@ -216,8 +222,21 @@ func TestResetSSOUserPassword(t *testing.T) {
 			id:       "eeb2dec800000001",
 			expected: nil,
 		},
+		{
+			user: types.SSOUserModifyParam{
+				Password: "default",
+			},
+			id:       "Invalid",
+			expected: errors.New("500 Internal Server Error"),
+		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/rest/v1/users/" + "eeb2dec800000001" + "/reset-password" {
+			w.WriteHeader(http.StatusOK)
+		} else if r.URL.Path == "/rest/v1/users/" + "Invalid" + "/reset-password" {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "Invalid enum value"}`))
+		}
 	}))
 	defer svr.Close()
 
