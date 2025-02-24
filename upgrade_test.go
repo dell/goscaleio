@@ -21,6 +21,7 @@ import (
 
 	types "github.com/dell/goscaleio/types/v1"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUploadCompliance(t *testing.T) {
@@ -908,5 +909,60 @@ func TestTestConnection(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// Test unsupported protocol scheme by setting gc.host to '*?' before calling methods in upgrade.go
+func TestUnsupportedProtocolScheme(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		switch req.RequestURI {
+		case "/rest/auth/login":
+			resp.WriteHeader(http.StatusOK)
+			fmt.Fprintln(resp, `{"access_token":"mock_access_token"}`)
+		default:
+			resp.WriteHeader(http.StatusBadRequest)
+			resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+		}
+	}))
+	defer server.Close()
+	gc, err := NewGateway(server.URL, "test_username", "test_password", false, false)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	// gc.host is used to build URLs like: http.NewRequest(http.MethodDelete, gc.host+"/Api/V1/FirmwareRepository/"+id, nil)
+	// by setting it to '*?' we can simulate an unsupported protocol scheme that will cause Client.Do() to return an error
+	gc.host = "*?"
+
+	Params := types.UploadComplianceParam{
+		Username: "user",
+		Password: "password",
+	}
+	searchID := uuid.NewString()
+	cases := []string{"TestConnection", "DeleteFirmwareRepository", "GetUploadComplianceDetailsUsingID", "GetAllUploadComplianceDetails", "ApproveUnsignedFile", "GetUploadComplianceDetails", "UploadCompliance"}
+	for _, method := range cases {
+
+		if method == "TestConnection" {
+			err = gc.TestConnection(&Params)
+		}
+		if method == "DeleteFirmwareRepository" {
+			err = gc.DeleteFirmwareRepository(searchID)
+		}
+		if method == "GetUploadComplianceDetailsUsingID" {
+			_, err = gc.GetUploadComplianceDetailsUsingID(searchID)
+		}
+		if method == "GetAllUploadComplianceDetails" {
+			_, err = gc.GetAllUploadComplianceDetails()
+		}
+		if method == "ApproveUnsignedFile" {
+			err = gc.ApproveUnsignedFile(searchID)
+		}
+		if method == "GetUploadComplianceDetails" {
+			_, err = gc.GetUploadComplianceDetails(searchID, true)
+		}
+		if method == "UploadCompliance" {
+			_, err = gc.UploadCompliance(&Params)
+		}
+		assert.ErrorContains(t, err, "unsupported protocol scheme")
 	}
 }
