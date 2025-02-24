@@ -304,7 +304,10 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 	}
 
 	defer func() {
-		file.Close()
+		err := file.Close()
+		if err != nil {
+			fmt.Printf("failed to close file: %v", err)
+		}
 	}()
 
 	body := &bytes.Buffer{}

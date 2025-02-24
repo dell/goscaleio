@@ -208,7 +208,7 @@ func (r RealSyscall) Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscal
 
 var ioctlWrapper = func(syscaller Syscaller, fd, op uintptr, arg *ioctlGUID) error {
 	// conversion of a Pointer to uintptr must appear in the call itself when calling syscall.Syscall
-	_, _, errno := syscaller.Syscall(syscall.SYS_IOCTL, fd, op, uintptr(unsafe.Pointer(arg)))
+	_, _, errno := syscaller.Syscall(syscall.SYS_IOCTL, fd, op, uintptr(unsafe.Pointer(arg))) // #nosec G103
 	if errno != 0 {
 		return errno
 	}
