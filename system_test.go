@@ -39,7 +39,7 @@ func TestModifyPerformanceProfile(t *testing.T) {
 				switch param.PerfProfile {
 				case "Compact1":
 					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte(`{"error": "500 Internal Server Error"}`))
+					w.Write([]byte(`{"error": "perfProfile should get one of the following values: Compact, HighPerformance, but its value is Compact1"}`))
 				default:
 					w.WriteHeader(http.StatusOK)
 				}
@@ -169,7 +169,7 @@ func TestRemoveStandByMDM(t *testing.T) {
 					w.Write([]byte(`{"error": "404 Not Found"}`))
 				case "1d9004d91b4ba505":
 					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte(`{"error": "500 Internal Server Error"}`))
+					w.Write([]byte(`{"error": "The MDM could not be found"}`))
 				default:
 					w.WriteHeader(http.StatusOK)
 				}
@@ -232,7 +232,7 @@ func TestChangeMDMOwnership(t *testing.T) {
 				switch param.ID {
 				case "1d9004d91b4ba504":
 					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte(`{"error": "500 Internal Server Error"}`))
+					w.Write([]byte(`{"error": "The MDM could not be found"}`))
 				default:
 					w.WriteHeader(http.StatusOK)
 				}
@@ -298,7 +298,7 @@ func TestSwitchClusterMode(t *testing.T) {
 				switch param.Mode {
 				case "Failure - FiveNodes":
 					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte(`{"error": "500 Internal Server Error"}`))
+					w.Write([]byte(`{"error": "The MDM could not be found"}`))
 				default:
 					w.WriteHeader(http.StatusOK)
 				}
@@ -420,7 +420,7 @@ func TestRenameMdm(t *testing.T) {
 				switch param.ID {
 				case "FiveNodes":
 					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte(`{"error": "500 Internal Server Error"}`))
+					w.Write([]byte(`{"error": "An MDM with the same name already exists"}`))
 				default:
 					w.WriteHeader(http.StatusOK)
 				}

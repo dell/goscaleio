@@ -219,26 +219,59 @@ func TestCreateTreeQuota(t *testing.T) {
 }
 
 func TestDeleteTreeQuota(t *testing.T) {
-	id := "00000003-006a-0000-0600-000000000000"
+	type testCase struct {
+		id string
+		expected error
+	}
+	cases := []testCase{
+		{
+			id:       "00000003-006a-0000-0600-000000000000",
+			expected: nil,
+		},
+		{
+			id:       "1234",
+			expected: errors.New("500 Internal Server Error"),
+		},
+	}
 
 	// mock a powerflex endpoint
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/rest/v1/file-tree-quotas/00000003-006a-0000-0600-000000000000" {
+			w.WriteHeader(http.StatusNoContent)
+		} else if r.URL.Path == "/rest/v1/file-tree-quotas/1234" {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "invalid Tree Quota. Please try again with the correct ID or name"}`))
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
-	client.configConnect.Version = "4.0"
-	if err != nil {
-		t.Fatal(err)
-	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run("", func(_ *testing.T) {
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client.configConnect.Version = "4.0"
+			if err != nil {
+				t.Fatal(err)
+			}
 
-	s := System{
-		client: client,
-	}
+			s := System{
+				client: client,
+			}
 
-	err = s.DeleteTreeQuota(id)
-	assert.Nil(t, err)
+			err = s.DeleteTreeQuota(tc.id)
+			if err != nil {
+				if tc.expected == nil {
+					t.Errorf("Deleting tree quota did not work as expected, \n\tgot: %s \n\twant: %v", err, tc.expected)
+				} else {
+					if err.Error() != tc.expected.Error() {
+						t.Errorf("Deleting tree quota did not work as expected, \n\tgot: %s \n\twant: %s", err, tc.expected)
+					}
+				}
+			}
+		})
+	}
 }
 
 func TestModifyTreeQuota(t *testing.T) {
@@ -259,11 +292,15 @@ func TestModifyTreeQuota(t *testing.T) {
 			"",
 			1100,
 			"",
-			errors.New("file system name or ID is mandatory, please enter a valid value"),
+			errors.New("500 Internal Server Error"),
 		},
 	}
 	// mock a powerflex endpoint
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/rest/v1/file-tree-quotas/" {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "file system name or ID is mandatory, please enter a valid value"}`))
+		}
 	}))
 	defer svr.Close()
 
