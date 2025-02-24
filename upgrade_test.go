@@ -916,6 +916,9 @@ func TestTestConnection(t *testing.T) {
 func TestUnsupportedProtocolScheme(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
 		switch req.RequestURI {
+		case "/api/version":
+			resp.WriteHeader(http.StatusOK)
+			fmt.Fprintln(resp, "4.0")
 		case "/rest/auth/login":
 			resp.WriteHeader(http.StatusOK)
 			fmt.Fprintln(resp, `{"access_token":"mock_access_token"}`)
