@@ -48,8 +48,6 @@ func TestNewGateway(t *testing.T) {
 		http.NotFound(w, r)
 	}))
 
-	defer server.Close()
-
 	gc, err := NewGateway(server.URL, "test_username", "test_password", false, false)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -59,6 +57,57 @@ func TestNewGateway(t *testing.T) {
 	assert.NotNil(t, gc, "GatewayClient is nil")
 	assert.Equal(t, "mock_access_token", gc.token, "Unexpected access token")
 	assert.Equal(t, "4.0", gc.version, "Unexpected version")
+
+	// error test - empty host
+	gc, err = NewGateway("", "test_username", "test_password", false, false)
+	assert.Nil(t, gc, "GatewayClient is not nil")
+	assert.Error(t, err, "missing endpoint")
+
+	server.Close()
+
+	////////////////
+	// version response tests
+	////////////////
+	// error response
+	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && r.URL.Path == "/rest/auth/login" {
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintln(w, `{"access_token":"mock_access_token"}`)
+			return
+		}
+		if r.Method == http.MethodGet && r.URL.Path == "/api/version" {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+	}))
+	gc, err = NewGateway(server.URL, "test_username", "test_password", false, false)
+	assert.NotNil(t, err, "Expected error")
+	assert.Nil(t, gc, "GatewayClient is nil")
+	server.Close()
+
+	// version 3.5 path
+	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && r.URL.Path == "/rest/auth/login" {
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintln(w, `{"access_token":"mock_access_token"}`)
+			return
+		}
+		if r.Method == http.MethodGet && r.URL.Path == "/api/version" {
+			w.Header().Set("Content-Type", "text/plain")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintln(w, "3.5")
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	gc, err = NewGateway(server.URL, "test_username", "test_password", false, false)
+	assert.Nil(t, err, "Unexpected error")
+	assert.NotNil(t, gc, "GatewayClient is nil")
+	assert.Equal(t, "", gc.token, "") // no token for 3.5
+	assert.Equal(t, "3.5", gc.version, "Unexpected version")
 }
 
 func TestNewGatewayInsecure(t *testing.T) {
@@ -187,7 +236,7 @@ func TestGetVersion(t *testing.T) {
 				}
 			},
 			expected:    "",
-			expectedErr: "",
+			expectedErr: "Error: 400 Bad Request",
 		},
 		{
 			name: "error extracting version string",
@@ -307,6 +356,24 @@ func TestUploadPackages(t *testing.T) {
 
 		_, err = gc.UploadPackages([]string{name})
 		assert.ErrorContains(t, err, "received bad response")
+	})
+
+	t.Run("error - set cookie", func(t *testing.T) {
+		defaultCookieFunc := setCookieFunc
+		setCookieFunc = func(_ http.Header, _ string) error {
+			return errors.New("cookie error")
+		}
+		name := "test_file.tar"
+		err := os.WriteFile(name, []byte("package data"), 0644)
+		assert.NoError(t, err)
+
+		defer os.Remove(name)
+
+		gc.version = "4.0"
+
+		_, err = gc.UploadPackages([]string{name})
+		assert.Error(t, err)
+		setCookieFunc = defaultCookieFunc
 	})
 
 }
@@ -438,6 +505,37 @@ func TestParseCSV(t *testing.T) {
 		gc := &GatewayClient{}
 		_, err := gc.ParseCSV("nonexistent.csv")
 		assert.Error(t, err)
+	})
+
+	t.Run("cookie error", func(t *testing.T) {
+		defaultCookieFunc := setCookieFunc
+		setCookieFunc = func(_ http.Header, _ string) error {
+			return errors.New("cookie error")
+		}
+		file, err := os.CreateTemp("", "test_file.csv")
+		if err != nil {
+			t.Fatalf("Failed to create temp file: %v", err)
+		}
+		defer file.Close()
+
+		_, err = file.WriteString("header1,header2\nvalue1,value2")
+		if err != nil {
+			t.Fatalf("Failed to write to temp file: %v", err)
+		}
+
+		defer os.Remove(file.Name())
+
+		gc := &GatewayClient{
+			http:     server.Client(),
+			host:     server.URL,
+			username: "test_username",
+			password: "test_password",
+			version:  "4.0",
+		}
+
+		_, err = gc.ParseCSV(file.Name())
+		assert.Error(t, err)
+		setCookieFunc = defaultCookieFunc
 	})
 
 }
@@ -1417,6 +1515,134 @@ func TestParseJSONError(t *testing.T) {
 			err := ParseJSONError(tt.response)
 			if !reflect.DeepEqual(err, tt.expectedErr) {
 				t.Errorf("Expected error %v, got %v", tt.expectedErr, err)
+			}
+		})
+	}
+}
+
+func TestGatewayClient_NewTokenGeneration(t *testing.T) {
+	// create mock HTTP servers for various needs
+	successServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && r.URL.Path == "/rest/auth/login" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintln(w, `{"access_token":"mock_access_token"}`)
+			return
+		}
+		http.NotFound(w, r)
+	}))
+
+	failServerLogin := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && r.URL.Path == "/rest/auth/login" {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		http.NotFound(w, r)
+	}))
+
+	closedServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && r.URL.Path == "/rest/auth/login" {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	closedServer.Close()
+
+	defer func() {
+		successServer.Close()
+		failServerLogin.Close()
+	}()
+	type fields struct {
+		http     *http.Client
+		host     string
+		username string
+		password string
+		token    string
+		version  string
+		insecure bool
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "success",
+			fields: fields{
+				http:     &http.Client{},
+				host:     successServer.URL,
+				username: "admin",
+				password: "password",
+				token:    "",
+				version:  "4.0",
+				insecure: true,
+			},
+			want:    "mock_access_token",
+			wantErr: false,
+		},
+		{
+			name: "login error",
+			fields: fields{
+				http:     &http.Client{},
+				host:     failServerLogin.URL,
+				username: "admin",
+				password: "password",
+				token:    "",
+				version:  "4.0",
+				insecure: true,
+			},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name: "bad request",
+			fields: fields{
+				http:     &http.Client{},
+				host:     failServerLogin.URL + "*?",
+				username: "admin",
+				password: "password",
+				token:    "",
+				version:  "4.0",
+				insecure: true,
+			},
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name: "closed server",
+			fields: fields{
+				http:     &http.Client{},
+				host:     closedServer.URL,
+				username: "admin",
+				password: "password",
+				token:    "",
+				version:  "4.0",
+				insecure: true,
+			},
+			want:    "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gc := &GatewayClient{
+				http:     tt.fields.http,
+				host:     tt.fields.host,
+				username: tt.fields.username,
+				password: tt.fields.password,
+				token:    tt.fields.token,
+				version:  tt.fields.version,
+				insecure: tt.fields.insecure,
+			}
+			got, err := gc.NewTokenGeneration()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GatewayClient.NewTokenGeneration() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GatewayClient.NewTokenGeneration() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -107,11 +107,6 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		}
 
 		gc.token = token
-
-		version, err = gc.GetVersion()
-		if err != nil {
-			return nil, err
-		}
 		gc.version = version
 	}
 
@@ -196,7 +191,7 @@ func (gc *GatewayClient) GetVersion() (string, error) {
 	case resp == nil:
 		return "", errNilReponse
 	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
-		return "", nil
+		return "", errors.New("Error: " + resp.Status)
 	}
 
 	version, err := extractString(resp)
@@ -308,11 +303,8 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 		return &gatewayResponse, filePathError
 	}
 
-	defer func() error {
-		if err := file.Close(); err != nil {
-			return err
-		}
-		return nil
+	defer func() {
+		file.Close()
 	}()
 
 	body := &bytes.Buffer{}
@@ -1233,6 +1225,10 @@ type Host struct {
 }
 
 func storeCookie(header http.Header, host string) error {
+	return storeCookieFunc(header, host)
+}
+
+var storeCookieFunc = func(header http.Header, host string) error {
 	if header != nil && header["Set-Cookie"] != nil {
 
 		newCookie := strings.Split(header["Set-Cookie"][0], ";")[0]
@@ -1272,6 +1268,11 @@ func storeCookie(header http.Header, host string) error {
 }
 
 func setCookie(header http.Header, host string) error {
+	return setCookieFunc(header, host)
+}
+
+var setCookieFunc = func(header http.Header, host string) error {
+
 	if globalCookie != "" {
 		header.Set("Cookie", "LEGACYGWCOOKIE="+strings.ReplaceAll(globalCookie, "_", "|"))
 	} else {
