@@ -651,6 +651,27 @@ func TestDeletePackage(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 200, packageResponse.StatusCode)
 	})
+	t.Run("error - set cookies", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+		defer server.Close()
+		defaultSetCookieFunc := setCookieFunc
+		setCookieFunc = func(_ http.Header, _ string) error {
+			return errors.New("cookie error")
+		}
+
+		gc := &GatewayClient{
+			http:    &http.Client{},
+			host:    server.URL,
+			version: "4.0",
+			token:   "dummy_token",
+		}
+
+		_, err := gc.DeletePackage("test_package")
+		assert.Error(t, err)
+		setCookieFunc = defaultSetCookieFunc
+	})
 	t.Run("successful response with bearer token", func(t *testing.T) {
 		responseJSON := `{
 		"StatusCode": 200
@@ -705,12 +726,17 @@ func TestDeletePackage(t *testing.T) {
 }
 
 func TestBeginInstallation(t *testing.T) {
+	defaultCookiesFunc := setCookieFunc
+	after := func() {
+		setCookieFunc = defaultCookiesFunc
+	}
 	tests := map[string]struct {
 		server           *httptest.Server
 		version          string
 		expectedResponse *types.GatewayResponse
 		expectedErr      error
 		expectedStatus   int
+		setup            func()
 	}{
 		"success with version 4.0": {
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -722,6 +748,23 @@ func TestBeginInstallation(t *testing.T) {
 			})),
 			version:        "4.0",
 			expectedStatus: http.StatusOK,
+		},
+		"fail - setCookie": {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/im/types/Configuration/actions/install") {
+					w.WriteHeader(http.StatusAccepted)
+					return
+				}
+				http.NotFound(w, r)
+			})),
+			version:        "4.0",
+			expectedStatus: -1,
+			expectedErr:    errors.New("Error While Handling Cookie: cookie error"),
+			setup: func() {
+				setCookieFunc = func(_ http.Header, _ string) error {
+					return errors.New("cookie error")
+				}
+			},
 		},
 		"success with version < 4.0": {
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -751,6 +794,7 @@ func TestBeginInstallation(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			defer tt.server.Close()
+			defer after()
 
 			gc := &GatewayClient{
 				http:     &http.Client{},
@@ -759,10 +803,18 @@ func TestBeginInstallation(t *testing.T) {
 				password: "test_password",
 				version:  tt.version,
 			}
+			if tt.setup != nil {
+				tt.setup()
+			}
 
 			resp, err := gc.BeginInstallation("{}", "mdm_user", "mdm_password", "lia_password", true, true, true, false)
-			assert.Nil(t, err)
-			assert.Equal(t, tt.expectedStatus, resp.StatusCode)
+			if tt.expectedErr != nil {
+				assert.EqualError(t, err, tt.expectedErr.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, resp)
+				assert.Equal(t, tt.expectedStatus, resp.StatusCode)
+			}
 		})
 	}
 }
