@@ -842,6 +842,19 @@ func TestMoveToNextPhase(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 	})
+	t.Run("fail - setCookie", func(t *testing.T) {
+		temp := setCookieFunc
+		setCookieFunc = func(_ http.Header, _ string) error {
+			return errors.New("cookie error")
+		}
+		gc.username = "test_username"
+		gc.password = "test_password"
+		gc.version = "4.0"
+
+		_, err := gc.MoveToNextPhase()
+		assert.Error(t, err)
+		setCookieFunc = temp
+	})
 	t.Run("successful response with bearer token", func(t *testing.T) {
 		gc.version = "4.0"
 		gc.token = "dummy_token"
@@ -893,6 +906,19 @@ func TestRetryPhase(t *testing.T) {
 		gatewayResponse, err := gc.RetryPhase()
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("fail - setCookie", func(t *testing.T) {
+		temp := setCookieFunc
+		setCookieFunc = func(_ http.Header, _ string) error {
+			return errors.New("cookie error")
+		}
+		gc.username = "test_username"
+		gc.password = "test_password"
+		gc.version = "4.0"
+
+		_, err := gc.RetryPhase()
+		assert.Error(t, err)
+		setCookieFunc = temp
 	})
 	t.Run("successful response with bearer token", func(t *testing.T) {
 		gc.version = "4.0"
@@ -946,6 +972,19 @@ func TestAbortOperation(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 	})
+	t.Run("fail - setCookie", func(t *testing.T) {
+		temp := setCookieFunc
+		setCookieFunc = func(_ http.Header, _ string) error {
+			return errors.New("cookie error")
+		}
+		gc.username = "test_username"
+		gc.password = "test_password"
+		gc.version = "4.0"
+
+		_, err := gc.AbortOperation()
+		assert.Error(t, err)
+		setCookieFunc = temp
+	})
 	t.Run("successful response with bearer token", func(t *testing.T) {
 		gc.version = "4.0"
 		gc.token = "dummy_token"
@@ -998,6 +1037,19 @@ func TestClearQueueCommand(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 	})
+	t.Run("fail - setCookie", func(t *testing.T) {
+		temp := setCookieFunc
+		setCookieFunc = func(_ http.Header, _ string) error {
+			return errors.New("cookie error")
+		}
+		gc.username = "test_username"
+		gc.password = "test_password"
+		gc.version = "4.0"
+
+		_, err := gc.ClearQueueCommand()
+		assert.Error(t, err)
+		setCookieFunc = temp
+	})
 	t.Run("successful response with bearer token", func(t *testing.T) {
 		gc.version = "4.0"
 		gc.token = "dummy_token"
@@ -1048,6 +1100,31 @@ func TestMoveToIdlePhase(t *testing.T) {
 		gatewayResponse, err := gc.MoveToIdlePhase()
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("fail - setCookie", func(t *testing.T) {
+		temp := setCookieFunc
+		setCookieFunc = func(_ http.Header, _ string) error {
+			return errors.New("cookie error")
+		}
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodPost && r.URL.Path == "/im/types/ProcessPhase/actions/moveToIdlePhase" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			http.NotFound(w, r)
+		}))
+		defer server.Close()
+		gc := &GatewayClient{
+			http:     &http.Client{},
+			host:     server.URL,
+			username: "test_username",
+			password: "test_password",
+			version:  "4.0",
+		}
+
+		_, err := gc.MoveToIdlePhase()
+		assert.Error(t, err)
+		setCookieFunc = temp
 	})
 	t.Run("happy path with bearer token", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1226,6 +1303,18 @@ func TestUninstallCluster(t *testing.T) {
 		gatewayResponse, err := gc.UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, false)
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
+	})
+	t.Run("error - set cookies", func(t *testing.T) {
+		temp := setCookieFunc
+		setCookieFunc = func(_ http.Header, _ string) error {
+			return errors.New("cookie error")
+		}
+		gc.version = "4.0"
+		gc.token = "dummy_token"
+
+		_, err := gc.UninstallCluster(jsonStr, mdmUsername, mdmPassword, liaPassword, allowNonSecureCommunicationWithMdm, allowNonSecureCommunicationWithLia, disableNonMgmtComponentsAuth, false)
+		assert.Error(t, err)
+		setCookieFunc = temp
 	})
 	t.Run("successful repsonse with basic auth", func(t *testing.T) {
 		gc.username = "test_username"
@@ -1769,6 +1858,92 @@ func TestGatewayClient_NewTokenGeneration(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("GatewayClient.NewTokenGeneration() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGatewayClient_GetInQueueCommand(t *testing.T) {
+	defaultSetCookieFunc := setCookieFunc
+	after := func() {
+		setCookieFunc = defaultSetCookieFunc
+	}
+	successServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && r.URL.Path == "/rest/auth/login" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintln(w, `{"access_token":"mock_access_token"}`)
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	type fields struct {
+		http     *http.Client
+		host     string
+		username string
+		password string
+		token    string
+		version  string
+		insecure bool
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    []types.MDMQueueCommandDetails
+		wantErr bool
+		setup   func()
+	}{
+		{name: "success case",
+			fields: fields{
+				http:     &http.Client{},
+				host:     successServer.URL,
+				username: "admin",
+				password: "password",
+				token:    "",
+				version:  "4.0",
+				insecure: true,
+			},
+			want:    []types.MDMQueueCommandDetails{},
+			wantErr: false,
+		},
+		{name: "fail - set cookies",
+			fields: fields{
+				http:     &http.Client{},
+				host:     successServer.URL,
+				username: "admin",
+				password: "password",
+				token:    "",
+				version:  "4.0",
+				insecure: true,
+			},
+			want:    nil,
+			wantErr: true,
+			setup: func() {
+				setCookieFunc = func(_ http.Header, _ string) error {
+					return errors.New("cookie error")
+				}
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer after()
+			gc := &GatewayClient{
+				http:     tt.fields.http,
+				host:     tt.fields.host,
+				username: tt.fields.username,
+				password: tt.fields.password,
+				token:    tt.fields.token,
+				version:  tt.fields.version,
+				insecure: tt.fields.insecure,
+			}
+			if tt.setup != nil {
+				tt.setup()
+			}
+			_, err := gc.GetInQueueCommand()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GatewayClient.GetInQueueCommand() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
 		})
 	}
