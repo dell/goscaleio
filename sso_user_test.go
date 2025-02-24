@@ -231,9 +231,9 @@ func TestResetSSOUserPassword(t *testing.T) {
 		},
 	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/rest/v1/users/" + "eeb2dec800000001" + "/reset-password" {
+		if r.URL.Path == "/rest/v1/users/"+"eeb2dec800000001"+"/reset-password" {
 			w.WriteHeader(http.StatusOK)
-		} else if r.URL.Path == "/rest/v1/users/" + "Invalid" + "/reset-password" {
+		} else if r.URL.Path == "/rest/v1/users/"+"Invalid"+"/reset-password" {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error": "Invalid enum value"}`))
 		}

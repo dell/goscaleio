@@ -26,7 +26,6 @@ func (m MockSyscall) Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscal
 	return 0, 0, m.ReturnErrno
 }
 
-
 type mockFileInfo struct {
 	isDir bool
 }

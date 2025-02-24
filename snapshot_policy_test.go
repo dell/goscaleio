@@ -116,9 +116,9 @@ func TestRenameSnapshotPolicy(t *testing.T) {
 		},
 	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/instances/SnapshotPolicy::" + ID2 + "/action/renameSnapshotPolicy" {
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/action/renameSnapshotPolicy" {
 			w.WriteHeader(http.StatusOK)
-		} else if r.URL.Path == "/api/instances/SnapshotPolicy::" + "1234" + "/action/renameSnapshotPolicy" {
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"1234"+"/action/renameSnapshotPolicy" {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
 		}
@@ -176,9 +176,9 @@ func TestModifySnapshotPolicy(t *testing.T) {
 		},
 	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/instances/SnapshotPolicy::" + ID2 + "/action/modifySnapshotPolicy" {
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/action/modifySnapshotPolicy" {
 			w.WriteHeader(http.StatusOK)
-		} else if r.URL.Path == "/api/instances/SnapshotPolicy::" + "Invalid" + "/action/modifySnapshotPolicy" {
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"Invalid"+"/action/modifySnapshotPolicy" {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
 		}
@@ -234,9 +234,9 @@ func TestAssignVolumeToSnapshotPolicy(t *testing.T) {
 		},
 	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/instances/SnapshotPolicy::" + ID2 + "/action/addSourceVolumeToSnapshotPolicy" {
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/action/addSourceVolumeToSnapshotPolicy" {
 			w.WriteHeader(http.StatusOK)
-		} else if r.URL.Path == "/api/instances/SnapshotPolicy::" + "Invalid" + "/action/addSourceVolumeToSnapshotPolicy" {
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"Invalid"+"/action/addSourceVolumeToSnapshotPolicy" {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
 		}
@@ -342,9 +342,9 @@ func TestPauseSnapshotPolicy(t *testing.T) {
 		},
 	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/instances/SnapshotPolicy::" + ID2 + "/action/pauseSnapshotPolicy"{
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/action/pauseSnapshotPolicy" {
 			w.WriteHeader(http.StatusOK)
-		} else if r.URL.Path == "/api/instances/SnapshotPolicy::" + "Invalid" + "/action/pauseSnapshotPolicy"{
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"Invalid"+"/action/pauseSnapshotPolicy" {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
 		}
@@ -393,9 +393,9 @@ func TestResumeSnapshotPolicy(t *testing.T) {
 		},
 	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/instances/SnapshotPolicy::" + ID2 + "/action/resumeSnapshotPolicy"{
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/action/resumeSnapshotPolicy" {
 			w.WriteHeader(http.StatusOK)
-		} else if r.URL.Path == "/api/instances/SnapshotPolicy::" + "Invalid" + "/action/resumeSnapshotPolicy"{
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"Invalid"+"/action/resumeSnapshotPolicy" {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
 		}
@@ -444,9 +444,9 @@ func TestRemoveSnapshotPolicy(t *testing.T) {
 		},
 	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/instances/SnapshotPolicy::" + ID2 + "/action/removeSnapshotPolicy"{
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/action/removeSnapshotPolicy" {
 			w.WriteHeader(http.StatusOK)
-		} else if r.URL.Path == "/api/instances/SnapshotPolicy::" + "Invalid" + "/action/removeSnapshotPolicy"{
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"Invalid"+"/action/removeSnapshotPolicy" {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
 		}
@@ -495,9 +495,9 @@ func TestGetSourceVolume(t *testing.T) {
 		},
 	}
 	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/instances/SnapshotPolicy::" + ID2 + "/relationships/SourceVolume"{
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/relationships/SourceVolume" {
 			w.WriteHeader(http.StatusOK)
-		} else if r.URL.Path == "/api/instances/SnapshotPolicy::" + "Invalid" + "/relationships/SourceVolume"{
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"Invalid"+"/relationships/SourceVolume" {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
 		}

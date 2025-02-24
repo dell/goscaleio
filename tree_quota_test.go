@@ -220,7 +220,7 @@ func TestCreateTreeQuota(t *testing.T) {
 
 func TestDeleteTreeQuota(t *testing.T) {
 	type testCase struct {
-		id string
+		id       string
 		expected error
 	}
 	cases := []testCase{
