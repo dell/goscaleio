@@ -599,6 +599,15 @@ func TestGetPackageDetails(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, packageDetails)
 	})
+	t.Run("set cookie error", func(t *testing.T) {
+		defaultCookieFunc := setCookieFunc
+		setCookieFunc = func(_ http.Header, _ string) error {
+			return errors.New("cookie error")
+		}
+		_, err := gc.GetPackageDetails()
+		assert.Error(t, err)
+		setCookieFunc = defaultCookieFunc
+	})
 	t.Run("successful response with basic auth", func(t *testing.T) {
 		gc.version = "3.0"
 		packageDetails, err := gc.GetPackageDetails()
@@ -1243,12 +1252,18 @@ func TestRenewInstallationCookie(t *testing.T) {
 }
 
 func TestValidateMDMDetails(t *testing.T) {
+
+	defaultCookiesFunc := setCookieFunc
+	after := func() {
+		setCookieFunc = defaultCookiesFunc
+	}
 	tests := map[string]struct {
 		mdmTopologyParam []byte
 		server           *httptest.Server
 		expectedResponse *types.GatewayResponse
 		version          string
 		expectedErr      error
+		setup            func()
 	}{
 		"success with version 4.0": {
 			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
@@ -1270,6 +1285,29 @@ func TestValidateMDMDetails(t *testing.T) {
 			},
 			version:     "4.0",
 			expectedErr: nil,
+		},
+		"failure - cookie error": {
+			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				resp := types.MDMTopologyDetails{
+					SdcIps: []string{"10.0.0.1", "10.0.0.2"},
+				}
+
+				data, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				w.WriteHeader(http.StatusOK)
+				w.Write(data)
+			})),
+			expectedResponse: nil,
+			version:          "4.0",
+			expectedErr:      errors.New("Error While Handling Cookie: Cookie error"),
+			setup: func() {
+				setCookieFunc = func(header http.Header, host string) error {
+					return errors.New("Cookie error")
+				}
+			},
 		},
 		"success with version < 4.0": {
 			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
@@ -1318,6 +1356,7 @@ func TestValidateMDMDetails(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			defer tt.server.Close()
+			defer after()
 
 			gc := &GatewayClient{
 				http:     &http.Client{},
@@ -1325,6 +1364,9 @@ func TestValidateMDMDetails(t *testing.T) {
 				username: "test_username",
 				password: "test_password",
 				version:  tt.version,
+			}
+			if tt.setup != nil {
+				tt.setup()
 			}
 
 			res, err := gc.ValidateMDMDetails(tt.mdmTopologyParam)
@@ -1341,6 +1383,10 @@ func TestValidateMDMDetails(t *testing.T) {
 }
 
 func TestGetClusterDetails(t *testing.T) {
+	defaultCookiesFunc := setCookieFunc
+	after := func() {
+		setCookieFunc = defaultCookiesFunc
+	}
 	tests := map[string]struct {
 		mdmTopologyParam   []byte
 		requireJSONOutput  bool
@@ -1349,6 +1395,7 @@ func TestGetClusterDetails(t *testing.T) {
 		expectedErr        error
 		expectedStatusCode int
 		expectedResponse   *types.GatewayResponse
+		setup              func()
 	}{
 		"success with version 4.0": {
 			mdmTopologyParam:  []byte(`{"mdmIps": ["192.168.0.1"]}`),
@@ -1372,6 +1419,29 @@ func TestGetClusterDetails(t *testing.T) {
 				ClusterDetails: types.MDMTopologyDetails{
 					SdcIps: []string{"10.0.0.1", "10.0.0.2"},
 				},
+			},
+		},
+		"error - set cookies": {
+			mdmTopologyParam:  []byte(`{"mdmIps": ["192.168.0.1"]}`),
+			requireJSONOutput: false,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				resp := types.MDMTopologyDetails{
+					SdcIps: []string{"10.0.0.1", "10.0.0.2"},
+				}
+				data, err := json.Marshal(resp)
+				if err != nil {
+					t.Fatal(err)
+				}
+				w.WriteHeader(http.StatusOK)
+				w.Write(data)
+			})),
+			version:            "4.0",
+			expectedStatusCode: http.StatusOK,
+			expectedErr:        errors.New("Error While Handling Cookie: Cookie error"),
+			setup: func() {
+				setCookieFunc = func(header http.Header, host string) error {
+					return errors.New("Cookie error")
+				}
 			},
 		},
 		"error getting cluster details": {
@@ -1446,6 +1516,7 @@ func TestGetClusterDetails(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			defer tt.server.Close()
+			defer after()
 
 			gc := &GatewayClient{
 				http:     &http.Client{},
@@ -1453,6 +1524,9 @@ func TestGetClusterDetails(t *testing.T) {
 				username: "test_username",
 				password: "test_password",
 				version:  tt.version,
+			}
+			if tt.setup != nil {
+				tt.setup()
 			}
 
 			res, err := gc.GetClusterDetails(tt.mdmTopologyParam, tt.requireJSONOutput)
