@@ -211,7 +211,7 @@ func TestGetVolume(t *testing.T) {
 	client, _ := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
 
 	defaultFindVolumeID := findVolumeIDFunc
-	defaultGetJSONRetry  := getJSONWithRetryFunc
+	defaultGetJSONRetry := getJSONWithRetryFunc
 	afterEach := func() {
 		findVolumeIDFunc = defaultFindVolumeID
 		getJSONWithRetryFunc = defaultGetJSONRetry

@@ -305,7 +305,7 @@ func TestUploadPackages(t *testing.T) {
 
 	t.Run("wrong file type", func(t *testing.T) {
 		name := "test_file.log"
-		err := os.WriteFile(name, []byte("package data"), 0o644)
+		err := os.WriteFile(name, []byte("package data"), 0600)
 		assert.NoError(t, err)
 		defer os.Remove(name)
 
@@ -315,7 +315,7 @@ func TestUploadPackages(t *testing.T) {
 
 	t.Run("successful upload", func(t *testing.T) {
 		name := "test_file.tar"
-		err := os.WriteFile(name, []byte("package data"), 0o644)
+		err := os.WriteFile(name, []byte("package data"), 0600)
 		assert.NoError(t, err)
 
 		defer os.Remove(name)
@@ -334,7 +334,7 @@ func TestUploadPackages(t *testing.T) {
 
 	t.Run("bad response code", func(t *testing.T) {
 		name := "test_file.tar"
-		err := os.WriteFile(name, []byte("package data"), 0o644)
+		err := os.WriteFile(name, []byte("package data"), 0600)
 		assert.NoError(t, err)
 		defer os.Remove(name)
 
@@ -363,7 +363,7 @@ func TestUploadPackages(t *testing.T) {
 			return errors.New("cookie error")
 		}
 		name := "test_file.tar"
-		err := os.WriteFile(name, []byte("package data"), 0o644)
+		err := os.WriteFile(name, []byte("package data"), 0600)
 		assert.NoError(t, err)
 
 		defer os.Remove(name)
@@ -445,7 +445,7 @@ func TestParseCSV(t *testing.T) {
 	t.Run("bad response code", func(t *testing.T) {
 		name := "test_file.csv"
 
-		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0o644)
+		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0600)
 		assert.NoError(t, err)
 		defer os.Remove(name)
 
@@ -475,7 +475,7 @@ func TestParseCSV(t *testing.T) {
 
 	t.Run("good response code, but no mdm", func(t *testing.T) {
 		name := "test_file.csv"
-		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0o644)
+		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0600)
 		assert.NoError(t, err)
 		defer os.Remove(name)
 
@@ -773,7 +773,7 @@ func TestBeginInstallation(t *testing.T) {
 			expectedStatus: http.StatusOK,
 		},
 		"non 200 status code": {
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
 				response := types.GatewayResponse{
 					Message: "Bad Request",
@@ -1438,7 +1438,7 @@ func TestValidateMDMDetails(t *testing.T) {
 			version:          "4.0",
 			expectedErr:      errors.New("Error While Handling Cookie: Cookie error"),
 			setup: func() {
-				setCookieFunc = func(header http.Header, host string) error {
+				setCookieFunc = func(_ http.Header, host string) error {
 					return errors.New("Cookie error")
 				}
 			},
@@ -1473,7 +1473,7 @@ func TestValidateMDMDetails(t *testing.T) {
 		},
 		"non 200 status code": {
 			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["10.10.0.1"]}`),
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
 				response := types.GatewayResponse{
 					Message: "Bad Request",
@@ -1573,7 +1573,7 @@ func TestGetClusterDetails(t *testing.T) {
 			expectedStatusCode: http.StatusOK,
 			expectedErr:        errors.New("Error While Handling Cookie: Cookie error"),
 			setup: func() {
-				setCookieFunc = func(header http.Header, host string) error {
+				setCookieFunc = func(_ http.Header, host string) error {
 					return errors.New("Cookie error")
 				}
 			},
@@ -1593,7 +1593,7 @@ func TestGetClusterDetails(t *testing.T) {
 		},
 		"non 200 status code": {
 			mdmTopologyParam: []byte(`{"mdmUser": "admin", "mdmPassword": "password", "mdmIps": ["192.168.0.1"]}`),
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
 				response := types.GatewayResponse{
 					Message: "Bad Request",

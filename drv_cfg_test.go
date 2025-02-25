@@ -187,7 +187,7 @@ func TestDrvCfgQueryGUID(t *testing.T) {
 		},
 		{
 			name: "Open device error",
-			mockOpen: func(name string) (*os.File, error) {
+			mockOpen: func(_ string) (*os.File, error) {
 				return nil, fmt.Errorf("open device error")
 			},
 			expectErr: true,
@@ -278,7 +278,7 @@ func TestDrvCfgQueryRescan(t *testing.T) {
 	}{
 		{
 			name: "error opening SDC device",
-			mockOpen: func(name string) (*os.File, error) {
+			mockOpen: func(_ string) (*os.File, error) {
 				return nil, fmt.Errorf("open device error")
 			},
 			expectedOut: "",

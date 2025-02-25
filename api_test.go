@@ -677,7 +677,7 @@ func TestWithContext(t *testing.T) {
 
 type failingReadCloser struct{}
 
-func (r *failingReadCloser) Read(p []byte) (n int, err error) {
+func (r *failingReadCloser) Read(_ []byte) (n int, err error) {
 	return 0, io.ErrUnexpectedEOF
 }
 
