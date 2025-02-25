@@ -111,7 +111,7 @@ func DrvCfgQueryGUID() (string, error) {
 	// #nosec CWE-242, validated buffer is large enough to hold data
 	err = ioctlWrapper(syscaller, f.Fd(), opCode, &buf)
 	if err != nil {
-		return "", fmt.Errorf("queryGUID error: %v", err)
+		return "", fmt.Errorf("QueryGUID error: %v", err)
 	}
 
 	rc, err := strconv.ParseInt(hex.EncodeToString(buf.rc[0:1]), 16, 64)
@@ -180,7 +180,7 @@ func DrvCfgQuerySystems() (*[]ConfiguredCluster, error) {
 
 	output, err := executeFunc("chroot", "/noderoot", drvCfg, "--query_mdm")
 	if err != nil {
-		return nil, fmt.Errorf("drvCfgQuerySystems: Request to query MDM failed : %v", err)
+		return nil, fmt.Errorf("failed to query MDM: %v", err)
 	}
 
 	// Parse the output to extract MDM information
