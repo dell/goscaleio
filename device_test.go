@@ -23,7 +23,27 @@ import (
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestNewDevice(t *testing.T) {
+	client := &Client{}
+	device := NewDevice(client)
+
+	assert.NotNil(t, device)
+	assert.NotNil(t, device.Device)
+	assert.Equal(t, client, device.client)
+}
+
+func TestNewDeviceEx(t *testing.T) {
+	client := &Client{}
+	existingDevice := &types.Device{}
+	device := NewDeviceEx(client, existingDevice)
+
+	assert.NotNil(t, device)
+	assert.Equal(t, existingDevice, device.Device)
+	assert.Equal(t, client, device.client)
+}
 
 func TestGetAllDevices(t *testing.T) {
 	type testCase struct {

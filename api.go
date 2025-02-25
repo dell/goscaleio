@@ -201,6 +201,10 @@ func (c *Client) getJSONWithRetry(
 	method, uri string,
 	body, resp interface{},
 ) error {
+	return getJSONWithRetryFunc(c, method, uri, body, resp)
+}
+
+var getJSONWithRetryFunc = func(c *Client, method, uri string, body, resp interface{}) error {
 	headers := make(map[string]string, 2)
 	headers[api.HeaderKeyAccept] = accHeader
 	headers[api.HeaderKeyContentType] = conHeader

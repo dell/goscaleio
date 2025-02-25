@@ -30,6 +30,14 @@ func TestGetTemplateByID(t *testing.T) {
 		version  string
 		expected error
 	}{
+		"error due to parsing response": {
+			id: "12345",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte("invalid json"))
+			})),
+			expected: fmt.Errorf("Error parsing response data for template: invalid character 'i' looking for beginning of value"),
+		},
 		"success version 4.0": {
 			id: "12345",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -153,6 +161,19 @@ func TestGetTemplateByFilters(t *testing.T) {
 				w.Write([]byte("invalid json"))
 			})),
 			expected: fmt.Errorf("Error While Parsing Response Data For Template: invalid character 'i' looking for beginning of value"),
+		},
+		"error due to template not found": {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.NotFound(w, r)
+			})),
+			expected: fmt.Errorf("Template not found"),
+		},
+		"error due to template details is empty": {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte("{}"))
+			})),
+			expected: fmt.Errorf("Template not found"),
 		},
 	}
 

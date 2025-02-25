@@ -25,6 +25,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNewFileSystem(t *testing.T) {
+	client := &Client{}
+	existingFileSystem := &types.FileSystem{}
+	fs := NewFileSystem(client, existingFileSystem)
+
+	assert.NotNil(t, fs)
+	assert.Equal(t, existingFileSystem, fs.FileSystem)
+	assert.Equal(t, client, fs.client)
+}
+
 func TestGetFileSystemByIDName(t *testing.T) {
 	type checkFn func(*testing.T, *types.FileSystem, error)
 	check := func(fns ...checkFn) []checkFn { return fns }
