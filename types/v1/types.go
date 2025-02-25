@@ -61,7 +61,6 @@ func (e Error) Error() string {
 			translation := TranslateErrorCodeToErrorMessage(e.ErrorDetails[0].Error)
 			if translation != "" {
 				e.Message = translation
-				e.Message = e.ErrorDetails[0].ErrorMessage
 				return translation
 			}
 		}

@@ -212,6 +212,15 @@ func TestResourceCredentialsCreateModifyDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Expect failure: inconsistent credentials config
+	_, err = system.CreateSwitchResourceCredential(
+		types.IomCredential{
+			SSHPrivateKey: "test",
+			KeyPairName:   "",
+		},
+	)
+	assert.Error(t, err)
+
 	// Modify Switch RC Successfully
 	_, err = system.ModifySwitchResourceCredential(
 		types.IomCredential{
@@ -222,6 +231,15 @@ func TestResourceCredentialsCreateModifyDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// Expect failure: inconsistent credentials config
+	_, err = system.ModifySwitchResourceCredential(
+		types.IomCredential{
+			SSHPrivateKey: "test",
+			KeyPairName:   "",
+		}, "123",
+	)
+	assert.Error(t, err)
 
 	// Create VCenter RC Successfully
 	_, err = system.CreateVCenterResourceCredential(
@@ -317,6 +335,15 @@ func TestResourceCredentialsCreateModifyDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Expect failure: inconsistent credentials config
+	_, err = system.CreateOsAdminResourceCredential(
+		types.OSAdminCredential{
+			SSHPrivateKey: "test",
+			KeyPairName:   "",
+		},
+	)
+	assert.Error(t, err)
+
 	// Modify OsAdmin RC Successfully
 	_, err = system.ModifyOsAdminResourceCredential(
 		types.OSAdminCredential{
@@ -328,6 +355,15 @@ func TestResourceCredentialsCreateModifyDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Expect failure: inconsistent credentials config
+	_, err = system.ModifyOsAdminResourceCredential(
+		types.OSAdminCredential{
+			SSHPrivateKey: "test",
+			KeyPairName:   "",
+		}, "123",
+	)
+	assert.Error(t, err)
+
 	// Create OsUser RC Successfully
 	_, err = system.CreateOsUserResourceCredential(
 		types.OSUserCredential{
@@ -337,6 +373,15 @@ func TestResourceCredentialsCreateModifyDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// Expect failure: inconsistent credentials config
+	_, err = system.CreateOsUserResourceCredential(
+		types.OSUserCredential{
+			SSHPrivateKey: "test",
+			KeyPairName:   "",
+		},
+	)
+	assert.Error(t, err)
 
 	// Modify OsUser RC Successfully
 	_, err = system.ModifyOsUserResourceCredential(
@@ -348,6 +393,15 @@ func TestResourceCredentialsCreateModifyDelete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// Expect failure: inconsistent credentials config
+	_, err = system.ModifyOsUserResourceCredential(
+		types.OSUserCredential{
+			SSHPrivateKey: "test",
+			KeyPairName:   "",
+		}, "123",
+	)
+	assert.Error(t, err)
 
 	// Delete Should work successfully
 

@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -108,11 +107,6 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		}
 
 		gc.token = token
-
-		version, err = gc.GetVersion()
-		if err != nil {
-			return nil, err
-		}
 		gc.version = version
 	}
 
@@ -197,7 +191,7 @@ func (gc *GatewayClient) GetVersion() (string, error) {
 	case resp == nil:
 		return "", errNilReponse
 	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
-		return "", nil
+		return "", fmt.Errorf("error response: %s", resp.Status)
 	}
 
 	version, err := extractString(resp)
@@ -212,7 +206,7 @@ func (gc *GatewayClient) GetVersion() (string, error) {
 	return version, nil
 }
 
-// UploadPackages used for upload packge to gateway server
+// UploadPackages used for upload package to gateway server
 func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayResponse, error) {
 	var gatewayResponse types.GatewayResponse
 
@@ -223,6 +217,9 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 
 		info, err := os.Stat(filePath)
 		if err != nil {
+			if os.IsNotExist(err) {
+				return &gatewayResponse, fmt.Errorf("file %s does not exist", filePath)
+			}
 			return &gatewayResponse, err
 		}
 
@@ -278,10 +275,10 @@ func (gc *GatewayClient) UploadPackages(filePaths []string) (*types.GatewayRespo
 
 		err := json.Unmarshal([]byte(responseString), &gatewayResponse)
 		if err != nil {
-			return &gatewayResponse, fmt.Errorf("Error For Uploading Package: %s", err)
+			return &gatewayResponse, fmt.Errorf("failed to parse response body: %v", err)
 		}
 
-		return &gatewayResponse, fmt.Errorf("Error For Uploading Package: %s", gatewayResponse.Message)
+		return &gatewayResponse, fmt.Errorf("received bad response: %s", gatewayResponse.Message)
 	}
 
 	gatewayResponse.StatusCode = 200
@@ -306,11 +303,11 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 		return &gatewayResponse, filePathError
 	}
 
-	defer func() error {
-		if err := file.Close(); err != nil {
-			return err
+	defer func() {
+		err := file.Close()
+		if err != nil {
+			fmt.Printf("failed to close file: %v", err)
 		}
-		return nil
 	}()
 
 	body := &bytes.Buffer{}
@@ -1231,6 +1228,10 @@ type Host struct {
 }
 
 func storeCookie(header http.Header, host string) error {
+	return storeCookieFunc(header, host)
+}
+
+var storeCookieFunc = func(header http.Header, host string) error {
 	if header != nil && header["Set-Cookie"] != nil {
 
 		newCookie := strings.Split(header["Set-Cookie"][0], ";")[0]
@@ -1270,6 +1271,10 @@ func storeCookie(header http.Header, host string) error {
 }
 
 func setCookie(header http.Header, host string) error {
+	return setCookieFunc(header, host)
+}
+
+var setCookieFunc = func(header http.Header, host string) error {
 	if globalCookie != "" {
 		header.Set("Cookie", "LEGACYGWCOOKIE="+strings.ReplaceAll(globalCookie, "_", "|"))
 	} else {
@@ -1294,7 +1299,7 @@ func setCookie(header http.Header, host string) error {
 func loadConfig() (*CookieConfig, error) {
 	configFile, _ := getConfigPath()
 	if _, err := os.Stat(filepath.Clean(configFile)); err == nil {
-		data, err := ioutil.ReadFile(configFile)
+		data, err := os.ReadFile(configFile)
 		if err != nil {
 			return nil, err
 		}
@@ -1318,7 +1323,7 @@ func writeConfig(config *CookieConfig) error {
 	}
 	// #nosec G306
 	configFile, _ := getConfigPath()
-	err = ioutil.WriteFile(configFile, data, 0o600)
+	err = os.WriteFile(configFile, data, 0o600)
 	if err != nil {
 		return err
 	}

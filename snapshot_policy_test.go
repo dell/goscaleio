@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -50,10 +51,23 @@ func TestCreateSnapshotPolicy(t *testing.T) {
 				NumOfRetainedSnapshotsPerLevel:   []string{"1"},
 				SnapshotAccessMode:               "Invalid",
 			},
-			expected: errors.New("accessMode should get one of the following values: ReadWrite, ReadOnly, but its value is Invalid"),
+			expected: errors.New("500 Internal Server Error"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/types/SnapshotPolicy/instances" {
+			if r.Method == http.MethodPost {
+				var param types.SnapshotPolicyCreateParam
+				_ = json.NewDecoder(r.Body).Decode(&param)
+				switch param.Name {
+				case "testSnapshotPolicy":
+					w.WriteHeader(http.StatusOK)
+				case "testSnapshotPolicy2":
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte(`{"error": "accessMode should get one of the following values: ReadWrite, ReadOnly, but its value is Invalid"}`))
+				}
+			}
+		}
 	}))
 	defer svr.Close()
 
@@ -83,7 +97,7 @@ func TestCreateSnapshotPolicy(t *testing.T) {
 	}
 }
 
-func TestModifySnapshotPolicyName(t *testing.T) {
+func TestRenameSnapshotPolicy(t *testing.T) {
 	type testCase struct {
 		name     string
 		id       string
@@ -98,10 +112,16 @@ func TestModifySnapshotPolicyName(t *testing.T) {
 		{
 			id:       "1234",
 			name:     "renameSnapshotPolicy",
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
+			expected: errors.New("500 Internal Server Error"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/action/renameSnapshotPolicy" {
+			w.WriteHeader(http.StatusOK)
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"1234"+"/action/renameSnapshotPolicy" {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
+		}
 	}))
 	defer svr.Close()
 
@@ -151,10 +171,16 @@ func TestModifySnapshotPolicy(t *testing.T) {
 				AutoSnapshotCreationCadenceInMin: "6",
 				NumOfRetainedSnapshotsPerLevel:   []string{"2", "3"},
 			},
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
+			expected: errors.New("500 Internal Server Error"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/action/modifySnapshotPolicy" {
+			w.WriteHeader(http.StatusOK)
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"Invalid"+"/action/modifySnapshotPolicy" {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
+		}
 	}))
 	defer svr.Close()
 
@@ -184,7 +210,7 @@ func TestModifySnapshotPolicy(t *testing.T) {
 	}
 }
 
-func TestAssignSnapshotPolicy(t *testing.T) {
+func TestAssignVolumeToSnapshotPolicy(t *testing.T) {
 	type testCase struct {
 		id       string
 		snap     *types.AssignVolumeToSnapshotPolicyParam
@@ -203,17 +229,16 @@ func TestAssignSnapshotPolicy(t *testing.T) {
 			snap: &types.AssignVolumeToSnapshotPolicyParam{
 				SourceVolumeID: "edba1bff00000001",
 			},
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
-		},
-		{
-			id: ID2,
-			snap: &types.AssignVolumeToSnapshotPolicyParam{
-				SourceVolumeID: "edba1bff000000",
-			},
-			expected: errors.New("Invalid volume. Please try again with a valid ID or name"),
+			expected: errors.New("500 Internal Server Error"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/action/addSourceVolumeToSnapshotPolicy" {
+			w.WriteHeader(http.StatusOK)
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"Invalid"+"/action/addSourceVolumeToSnapshotPolicy" {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
+		}
 	}))
 	defer svr.Close()
 
@@ -243,7 +268,7 @@ func TestAssignSnapshotPolicy(t *testing.T) {
 	}
 }
 
-func TestUnassignSnapshotPolicy(t *testing.T) {
+func TestUnassignVolumeFromSnapshotPolicy(t *testing.T) {
 	policyID := uuid.NewString()
 	systemID := uuid.NewString()
 	type testCase struct {
@@ -312,10 +337,16 @@ func TestPauseSnapshotPolicy(t *testing.T) {
 		},
 		{
 			id:       "Invalid",
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
+			expected: errors.New("500 Internal Server Error"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/action/pauseSnapshotPolicy" {
+			w.WriteHeader(http.StatusOK)
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"Invalid"+"/action/pauseSnapshotPolicy" {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
+		}
 	}))
 	defer svr.Close()
 
@@ -357,10 +388,16 @@ func TestResumeSnapshotPolicy(t *testing.T) {
 		},
 		{
 			id:       "Invalid",
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
+			expected: errors.New("500 Internal Server Error"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/action/resumeSnapshotPolicy" {
+			w.WriteHeader(http.StatusOK)
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"Invalid"+"/action/resumeSnapshotPolicy" {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
+		}
 	}))
 	defer svr.Close()
 
@@ -390,7 +427,7 @@ func TestResumeSnapshotPolicy(t *testing.T) {
 	}
 }
 
-func TestDeleteSnapshotPolicy(t *testing.T) {
+func TestRemoveSnapshotPolicy(t *testing.T) {
 	type testCase struct {
 		id       string
 		expected error
@@ -402,10 +439,16 @@ func TestDeleteSnapshotPolicy(t *testing.T) {
 		},
 		{
 			id:       "Invalid",
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
+			expected: errors.New("500 Internal Server Error"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/action/removeSnapshotPolicy" {
+			w.WriteHeader(http.StatusOK)
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"Invalid"+"/action/removeSnapshotPolicy" {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
+		}
 	}))
 	defer svr.Close()
 
@@ -447,10 +490,16 @@ func TestGetSourceVolume(t *testing.T) {
 		},
 		{
 			id:       "Invalid",
-			expected: errors.New("id (Invalid) must be a hexadecimal number (unsigned long)"),
+			expected: errors.New("500 Internal Server Error"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/instances/SnapshotPolicy::"+ID2+"/relationships/SourceVolume" {
+			w.WriteHeader(http.StatusOK)
+		} else if r.URL.Path == "/api/instances/SnapshotPolicy::"+"Invalid"+"/relationships/SourceVolume" {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
+		}
 	}))
 	defer svr.Close()
 

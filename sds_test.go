@@ -687,3 +687,7 @@ func TestSdsActionsSuccess(t *testing.T) {
 	err = pd.SetSdsPerformanceProfile(sdsID, "PowerProfile")
 	assert.Nil(t, err)
 }
+
+func TestNewSdsEx(t *testing.T) {
+	assert.NotNil(t, NewSdsEx(nil, nil))
+}

@@ -107,6 +107,16 @@ func TestDumpRequest(t *testing.T) {
 		t.Errorf("Expected %q, got %q", expected, string(b))
 	}
 
+	// Test case: Request empty path
+	req, err = http.NewRequest("GET", "", strings.NewReader("Hello, world!"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = dumpRequest(req, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// Test case: Request with connection close
 	req, err = http.NewRequest("DELETE", "http://example.com/instances", nil)
 	if err != nil {
@@ -155,6 +165,27 @@ func TestWriteIndentedN(t *testing.T) {
 	if b.String() != expected {
 		t.Errorf("Expected: %s, got: %s", expected, b.String())
 	}
+
+	// Test case: write error
+	w := &TestWriter{maxWrites: 0}
+	err = WriteIndentedN(w, []byte("Line 1"), 1)
+	if err == nil || err.Error() != "write error" {
+		t.Fatalf("expected 'write error', got %v", err)
+	}
+
+	// Test case: write error with 0 spaces and 0 allowed writes
+	w = &TestWriter{maxWrites: 0}
+	err = WriteIndentedN(w, []byte("Line 1"), 0)
+	if err == nil || err.Error() != "write error" {
+		t.Fatalf("expected 'write error', got %v", err)
+	}
+
+	// Test case: write error with 0 spaces and 1 successful write
+	w = &TestWriter{maxWrites: 3}
+	err = WriteIndentedN(w, []byte("Line 1\nLine 2\nLine 3\nLine 4"), 0)
+	if err == nil || err.Error() != "write error" {
+		t.Fatalf("expected 'write error', got %v", err)
+	}
 }
 
 func TestLogResponse(_ *testing.T) {
@@ -179,6 +210,14 @@ func TestLogResponse(_ *testing.T) {
 		StatusCode: http.StatusOK,
 		Header:     http.Header{"Content-Type": []string{"application/octet-stream"}},
 		Body:       io.NopCloser(bytes.NewReader([]byte{0x01, 0x02, 0x03})),
+	}
+	logResponse(context.Background(), res, nil)
+
+	// Test case: Failed response with binary content and error body
+	res = &http.Response{
+		StatusCode: http.StatusNoContent,
+		Header:     http.Header{"Content-Type": []string{"text/plain"}},
+		Body:       io.NopCloser(NewErrorReader(fmt.Errorf("simulated error while reading body"))),
 	}
 	logResponse(context.Background(), res, nil)
 }
@@ -288,15 +327,22 @@ func TestDrainBody(t *testing.T) {
 	}
 
 	// Test case: b.Close returns an error
-	b = io.NopCloser(strings.NewReader("test"))
-	r1, r2, err = drainBody(b)
-	if r1 == nil {
-		t.Error("Expected r1 to not be nil")
+	b = &TestReadCloser{reader: io.NopCloser(strings.NewReader("test")), closeErr: errors.New("close error")}
+	_, _, err = drainBody(b)
+	if err == nil || err.Error() != "close error" {
+		t.Fatalf("expected 'close error', got %v", err)
 	}
-	if r2 == nil {
-		t.Error("Expected r2 to not be nil")
+}
+
+type TestWriter struct {
+	maxWrites int // Maximum of successful writes
+	count     int
+}
+
+func (w *TestWriter) Write(p []byte) (int, error) {
+	if w.count >= w.maxWrites {
+		return 0, errors.New("write error")
 	}
-	if err != nil {
-		t.Error("Expected err to be nil")
-	}
+	w.count++
+	return len(p), nil
 }
