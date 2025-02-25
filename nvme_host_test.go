@@ -722,3 +722,7 @@ func Test_GetHostNvmeControllers(t *testing.T) {
 		})
 	}
 }
+
+func TestGetNewNvmeHost(t *testing.T) {
+	assert.NotNil(t, NewNvmeHost(nil, nil))
+}

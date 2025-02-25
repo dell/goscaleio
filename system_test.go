@@ -27,11 +27,24 @@ func TestModifyPerformanceProfile(t *testing.T) {
 
 		{
 			"Compact1",
-			errors.New("perfProfile should get one of the following values: Compact, HighPerformance, but its value is Compact1"),
+			errors.New("500 Internal Server Error"),
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/instances/System/action/setMdmPerformanceParameters" {
+			if r.Method == http.MethodPost {
+				var param types.ChangeMdmPerfProfile
+				_ = json.NewDecoder(r.Body).Decode(&param)
+				switch param.PerfProfile {
+				case "Compact1":
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte(`{"error": "perfProfile should get one of the following values: Compact, HighPerformance, but its value is Compact1"}`))
+				default:
+					w.WriteHeader(http.StatusOK)
+				}
+			}
+		}
 	}))
 	defer svr.Close()
 
@@ -137,11 +150,31 @@ func TestRemoveStandByMDM(t *testing.T) {
 
 		{
 			"1d9004d91b4ba504",
-			errors.New("The MDM could not be found"),
+			errors.New("404 Not Found"),
+		},
+		{
+			"1d9004d91b4ba505",
+			errors.New("500 Internal Server Error"),
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/instances/System/action/removeStandbyMdm" {
+			if r.Method == http.MethodPost {
+				var param types.RemoveStandByMdmParam
+				_ = json.NewDecoder(r.Body).Decode(&param)
+				switch param.ID {
+				case "1d9004d91b4ba504":
+					w.WriteHeader(http.StatusNotFound)
+					w.Write([]byte(`{"error": "404 Not Found"}`))
+				case "1d9004d91b4ba505":
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte(`{"error": "The MDM could not be found"}`))
+				default:
+					w.WriteHeader(http.StatusOK)
+				}
+			}
+		}
 	}))
 	defer svr.Close()
 
@@ -166,6 +199,8 @@ func TestRemoveStandByMDM(t *testing.T) {
 						t.Errorf("Adding standby mdm did not work as expected, \n\tgot: %s \n\twant: %s", err, tc.expected)
 					}
 				}
+			} else if tc.expected != nil {
+				t.Errorf("Expected error but got nil, \n\twant: %s", tc.expected)
 			}
 		})
 	}
@@ -185,11 +220,24 @@ func TestChangeMDMOwnership(t *testing.T) {
 
 		{
 			"1d9004d91b4ba504",
-			errors.New("The MDM could not be found"),
+			errors.New("500 Internal Server Error"),
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/instances/System/action/changeMdmOwnership" {
+			if r.Method == http.MethodPost {
+				var param types.ChangeMdmOwnerShip
+				_ = json.NewDecoder(r.Body).Decode(&param)
+				switch param.ID {
+				case "1d9004d91b4ba504":
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte(`{"error": "The MDM could not be found"}`))
+				default:
+					w.WriteHeader(http.StatusOK)
+				}
+			}
+		}
 	}))
 	defer svr.Close()
 
@@ -229,20 +277,33 @@ func TestSwitchClusterMode(t *testing.T) {
 
 	cases := []testCase{
 		{
-			"FiveNodes",
+			"Success - FiveNodes",
 			[]string{"1728fe1657674303"},
 			[]string{"463a6129033de104"},
 			nil,
 		},
 		{
-			"FiveNodes",
+			"Failure - FiveNodes",
 			[]string{"1728fe1657674311"},
 			[]string{"463a6129033de112"},
-			errors.New("The MDM could not be found"),
+			errors.New("500 Internal Server Error"),
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/instances/System/action/switchClusterMode" {
+			if r.Method == http.MethodPost {
+				var param types.SwitchClusterMode
+				_ = json.NewDecoder(r.Body).Decode(&param)
+				switch param.Mode {
+				case "Failure - FiveNodes":
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte(`{"error": "The MDM could not be found"}`))
+				default:
+					w.WriteHeader(http.StatusOK)
+				}
+			}
+		}
 	}))
 	defer svr.Close()
 
@@ -347,12 +408,24 @@ func TestRenameMdm(t *testing.T) {
 		{
 			"FiveNodes",
 			"mdm_renamed",
-			errors.New("An MDM with the same name already exists"),
+			errors.New("500 Internal Server Error"),
 		},
 	}
 
-	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
+	svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/instances/System/action/renameMdm" {
+			if r.Method == http.MethodPost {
+				var param types.RenameMdm
+				_ = json.NewDecoder(r.Body).Decode(&param)
+				switch param.ID {
+				case "FiveNodes":
+					w.WriteHeader(http.StatusInternalServerError)
+					w.Write([]byte(`{"error": "An MDM with the same name already exists"}`))
+				default:
+					w.WriteHeader(http.StatusOK)
+				}
+			}
+		}
 	}))
 	defer svr.Close()
 

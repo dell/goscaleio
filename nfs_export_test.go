@@ -24,6 +24,7 @@ import (
 	"math"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
@@ -330,4 +331,19 @@ func TestCreateNFSExport(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestModifyNFSExport(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	os.Setenv("GOSCALEIO_ENDPOINT", server.URL+"/api")
+
+	client, err := NewClient()
+	assert.NoError(t, err)
+
+	err = client.ModifyNFSExport(&types.NFSExportModify{}, "123")
+	assert.NoError(t, err)
 }
