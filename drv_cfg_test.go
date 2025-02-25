@@ -296,7 +296,7 @@ func TestDrvCfgQueryRescan(t *testing.T) {
 			},
 			expectedOut: "",
 			expectError: true,
-			errMessage:  "Rescan error: input/output error",
+			errMessage:  "rescan error: input/output error",
 		},
 	}
 
