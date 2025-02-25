@@ -305,7 +305,7 @@ func TestUploadPackages(t *testing.T) {
 
 	t.Run("wrong file type", func(t *testing.T) {
 		name := "test_file.log"
-		err := os.WriteFile(name, []byte("package data"), 0600)
+		err := os.WriteFile(name, []byte("package data"), 0o600)
 		assert.NoError(t, err)
 		defer os.Remove(name)
 
@@ -315,7 +315,7 @@ func TestUploadPackages(t *testing.T) {
 
 	t.Run("successful upload", func(t *testing.T) {
 		name := "test_file.tar"
-		err := os.WriteFile(name, []byte("package data"), 0600)
+		err := os.WriteFile(name, []byte("package data"), 0o600)
 		assert.NoError(t, err)
 
 		defer os.Remove(name)
@@ -334,7 +334,7 @@ func TestUploadPackages(t *testing.T) {
 
 	t.Run("bad response code", func(t *testing.T) {
 		name := "test_file.tar"
-		err := os.WriteFile(name, []byte("package data"), 0600)
+		err := os.WriteFile(name, []byte("package data"), 0o600)
 		assert.NoError(t, err)
 		defer os.Remove(name)
 
@@ -363,7 +363,7 @@ func TestUploadPackages(t *testing.T) {
 			return errors.New("cookie error")
 		}
 		name := "test_file.tar"
-		err := os.WriteFile(name, []byte("package data"), 0600)
+		err := os.WriteFile(name, []byte("package data"), 0o600)
 		assert.NoError(t, err)
 
 		defer os.Remove(name)
@@ -445,7 +445,7 @@ func TestParseCSV(t *testing.T) {
 	t.Run("bad response code", func(t *testing.T) {
 		name := "test_file.csv"
 
-		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0600)
+		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0o600)
 		assert.NoError(t, err)
 		defer os.Remove(name)
 
@@ -475,7 +475,7 @@ func TestParseCSV(t *testing.T) {
 
 	t.Run("good response code, but no mdm", func(t *testing.T) {
 		name := "test_file.csv"
-		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0600)
+		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0o600)
 		assert.NoError(t, err)
 		defer os.Remove(name)
 
@@ -1438,7 +1438,7 @@ func TestValidateMDMDetails(t *testing.T) {
 			version:          "4.0",
 			expectedErr:      errors.New("Error While Handling Cookie: Cookie error"),
 			setup: func() {
-				setCookieFunc = func(_ http.Header, host string) error {
+				setCookieFunc = func(_ http.Header, _ string) error {
 					return errors.New("Cookie error")
 				}
 			},
@@ -1573,7 +1573,7 @@ func TestGetClusterDetails(t *testing.T) {
 			expectedStatusCode: http.StatusOK,
 			expectedErr:        errors.New("Error While Handling Cookie: Cookie error"),
 			setup: func() {
-				setCookieFunc = func(_ http.Header, host string) error {
+				setCookieFunc = func(_ http.Header, _ string) error {
 					return errors.New("Cookie error")
 				}
 			},
@@ -1886,7 +1886,8 @@ func TestGatewayClient_GetInQueueCommand(t *testing.T) {
 		wantErr bool
 		setup   func()
 	}{
-		{name: "success case",
+		{
+			name: "success case",
 			fields: fields{
 				http:     &http.Client{},
 				host:     successServer.URL,
@@ -1899,7 +1900,8 @@ func TestGatewayClient_GetInQueueCommand(t *testing.T) {
 			want:    []types.MDMQueueCommandDetails{},
 			wantErr: false,
 		},
-		{name: "fail - set cookies",
+		{
+			name: "fail - set cookies",
 			fields: fields{
 				http:     &http.Client{},
 				host:     successServer.URL,
