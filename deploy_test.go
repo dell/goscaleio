@@ -235,7 +235,7 @@ func TestGetVersion(t *testing.T) {
 				}
 			},
 			expected:    "",
-			expectedErr: "Error: 400 Bad Request",
+			expectedErr: "error response: 400 Bad Request",
 		},
 		{
 			name: "error extracting version string",

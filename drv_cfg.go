@@ -60,6 +60,14 @@ type Syscaller interface {
 	Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno)
 }
 
+// RealSyscall implements Syscaller using the real syscall.Syscall
+// Used in inttests
+type RealSyscall struct{}
+
+func (r RealSyscall) Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
+	return syscall.Syscall(trap, a1, a2, a3)
+}
+
 // DrvCfgIsSDCInstalled will check to see if the SDC kernel module is loaded
 func DrvCfgIsSDCInstalled() bool {
 	if SCINIMockMode {
@@ -81,8 +89,10 @@ var openFileFunc = func(name string) (*os.File, error) {
 	return os.Open(filepath.Clean(name))
 }
 
+var syscaller Syscaller = RealSyscall{}
+
 // DrvCfgQueryGUID will return the GUID of the locally installed SDC
-func DrvCfgQueryGUID(syscaller Syscaller) (string, error) {
+func DrvCfgQueryGUID() (string, error) {
 	if SCINIMockMode {
 		return mockGUID, nil
 	}
@@ -101,28 +111,28 @@ func DrvCfgQueryGUID(syscaller Syscaller) (string, error) {
 	// #nosec CWE-242, validated buffer is large enough to hold data
 	err = ioctlWrapper(syscaller, f.Fd(), opCode, &buf)
 	if err != nil {
-		return "", fmt.Errorf("QueryGUID error: %v", err)
+		return "", fmt.Errorf("queryGUID error: %v", err)
 	}
 
 	rc, err := strconv.ParseInt(hex.EncodeToString(buf.rc[0:1]), 16, 64)
 	if err != nil {
-		return "", fmt.Errorf("Failed to parse return code: %v", err)
+		return "", fmt.Errorf("failed to parse return code: %v", err)
 	}
 	if rc != 65 {
-		return "", fmt.Errorf("Request to query GUID failed, RC=%d", rc)
+		return "", fmt.Errorf("request to query GUID failed, RC=%d", rc)
 	}
 
 	g := hex.EncodeToString(buf.uuid[:len(buf.uuid)])
 	u, err := uuid.Parse(g)
 	if err != nil {
-		return "", fmt.Errorf("Failed to parse UUID: %v", err)
+		return "", fmt.Errorf("failed to parse UUID: %v", err)
 	}
 	discoveredGUID := strings.ToUpper(u.String())
 	return discoveredGUID, nil
 }
 
 // DrvCfgQueryRescan preforms a rescan
-func DrvCfgQueryRescan(syscaller Syscaller) (string, error) {
+func DrvCfgQueryRescan() (string, error) {
 	f, err := openFileFunc(SDCDevice)
 	if err != nil {
 		return "", fmt.Errorf("Powerflex SDC is not installed")
@@ -138,7 +148,7 @@ func DrvCfgQueryRescan(syscaller Syscaller) (string, error) {
 	// #nosec CWE-242, validated buffer is large enough to hold data
 	err = ioctlWrapper(syscaller, f.Fd(), opCode, &rcBuf)
 	if err != nil {
-		return "", fmt.Errorf("Rescan error: %v", err)
+		return "", fmt.Errorf("rescan error: %v", err)
 	}
 	rcCode := strconv.FormatInt(int64(rcBuf.rc[0]), 10)
 
@@ -170,7 +180,7 @@ func DrvCfgQuerySystems() (*[]ConfiguredCluster, error) {
 
 	output, err := executeFunc("chroot", "/noderoot", drvCfg, "--query_mdm")
 	if err != nil {
-		return nil, fmt.Errorf("DrvCfgQuerySystems: Request to query MDM failed : %v", err)
+		return nil, fmt.Errorf("drvCfgQuerySystems: Request to query MDM failed : %v", err)
 	}
 
 	// Parse the output to extract MDM information
@@ -196,14 +206,6 @@ func DrvCfgQuerySystems() (*[]ConfiguredCluster, error) {
 
 var executeFunc = func(name string, arg ...string) ([]byte, error) {
 	return exec.Command(name, arg...).CombinedOutput()
-}
-
-// RealSyscall implements Syscaller using the real syscall.Syscall
-// Used in inttests
-type RealSyscall struct{}
-
-func (r RealSyscall) Syscall(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
-	return syscall.Syscall(trap, a1, a2, a3)
 }
 
 var ioctlWrapper = func(syscaller Syscaller, fd, op uintptr, arg *ioctlGUID) error {

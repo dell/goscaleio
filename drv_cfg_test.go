@@ -253,11 +253,7 @@ func TestDrvCfgQueryGUID(t *testing.T) {
 				return nil
 			}
 
-			syscaller := &MockSyscall{
-				SyscallFunc: tt.mockSyscall,
-			}
-
-			guid, err := DrvCfgQueryGUID(syscaller)
+			guid, err := DrvCfgQueryGUID()
 			if tt.expectErr {
 				assert.Error(t, err)
 			} else {
@@ -322,11 +318,7 @@ func TestDrvCfgQueryRescan(t *testing.T) {
 				return nil
 			}
 
-			syscaller := MockSyscall{
-				ReturnErrno: 0,
-			}
-
-			out, err := DrvCfgQueryRescan(syscaller)
+			out, err := DrvCfgQueryRescan()
 			if tt.expectError {
 				assert.NotNil(t, err)
 				assert.Equal(t, tt.errMessage, err.Error())

@@ -191,7 +191,7 @@ func (gc *GatewayClient) GetVersion() (string, error) {
 	case resp == nil:
 		return "", errNilReponse
 	case !(resp.StatusCode >= 200 && resp.StatusCode <= 299):
-		return "", errors.New("Error: " + resp.Status)
+		return "", fmt.Errorf("error response: %s", resp.Status)
 	}
 
 	version, err := extractString(resp)
