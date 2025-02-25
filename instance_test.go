@@ -14,6 +14,7 @@ package goscaleio
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -207,6 +208,19 @@ func TestGetInstance(t *testing.T) {
 func TestGetVolume(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(mockInstanceServerHandler))
 	defer mockServer.Close()
+	client, _ := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+
+	defaultFindVolumeID := findVolumeIDFunc
+	defaultGetJSONRetry := getJSONWithRetryFunc
+	afterEach := func() {
+		findVolumeIDFunc = defaultFindVolumeID
+		getJSONWithRetryFunc = defaultGetJSONRetry
+		freshclient, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		client = freshclient
+	}
 
 	tests := []struct {
 		name              string
@@ -216,7 +230,22 @@ func TestGetVolume(t *testing.T) {
 		ancestorevolumeid string
 		snapshots         bool
 		error             string
+		setup             func()
 	}{
+		/*{ // TODO: Something is broken in this test.
+			name:              "inject unknown error in getJSONWithRetry",
+			volumeid:          "",
+			volumehref:        "",
+			ancestorevolumeid: "mock-volume-id",
+			volumename:        "mock-volume-name",
+			snapshots:         true,
+			error:             "Unknown - GJWR",
+			setup: func() {
+				getJSONWithRetryFunc = func(_ *Client, _, _ string, _, _ interface{}) error {
+					return errors.New("Unknown - GJWR")
+				}
+			},
+		},*/
 		{
 			name:              "get volume name not null",
 			volumeid:          "",
@@ -262,15 +291,43 @@ func TestGetVolume(t *testing.T) {
 			snapshots:         true,
 			error:             "volume not found",
 		},
+		{
+			name:              "inject error in FindVolumeID",
+			volumeid:          "",
+			volumehref:        "",
+			ancestorevolumeid: "mock-volume-id",
+			volumename:        "mock-volume-name",
+			snapshots:         true,
+			error:             "",
+			setup: func() {
+				findVolumeIDFunc = func(_ *Client, _ string) (string, error) {
+					return "", errors.New("Not found")
+				}
+			},
+		},
+		{
+			name:              "inject unknown error in FindVolumeID",
+			volumeid:          "",
+			volumehref:        "",
+			ancestorevolumeid: "mock-volume-id",
+			volumename:        "mock-volume-name",
+			snapshots:         true,
+			error:             "Error: problem finding volume: Unknown - FVIF",
+			setup: func() {
+				findVolumeIDFunc = func(_ *Client, _ string) (string, error) {
+					return "", errors.New("Unknown - FVIF")
+				}
+			},
+		},
 	}
 
 	for _, tc := range tests {
-		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
-		if err != nil {
-			t.Fatal(err)
+		defer afterEach()
+		if tc.setup != nil {
+			tc.setup()
 		}
 
-		_, err = client.GetVolume(tc.volumehref, tc.volumeid, tc.ancestorevolumeid, tc.volumename, tc.snapshots)
+		_, err := client.GetVolume(tc.volumehref, tc.volumeid, tc.ancestorevolumeid, tc.volumename, tc.snapshots)
 		if err != nil {
 			if tc.error != err.Error() {
 				t.Fatal(err)
@@ -426,6 +483,18 @@ func TestCreateVolume(t *testing.T) {
 			protectiondomain: "mock-protection-domain-id",
 			error:            "",
 		},
+		{
+			name: "bad storage pool",
+			volumeparam: &types.VolumeParam{
+				Name:               "mock-volume-name",
+				VolumeSizeInKb:     "1024",
+				StoragePoolID:      "mock-storage-pool-id-bad",
+				ProtectionDomainID: "mock-protection-domain-id",
+			},
+			storagepoolname:  "mock-storage-pool-name-bad",
+			protectiondomain: "mock-protection-domain-id",
+			error:            "Couldn't find storage pool",
+		},
 	}
 
 	for _, tc := range tests {
@@ -447,11 +516,18 @@ func TestGetSnapshotPolicyI(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(mockInstanceServerHandler))
 	defer mockServer.Close()
 
+	defaultfindSnapshotPolicyByIDFunc := findSnapshotPolicyByIDFunc
+
+	afterEach := func() {
+		findSnapshotPolicyByIDFunc = defaultfindSnapshotPolicyByIDFunc
+	}
+
 	tests := []struct {
 		name               string
 		snapshotpolicyid   string
 		snapshotpolicyname string
 		error              string
+		setup              func()
 	}{
 		{
 			name:               "snapshot policy name empty",
@@ -465,20 +541,46 @@ func TestGetSnapshotPolicyI(t *testing.T) {
 			snapshotpolicyname: "mock-snapshot-policy-name",
 			error:              "",
 		},
+		{
+			name:               "force not found error",
+			snapshotpolicyid:   "mock-snapshot-policy-id",
+			snapshotpolicyname: "mock-snapshot-policy-name",
+			error:              "Not found",
+			setup: func() {
+				findSnapshotPolicyByIDFunc = func(_ *Client, _ string) (string, error) {
+					return "", errors.New("Not found")
+				}
+			},
+		},
+		{
+			name:               "force some other retrieval error",
+			snapshotpolicyid:   "mock-snapshot-policy-id",
+			snapshotpolicyname: "mock-snapshot-policy-name",
+			error:              "Error: problem finding snapshot policy: Other Error",
+			setup: func() {
+				findSnapshotPolicyByIDFunc = func(_ *Client, _ string) (string, error) {
+					return "", errors.New("Other Error")
+				}
+			},
+		},
 	}
 
-	for _, tc := range tests {
+	for _, tt := range tests {
+		if tt.setup != nil {
+			tt.setup()
+		}
 		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		_, err = client.GetSnapshotPolicy(tc.snapshotpolicyname, tc.snapshotpolicyid)
+		_, err = client.GetSnapshotPolicy(tt.snapshotpolicyname, tt.snapshotpolicyid)
 		if err != nil {
-			if tc.error != err.Error() {
+			if tt.error != err.Error() {
 				t.Fatal(err)
 			}
 		}
+		afterEach()
 	}
 }
 

@@ -992,3 +992,7 @@ func Test_ExitSdtMaintenanceMode(t *testing.T) {
 		})
 	}
 }
+
+func TestNewSdt(t *testing.T) {
+	assert.NotNil(t, NewSdt(nil, nil))
+}

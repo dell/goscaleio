@@ -1168,3 +1168,7 @@ func TestGetSDSStoragePool(t *testing.T) {
 		})
 	}
 }
+
+func TestNewStoragePoolEx(t *testing.T) {
+	assert.NotNil(t, NewStoragePoolEx(nil, nil))
+}

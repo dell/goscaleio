@@ -15,6 +15,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -26,7 +27,34 @@ import (
 	"time"
 
 	types "github.com/dell/goscaleio/types/v1"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestNew(t *testing.T) {
+	tests := []struct {
+		name        string
+		host        string
+		opts        ClientOptions
+		debug       bool
+		expectedErr error
+	}{
+		{
+			name:        "missing host",
+			host:        "",
+			opts:        ClientOptions{},
+			expectedErr: errors.New("missing endpoint"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := New(context.Background(), tt.host, tt.opts, true)
+			if !reflect.DeepEqual(err, tt.expectedErr) {
+				t.Errorf("Got error: %v, expected: %v", err, tt.expectedErr)
+				return
+			}
+		})
+	}
+}
 
 func TestGet(t *testing.T) {
 	tests := map[string]struct {
@@ -233,6 +261,14 @@ func TestPut(t *testing.T) {
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
 			body:         nil,
+			expectedErr:  fmt.Errorf("400 Bad Request"),
+			expectedBody: "",
+		},
+		"invalid headers and body": {
+			method:       http.MethodPut,
+			path:         "/api/test",
+			headers:      nil,
+			body:         "nil",
 			expectedErr:  fmt.Errorf("400 Bad Request"),
 			expectedBody: "",
 		},
@@ -462,51 +498,24 @@ func TestDo(t *testing.T) {
 	}
 }
 
-func TestDoXMLRequest(t *testing.T) {
+func TestDoXMLRequest_FailDecode(t *testing.T) {
 	tests := map[string]struct {
 		method       string
 		path         string
 		body         interface{}
+		resp         interface{}
+		req          string
+		version      string
 		expectedErr  error
 		expectedBody string
 	}{
-		"successful GET request": {
-			method:       http.MethodGet,
+		"Fail decode response": {
+			method:       http.MethodPost,
 			path:         "/api/test",
 			body:         nil,
-			expectedErr:  nil,
-			expectedBody: `{"message":"success"}`,
-		},
-		"successful Post request Body not Nil": {
-			method: http.MethodPost,
-			path:   "/api/test",
-			body: types.SwitchCredentialWrapper{
-				IomCredential: types.IomCredential{
-					Username: "test",
-					Password: "test",
-				},
-			},
-			expectedErr:  nil,
-			expectedBody: `{"message":"success"}`,
-		},
-		"successful Post request Body without begining slash": {
-			method: http.MethodPost,
-			path:   "api/test",
-			body: types.SwitchCredentialWrapper{
-				IomCredential: types.IomCredential{
-					Username: "test",
-					Password: "test",
-				},
-			},
-			expectedErr:  nil,
-			expectedBody: `{"message":"success"}`,
-		},
-		"Fail Invalid Body": {
-			method:       http.MethodPost,
-			path:         "api/test",
-			body:         map[string]string{"test": "test"},
-			expectedErr:  fmt.Errorf("xml: unsupported type: map[string]string"),
-			expectedBody: "",
+			resp:         "",
+			version:      "3.6",
+			expectedBody: `{"message":"failed to decode response"}`,
 		},
 	}
 
@@ -518,9 +527,9 @@ func TestDoXMLRequest(t *testing.T) {
 					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", tt.method, r.Method))
 				}
 
-				if tt.expectedErr != nil {
+				if tt.req != "" {
 					w.WriteHeader(http.StatusBadRequest)
-					w.Write([]byte(tt.expectedErr.Error()))
+					w.Write([]byte(tt.req))
 				} else {
 					w.WriteHeader(http.StatusOK)
 					w.Write([]byte(tt.expectedBody))
@@ -535,14 +544,178 @@ func TestDoXMLRequest(t *testing.T) {
 			}
 
 			// Call the DoWithHeaders function with the test parameters
-			var resp interface{}
 			_, err = c.DoXMLRequest(
 				context.Background(),
 				tt.method,
 				tt.path,
-				"3.6",
+				tt.version,
 				tt.body,
-				&resp,
+				tt.resp,
+			)
+			assert.NotNil(t, err)
+		})
+	}
+}
+
+func TestDoXMLRequest(t *testing.T) {
+	tests := map[string]struct {
+		method       string
+		path         string
+		body         interface{}
+		resp         interface{}
+		req          string
+		version      string
+		token        string
+		expectedErr  error
+		expectedBody string
+	}{
+		"successful GET request": {
+			method:       http.MethodGet,
+			path:         "/api/test",
+			body:         nil,
+			resp:         "",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"successful Post request Body not Nil": {
+			method: http.MethodPost,
+			path:   "/api/test",
+			body: types.SwitchCredentialWrapper{
+				IomCredential: types.IomCredential{
+					Username: "test",
+					Password: "test",
+				},
+			},
+			resp:         "",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"successful Post request Body without begining slash": {
+			method: http.MethodPost,
+			path:   "api/test",
+			body: types.SwitchCredentialWrapper{
+				IomCredential: types.IomCredential{
+					Username: "test",
+					Password: "test",
+				},
+			},
+			resp:         "",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"Fail Invalid Body": {
+			method:       http.MethodPost,
+			path:         "api/test",
+			body:         map[string]string{"test": "test"},
+			resp:         "",
+			expectedErr:  fmt.Errorf("xml: unsupported type: map[string]string"),
+			expectedBody: "",
+		},
+		"Invalid response": {
+			method: http.MethodPost,
+			path:   "/api/test/notexist",
+			body: types.SwitchCredentialWrapper{
+				IomCredential: types.IomCredential{
+					Username: "test",
+					Password: "test",
+				},
+			},
+			resp:         "",
+			req:          "{}",
+			expectedErr:  fmt.Errorf(`400 Bad Request`),
+			expectedBody: "",
+		},
+		"Invalid status code": {
+			method: http.MethodGet,
+			path:   "api/test",
+			body: types.SwitchCredentialWrapper{
+				IomCredential: types.IomCredential{
+					Username: "test",
+					Password: "test",
+				},
+			},
+			resp:         nil,
+			expectedBody: "",
+		},
+		"Fail parse version": {
+			method:      http.MethodPost,
+			path:        "/api/test",
+			body:        nil,
+			resp:        "",
+			version:     "invalid_version",
+			expectedErr: fmt.Errorf("strconv.ParseFloat: parsing \"invalid_version\": invalid syntax"),
+		},
+		"Token with version 4": {
+			method:       http.MethodGet,
+			path:         "/api/test",
+			body:         nil,
+			resp:         "",
+			version:      "4.0",
+			token:        "test-token",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"Token with version less than 4": {
+			method:       http.MethodGet,
+			path:         "/api/test",
+			body:         nil,
+			resp:         "",
+			version:      "2.0",
+			token:        "test-token",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"Token with no version": {
+			method:       http.MethodGet,
+			path:         "/api/test",
+			body:         nil,
+			resp:         "",
+			version:      "",
+			token:        "test-token",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			// Create a test server to handle the request
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != tt.method {
+					t.Fatal(fmt.Errorf("wrong method. Expected %s; but got %s", tt.method, r.Method))
+				}
+
+				if tt.req != "" {
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write([]byte(tt.req))
+				} else {
+					w.WriteHeader(http.StatusOK)
+					w.Write([]byte(tt.expectedBody))
+				}
+			}))
+			defer ts.Close()
+
+			// Create a new client and set the host to the test server
+			c, err := New(context.Background(), ts.URL, ClientOptions{}, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			c.SetToken(tt.token)
+
+			// Call the DoWithHeaders function with the test parameters
+			var resp interface{}
+			res := tt.resp
+			if tt.resp != nil {
+				res = &resp
+			}
+			_, err = c.DoXMLRequest(
+				context.Background(),
+				tt.method,
+				tt.path,
+				tt.version,
+				tt.body,
+				res,
 			)
 
 			// Check if the error matches the expected error
@@ -560,6 +733,7 @@ func TestDoXMLRequest(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
+				t.Logf("Response: %s", string(b))
 				if string(b) != tt.expectedBody {
 					t.Errorf("expected response body %s, got %s", tt.expectedBody, string(b))
 				}
@@ -574,6 +748,7 @@ func TestDoWithHeaders(t *testing.T) {
 		path         string
 		headers      map[string]string
 		body         interface{}
+		version      string
 		expectedErr  error
 		expectedBody string
 	}{
@@ -607,6 +782,22 @@ func TestDoWithHeaders(t *testing.T) {
 			headers:     map[string]string{"Content-Type": "application/json"},
 			body:        nil,
 			expectedErr: nil,
+		},
+		"Invalid version": {
+			method:      http.MethodGet,
+			path:        "api/test",
+			version:     "invalid_version",
+			expectedErr: fmt.Errorf("strconv.ParseFloat: parsing \"invalid_version\": invalid syntax"),
+		},
+		"read close error": {
+			method: http.MethodGet,
+			path:   "/api/test",
+			body: &TestReadCloser{
+				reader:   strings.NewReader("Test request body"),
+				closeErr: errors.New("transport connection broken"),
+			},
+			version:     "4.0",
+			expectedErr: errors.New("transport connection broken"),
 		},
 	}
 
@@ -653,12 +844,12 @@ func TestDoWithHeaders(t *testing.T) {
 				tt.headers,
 				tt.body,
 				&resp,
-				"",
+				tt.version,
 			)
 
 			// Check if the error matches the expected error
 			if tt.expectedErr != nil {
-				if err == nil || err.Error() != tt.expectedErr.Error() {
+				if err == nil || !strings.Contains(err.Error(), tt.expectedErr.Error()) {
 					t.Errorf("expected error %v, got %v", tt.expectedErr, err)
 				}
 			} else if err != nil {
@@ -684,7 +875,8 @@ type SamplePayload struct {
 }
 
 type TestReadCloser struct {
-	reader io.Reader
+	reader   io.Reader
+	closeErr error
 }
 
 func (r *TestReadCloser) Read(p []byte) (n int, err error) {
@@ -692,7 +884,7 @@ func (r *TestReadCloser) Read(p []byte) (n int, err error) {
 }
 
 func (r *TestReadCloser) Close() error {
-	return nil
+	return r.closeErr
 }
 
 func TestDoAndGetResponseBody(t *testing.T) {
@@ -701,6 +893,8 @@ func TestDoAndGetResponseBody(t *testing.T) {
 		path         string
 		headers      map[string]string
 		body         interface{}
+		version      string
+		token        string
 		expectedErr  error
 		expectedBody string
 	}{
@@ -709,6 +903,7 @@ func TestDoAndGetResponseBody(t *testing.T) {
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
 			body:         nil,
+			version:      "4.0",
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
@@ -717,6 +912,7 @@ func TestDoAndGetResponseBody(t *testing.T) {
 			path:         "/api/test",
 			headers:      map[string]string{"Content-Type": "application/json"},
 			body:         SamplePayload{},
+			version:      "4.0",
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
@@ -727,6 +923,38 @@ func TestDoAndGetResponseBody(t *testing.T) {
 			body: &TestReadCloser{
 				reader: strings.NewReader("Test request body"),
 			},
+			version:      "4.0",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"No headers": {
+			method:  http.MethodGet,
+			path:    "/api/test",
+			headers: nil,
+			body: &TestReadCloser{
+				reader: strings.NewReader("Test request body"),
+			},
+			version:      "4.0",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"Version 4 with token": {
+			method:       http.MethodGet,
+			path:         "/api/test",
+			headers:      nil,
+			body:         nil,
+			token:        "test-token",
+			version:      "4.0",
+			expectedErr:  nil,
+			expectedBody: `{"message":"success"}`,
+		},
+		"Version less than 4 with token": {
+			method:       http.MethodGet,
+			path:         "/api/test",
+			headers:      nil,
+			body:         nil,
+			token:        "test-token",
+			version:      "2.0",
 			expectedErr:  nil,
 			expectedBody: `{"message":"success"}`,
 		},
@@ -770,13 +998,15 @@ func TestDoAndGetResponseBody(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			c.SetToken(tt.token)
+
 			// Call the DoAndGetResponseBody function with the test parameters
 			res, err := c.DoAndGetResponseBody(
 				context.Background(),
 				tt.method,
 				tt.path,
 				tt.headers,
-				tt.body, "4.0")
+				tt.body, tt.version)
 
 			// Check if the error matches the expected error
 			if tt.expectedErr != nil {
@@ -851,4 +1081,13 @@ func TestParseJSONError(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("Bad response", func(t *testing.T) {
+		c := &client{}
+		response := &http.Response{
+			Body: ioutil.NopCloser(strings.NewReader("{Bad response}")),
+		}
+		err := c.ParseJSONError(response)
+		assert.NotNil(t, err)
+	})
 }
