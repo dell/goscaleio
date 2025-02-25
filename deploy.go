@@ -1275,7 +1275,6 @@ func setCookie(header http.Header, host string) error {
 }
 
 var setCookieFunc = func(header http.Header, host string) error {
-
 	if globalCookie != "" {
 		header.Set("Cookie", "LEGACYGWCOOKIE="+strings.ReplaceAll(globalCookie, "_", "|"))
 	} else {

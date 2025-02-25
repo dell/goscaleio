@@ -122,7 +122,6 @@ func TestRenameSnapshotPolicy(t *testing.T) {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error": "id (Invalid) must be a hexadecimal number (unsigned long)"}`))
 		}
-
 	}))
 	defer svr.Close()
 

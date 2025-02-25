@@ -109,7 +109,6 @@ func (c *Client) GetVolume(
 // FindVolumeID returns a VolumeID
 func (c *Client) FindVolumeID(volumename string) (string, error) {
 	return findVolumeIDFunc(c, volumename)
-
 }
 
 var findVolumeIDFunc = func(c *Client, volumename string) (string, error) {

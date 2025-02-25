@@ -24,11 +24,11 @@ import (
 	"math"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
-	"os"
 )
 
 func TestGetNFSExportByIDName(t *testing.T) {
@@ -334,7 +334,7 @@ func TestCreateNFSExport(t *testing.T) {
 }
 
 func TestModifyNFSExport(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
@@ -346,5 +346,4 @@ func TestModifyNFSExport(t *testing.T) {
 
 	err = client.ModifyNFSExport(&types.NFSExportModify{}, "123")
 	assert.NoError(t, err)
-
 }

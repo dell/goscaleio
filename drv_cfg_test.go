@@ -53,7 +53,6 @@ func TestDrvCfgQuerySystems(t *testing.T) {
 			name: "scini in mock mode",
 			setup: func() {
 				SCINIMockMode = true
-
 			},
 			expectErr: false,
 			expectOut: &[]ConfiguredCluster{{
@@ -129,7 +128,6 @@ func TestDrvCfgIsSDCInstalled(t *testing.T) {
 			name: "scini in mock mode",
 			setup: func() {
 				SCINIMockMode = true
-
 			},
 			expectedOut: true,
 		},
@@ -140,7 +138,7 @@ func TestDrvCfgIsSDCInstalled(t *testing.T) {
 		{
 			name: "SDC device is a directory",
 			setup: func() {
-				statFileFunc = func(name string) (fs.FileInfo, error) {
+				statFileFunc = func(_ string) (fs.FileInfo, error) {
 					return &mockFileInfo{
 						isDir: true,
 					}, nil
@@ -151,7 +149,7 @@ func TestDrvCfgIsSDCInstalled(t *testing.T) {
 		{
 			name: "SDC device is not a directory",
 			setup: func() {
-				statFileFunc = func(name string) (os.FileInfo, error) {
+				statFileFunc = func(_ string) (os.FileInfo, error) {
 					return &mockFileInfo{
 						isDir: false,
 					}, nil
@@ -196,7 +194,7 @@ func TestDrvCfgQueryGUID(t *testing.T) {
 		},
 		{
 			name: "Ioctl_error",
-			mockSyscall: func(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
+			mockSyscall: func(_, _, _, _ uintptr) (uintptr, uintptr, syscall.Errno) {
 				return 0, 0, syscall.EIO // Simulate an I/O error
 			},
 			mockOpen: func(name string) (*os.File, error) {
@@ -206,7 +204,7 @@ func TestDrvCfgQueryGUID(t *testing.T) {
 		},
 		{
 			name: "Invalid_RC",
-			mockSyscall: func(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
+			mockSyscall: func(_, _, _, _ uintptr) (uintptr, uintptr, syscall.Errno) {
 				var buf ioctlGUID
 				buf.rc[0] = 0x00 // Set an invalid return code
 				return 0, 0, 0
@@ -218,7 +216,7 @@ func TestDrvCfgQueryGUID(t *testing.T) {
 		},
 		{
 			name: "Successful query",
-			mockSyscall: func(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
+			mockSyscall: func(_, _, _, _ uintptr) (uintptr, uintptr, syscall.Errno) {
 				var buf ioctlGUID
 				buf.rc[0] = 0x41
 				uuidBytes, _ := uuid.Parse("D7C07724-A481-42D6-B1A7-0739A3F28BB0")
@@ -349,7 +347,7 @@ func TestIoctlWrapper(t *testing.T) {
 	}{
 		{
 			name: "ioctl call returns error",
-			mockSyscall: func(trap, a1, a2, a3 uintptr) (uintptr, uintptr, syscall.Errno) {
+			mockSyscall: func(_, _, _, _ uintptr) (uintptr, uintptr, syscall.Errno) {
 				return 0, 0, syscall.EIO
 			},
 			expectError: true,

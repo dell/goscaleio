@@ -211,10 +211,10 @@ func TestGetVolume(t *testing.T) {
 	client, _ := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
 
 	defaultFindVolumeID := findVolumeIDFunc
-	defaultGetJsonRetry := getJSONWithRetryFunc
+	defaultGetJSONRetry  := getJSONWithRetryFunc
 	afterEach := func() {
 		findVolumeIDFunc = defaultFindVolumeID
-		getJSONWithRetryFunc = defaultGetJsonRetry
+		getJSONWithRetryFunc = defaultGetJSONRetry
 		freshclient, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
 		if err != nil {
 			t.Fatal(err)
@@ -300,7 +300,7 @@ func TestGetVolume(t *testing.T) {
 			snapshots:         true,
 			error:             "",
 			setup: func() {
-				findVolumeIDFunc = func(c *Client, volumename string) (string, error) {
+				findVolumeIDFunc = func(_ *Client, _ string) (string, error) {
 					return "", errors.New("Not found")
 				}
 			},
@@ -314,7 +314,7 @@ func TestGetVolume(t *testing.T) {
 			snapshots:         true,
 			error:             "Error: problem finding volume: Unknown - FVIF",
 			setup: func() {
-				findVolumeIDFunc = func(c *Client, volumename string) (string, error) {
+				findVolumeIDFunc = func(_ *Client, _ string) (string, error) {
 					return "", errors.New("Unknown - FVIF")
 				}
 			},
@@ -547,7 +547,7 @@ func TestGetSnapshotPolicyI(t *testing.T) {
 			snapshotpolicyname: "mock-snapshot-policy-name",
 			error:              "Not found",
 			setup: func() {
-				findSnapshotPolicyByIDFunc = func(c *Client, spid string) (string, error) {
+				findSnapshotPolicyByIDFunc = func(_ *Client, _ string) (string, error) {
 					return "", errors.New("Not found")
 				}
 			},
@@ -558,7 +558,7 @@ func TestGetSnapshotPolicyI(t *testing.T) {
 			snapshotpolicyname: "mock-snapshot-policy-name",
 			error:              "Error: problem finding snapshot policy: Other Error",
 			setup: func() {
-				findSnapshotPolicyByIDFunc = func(c *Client, spid string) (string, error) {
+				findSnapshotPolicyByIDFunc = func(_ *Client, _ string) (string, error) {
 					return "", errors.New("Other Error")
 				}
 			},

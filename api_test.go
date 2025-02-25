@@ -22,13 +22,13 @@ import (
 	"net/http/httptest"
 	"os"
 	"reflect"
+	"strings"
 	"sync"
 	"testing"
 	"time"
 
 	v1 "github.com/dell/goscaleio/types/v1"
 	"github.com/stretchr/testify/assert"
-	"strings"
 )
 
 func setupClient(t *testing.T, hostAddr string) *Client {
@@ -293,11 +293,9 @@ func TestClientVersion(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "malformed", ver)
 	})
-
 }
 
 func TestClientLogin(t *testing.T) {
-
 	server := newGoScaleioTestServer()
 	defer server.Close()
 

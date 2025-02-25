@@ -144,7 +144,7 @@ func TestNewGatewayInsecure(t *testing.T) {
 // errorTransport simulates an error during response body reading
 type errorTransport struct{}
 
-func (t *errorTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *errorTransport) RoundTrip(_ *http.Request) (*http.Response, error) {
 	return &http.Response{
 		StatusCode: http.StatusOK,
 		Body:       io.NopCloser(&errorReader{}),
@@ -153,7 +153,7 @@ func (t *errorTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 type errorReader struct{}
 
-func (r *errorReader) Read(p []byte) (n int, err error) {
+func (r *errorReader) Read(_ []byte) (n int, err error) {
 	return 0, errBodyRead
 }
 
@@ -163,7 +163,6 @@ func (r *errorReader) Close() error {
 
 // TestGetVersion tests the GetVersion function.
 func TestGetVersion(t *testing.T) {
-
 	tests := []struct {
 		name        string
 		setup       func() *GatewayClient
@@ -227,7 +226,7 @@ func TestGetVersion(t *testing.T) {
 		{
 			name: "non-2xx status code",
 			setup: func() *GatewayClient {
-				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					http.Error(w, "error", http.StatusBadRequest)
 				}))
 				return &GatewayClient{
@@ -241,7 +240,7 @@ func TestGetVersion(t *testing.T) {
 		{
 			name: "error extracting version string",
 			setup: func() *GatewayClient {
-				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusOK)
 					w.Write([]byte(`{"version": "invalid"}`))
 				}))
@@ -306,7 +305,7 @@ func TestUploadPackages(t *testing.T) {
 
 	t.Run("wrong file type", func(t *testing.T) {
 		name := "test_file.log"
-		err := os.WriteFile(name, []byte("package data"), 0644)
+		err := os.WriteFile(name, []byte("package data"), 0o644)
 		assert.NoError(t, err)
 		defer os.Remove(name)
 
@@ -316,7 +315,7 @@ func TestUploadPackages(t *testing.T) {
 
 	t.Run("successful upload", func(t *testing.T) {
 		name := "test_file.tar"
-		err := os.WriteFile(name, []byte("package data"), 0644)
+		err := os.WriteFile(name, []byte("package data"), 0o644)
 		assert.NoError(t, err)
 
 		defer os.Remove(name)
@@ -335,7 +334,7 @@ func TestUploadPackages(t *testing.T) {
 
 	t.Run("bad response code", func(t *testing.T) {
 		name := "test_file.tar"
-		err := os.WriteFile(name, []byte("package data"), 0644)
+		err := os.WriteFile(name, []byte("package data"), 0o644)
 		assert.NoError(t, err)
 		defer os.Remove(name)
 
@@ -364,7 +363,7 @@ func TestUploadPackages(t *testing.T) {
 			return errors.New("cookie error")
 		}
 		name := "test_file.tar"
-		err := os.WriteFile(name, []byte("package data"), 0644)
+		err := os.WriteFile(name, []byte("package data"), 0o644)
 		assert.NoError(t, err)
 
 		defer os.Remove(name)
@@ -375,14 +374,13 @@ func TestUploadPackages(t *testing.T) {
 		assert.Error(t, err)
 		setCookieFunc = defaultCookieFunc
 	})
-
 }
 
 func TestParseCSV(t *testing.T) {
 	respStatus := http.StatusOK
 	respBody := "-"
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(respStatus)
 		if respBody != "-" {
 			w.Write([]byte(respBody))
@@ -393,7 +391,6 @@ func TestParseCSV(t *testing.T) {
 	defer server.Close()
 
 	t.Run("successful parse with bearer token", func(t *testing.T) {
-
 		file, err := os.CreateTemp("", "test_file.csv")
 		if err != nil {
 			t.Fatalf("Failed to create temp file: %v", err)
@@ -420,7 +417,6 @@ func TestParseCSV(t *testing.T) {
 	})
 
 	t.Run("successful parse with basic auth", func(t *testing.T) {
-
 		file, err := os.CreateTemp("", "test_file.csv")
 		if err != nil {
 			t.Fatalf("Failed to create temp file: %v", err)
@@ -449,7 +445,7 @@ func TestParseCSV(t *testing.T) {
 	t.Run("bad response code", func(t *testing.T) {
 		name := "test_file.csv"
 
-		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0644)
+		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0o644)
 		assert.NoError(t, err)
 		defer os.Remove(name)
 
@@ -479,7 +475,7 @@ func TestParseCSV(t *testing.T) {
 
 	t.Run("good response code, but no mdm", func(t *testing.T) {
 		name := "test_file.csv"
-		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0644)
+		err := os.WriteFile(name, []byte("header1,header2\nvalue1,value2"), 0o644)
 		assert.NoError(t, err)
 		defer os.Remove(name)
 
@@ -537,7 +533,6 @@ func TestParseCSV(t *testing.T) {
 		assert.Error(t, err)
 		setCookieFunc = defaultCookieFunc
 	})
-
 }
 
 func TestGetPackageDetails(t *testing.T) {
@@ -620,7 +615,7 @@ func TestGetPackageDetails(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 	t.Run("Error unmarshalling response", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(`invalid json`))
 		}))
@@ -703,7 +698,7 @@ func TestDeletePackage(t *testing.T) {
 		assert.Equal(t, 200, packageResponse.StatusCode)
 	})
 	t.Run("non 200 status code", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest) // Simulate a non-200 status code
 			response := types.GatewayResponse{
 				Message: "Bad Request",
@@ -1149,7 +1144,7 @@ func TestMoveToIdlePhase(t *testing.T) {
 		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 	})
 	t.Run("fail to move to idle phase", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
 			response := types.GatewayResponse{
@@ -1206,7 +1201,7 @@ func TestCheckForCompletionQueueCommands(t *testing.T) {
 		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 	})
 	t.Run("pending command", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			response := map[string][]interface{}{
 				"commands": {
@@ -1236,7 +1231,7 @@ func TestCheckForCompletionQueueCommands(t *testing.T) {
 	})
 
 	t.Run("failed command", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			response := map[string][]interface{}{
 				"commands": {
@@ -1264,7 +1259,6 @@ func TestCheckForCompletionQueueCommands(t *testing.T) {
 		assert.Equal(t, "Failed", gatewayResponse.Data)
 		assert.Equal(t, http.StatusOK, gatewayResponse.StatusCode)
 	})
-
 }
 
 func TestUninstallCluster(t *testing.T) {
@@ -1393,7 +1387,6 @@ func TestRenewInstallationCookie(t *testing.T) {
 }
 
 func TestValidateMDMDetails(t *testing.T) {
-
 	defaultCookiesFunc := setCookieFunc
 	after := func() {
 		setCookieFunc = defaultCookiesFunc
