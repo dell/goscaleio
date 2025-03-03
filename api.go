@@ -377,6 +377,10 @@ func NewClientWithArgs(
 	if showHTTP {
 		debug = true
 	}
+	if debug {
+		doLog(logger.Info, "Setting log level to debug")
+		slog.SetLogLoggerLevel(slog.LevelDebug)
+	}
 
 	fields := map[string]interface{}{
 		"endpoint": endpoint,
