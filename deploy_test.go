@@ -74,7 +74,7 @@ func TestNewGateway(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprintln(w, `{"access_token":"mock_access_token"}`)
+			fmt.Fprintln(w, `{"access_token":""}`)
 			return
 		}
 		if r.Method == http.MethodGet && r.URL.Path == "/api/version" {
@@ -92,7 +92,7 @@ func TestNewGateway(t *testing.T) {
 
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprintln(w, `{"access_token":"mock_access_token"}`)
+			fmt.Fprintln(w, `{"access_token":""}`)
 			return
 		}
 		if r.Method == http.MethodGet && r.URL.Path == "/api/version" {
