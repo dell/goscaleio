@@ -44,7 +44,8 @@ var (
 
 	debug, _    = strconv.ParseBool(os.Getenv("GOSCALEIO_DEBUG"))
 	showHTTP, _ = strconv.ParseBool(os.Getenv("GOSCALEIO_SHOWHTTP"))
-	logger      = slog.New(slog.NewTextHandler(os.Stderr, nil))
+	logLevel    = new(slog.LevelVar) //Info by default
+	logger      = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: logLevel}))
 )
 
 // Client defines struct for Client
@@ -378,8 +379,8 @@ func NewClientWithArgs(
 		debug = true
 	}
 	if debug {
-		doLog(logger.Info, "Setting log level to debug")
-		slog.SetLogLoggerLevel(slog.LevelDebug)
+		doLog(logger.Info, "Setting log level to debug in GoScaleIO")
+		logLevel.Set(slog.LevelDebug)
 	}
 
 	fields := map[string]interface{}{
