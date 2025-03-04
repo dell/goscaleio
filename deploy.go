@@ -92,6 +92,13 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		}
 	}
 
+	token, errT := gc.NewTokenGeneration()
+	if errT != nil {
+		return nil, errT
+	}
+
+	gc.token = token
+
 	version, err := gc.GetVersion()
 	if err != nil {
 		return nil, err
