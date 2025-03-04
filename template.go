@@ -159,3 +159,29 @@ func (gc *GatewayClient) GetTemplateByFilters(key string, value string) ([]types
 
 	return templates.TemplateDetails, nil
 }
+// CloneTemplate Creates a new Template based on a preexisting Template using the original template id
+func (gc *GatewayClient) CloneTemplate(s *System, origin_template_id string) ([]types.TemplateDetails, error) {
+	defer TimeSpent("CloneTemplate", time.Now())
+
+	path := `/Api/V1/ServiceTemplate/cloneTemplate` 
+
+    //Get template by filtering by original template id
+    template, err := gc.GetTemplateByFilters("original_template_id", origin_template_id)
+	if err != nil {
+		return nil, fmt.Errorf("Template not found")
+	}
+    
+	//set mandatory fields for copy
+	template[0].TemplateLocked = false
+	template[0].Draft = true
+	template[0].InConfiguration = true
+
+    err =  s.client.getJSONWithRetry(
+		http.MethodPost, path, nil, &template)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return template, nil
+}
