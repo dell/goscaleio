@@ -47,7 +47,8 @@ const (
 var (
 	errNewClient = errors.New("missing endpoint")
 	errSysCerts  = errors.New("Unable to initialize cert pool from system")
-	logger       = slog.New(slog.NewTextHandler(os.Stderr, nil))
+	logLevel     = new(slog.LevelVar) // Info by default
+	logger       = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: logLevel}))
 )
 
 // Client is an API client.
@@ -319,6 +320,11 @@ func (c *client) DoAndGetResponseBody(
 		hostEndsWithSlash  = endsWithSlash(c.host)
 		uriBeginsWithSlash = beginsWithSlash(uri)
 	)
+
+	// if showHTTP is enabled, we want log level to be debug
+	if c.showHTTP {
+		logLevel.Set(slog.LevelDebug)
+	}
 
 	ubf.WriteString(c.host)
 

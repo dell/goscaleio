@@ -44,7 +44,7 @@ var (
 
 	debug, _    = strconv.ParseBool(os.Getenv("GOSCALEIO_DEBUG"))
 	showHTTP, _ = strconv.ParseBool(os.Getenv("GOSCALEIO_SHOWHTTP"))
-	logLevel    = new(slog.LevelVar) //Info by default
+	logLevel    = new(slog.LevelVar) // Info by default
 	logger      = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: logLevel}))
 )
 
