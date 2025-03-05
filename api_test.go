@@ -543,9 +543,20 @@ func TestNewClientWithArgs(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name:     "Set GOSCALEIO_SHOWHTTP to true",
+			endpoint: "/testing",
+			setEnv: func() {
+				showHTTP = true
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.setEnv != nil {
+				tt.setEnv()
+			}
 			_, err := NewClientWithArgs(tt.endpoint, "3.5", math.MaxInt64, true, false)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewClientWithArgs() error = %v, wantErr %v", err, tt.wantErr)

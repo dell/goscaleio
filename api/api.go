@@ -22,14 +22,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/dell/goscaleio/log"
 	types "github.com/dell/goscaleio/types/v1"
 )
 
@@ -47,7 +46,6 @@ const (
 var (
 	errNewClient = errors.New("missing endpoint")
 	errSysCerts  = errors.New("Unable to initialize cert pool from system")
-	logger       = slog.New(slog.NewTextHandler(os.Stderr, nil))
 )
 
 // Client is an API client.
@@ -280,7 +278,7 @@ func (c *client) DoWithHeaders(
 
 	defer func() {
 		if err := res.Body.Close(); err != nil {
-			c.doLog(logger.Error, err.Error())
+			log.DoLog(log.Log.Error, err.Error())
 		}
 	}()
 
@@ -294,7 +292,7 @@ func (c *client) DoWithHeaders(
 		}
 		dec := json.NewDecoder(res.Body)
 		if err = dec.Decode(resp); err != nil && err != io.EOF {
-			c.doLog(logger.Error, fmt.Sprintf("Error: %s Unable to decode response into %+v", err.Error(), resp))
+			log.DoLog(log.Log.Error, fmt.Sprintf("Error: %s Unable to decode response into %+v", err.Error(), resp))
 			return err
 		}
 	default:
@@ -347,7 +345,7 @@ func (c *client) DoAndGetResponseBody(
 
 		defer func() {
 			if err := r.Close(); err != nil {
-				c.doLog(logger.Error, err.Error())
+				log.DoLog(log.Log.Error, err.Error())
 			}
 		}()
 
@@ -416,7 +414,7 @@ func (c *client) DoAndGetResponseBody(
 	}
 
 	if c.showHTTP {
-		logRequest(ctx, req, c.doLog)
+		logRequest(ctx, req, log.DoLog)
 	}
 
 	// send the request
@@ -426,7 +424,7 @@ func (c *client) DoAndGetResponseBody(
 	}
 
 	if c.showHTTP {
-		logResponse(ctx, res, c.doLog)
+		logResponse(ctx, res, log.DoLog)
 	}
 
 	return res, err
@@ -475,20 +473,20 @@ func (c *client) DoXMLRequest(
 	if body != nil {
 		xmlBody, err := xml.Marshal(body)
 		if err != nil {
-			c.doLog(logger.Error, fmt.Sprintf("Error marshaling XML: %v", err))
+			log.DoLog(log.Log.Error, fmt.Sprintf("Error marshaling XML: %v", err))
 			return nil, err
 		}
 
 		// Create the HTTP request
 		req, err = http.NewRequest(method, u.String(), bytes.NewBuffer(xmlBody))
 		if err != nil {
-			c.doLog(logger.Error, fmt.Sprintf("Error creating request: %v", err))
+			log.DoLog(log.Log.Error, fmt.Sprintf("Error creating request: %v", err))
 			return nil, err
 		}
 	} else {
 		req, err = http.NewRequest(method, u.String(), nil)
 		if err != nil {
-			c.doLog(logger.Error, fmt.Sprintf("Error creating request: %v", err))
+			log.DoLog(log.Log.Error, fmt.Sprintf("Error creating request: %v", err))
 			return nil, err
 		}
 	}
@@ -535,7 +533,7 @@ func (c *client) DoXMLRequest(
 		}
 		dec := json.NewDecoder(res.Body)
 		if err = dec.Decode(resp); err != nil && err != io.EOF {
-			c.doLog(logger.Error, fmt.Sprintf("Error: %s Unable to decode response into %+v", err.Error(), resp))
+			log.DoLog(log.Log.Error, fmt.Sprintf("Error: %s Unable to decode response into %+v", err.Error(), resp))
 			return nil, err
 		}
 	default:
@@ -565,13 +563,4 @@ func (c *client) ParseJSONError(r *http.Response) error {
 	}
 
 	return jsonError
-}
-
-func (c *client) doLog(
-	l func(msg string, args ...any),
-	msg string,
-) {
-	if c.debug {
-		l(msg)
-	}
 }

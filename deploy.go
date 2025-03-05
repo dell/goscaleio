@@ -32,6 +32,7 @@ import (
 	"strings"
 
 	"github.com/dell/goscaleio/api"
+	"github.com/dell/goscaleio/log"
 	types "github.com/dell/goscaleio/types/v1"
 	"gopkg.in/yaml.v3"
 )
@@ -137,7 +138,7 @@ func (gc *GatewayClient) NewTokenGeneration() (string, error) {
 
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			doLog(logger.Error, err.Error())
+			log.DoLog(log.Log.Error, err.Error())
 		}
 	}()
 
