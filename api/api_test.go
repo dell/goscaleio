@@ -799,6 +799,12 @@ func TestDoWithHeaders(t *testing.T) {
 			version:     "4.0",
 			expectedErr: errors.New("transport connection broken"),
 		},
+		"Invalid Json": {
+			method:      http.MethodGet,
+			path:        "/api/test",
+			version:     "4.0",
+			expectedErr: errors.New("looking for beginning of value"),
+		},
 	}
 
 	for name, tt := range tests {
@@ -819,9 +825,13 @@ func TestDoWithHeaders(t *testing.T) {
 					}
 				}
 
-				if tt.expectedErr != nil {
+				if tt.expectedErr != nil && tt.expectedErr.Error() != "looking for beginning of value" {
 					w.WriteHeader(http.StatusBadRequest)
 					w.Write([]byte(tt.expectedErr.Error()))
+				} else if tt.expectedErr != nil && tt.expectedErr.Error() == "looking for beginning of value" {
+					w.WriteHeader(http.StatusOK)
+					// return an invalid JSON that will cause an error when decoding
+					w.Write([]byte(`invalid json`))
 				} else {
 					w.WriteHeader(http.StatusOK)
 					w.Write([]byte(tt.expectedBody))
