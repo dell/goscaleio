@@ -378,8 +378,8 @@ func NewClientWithArgs(
 		debug = true
 	}
 	if debug {
-		log.DoLog(log.Log.Info, "Setting log level to debug in GoScaleIO")
 		log.SetLogLevel(slog.LevelDebug)
+		log.DoLog(log.Log.Info, "Setting log level to debug in GoScaleIO")
 	}
 
 	fields := map[string]interface{}{
