@@ -232,7 +232,7 @@ var getJSONWithRetryFunc = func(c *Client, method, uri string, body, resp interf
 				ctx, method, uri, headers, body, resp, c.configConnect.Version)
 		}
 	}
-	log.DoLog(log.Log.Debug, err.Error())
+	log.DoLog(log.Log.Error, err.Error())
 
 	return err
 }
