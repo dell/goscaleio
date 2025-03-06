@@ -272,7 +272,7 @@ func (c *Client) getStringWithRetry(
 	checkResponse := func(resp *http.Response) (string, bool, error) {
 		defer func() {
 			if err := resp.Body.Close(); err != nil {
-				log.DoLog(log.Log.Debug, err.Error())
+				log.DoLog(log.Log.Error, err.Error())
 			}
 		}()
 
