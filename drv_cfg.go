@@ -38,7 +38,7 @@ const (
 	IOCTLDevice = "/dev/scini"
 	mockGUID    = "9E56672F-2F4B-4A42-BFF4-88B6846FBFDA"
 	mockSystem  = "14dbbf5617523654"
-	drvCfg      = "/opt/emc/scaleio/sdc/bin/drv_cfg"
+	drvCfg      = "/bin/emc/scaleio/drv_cfg"
 )
 
 var (
@@ -178,7 +178,7 @@ func DrvCfgQuerySystems() (*[]ConfiguredCluster, error) {
 		return &clusters, nil
 	}
 
-	output, err := executeFunc("chroot", "/noderoot", drvCfg, "--query_mdm")
+	output, err := executeFunc(drvCfg, "--query_mdm")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query MDM: %v", err)
 	}
