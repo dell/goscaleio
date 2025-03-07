@@ -405,9 +405,11 @@ func NewClientWithArgs(
 		Timeout:  time.Duration(timeout) * time.Second,
 	}
 
+	mu.Lock()
 	if ClientConnectTimeout != 0 {
 		opts.Timeout = ClientConnectTimeout
 	}
+	mu.Unlock()
 
 	ac, err := api.New(context.Background(), endpoint, opts, debug)
 	if err != nil {
