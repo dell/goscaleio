@@ -38,7 +38,7 @@ const (
 	IOCTLDevice = "/dev/scini"
 	mockGUID    = "9E56672F-2F4B-4A42-BFF4-88B6846FBFDA"
 	mockSystem  = "14dbbf5617523654"
-	drvCfg      = "/bin/emc/scaleio/drv_cfg"
+	drvCfg      = "/opt/emc/scaleio/sdc/bin/drv_cfg"
 )
 
 var (

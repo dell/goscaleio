@@ -64,7 +64,7 @@ func TestDrvCfgQuerySystems(t *testing.T) {
 			name: "passing test",
 			setup: func() {
 				executeFunc = func(cmd string, arg ...string) ([]byte, error) {
-					assert.Equal(t, cmd, "/bin/emc/scaleio/drv_cfg")
+					assert.Equal(t, cmd, "/opt/emc/scaleio/sdc/bin/drv_cfg")
 					assert.Equal(t, arg, []string{"--query_mdm"})
 					return []byte("MDM-ID aaaa SDC ID bbbb"), nil
 				}
