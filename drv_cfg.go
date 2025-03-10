@@ -178,7 +178,7 @@ func DrvCfgQuerySystems() (*[]ConfiguredCluster, error) {
 		return &clusters, nil
 	}
 
-	output, err := executeFunc("chroot", "/noderoot", drvCfg, "--query_mdm")
+	output, err := executeFunc(drvCfg, "--query_mdm")
 	if err != nil {
 		return nil, fmt.Errorf("failed to query MDM: %v", err)
 	}
