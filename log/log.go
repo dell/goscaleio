@@ -15,9 +15,11 @@ package log
 import (
 	"log/slog"
 	"os"
+	"sync"
 )
 
 var (
+	mu       sync.Mutex           // guards logLevel
 	logLevel = new(slog.LevelVar) // Info by default
 	// Log is a logger for goscaleio and api packages to use
 	Log   = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: logLevel}))
@@ -25,6 +27,8 @@ var (
 )
 
 func SetLogLevel(level slog.Level) {
+	mu.Lock()
+	defer mu.Unlock()
 	logLevel.Set(level)
 	if level == slog.LevelDebug {
 		debug = true
