@@ -93,6 +93,12 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		}
 	}
 
+	// For versions greater than 3.5 we need the token in order to get the version.
+	token, err := gc.NewTokenGeneration()
+	if err == nil {
+		gc.token = token
+	}
+
 	version, err := gc.GetVersion()
 	if err != nil {
 		return nil, err

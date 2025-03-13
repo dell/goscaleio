@@ -15,8 +15,10 @@ package goscaleio
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -273,6 +275,85 @@ func TestGetAllTemplates(t *testing.T) {
 			} else {
 				assert.NotNil(t, err)
 				assert.Equal(t, tc.expected.Error(), err.Error())
+			}
+		})
+	}
+}
+
+func TestCloneTemplate(t *testing.T) {
+	tests := []struct {
+		name         string
+		originID     string
+		templateName string
+		expectedErr  error
+	}{
+		{
+			name:         "success",
+			originID:     "1234567",
+			templateName: "Test-Copy",
+			expectedErr:  nil,
+		},
+		{
+			name:         "error due to cloning a non-existant template",
+			originID:     "template_id_does_not_exist",
+			templateName: "Test-Copy",
+			expectedErr:  fmt.Errorf("Error While Cloning Template: Template not found"),
+		},
+		{
+			name:         "error due to cloning an existing template",
+			originID:     "1234567",
+			templateName: "Test",
+			expectedErr:  fmt.Errorf("Error While Cloning Template: Template already exists please use a different name"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			encodedValue := url.QueryEscape("1234567")
+			// Create a mock server
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method == http.MethodPost && r.URL.Path == "/Api/V1/ServiceTemplate/cloneTemplate" && tc.templateName == "Test-Copy" {
+					w.WriteHeader(http.StatusOK)
+					return
+				}
+				responseJSONFile := "response/templates_response.json"
+				responseData, err := ioutil.ReadFile(responseJSONFile)
+				if err != nil {
+					t.Fatalf("Failed to read response JSON file: %v", err)
+				}
+				if strings.Contains(r.URL.Path, "/Api/V1/template") && strings.Contains(r.URL.RawQuery, encodedValue) {
+					if r.Method == http.MethodGet {
+						w.WriteHeader(http.StatusOK)
+						w.Write(responseData)
+						return
+					}
+				}
+				http.NotFound(w, r)
+			}))
+			defer server.Close()
+
+			client, err := NewClientWithArgs(server.URL, "4.0", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			s := System{
+				client: client,
+			}
+			gc := &GatewayClient{
+				http:     &http.Client{},
+				host:     server.URL,
+				username: "test_username",
+				password: "test_password",
+				version:  "4.0",
+			}
+
+			err = gc.CloneTemplate(&s, tc.originID, tc.templateName)
+
+			if tc.expectedErr == nil {
+				assert.Nil(t, err)
+			} else {
+				assert.NotNil(t, err)
+				assert.Equal(t, tc.expectedErr.Error(), err.Error())
 			}
 		})
 	}
