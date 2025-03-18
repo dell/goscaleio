@@ -1740,6 +1740,16 @@ func TestGatewayClient_NewTokenGeneration(t *testing.T) {
 		http.NotFound(w, r)
 	}))
 
+	successServerBasicAuth := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && r.URL.Path == "/rest/auth/login" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintln(w, `{}`)
+			return
+		}
+		http.NotFound(w, r)
+	}))
+
 	failServerLogin := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost && r.URL.Path == "/rest/auth/login" {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -1788,6 +1798,20 @@ func TestGatewayClient_NewTokenGeneration(t *testing.T) {
 				insecure: true,
 			},
 			want:    "mock_access_token",
+			wantErr: false,
+		},
+		{
+			name: "success basic authentication",
+			fields: fields{
+				http:     &http.Client{},
+				host:     successServerBasicAuth.URL,
+				username: "admin",
+				password: "password",
+				token:    "",
+				version:  "4.0",
+				insecure: true,
+			},
+			want:    "",
 			wantErr: false,
 		},
 		{

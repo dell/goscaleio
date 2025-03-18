@@ -169,6 +169,11 @@ func (gc *GatewayClient) NewTokenGeneration() (string, error) {
 		return "", fmt.Errorf("Error For Uploading Package: %s", jsonErr)
 	}
 
+	if result["access_token"] == nil {
+		log.DoLog(log.Log.Info, "authentication defaulting to basic authentication.")
+		return "", nil
+	}
+
 	token = result["access_token"].(string)
 
 	return token, nil
