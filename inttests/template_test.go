@@ -45,3 +45,15 @@ func TestGetTemplateByFilters(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, templates)
 }
+
+func TestCloneTemplate(t *testing.T) {
+	templates, err := GC.GetTemplateByFilters("category", "Sample Templates")
+	assert.Nil(t, err)
+	assert.NotNil(t, templates)
+
+	system := getSystem()
+	assert.NotNil(t, system)
+
+	errCT := GC.CloneTemplate(system, templates[0].TemplateName+"- Copy", templates[0].OriginalTemplateID)
+	assert.Nil(t, errCT)
+}
