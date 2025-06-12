@@ -637,3 +637,135 @@ func TestGeFileInterfaace(t *testing.T) {
 		})
 	}
 }
+
+func TestIsNFSEnabled(t *testing.T) {
+	type checkFn func(*testing.T, bool, error)
+	check := func(fns ...checkFn) []checkFn { return fns }
+
+	hasNoError := func(t *testing.T, _ bool, err error) {
+		if err != nil {
+			t.Fatalf("expected no error, got: %v", err)
+		}
+	}
+
+	hasError := func(t *testing.T, _ bool, err error) {
+		if err == nil {
+			t.Fatalf("expected error but got none")
+		}
+	}
+
+	expectTrue := func(t *testing.T, enabled bool, _ error) {
+		if !enabled {
+			t.Fatal("expected NFS to be enabled, got false")
+		}
+	}
+
+	expectFalse := func(t *testing.T, enabled bool, _ error) {
+		if enabled {
+			t.Fatal("expected NFS to be disabled, got true")
+		}
+	}
+
+	tests := map[string]func(t *testing.T) (*httptest.Server, *System, []checkFn){
+		"success with NFSv3 enabled": func(t *testing.T) (*httptest.Server, *System, []checkFn) {
+			resp := `[{
+				"id": "1",
+				"nas_server_id": "nas-1",
+				"is_nfsv3_enabled": true,
+				"is_nfsv4_enabled": false
+			}]`
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path != "/rest/v1/nfs-servers" {
+					t.Fatalf("unexpected path: %s", r.URL.Path)
+				}
+				w.Header().Set("Content-Type", "application/json")
+				fmt.Fprint(w, resp)
+			}))
+
+			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			return ts, &System{client: client}, check(hasNoError, expectTrue)
+		},
+
+		"success with NFSv4 enabled": func(t *testing.T) (*httptest.Server, *System, []checkFn) {
+			resp := `[{
+				"id": "2",
+				"nas_server_id": "nas-2",
+				"is_nfsv3_enabled": false,
+				"is_nfsv4_enabled": true
+			}]`
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				fmt.Fprint(w, resp)
+			}))
+
+			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			return ts, &System{client: client}, check(hasNoError, expectTrue)
+		},
+
+		"success with no NFS enabled": func(t *testing.T) (*httptest.Server, *System, []checkFn) {
+			resp := `[{
+				"id": "3",
+				"nas_server_id": "nas-3",
+				"is_nfsv3_enabled": false,
+				"is_nfsv4_enabled": false
+			}]`
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				fmt.Fprint(w, resp)
+			}))
+
+			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			return ts, &System{client: client}, check(hasNoError, expectFalse)
+		},
+
+		"malformed response": func(t *testing.T) (*httptest.Server, *System, []checkFn) {
+			resp := `invalid-json`
+
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				fmt.Fprint(w, resp)
+			}))
+
+			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			return ts, &System{client: client}, check(hasError)
+		},
+
+		"empty response list": func(t *testing.T) (*httptest.Server, *System, []checkFn) {
+			resp := `[]`
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				fmt.Fprint(w, resp)
+			}))
+			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			return ts, &System{client: client}, check(hasNoError, expectFalse)
+		},
+
+		"multiple entries, one with NFSv3 enabled": func(t *testing.T) (*httptest.Server, *System, []checkFn) {
+			resp := `[
+		{"id": "1", "nas_server_id": "nas-1", "is_nfsv3_enabled": false, "is_nfsv4_enabled": false},
+		{"id": "2", "nas_server_id": "nas-2", "is_nfsv3_enabled": true, "is_nfsv4_enabled": false}
+	]`
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				fmt.Fprint(w, resp)
+			}))
+			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			return ts, &System{client: client}, check(hasNoError, expectTrue)
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			ts, system, checks := tc(t)
+			defer ts.Close()
+
+			result, err := system.IsNFSEnabled()
+			for _, checkFn := range checks {
+				checkFn(t, result, err)
+			}
+		})
+	}
+}
