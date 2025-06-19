@@ -687,7 +687,7 @@ func TestIsNFSEnabled(t *testing.T) {
 			return ts, &System{client: client}, check(hasNoError, expectTrue)
 		},
 
-		"success with NFSv4 enabled": func(t *testing.T) (*httptest.Server, *System, []checkFn) {
+		"success with NFSv4 enabled": func(_ *testing.T) (*httptest.Server, *System, []checkFn) {
 			resp := `[{
 				"id": "2",
 				"nas_server_id": "nas-2",
@@ -695,7 +695,7 @@ func TestIsNFSEnabled(t *testing.T) {
 				"is_nfsv4_enabled": true
 			}]`
 
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				fmt.Fprint(w, resp)
 			}))
@@ -704,7 +704,7 @@ func TestIsNFSEnabled(t *testing.T) {
 			return ts, &System{client: client}, check(hasNoError, expectTrue)
 		},
 
-		"success with no NFS enabled": func(t *testing.T) (*httptest.Server, *System, []checkFn) {
+		"success with no NFS enabled": func(_ *testing.T) (*httptest.Server, *System, []checkFn) {
 			resp := `[{
 				"id": "3",
 				"nas_server_id": "nas-3",
@@ -712,7 +712,7 @@ func TestIsNFSEnabled(t *testing.T) {
 				"is_nfsv4_enabled": false
 			}]`
 
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				fmt.Fprint(w, resp)
 			}))
@@ -721,10 +721,10 @@ func TestIsNFSEnabled(t *testing.T) {
 			return ts, &System{client: client}, check(hasNoError, expectFalse)
 		},
 
-		"malformed response": func(t *testing.T) (*httptest.Server, *System, []checkFn) {
+		"malformed response": func(_ *testing.T) (*httptest.Server, *System, []checkFn) {
 			resp := `invalid-json`
 
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				fmt.Fprint(w, resp)
 			}))
@@ -733,9 +733,9 @@ func TestIsNFSEnabled(t *testing.T) {
 			return ts, &System{client: client}, check(hasError)
 		},
 
-		"empty response list": func(t *testing.T) (*httptest.Server, *System, []checkFn) {
+		"empty response list": func(_ *testing.T) (*httptest.Server, *System, []checkFn) {
 			resp := `[]`
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				fmt.Fprint(w, resp)
 			}))
@@ -743,12 +743,12 @@ func TestIsNFSEnabled(t *testing.T) {
 			return ts, &System{client: client}, check(hasNoError, expectFalse)
 		},
 
-		"multiple entries, one with NFSv3 enabled": func(t *testing.T) (*httptest.Server, *System, []checkFn) {
+		"multiple entries, one with NFSv3 enabled": func(_ *testing.T) (*httptest.Server, *System, []checkFn) {
 			resp := `[
 		{"id": "1", "nas_server_id": "nas-1", "is_nfsv3_enabled": false, "is_nfsv4_enabled": false},
 		{"id": "2", "nas_server_id": "nas-2", "is_nfsv3_enabled": true, "is_nfsv4_enabled": false}
 	]`
-			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				fmt.Fprint(w, resp)
 			}))
