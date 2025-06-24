@@ -1451,6 +1451,21 @@ type CreateNASResponse struct {
 	ID string `json:"id"`
 }
 
+// GetAllNASResponse defines the struct for GetAllNASResponse
+type NFSServer struct {
+	ID                           string `json:"id"`
+	HostName                     string `json:"host_name"`
+	NasServerID                  string `json:"nas_server_id"`
+	IsNFSv3Enabled               bool   `json:"is_nfsv3_enabled"`
+	IsNFSv4Enabled               bool   `json:"is_nfsv4_enabled"`
+	IsSecureEnabled              bool   `json:"is_secure_enabled"`
+	IsUseSMBConfigEnabled        bool   `json:"is_use_smb_config_enabled"`
+	ServicePrincipalName         string `json:"service_principal_name"`
+	IsJoined                     bool   `json:"is_joined"`
+	IsExtendedCredentialsEnabled bool   `json:"is_extended_credentials_enabled"`
+	CredentialsCacheTTL          int    `json:"credentials_cache_TTL"`
+}
+
 // PingNASParam defines the struct (payload) for Ping NAS
 type PingNASParam struct {
 	DestinationAddress string `json:"destination_address"`
