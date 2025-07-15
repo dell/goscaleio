@@ -199,8 +199,7 @@ func (sdc *Sdc) GetVolumeMetrics() ([]*types.SdcVolumeMetrics, error) {
 
 	sdcID := sdc.Sdc.ID
 	path := fmt.Sprintf("/api/instances/Sdc::%s/action/queryVolumeSdcBwc", sdcID)
-
-	var body = struct{}{}
+	body := struct{}{}
 	var metrics []*types.SdcVolumeMetrics
 	err := sdc.client.getJSONWithRetry(http.MethodPost, path, body, &metrics)
 	if err != nil {

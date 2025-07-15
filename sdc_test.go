@@ -1303,16 +1303,15 @@ func TestGetVolumeMetrics(t *testing.T) {
 			t.Errorf("expected 1 volume info, got %d", len(metrics))
 		}
 
-		if metrics[0].VolumeId != "9d12552300000039" {
-			t.Errorf("expected volume ID 9d12552300000039, got %s", metrics[0].VolumeId)
+		if metrics[0].VolumeID != "9d12552300000039" {
+			t.Errorf("expected volume ID 9d12552300000039, got %s", metrics[0].VolumeID)
 		}
-
 	})
 
 	// Test case 2: Error during retrieval of volume metrics
 	t.Run("error during retrieval", func(t *testing.T) {
 		// Create a test server with an error response
-		svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(`{"error": "mock error"}`))
 		}))
@@ -1341,7 +1340,7 @@ func TestGetVolumeMetrics(t *testing.T) {
 	// Test case 3: Invalid JSON response
 	t.Run("invalid JSON response", func(t *testing.T) {
 		// Create a test server with an invalid JSON response
-		svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(`invalid JSON`))
 		}))

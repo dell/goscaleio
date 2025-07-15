@@ -2386,6 +2386,6 @@ type SdcVolumeMetrics struct {
 	TrimLatencyBwc  BWC    `json:"trimLatencyBwc"`
 	WriteBwc        BWC    `json:"writeBwc"`
 	WriteLatencyBwc BWC    `json:"writeLatencyBwc"`
-	VolumeId        string `json:"volumeId"`
-	SdcId           string `json:"sdcId"`
+	VolumeID        string `json:"volumeId"`
+	SdcID           string `json:"sdcId"`
 }
