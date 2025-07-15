@@ -224,3 +224,17 @@ func TestSdcRestrictedMode(t *testing.T) {
 	err = system.SetRestrictedMode("None")
 	assert.Nil(t, err)
 }
+
+// TestGetVolumeMetrics
+func TestGetVolumeMetrics(t *testing.T) {
+	Sdc := getAllSdc(t)
+	assert.NotNil(t, Sdc)
+	if Sdc == nil {
+		return
+	}
+
+	for _, s := range Sdc {
+		_, err := s.GetVolumeMetrics()
+		assert.Nil(t, err)
+	}
+}
