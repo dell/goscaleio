@@ -1223,3 +1223,147 @@ func TestGetSdcLocalGUID(t *testing.T) {
 	_, err = GetSdcLocalGUID()
 	assert.Error(t, err)
 }
+
+func TestGetVolumeMetrics(t *testing.T) {
+	// Test case 1: Successful retrieval of volume metrics
+	t.Run("successful retrieval", func(t *testing.T) {
+		// Create a test server with a successful response
+		svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method != http.MethodPost {
+				t.Errorf("expected POST method, got %s", r.Method)
+			}
+
+			if r.URL.Path != "/api/instances/Sdc::ed10ad4300000031/action/queryVolumeSdcBwc" {
+				t.Errorf("expected URL path /api/instances/Sdc::ed10ad4300000031/action/queryVolumeSdcBwc, got %s", r.URL.Path)
+			}
+
+			w.WriteHeader(http.StatusOK)
+			jsonData := []byte(`
+				[
+				  {
+					"readLatencyBwc": {
+					  "numSeconds": 0,
+					  "totalWeightInKb": 0,
+					  "numOccured": 0
+					},
+					"volumeId": "9d12552300000039",
+					"trimBwc": {
+					  "numSeconds": 0,
+					  "totalWeightInKb": 0,
+					  "numOccured": 0
+					},
+					"trimLatencyBwc": {
+					  "numSeconds": 0,
+					  "totalWeightInKb": 0,
+					  "numOccured": 0
+					},
+					"readBwc": {
+					  "numSeconds": 0,
+					  "totalWeightInKb": 0,
+					  "numOccured": 0
+					},
+					"writeLatencyBwc": {
+					  "numSeconds": 0,
+					  "totalWeightInKb": 0,
+					  "numOccured": 0
+					},
+					"sdcId": "ed10ad4300000031",
+					"writeBwc": {
+					  "numSeconds": 0,
+					  "totalWeightInKb": 0,
+					  "numOccured": 0
+					}
+				  }
+				]
+			`)
+			w.Write(jsonData)
+		}))
+		defer svr.Close()
+
+		client, err := NewClientWithArgs(svr.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Create a new Sdc instance with the test server URL
+		sdc := &Sdc{
+			Sdc: &types.Sdc{
+				ID: "ed10ad4300000031",
+			},
+			client: client,
+		}
+
+		// Call the GetVolumeMetrics method
+		metrics, err := sdc.GetVolumeMetrics()
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		if len(metrics) != 1 {
+			t.Errorf("expected 1 volume info, got %d", len(metrics))
+		}
+
+		if metrics[0].VolumeId != "9d12552300000039" {
+			t.Errorf("expected volume ID 9d12552300000039, got %s", metrics[0].VolumeId)
+		}
+
+	})
+
+	// Test case 2: Error during retrieval of volume metrics
+	t.Run("error during retrieval", func(t *testing.T) {
+		// Create a test server with an error response
+		svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"error": "mock error"}`))
+		}))
+		defer svr.Close()
+
+		client, err := NewClientWithArgs(svr.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Create a new Sdc instance with the test server URL
+		sdc := &Sdc{
+			Sdc: &types.Sdc{
+				ID: "ed10ad4300000031",
+			},
+			client: client,
+		}
+
+		// Call the GetVolumeMetrics method
+		_, err = sdc.GetVolumeMetrics()
+		if err == nil {
+			t.Errorf("expected an error, got none")
+		}
+	})
+
+	// Test case 3: Invalid JSON response
+	t.Run("invalid JSON response", func(t *testing.T) {
+		// Create a test server with an invalid JSON response
+		svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`invalid JSON`))
+		}))
+		defer svr.Close()
+
+		client, err := NewClientWithArgs(svr.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Create a new Sdc instance with the test server URL
+		sdc := &Sdc{
+			Sdc: &types.Sdc{
+				ID: "ed10ad4300000031",
+			},
+			client: client,
+		}
+
+		// Call the GetVolumeMetrics method
+		_, err = sdc.GetVolumeMetrics()
+		if err == nil {
+			t.Errorf("expected an error, got none")
+		}
+	})
+}
