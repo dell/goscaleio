@@ -194,6 +194,21 @@ func (sdc *Sdc) GetVolume() ([]*types.Volume, error) {
 	return vols, nil
 }
 
+func (sdc *Sdc) GetVolumeMetrics() ([]*types.SdcVolumeMetrics, error) {
+	defer TimeSpent("GetVolume", time.Now())
+
+	sdcID := sdc.Sdc.ID
+	path := fmt.Sprintf("/api/instances/Sdc::%s/action/queryVolumeSdcBwc", sdcID)
+	body := struct{}{}
+	var metrics []*types.SdcVolumeMetrics
+	err := sdc.client.getJSONWithRetry(http.MethodPost, path, body, &metrics)
+	if err != nil {
+		return nil, err
+	}
+
+	return metrics, nil
+}
+
 // FindVolumes returns volumes
 func (sdc *Sdc) FindVolumes() ([]*Volume, error) {
 	defer TimeSpent("FindVolumes", time.Now())

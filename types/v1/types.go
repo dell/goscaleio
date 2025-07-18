@@ -2377,3 +2377,15 @@ type OSUserCredential struct {
 	// Required if Private Key is set
 	KeyPairName string `xml:"keyPairName,omitempty"`
 }
+
+// SdcVolumeMetrics represents metrics for a single volume on a single SDC
+type SdcVolumeMetrics struct {
+	ReadLatencyBwc  BWC    `json:"readLatencyBwc"`
+	ReadBwc         BWC    `json:"readBwc"`
+	TrimBwc         BWC    `json:"trimBwc"`
+	TrimLatencyBwc  BWC    `json:"trimLatencyBwc"`
+	WriteBwc        BWC    `json:"writeBwc"`
+	WriteLatencyBwc BWC    `json:"writeLatencyBwc"`
+	VolumeID        string `json:"volumeId"`
+	SdcID           string `json:"sdcId"`
+}
