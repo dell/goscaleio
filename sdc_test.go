@@ -209,7 +209,7 @@ func TestApproveSDC(t *testing.T) {
 			param: types.ApproveSdcParam{
 				Name: "sdc_test",
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 				w.Write([]byte(`{"message":"Request message is not valid: One of the parameter(s) must be part of the request body: sdcIp, sdcIps, sdcGuid"}`))
 			})),
