@@ -19,6 +19,7 @@ import (
 	"math"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
@@ -179,58 +180,70 @@ func TestRenameSdc(t *testing.T) {
 }
 
 func TestApproveSDC(t *testing.T) {
+	systemID := "0000aaabbbccc1111"
 	type testCase struct {
-		param    types.ApproveSdcParam
-		expected error
-	}
-
-	system := types.System{
-		ID:                       "0000aaabbbccc1111",
-		RestrictedSdcModeEnabled: true,
-		RestrictedSdcMode:        "Guid",
+		name         string
+		param        types.ApproveSdcParam
+		server       *httptest.Server
+		expectedErr  error
+		expectedResp *types.ApproveSdcResponse
 	}
 
 	cases := []testCase{
 		{
+			name: "success",
 			param: types.ApproveSdcParam{
 				SdcGUID: "UT3A9C7B2E-7F2D-4A1B-9C3E-8A1FDE9B1234",
 				SdcIP:   "10.10.10.10",
 				SdcIps:  []string{"10.10.10.10"},
 			},
-			expected: nil,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"id": "approved-sdc-id"}`))
+			})),
+			expectedErr:  nil,
+			expectedResp: &types.ApproveSdcResponse{SdcID: "approved-sdc-id"},
 		},
 		{
+			name: "error: missing required fields",
 			param: types.ApproveSdcParam{
 				Name: "sdc_test",
 			},
-			expected: errors.New("Request message is not valid: One of the parameter(s) must be part of the request body: sdcIp, sdcIps, sdcGuid"),
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte(`{"message":"Request message is not valid: One of the parameter(s) must be part of the request body: sdcIp, sdcIps, sdcGuid"}`))
+			})),
+			expectedErr: fmt.Errorf("Request message is not valid: One of the parameter(s) must be part of the request body: sdcIp, sdcIps, sdcGuid"),
 		},
 	}
-	svr := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
-	}))
-	defer svr.Close()
 
 	for _, tc := range cases {
-		tc := tc
-		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+		t.Run(tc.name, func(t *testing.T) {
+			defer tc.server.Close()
+
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			s := System{
+			system := System{
 				client: client,
-				System: &system,
+				System: &types.System{
+					ID: systemID,
+				},
 			}
 
-			_, err2 := s.ApproveSdc(&tc.param)
-			if err2 != nil {
-				if tc.expected == nil {
-					t.Errorf("Approving SDC did not work as expected, \n\tgot: %s \n\twant: %v", err2, tc.expected)
-				} else {
-					if err2.Error() != tc.expected.Error() {
-						t.Errorf("Approving SDC did not work as expected, \n\tgot: %s \n\twant: %s", err2, tc.expected)
-					}
+			resp, err := system.ApproveSdc(&tc.param)
+			if tc.expectedErr != nil {
+				if err == nil || !strings.Contains(err.Error(), tc.expectedErr.Error()) {
+					t.Errorf("Expected error containing %q, got %v", tc.expectedErr.Error(), err)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Expected no error, got %v", err)
+				}
+				if resp == nil || resp.SdcID != tc.expectedResp.SdcID {
+					t.Errorf("Expected response ID %q, got %v", tc.expectedResp.SdcID, resp)
 				}
 			}
 		})
