@@ -197,7 +197,7 @@ func TestApproveSDC(t *testing.T) {
 				SdcIP:   "10.10.10.10",
 				SdcIps:  []string{"10.10.10.10"},
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{"id": "approved-sdc-id"}`))
 			})),
