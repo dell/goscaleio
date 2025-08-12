@@ -512,8 +512,8 @@ type ApproveSdcParam struct {
 	Name    string   `json:"name,omitempty"`
 }
 
-// ApproveSdcByGUIDResponse defines struct for ApproveSdcByGUIDResponse
-type ApproveSdcByGUIDResponse struct {
+// ApproveSdcResponse defines struct for ApproveSdcResponse
+type ApproveSdcResponse struct {
 	SdcID string `json:"id"`
 }
 
