@@ -370,10 +370,25 @@ func (s *System) ApproveSdc(approveSdcParam *types.ApproveSdcParam) (*types.Appr
 
 	path := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", s.System.ID)
 	sdcParam := &types.ApproveSdcParam{
-		SdcGUID: approveSdcParam.SdcGUID,
-		SdcIP:   approveSdcParam.SdcIP,
-		SdcIps:  approveSdcParam.SdcIps,
-		Name:    approveSdcParam.Name,
+		Name: approveSdcParam.Name,
+	}
+
+	// Set the appropriate parameter based on RestrictedSdcMode
+	switch s.System.RestrictedSdcMode {
+	case "None":
+		// Only send Name parameter
+	case "Guid":
+		// Allow only the SDC with this GUID
+		if approveSdcParam.SdcGUID != "" {
+			sdcParam.SdcGUID = approveSdcParam.SdcGUID
+		}
+	case "ApprovedIp":
+		// Allow only approved IP addresses for this SDC
+		if approveSdcParam.SdcIP != "" {
+			sdcParam.SdcIP = approveSdcParam.SdcIP
+		} else if len(approveSdcParam.SdcIps) > 0 {
+			sdcParam.SdcIps = approveSdcParam.SdcIps
+		}
 	}
 
 	err := s.client.getJSONWithRetry(http.MethodPost, path, sdcParam, &resp)
