@@ -239,7 +239,7 @@ func TestApproveSDC(t *testing.T) {
 			expectedResp: &types.ApproveSdcResponse{SdcID: "approved-sdc-guid-id"},
 		},
 		{
-			name: "success with RestrictedSdcMode ApprovedIp using SdcIP priority",
+			name: "success with RestrictedSdcMode ApprovedIp using SdcIps when both SdcIP and SdcIps are provided",
 			param: types.ApproveSdcParam{
 				SdcGUID: "UT3A9C7B2E-7F2D-4A1B-9C3E-8A1FDE9B1234",
 				SdcIP:   "10.10.10.10",
@@ -248,13 +248,13 @@ func TestApproveSDC(t *testing.T) {
 			},
 			restrictedMode: "ApprovedIp",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				// Verify SdcIP is used (has priority over SdcIps)
+				// Verify SdcIps is used when both are provided
 				body, _ := io.ReadAll(r.Body)
-				if !strings.Contains(string(body), "sdcIp") || !strings.Contains(string(body), "10.10.10.10") {
-					t.Errorf("Expected sdcIp with priority in body for ApprovedIp mode, got: %s", string(body))
+				if !strings.Contains(string(body), "sdcIps") || !strings.Contains(string(body), "10.10.10.11") {
+					t.Errorf("Expected sdcIps in body for ApprovedIp mode when both present, got: %s", string(body))
 				}
-				if strings.Contains(string(body), "sdcGUID") || strings.Contains(string(body), "sdcIps") {
-					t.Errorf("Expected no GUID or IPs array when SdcIP has priority, got body: %s", string(body))
+				if strings.Contains(string(body), "sdcGUID") || strings.Contains(string(body), "sdcIp\"") {
+					t.Errorf("Expected no GUID or single IP when using SdcIps, got body: %s", string(body))
 				}
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{"id": "approved-sdc-ip-priority-id"}`))
