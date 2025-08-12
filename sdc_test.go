@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"net/http/httptest"
@@ -182,22 +183,31 @@ func TestRenameSdc(t *testing.T) {
 func TestApproveSDC(t *testing.T) {
 	systemID := "0000aaabbbccc1111"
 	type testCase struct {
-		name         string
-		param        types.ApproveSdcParam
-		server       *httptest.Server
-		expectedErr  error
-		expectedResp *types.ApproveSdcResponse
+		name            string
+		param           types.ApproveSdcParam
+		restrictedMode  string
+		server          *httptest.Server
+		expectedErr     error
+		expectedResp    *types.ApproveSdcResponse
+		expectedReqBody string // To verify correct parameter is sent
 	}
 
 	cases := []testCase{
 		{
-			name: "success",
+			name: "success with RestrictedSdcMode None",
 			param: types.ApproveSdcParam{
 				SdcGUID: "UT3A9C7B2E-7F2D-4A1B-9C3E-8A1FDE9B1234",
 				SdcIP:   "10.10.10.10",
 				SdcIps:  []string{"10.10.10.10"},
+				Name:    "test-sdc",
 			},
-			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			restrictedMode: "None",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// Verify only Name is sent (no restriction parameters)
+				body, _ := io.ReadAll(r.Body)
+				if strings.Contains(string(body), "sdcGUID") || strings.Contains(string(body), "sdcIP") || strings.Contains(string(body), "sdcIps") {
+					t.Errorf("Expected no restriction parameters for None mode, got body: %s", string(body))
+				}
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{"id": "approved-sdc-id"}`))
 			})),
@@ -205,15 +215,128 @@ func TestApproveSDC(t *testing.T) {
 			expectedResp: &types.ApproveSdcResponse{SdcID: "approved-sdc-id"},
 		},
 		{
-			name: "error: missing required fields",
+			name: "success with RestrictedSdcMode Guid",
 			param: types.ApproveSdcParam{
-				Name: "sdc_test",
+				SdcGUID: "UT3A9C7B2E-7F2D-4A1B-9C3E-8A1FDE9B1234",
+				SdcIP:   "10.10.10.10",
+				SdcIps:  []string{"10.10.10.10"},
+				Name:    "test-sdc",
 			},
+			restrictedMode: "Guid",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// Verify only SdcGUID is sent
+				body, _ := io.ReadAll(r.Body)
+				if !strings.Contains(string(body), "UT3A9C7B2E-7F2D-4A1B-9C3E-8A1FDE9B1234") {
+					t.Errorf("Expected SdcGUID in body for Guid mode, got: %s", string(body))
+				}
+				if strings.Contains(string(body), "sdcIP") || strings.Contains(string(body), "sdcIps") {
+					t.Errorf("Expected no IP parameters for Guid mode, got body: %s", string(body))
+				}
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"id": "approved-sdc-guid-id"}`))
+			})),
+			expectedErr:  nil,
+			expectedResp: &types.ApproveSdcResponse{SdcID: "approved-sdc-guid-id"},
+		},
+		{
+			name: "success with RestrictedSdcMode ApprovedIp using SdcIP priority",
+			param: types.ApproveSdcParam{
+				SdcGUID: "UT3A9C7B2E-7F2D-4A1B-9C3E-8A1FDE9B1234",
+				SdcIP:   "10.10.10.10",
+				SdcIps:  []string{"10.10.10.11", "10.10.10.12"},
+				Name:    "test-sdc",
+			},
+			restrictedMode: "ApprovedIp",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// Verify SdcIP is used (has priority over SdcIps)
+				body, _ := io.ReadAll(r.Body)
+				if !strings.Contains(string(body), "sdcIp") || !strings.Contains(string(body), "10.10.10.10") {
+					t.Errorf("Expected sdcIp with priority in body for ApprovedIp mode, got: %s", string(body))
+				}
+				if strings.Contains(string(body), "sdcGUID") || strings.Contains(string(body), "sdcIps") {
+					t.Errorf("Expected no GUID or IPs array when SdcIP has priority, got body: %s", string(body))
+				}
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"id": "approved-sdc-ip-priority-id"}`))
+			})),
+			expectedErr:  nil,
+			expectedResp: &types.ApproveSdcResponse{SdcID: "approved-sdc-ip-priority-id"},
+		},
+		{
+			name: "success with RestrictedSdcMode ApprovedIp using SdcIps fallback",
+			param: types.ApproveSdcParam{
+				SdcGUID: "UT3A9C7B2E-7F2D-4A1B-9C3E-8A1FDE9B1234",
+				SdcIps:  []string{"10.10.10.11", "10.10.10.12"},
+				Name:    "test-sdc",
+			},
+			restrictedMode: "ApprovedIp",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// Verify SdcIps is used when SdcIP is empty
+				body, _ := io.ReadAll(r.Body)
+				if !strings.Contains(string(body), "sdcIps") || !strings.Contains(string(body), "10.10.10.11") {
+					t.Errorf("Expected sdcIps fallback in body for ApprovedIp mode, got: %s", string(body))
+				}
+				if strings.Contains(string(body), "sdcGUID") || strings.Contains(string(body), "sdcIp\"") {
+					t.Errorf("Expected no GUID or single IP when using SdcIps fallback, got body: %s", string(body))
+				}
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"id": "approved-sdc-ips-fallback-id"}`))
+			})),
+			expectedErr:  nil,
+			expectedResp: &types.ApproveSdcResponse{SdcID: "approved-sdc-ips-fallback-id"},
+		},
+		{
+			name: "error: RestrictedSdcMode Guid but no SdcGUID provided",
+			param: types.ApproveSdcParam{
+				SdcIP:  "10.10.10.10",
+				SdcIps: []string{"10.10.10.10"},
+				Name:   "test-sdc",
+			},
+			restrictedMode: "Guid",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				// This should not be called since we return early with error
+				w.WriteHeader(http.StatusOK)
+			})),
+			expectedErr: fmt.Errorf("system is in GUID restricted mode but no SdcGUID provided"),
+		},
+		{
+			name: "error: RestrictedSdcMode ApprovedIp but no IP provided",
+			param: types.ApproveSdcParam{
+				SdcGUID: "UT3A9C7B2E-7F2D-4A1B-9C3E-8A1FDE9B1234",
+				Name:    "test-sdc",
+			},
+			restrictedMode: "ApprovedIp",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				// This should not be called since we return early with error
+				w.WriteHeader(http.StatusOK)
+			})),
+			expectedErr: fmt.Errorf("system is in IP restricted mode but no SdcIP or SdcIps provided"),
+		},
+		{
+			name: "error: unknown RestrictedSdcMode",
+			param: types.ApproveSdcParam{
+				SdcGUID: "UT3A9C7B2E-7F2D-4A1B-9C3E-8A1FDE9B1234",
+				Name:    "test-sdc",
+			},
+			restrictedMode: "InvalidMode",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				// This should not be called since we return early with error
+				w.WriteHeader(http.StatusOK)
+			})),
+			expectedErr: fmt.Errorf("unknown RestrictedSdcMode: InvalidMode"),
+		},
+		{
+			name: "error: API request fails",
+			param: types.ApproveSdcParam{
+				SdcGUID: "UT3A9C7B2E-7F2D-4A1B-9C3E-8A1FDE9B1234",
+				Name:    "test-sdc",
+			},
+			restrictedMode: "Guid",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
-				w.Write([]byte(`{"message":"Request message is not valid: One of the parameter(s) must be part of the request body: sdcIp, sdcIps, sdcGuid"}`))
+				w.Write([]byte(`{"message":"Request message is not valid"}`))
 			})),
-			expectedErr: fmt.Errorf("Request message is not valid: One of the parameter(s) must be part of the request body: sdcIp, sdcIps, sdcGuid"),
+			expectedErr: fmt.Errorf("Request message is not valid"),
 		},
 	}
 
@@ -229,7 +352,8 @@ func TestApproveSDC(t *testing.T) {
 			system := System{
 				client: client,
 				System: &types.System{
-					ID: systemID,
+					ID:                systemID,
+					RestrictedSdcMode: tc.restrictedMode,
 				},
 			}
 
