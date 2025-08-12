@@ -390,7 +390,6 @@ func (s *System) ApproveSdc(approveSdcParam *types.ApproveSdcParam) (*types.Appr
 			sdcParam.SdcIps = approveSdcParam.SdcIps
 		} else if approveSdcParam.SdcIP != "" {
 			sdcParam.SdcIP = approveSdcParam.SdcIP
-
 		} else {
 			return nil, fmt.Errorf("system is in IP restricted mode but no SdcIP or SdcIps provided")
 		}
