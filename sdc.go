@@ -370,10 +370,31 @@ func (s *System) ApproveSdc(approveSdcParam *types.ApproveSdcParam) (*types.Appr
 
 	path := fmt.Sprintf("/api/instances/System::%v/action/approveSdc", s.System.ID)
 	sdcParam := &types.ApproveSdcParam{
-		SdcGUID: approveSdcParam.SdcGUID,
-		SdcIP:   approveSdcParam.SdcIP,
-		SdcIps:  approveSdcParam.SdcIps,
-		Name:    approveSdcParam.Name,
+		Name: approveSdcParam.Name,
+	}
+
+	// Set the appropriate parameter based on RestrictedSdcMode
+	switch s.System.RestrictedSdcMode {
+	case "None":
+		// Only send Name parameter
+	case "Guid":
+		// Allow only the SDC with this GUID
+		if approveSdcParam.SdcGUID != "" {
+			sdcParam.SdcGUID = approveSdcParam.SdcGUID
+		} else {
+			return nil, fmt.Errorf("system is in GUID restricted mode but no SdcGUID provided")
+		}
+	case "ApprovedIp":
+		// Allow only approved IP addresses for this SDC
+		if len(approveSdcParam.SdcIps) > 0 {
+			sdcParam.SdcIps = approveSdcParam.SdcIps
+		} else if approveSdcParam.SdcIP != "" {
+			sdcParam.SdcIP = approveSdcParam.SdcIP
+		} else {
+			return nil, fmt.Errorf("system is in IP restricted mode but no SdcIP or SdcIps provided")
+		}
+	default:
+		return nil, fmt.Errorf("unknown RestrictedSdcMode: %s", s.System.RestrictedSdcMode)
 	}
 
 	err := s.client.getJSONWithRetry(http.MethodPost, path, sdcParam, &resp)
