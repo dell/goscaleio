@@ -310,7 +310,7 @@ func TestApproveSDC(t *testing.T) {
 				// This should not be called since we return early with error
 				w.WriteHeader(http.StatusOK)
 			})),
-			expectedErr: fmt.Errorf("system is in IP restricted mode but no SdcIP or SdcIps provided"),
+			expectedErr: fmt.Errorf("system is in IP restricted mode but no valid SdcIP or SdcIps provided"),
 		},
 		{
 			name: "error: unknown RestrictedSdcMode",
