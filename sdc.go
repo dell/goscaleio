@@ -15,6 +15,7 @@ package goscaleio
 import (
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os/exec"
 	"reflect"
@@ -388,10 +389,10 @@ func (s *System) ApproveSdc(approveSdcParam *types.ApproveSdcParam) (*types.Appr
 		// Allow only approved IP addresses for this SDC
 		if len(approveSdcParam.SdcIps) > 0 {
 			sdcParam.SdcIps = approveSdcParam.SdcIps
-		} else if approveSdcParam.SdcIP != "" {
+		} else if ip := net.ParseIP(approveSdcParam.SdcIP); ip != nil {
 			sdcParam.SdcIP = approveSdcParam.SdcIP
 		} else {
-			return nil, fmt.Errorf("system is in IP restricted mode but no SdcIP or SdcIps provided")
+			return nil, fmt.Errorf("system is in IP restricted mode but no valid SdcIP or SdcIps provided")
 		}
 	default:
 		return nil, fmt.Errorf("unknown RestrictedSdcMode: %s", s.System.RestrictedSdcMode)
