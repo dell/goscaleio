@@ -12,4 +12,4 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 )
 
-go 1.24
+go 1.25
