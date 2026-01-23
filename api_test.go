@@ -14,6 +14,7 @@ package goscaleio
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -292,6 +293,41 @@ func TestClientVersion(t *testing.T) {
 		ver, err := client.GetVersion()
 		assert.NoError(t, err)
 		assert.Equal(t, "malformed", ver)
+	})
+
+	t.Run("OIDC authentication fails", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodPost && r.URL.Path == "/rest/v1/token" {
+				http.Error(w, `{"error": "invalid_client"}`, http.StatusBadRequest)
+				return
+			}
+			http.NotFound(w, r)
+		}))
+		defer server.Close()
+
+		os.Setenv("GOSCALEIO_ENDPOINT", server.URL)
+
+		client, err := NewClient()
+		assert.NoError(t, err)
+
+		// Test OIDC authentication fails
+		_, err = client.Authenticate(&ConfigConnect{
+			Username:         "ScaleIOUser",
+			Password:         "password",
+			Version:          "4.0",
+			AuthType:         "OIDC",
+			PfmpIP:           server.URL,
+			CiamClientID:     "client_id",
+			CiamClientSecret: "client_secret",
+			Issuer:           "issuer",
+			OidcClientID:     "oidc_client_id",
+			OidcClientSecret: "oidc_client_secret",
+		})
+		assert.Error(t, err)
+
+		ver, err := client.GetVersion()
+		assert.Error(t, err)
+		assert.Empty(t, ver)
 	})
 }
 
@@ -712,4 +748,289 @@ func TestExtractString(t *testing.T) {
 	s, err := extractString(res)
 	assert.NoError(t, err)
 	assert.Equal(t, `{"message":"success"}`, s)
+}
+
+func TestExtractOauth2Token(t *testing.T) {
+	// Fixed time to use in JSON and comparisons
+	// exp := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name      string
+		body      string
+		wantToken string
+	}{
+		{
+			name:      "valid full token",
+			body:      `{"access_token":"abc123","token_type":"Bearer","refresh_token":"r1","expiry":"2025-01-01T00:00:00Z"}`,
+			wantToken: "abc123",
+		},
+		{
+			name:      "invalid JSON",
+			body:      `not-json`,
+			wantToken: "", // zero value expected
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resp := &http.Response{
+				Body:       ioNopCloser(strings.NewReader(tt.body)),
+				StatusCode: http.StatusOK,
+			}
+
+			token := extractOauth2Token(resp)
+
+			// Field-by-field assertions (safer for time.Time)
+			if token != tt.wantToken {
+				t.Errorf("AccessToken = %q, want %q", token, tt.wantToken)
+			}
+		})
+	}
+}
+
+type nopCloser struct{ *strings.Reader }
+
+func (nc nopCloser) Close() error { return nil }
+
+func ioNopCloser(r *strings.Reader) nopCloser { return nopCloser{Reader: r} }
+
+func TestMergedScopes(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name     string
+		issuer   string
+		clientID string
+		want     []string
+	}{
+		{
+			name:     "Azure via login.microsoftonline.com",
+			issuer:   "https://login.microsoftonline.com/tenant-id",
+			clientID: "abcd-1234",
+			want:     []string{"api://abcd-1234/.default"},
+		},
+		{
+			name:     "Azure via v2.0 suffix",
+			issuer:   "https://contoso.com/abc/v2.0",
+			clientID: "resource-app-id",
+			want:     []string{"api://resource-app-id/.default"},
+		},
+		{
+			name:     "Keycloak realm",
+			issuer:   "https://auth.example.com/realms/myrealm",
+			clientID: "client-x",
+			want:     []string{"openid"},
+		},
+		{
+			name:     "Unknown provider",
+			issuer:   "https://issuer.example.com",
+			clientID: "client-y",
+			want:     nil,
+		},
+		{
+			name:     "Issuer with whitespace",
+			issuer:   "   https://login.microsoftonline.com/foo   ",
+			clientID: "xyz",
+			want:     []string{"api://xyz/.default"},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			array := &ConfigConnect{
+				Issuer:           tc.issuer,
+				OidcClientID:     tc.clientID,
+				OidcClientSecret: "secret", // not used by mergedScopes
+			}
+			got := mergedScopes(array)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("scopes mismatch: want=%v got=%v", tc.want, got)
+			}
+		})
+	}
+}
+
+func TestNewTokenProvider_Validation(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name        string
+		array       *ConfigConnect
+		wantErr     bool
+		errContains string
+	}{
+		{
+			name:        "nil array",
+			array:       nil,
+			wantErr:     true,
+			errContains: "array connection data is nil",
+		},
+		{
+			name: "empty issuer",
+			array: &ConfigConnect{
+				Issuer:           "   ",
+				OidcClientID:     "client",
+				OidcClientSecret: "secret",
+			},
+			wantErr:     true,
+			errContains: "issuer must not be empty",
+		},
+		{
+			name: "empty client id",
+			array: &ConfigConnect{
+				Issuer:           "https://login.microsoftonline.com/tenant",
+				OidcClientID:     "   ",
+				OidcClientSecret: "secret",
+			},
+			wantErr:     true,
+			errContains: "oidc client credentials must not be empty",
+		},
+		{
+			name: "empty client secret",
+			array: &ConfigConnect{
+				Issuer:           "https://login.microsoftonline.com/tenant",
+				OidcClientID:     "client",
+				OidcClientSecret: "   ",
+			},
+			wantErr:     true,
+			errContains: "oidc client credentials must not be empty",
+		},
+		{
+			name: "success (azure)",
+			array: &ConfigConnect{
+				Issuer:           "https://login.microsoftonline.com/tenant",
+				OidcClientID:     "client",
+				OidcClientSecret: "secret",
+			},
+			wantErr: false,
+		},
+		{
+			name: "success (keycloak)",
+			array: &ConfigConnect{
+				Issuer:           "https://auth.example.com/realms/dev",
+				OidcClientID:     "kc-client",
+				OidcClientSecret: "secret",
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			provider, err := NewTokenProvider(tc.array /* no opts */)
+			if tc.wantErr {
+				if err == nil {
+					t.Fatalf("expected error, got nil")
+				}
+				if tc.errContains != "" && !strings.Contains(err.Error(), tc.errContains) {
+					t.Fatalf("expected error containing %q, got %q", tc.errContains, err.Error())
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if provider == nil {
+				t.Fatalf("expected provider, got nil")
+			}
+
+			// Ensure underlying type is OIDCTokenProvider and config looks sensible
+			otp, ok := provider.(*OIDCTokenProvider)
+			if !ok {
+				t.Fatalf("expected *OIDCTokenProvider, got %T", provider)
+			}
+			if otp.httpClient == nil {
+				t.Fatalf("http client should not be nil")
+			}
+			if otp.cfg.Issuer != tc.array.Issuer {
+				t.Fatalf("issuer mismatch: want %q got %q", tc.array.Issuer, otp.cfg.Issuer)
+			}
+			if otp.cfg.ClientID != tc.array.OidcClientID {
+				t.Fatalf("client id mismatch: want %q got %q", tc.array.OidcClientID, otp.cfg.ClientID)
+			}
+			if otp.cfg.ClientSecret != tc.array.OidcClientSecret {
+				t.Fatalf("client secret mismatch: want %q got %q", tc.array.OidcClientSecret, otp.cfg.ClientSecret)
+			}
+		})
+	}
+}
+
+func TestNewOIDCTokenProvider_HTTPClientOptions(t *testing.T) {
+	t.Parallel()
+
+	baseCfg := OIDCConfig{
+		Issuer:       "https://issuer.example.com",
+		ClientID:     "cid",
+		ClientSecret: "sec",
+		Scopes:       []string{"openid"},
+	}
+
+	t.Run("custom HTTP client wins", func(t *testing.T) {
+		t.Parallel()
+		custom := &http.Client{Timeout: 123 * time.Second}
+
+		p, err := NewOIDCTokenProvider(baseCfg, WithHTTPClient(custom), WithTimeout(2*time.Second), WithInsecureSkipVerify(true))
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if p.httpClient != custom {
+			t.Fatalf("expected custom client to be used")
+		}
+		// Ensure options are not re-applied on custom client
+		if p.httpClient.Timeout != 123*time.Second {
+			t.Fatalf("custom client timeout changed unexpectedly: got=%v", p.httpClient.Timeout)
+		}
+	})
+
+	t.Run("timeout and TLS defaults applied when no custom client", func(t *testing.T) {
+		t.Parallel()
+
+		p, err := NewOIDCTokenProvider(baseCfg, WithTimeout(2500*time.Millisecond))
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if p.httpClient.Timeout != 2500*time.Millisecond {
+			t.Fatalf("timeout mismatch: want=2500ms got=%v", p.httpClient.Timeout)
+		}
+		tr, ok := p.httpClient.Transport.(*http.Transport)
+		if !ok {
+			t.Fatalf("transport type: want *http.Transport got %T", p.httpClient.Transport)
+		}
+		if tr.TLSClientConfig == nil {
+			t.Fatalf("tls config must not be nil")
+		}
+		if tr.TLSClientConfig.MinVersion != tls.VersionTLS12 {
+			t.Fatalf("min tls version mismatch: want TLS1.2 got=%v", tr.TLSClientConfig.MinVersion)
+		}
+		if tr.TLSClientConfig.InsecureSkipVerify {
+			t.Fatalf("insecure skip verify should be false by default")
+		}
+	})
+
+	t.Run("insecure skip verify enabled", func(t *testing.T) {
+		t.Parallel()
+
+		p, err := NewOIDCTokenProvider(baseCfg, WithInsecureSkipVerify(true))
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		tr, ok := p.httpClient.Transport.(*http.Transport)
+		if !ok {
+			t.Fatalf("transport type: want *http.Transport got %T", p.httpClient.Transport)
+		}
+		if tr.TLSClientConfig == nil {
+			t.Fatalf("tls config must not be nil")
+		}
+		if !tr.TLSClientConfig.InsecureSkipVerify {
+			t.Fatalf("expected InsecureSkipVerify=true")
+		}
+		if tr.TLSClientConfig.MinVersion != tls.VersionTLS12 {
+			t.Fatalf("min tls version mismatch: want TLS1.2 got=%v", tr.TLSClientConfig.MinVersion)
+		}
+	})
 }
