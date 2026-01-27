@@ -25,6 +25,7 @@ import (
 	"math"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
@@ -872,6 +873,341 @@ func TestCreateSnapshotConsistencyGroup(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestCreateThinClone(t *testing.T) {
+	// Define test cases
+	testCases := map[string]struct {
+		system               *System
+		snapshotVolumesParam *types.CreateSnapshotParam
+		expected             *types.SnapshotVolumesResp
+		server               *httptest.Server
+		err                  error
+	}{
+		"success": {
+			system: &System{
+				System: &types.System{
+					Links: []*types.Link{
+						{
+							Rel:  "self",
+							HREF: "/api/System/instances/system-1",
+						},
+					},
+				},
+			},
+			snapshotVolumesParam: &types.CreateSnapshotParam{
+				SnapshotDefs: []*types.SnapshotDef{
+					{
+						VolumeID:     "volume-1",
+						SnapshotName: "snapshot-1",
+					},
+				},
+				RetentionPeriodInMin: "30",
+				VolumeClass:          "gold",
+			},
+			expected: &types.SnapshotVolumesResp{
+				VolumeIDList:    []string{"volume-1", "volume-2"},
+				SnapshotGroupID: "group-1",
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.RequestURI {
+				case "/api/System/instances/system-1/action/createThinClone":
+					data, err := json.Marshal(&types.SnapshotVolumesResp{
+						VolumeIDList:    []string{"volume-1", "volume-2"},
+						SnapshotGroupID: "group-1",
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+					w.Write(data)
+				default:
+					w.WriteHeader(http.StatusInternalServerError)
+				}
+			})),
+			err: nil,
+		},
+		"error due to no links in system": {
+			system: &System{
+				System: &types.System{
+					Links: []*types.Link{
+						{},
+					},
+				},
+			},
+			snapshotVolumesParam: &types.CreateSnapshotParam{
+				SnapshotDefs: []*types.SnapshotDef{
+					{
+						VolumeID:     "volume-1",
+						SnapshotName: "snapshot-1",
+					},
+				},
+				RetentionPeriodInMin: "30",
+				VolumeClass:          "gold",
+			},
+			expected: nil,
+			server: httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+			})),
+			err: errors.New("Error: problem finding link"),
+		},
+		"error due to failed HTTP request": {
+			system: &System{
+				System: &types.System{
+					Links: []*types.Link{
+						{
+							Rel:  "self",
+							HREF: "/api/System/instances/system-1",
+						},
+					},
+				},
+			},
+			snapshotVolumesParam: &types.CreateSnapshotParam{
+				SnapshotDefs: []*types.SnapshotDef{
+					{
+						VolumeID:     "volume-1",
+						SnapshotName: "snapshot-1",
+					},
+				},
+				RetentionPeriodInMin: "30",
+				VolumeClass:          "gold",
+			},
+			expected: nil,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			})),
+			err: errors.New("EOF"),
+		},
+	}
+
+	// Run test cases
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			defer tc.server.Close()
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			tc.system.client = client
+
+			// Call the CreateThinClone method
+			result, err := tc.system.CreateThinClone(tc.snapshotVolumesParam)
+
+			// Check if the error matches the expected error
+			if err != nil {
+				if tc.err == nil {
+					t.Errorf("expected no error, but got %v", err)
+				} else if err.Error() != tc.err.Error() {
+					t.Errorf("expected error %v, but got %v", tc.err, err)
+				}
+			} else {
+				if tc.err != nil {
+					t.Errorf("expected error %v, but got no error", tc.err)
+				}
+			}
+
+			// Check if the result matches the expected result
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("expected result %v, but got %v", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestCreateSnapshot(t *testing.T) {
+	// Define test cases
+	testCases := map[string]struct {
+		system        *System
+		snapshotParam *types.CreateSnapshotParam
+		expected      *types.SnapshotVolumesResp
+		server        *httptest.Server
+		err           error
+	}{
+		"success": {
+			system: &System{
+				System: &types.System{
+					Links: []*types.Link{
+						{
+							Rel:  "self",
+							HREF: "/api/System/instances/system-1",
+						},
+					},
+				},
+			},
+			snapshotParam: &types.CreateSnapshotParam{
+				SnapshotDefs: []*types.SnapshotDef{
+					{
+						VolumeID:     "volume-1",
+						SnapshotName: "snapshot-1",
+					},
+				},
+				RetentionPeriodInMin: "30",
+				VolumeClass:          "gold",
+			},
+			expected: &types.SnapshotVolumesResp{
+				VolumeIDList:    []string{"volume-1", "volume-2"},
+				SnapshotGroupID: "group-1",
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.RequestURI {
+				case "/api/System/instances/system-1/action/createSnapshot":
+					data, err := json.Marshal(&types.SnapshotVolumesResp{
+						VolumeIDList:    []string{"volume-1", "volume-2"},
+						SnapshotGroupID: "group-1",
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+					w.Write(data)
+				default:
+					w.WriteHeader(http.StatusInternalServerError)
+				}
+			})),
+			err: nil,
+		},
+		"error due to no links in system": {
+			system: &System{
+				System: &types.System{
+					Links: []*types.Link{
+						{},
+					},
+				},
+			},
+			snapshotParam: &types.CreateSnapshotParam{
+				SnapshotDefs: []*types.SnapshotDef{
+					{
+						VolumeID:     "volume-1",
+						SnapshotName: "snapshot-1",
+					},
+				},
+				RetentionPeriodInMin: "30",
+				VolumeClass:          "gold",
+			},
+			expected: nil,
+			server: httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+			})),
+			err: errors.New("Error: problem finding link"),
+		},
+		"error due to failed HTTP request": {
+			system: &System{
+				System: &types.System{
+					Links: []*types.Link{
+						{
+							Rel:  "self",
+							HREF: "/api/System/instances/system-1",
+						},
+					},
+				},
+			},
+			snapshotParam: &types.CreateSnapshotParam{
+				SnapshotDefs: []*types.SnapshotDef{
+					{
+						VolumeID:     "volume-1",
+						SnapshotName: "snapshot-1",
+					},
+				},
+				RetentionPeriodInMin: "30",
+				VolumeClass:          "gold",
+			},
+			expected: nil,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			})),
+			err: errors.New("EOF"),
+		},
+	}
+
+	// Run test cases
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			defer tc.server.Close()
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			tc.system.client = client
+
+			// Call the CreateSnapshot method
+			result, err := tc.system.CreateSnapshot(tc.snapshotParam)
+
+			// Check if the error matches the expected error
+			if err != nil {
+				if tc.err == nil {
+					t.Errorf("expected no error, but got %v", err)
+				} else if err.Error() != tc.err.Error() {
+					t.Errorf("expected error %v, but got %v", tc.err, err)
+				}
+			} else {
+				if tc.err != nil {
+					t.Errorf("expected error %v, but got no error", tc.err)
+				}
+			}
+
+			// Check if the result matches the expected result
+			if !reflect.DeepEqual(result, tc.expected) {
+				t.Errorf("expected result %v, but got %v", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestClient_GetMetrics(t *testing.T) {
+	testCases := map[string]struct {
+		resource string
+		ids      []string
+		response types.MetricsResponse
+		status   int
+		err      error
+	}{
+		"success": {
+			resource: "host",
+			ids:      []string{"id1", "id2"},
+			response: types.MetricsResponse{},
+			status:   http.StatusOK,
+			err:      nil,
+		},
+		"server error": {
+			resource: "host",
+			ids:      []string{"id1"},
+			response: types.MetricsResponse{},
+			status:   http.StatusInternalServerError,
+			err:      fmt.Errorf("EOF"),
+		},
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path != "/dtapi/rest/v1/metrics/query" {
+					w.WriteHeader(http.StatusNotFound)
+					return
+				}
+				w.WriteHeader(tc.status)
+				if tc.status == http.StatusOK {
+					data, err := json.Marshal(tc.response)
+					if err != nil {
+						t.Fatal(err)
+					}
+					w.Write(data)
+				}
+			}))
+			defer server.Close()
+
+			client, err := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			resp, err := client.GetMetrics(tc.resource, tc.ids)
+
+			if tc.err != nil {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, &tc.response, resp)
 			}
 		})
 	}

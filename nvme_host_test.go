@@ -13,6 +13,7 @@
 package goscaleio
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"net/http"
@@ -21,6 +22,7 @@ import (
 	"testing"
 
 	types "github.com/dell/goscaleio/types/v1"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -725,4 +727,141 @@ func Test_GetHostNvmeControllers(t *testing.T) {
 
 func TestGetNewNvmeHost(t *testing.T) {
 	assert.NotNil(t, NewNvmeHost(nil, nil))
+}
+
+func TestMapVolumeNVMe(t *testing.T) {
+	volumeID := uuid.NewString()
+	mapVolumeNVMeParam := &types.MapVolumeNVMeParam{}
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"succeed": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/Volume::%s/action/addMappedHost", volumeID):
+					content, err := json.Marshal(types.NvmeHost{
+						ID: volumeID,
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+		"error: could not find nvme host": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				switch req.RequestURI {
+				case fmt.Sprintf("/api/instances/Volume::%s/action/addMappedHost", volumeID):
+					content, err := json.Marshal([]types.NvmeHost{
+						{
+							ID: uuid.NewString(),
+						},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					resp.Write(content)
+					resp.WriteHeader(http.StatusOK)
+				default:
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled","httpStatusCode":400,"errorCode":0}`))
+				}
+			})),
+			expectedErr: fmt.Errorf("Couldn't find NVMe host"),
+		},
+	}
+
+	for _, tc := range cases {
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer tc.server.Close()
+
+		volume := Volume{
+			Volume: &types.Volume{
+				ID: volumeID,
+			},
+			client: client,
+		}
+
+		err = volume.MapVolumeNVMe(mapVolumeNVMeParam)
+		if err != nil {
+			if tc.expectedErr.Error() != err.Error() {
+				t.Fatal(err)
+			}
+		}
+	}
+}
+
+func TestRemoveMappedHost(t *testing.T) {
+	volumeID := uuid.NewString()
+	unmapVolumeNVMeParam := &types.UnmapVolumeNVMeParam{}
+
+	type testCase struct {
+		server      *httptest.Server
+		expectedErr error
+	}
+
+	cases := map[string]testCase{
+		"succeed": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+				if req.RequestURI == fmt.Sprintf("/api/instances/Volume::%s/action/removeMappedHost", volumeID) {
+					resp.WriteHeader(http.StatusOK)
+					resp.Write([]byte(`{}`)) // success response
+				} else {
+					resp.WriteHeader(http.StatusBadRequest)
+					resp.Write([]byte(`{"message":"no route handled"}`))
+				}
+			})),
+			expectedErr: nil,
+		},
+		"error: bad request": {
+			server: httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+				resp.WriteHeader(http.StatusBadRequest)
+				resp.Write([]byte(`{"message":"bad request"}`))
+			})),
+			expectedErr: fmt.Errorf("bad request"),
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer tc.server.Close()
+
+			volume := Volume{
+				Volume: &types.Volume{ID: volumeID},
+				client: client,
+			}
+
+			err = volume.RemoveMappedHost(unmapVolumeNVMeParam)
+			if err != nil {
+				if tc.expectedErr == nil || tc.expectedErr.Error() != err.Error() {
+					t.Fatalf("expected %v, got %v", tc.expectedErr, err)
+				}
+			}
+		})
+	}
 }

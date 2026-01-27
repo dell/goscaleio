@@ -353,6 +353,28 @@ type CompatibilityManagementPost struct {
 	CompatibilityDataBytes []byte `json:"compatibilityDataBytes,omitempty"`
 }
 
+type MetricsRequest struct {
+	ResourceType string   `json:"resource_type"`
+	IDs          []string `json:"ids"`
+}
+
+type MetricsResponse struct {
+	Format       string     `json:"format"`
+	ResourceType string     `json:"resource_type"`
+	Timestamps   []string   `json:"timestamps"`
+	Resources    []Resource `json:"resources"`
+}
+
+type Resource struct {
+	ID      string   `json:"id"`
+	Metrics []Metric `json:"metrics"`
+}
+
+type Metric struct {
+	Name   string    `json:"name"`
+	Values []float64 `json:"values"`
+}
+
 // SdcStatistics defines struct of Statistics for PowerFlex SDC
 type SdcStatistics struct {
 	UserDataReadBwc         BWC      `json:"userDataReadBwc"`
@@ -446,6 +468,10 @@ type PDConnInfo struct {
 	DisconnectedServerIP   *string `json:"disconnectedServerIp"`
 }
 
+const (
+	GenTypeEC = "EC"
+)
+
 // ProtectionDomain defines struct for PowerFlex ProtectionDomain
 type ProtectionDomain struct {
 	SystemID                    string     `json:"systemId"`
@@ -487,6 +513,7 @@ type ProtectionDomain struct {
 	Name                  string  `json:"name"`
 	ID                    string  `json:"id"`
 	Links                 []*Link `json:"links"`
+	GenType               string  `json:"genType"`
 }
 
 // ProtectionDomainParam defines struct for ProtectionDomainParam
@@ -919,6 +946,7 @@ type StoragePool struct {
 	ProtectedMaintenanceModeIoPriorityAppIopsPerDeviceThreshold     int     `json:"protectedMaintenanceModeIoPriorityAppIopsPerDeviceThreshold"`
 	ProtectedMaintenanceModeIoPriorityAppBwPerDeviceThresholdInKbps int     `json:"protectedMaintenanceModeIoPriorityAppBwPerDeviceThresholdInKbps"`
 	ProtectedMaintenanceModeIoPriorityQuietPeriodInMsec             int     `json:"protectedMaintenanceModeIoPriorityQuietPeriodInMsec"`
+	GenType                                                         string  `json:"genType"`
 }
 
 // StoragePoolParam defines struct for StoragePoolParam
@@ -1018,6 +1046,7 @@ type MappedSdcInfo struct {
 	SdcName               string `json:"sdcName"`
 	AccessMode            string `json:"accessMode"`
 	IsDirectBufferMapping bool   `json:"isDirectBufferMapping"`
+	HostType              string `json:"hostType"`
 }
 
 // Volume defines struct for Volume
@@ -1050,6 +1079,7 @@ type Volume struct {
 	ReplicationJournalVolume           bool             `json:"replicationJournalVolume"`
 	ReplicationTimeStamp               int              `json:"replicationTimeStamp"`
 	Links                              []*Link          `json:"links"`
+	GenType                            string           `json:"genType"`
 }
 
 // VolumeParam defines struct for VolumeParam
@@ -1106,6 +1136,16 @@ type MapVolumeSdcParam struct {
 	AccessMode            string `json:"accessMode,omitempty"`
 }
 
+// MapVolumeNVMeParam defines struct for MapVolumeNVMeParam
+type MapVolumeNVMeParam struct {
+	SdcID                 string `json:"sdcId,omitempty"`
+	HostID                string `json:"hostId,omitempty"`
+	Nqn                   string `json:"nqn,omitempty"`
+	AllHosts              string `json:"allHosts,omitempty"`
+	AllowMultipleMappings string `json:"allowMultipleMappings,omitempty"`
+	AccessMode            string `json:"accessMode,omitempty"`
+}
+
 // UnmapVolumeSdcParam defines struct for UnmapVolumeSdcParam
 type UnmapVolumeSdcParam struct {
 	SdcID                string `json:"sdcId,omitempty"`
@@ -1142,6 +1182,12 @@ type SnapshotVolumesParam struct {
 	RetentionPeriodInMin string         `json:"retentionPeriodInMin,omitempty"`
 	AccessMode           string         `json:"accessModeLimit,omitempty"`
 	AllowOnExtManagedVol bool           `json:"allowOnExtManagedVol,omitempty"`
+}
+
+type CreateSnapshotParam struct {
+	SnapshotDefs         []*SnapshotDef `json:"snapshotDefs"`
+	RetentionPeriodInMin string         `json:"retentionPeriodInMin,omitempty"`
+	VolumeClass          string         `json:"volumeClass,omitempty"`
 }
 
 // SnapshotVolumesResp defines struct for SnapshotVolumesResp
@@ -2134,6 +2180,12 @@ type ChangeNvmeMaxNumPathsParam struct {
 // ChangeNvmeHostMaxNumSysPortsParam defines struct for new max number system ports
 type ChangeNvmeHostMaxNumSysPortsParam struct {
 	MaxNumSysPorts IntString `json:"newMaxNumSysPorts"`
+}
+
+// UnmapVolumeNVMeParam defines struct for NVME HostID
+type UnmapVolumeNVMeParam struct {
+	HostID   string `json:"hostId,omitempty"`
+	AllHosts string `json:"allHosts,omitempty"`
 }
 
 // NvmeHostParam defines struct for creating an NVMe host
