@@ -1,4 +1,4 @@
-// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ func TestCreateProtectionDomain(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -124,7 +124,7 @@ func TestGetProtectionDomainEx(t *testing.T) {
 
 	for title, tc := range cases {
 		fmt.Printf("running test case: %s\n", title)
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -277,7 +277,7 @@ func TestDeleteProtectionDomain(t *testing.T) {
 
 	for title, tc := range cases {
 		fmt.Printf("running test case: %s\n", title)
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -348,7 +348,7 @@ func TestProtectionDomainDelete(t *testing.T) {
 
 	for title, tc := range cases {
 		fmt.Printf("running test case: %s\n", title)
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -424,7 +424,7 @@ func TestFindProtectionDomainByName(t *testing.T) {
 
 	for title, tc := range cases {
 		fmt.Printf("running test case: %s\n", title)
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -493,7 +493,7 @@ func TestProtectionDomainRefresh(t *testing.T) {
 
 	for title, tc := range cases {
 		fmt.Printf("running test case: %s\n", title)
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -553,7 +553,7 @@ func TestProtectionDomainSetParamters(t *testing.T) {
 		}
 	}))
 
-	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}

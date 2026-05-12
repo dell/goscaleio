@@ -1,4 +1,4 @@
-// Copyright © 2020 - 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2020 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -108,7 +108,7 @@ func Test_FindVolumes(t *testing.T) {
 			ts, sdc, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -159,7 +159,7 @@ func TestRenameSdc(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -221,7 +221,7 @@ func TestApproveSDC(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -279,7 +279,7 @@ func TestSetRestrictedMode(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -334,7 +334,7 @@ func TestSetApprovedIps(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -387,7 +387,7 @@ func TestDeleteSdc(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -445,7 +445,7 @@ func TestGetSdcIDByIP(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -540,7 +540,7 @@ func TestFindSdc(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -606,7 +606,7 @@ func TestGetSdcByID(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -674,7 +674,7 @@ func TestChangeSdcName(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -742,7 +742,7 @@ func TestChangeSdcPerfProfile(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -836,7 +836,7 @@ func TestGetSatistics(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -921,7 +921,7 @@ func TestMapVolumeSdc(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -982,7 +982,7 @@ func TestUnMapVolumeSdc(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1065,7 +1065,7 @@ func TestSetMappedSdcLimits(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1167,7 +1167,7 @@ func TestGetVolumeMetrics(t *testing.T) {
 		}))
 		defer svr.Close()
 
-		client, err := NewClientWithArgs(svr.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(svr.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1204,7 +1204,7 @@ func TestGetVolumeMetrics(t *testing.T) {
 		}))
 		defer svr.Close()
 
-		client, err := NewClientWithArgs(svr.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(svr.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1233,7 +1233,7 @@ func TestGetVolumeMetrics(t *testing.T) {
 		}))
 		defer svr.Close()
 
-		client, err := NewClientWithArgs(svr.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(svr.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}

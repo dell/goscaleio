@@ -1,4 +1,4 @@
-// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ func TestCreateSnapshotPolicy(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -128,7 +128,7 @@ func TestRenameSnapshotPolicy(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -187,7 +187,7 @@ func TestModifySnapshotPolicy(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -245,7 +245,7 @@ func TestAssignVolumeToSnapshotPolicy(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -299,7 +299,7 @@ func TestUnassignVolumeFromSnapshotPolicy(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -353,7 +353,7 @@ func TestPauseSnapshotPolicy(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -404,7 +404,7 @@ func TestResumeSnapshotPolicy(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -455,7 +455,7 @@ func TestRemoveSnapshotPolicy(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -506,7 +506,7 @@ func TestGetSourceVolume(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}

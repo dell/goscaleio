@@ -1,4 +1,4 @@
-// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -192,7 +192,7 @@ func TestGetInstance(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -208,14 +208,14 @@ func TestGetInstance(t *testing.T) {
 func TestGetVolume(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(mockInstanceServerHandler))
 	defer mockServer.Close()
-	client, _ := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+	client, _ := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false, "")
 
 	defaultFindVolumeID := findVolumeIDFunc
 	defaultGetJSONRetry := getJSONWithRetryFunc
 	afterEach := func() {
 		findVolumeIDFunc = defaultFindVolumeID
 		getJSONWithRetryFunc = defaultGetJSONRetry
-		freshclient, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+		freshclient, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -358,7 +358,7 @@ func TestGetStoragePool(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -411,7 +411,7 @@ func TestFindStoragePool(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -446,7 +446,7 @@ func TestGetStoragePoolVolumes(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -498,7 +498,7 @@ func TestCreateVolume(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -569,7 +569,7 @@ func TestGetSnapshotPolicyI(t *testing.T) {
 		if tt.setup != nil {
 			tt.setup()
 		}
-		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -588,7 +588,7 @@ func TestNewSnapshotPolicyI(t *testing.T) {
 	mockServer := httptest.NewServer(http.HandlerFunc(mockInstanceServerHandler))
 	defer mockServer.Close()
 
-	client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,4 +1,4 @@
-// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ func Test_CheckPfmpVersion(t *testing.T) {
 			server, version, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			result, err := CheckPfmpVersion(client, version)
 
 			for _, checkFn := range checkFns {

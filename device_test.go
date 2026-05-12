@@ -1,4 +1,4 @@
-// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -128,7 +128,7 @@ func TestGetAllDevices(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -187,7 +187,7 @@ func TestGetDevice(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -275,7 +275,7 @@ func TestGetDeviceByField(t *testing.T) {
 
 	for id, tc := range cases {
 		t.Run(id, func(t *testing.T) {
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -367,7 +367,7 @@ func TestSDSFindDevice(t *testing.T) {
 
 	for id, tc := range cases {
 		t.Run(id, func(t *testing.T) {
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -428,7 +428,7 @@ func TestSDSGetDevice(t *testing.T) {
 
 	for id, tc := range cases {
 		t.Run(id, func(t *testing.T) {
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -487,7 +487,7 @@ func TestStoragePoolGetDevice(t *testing.T) {
 
 	for id, tc := range cases {
 		t.Run(id, func(t *testing.T) {
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -575,7 +575,7 @@ func TestStoragePoolFindDevice(t *testing.T) {
 
 	for id, tc := range cases {
 		t.Run(id, func(t *testing.T) {
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -646,7 +646,7 @@ func TestStoragePoolSetDeviceName(t *testing.T) {
 			server, _, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			storagePool := NewStoragePool(client)
 			err := storagePool.SetDeviceName("mock-device-id", "mock-device-name")
 
@@ -707,7 +707,7 @@ func TestStoragePoolSetMediaType(t *testing.T) {
 			server, _, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			storagePool := NewStoragePool(client)
 			err := storagePool.SetDeviceMediaType("mock-device-id", "mock-media-type")
 
@@ -768,7 +768,7 @@ func TestStoragePoolSetDeviceExternalAccelerationType(t *testing.T) {
 			server, _, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			storagePool := NewStoragePool(client)
 			err := storagePool.SetDeviceExternalAccelerationType("mock-device-id", "mock-acceleration-type")
 
@@ -829,7 +829,7 @@ func TestStoragePoolSetDeviceCapacityLimit(t *testing.T) {
 			server, _, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			storagePool := NewStoragePool(client)
 			err := storagePool.SetDeviceCapacityLimit("mock-device-id", "100G")
 
@@ -890,7 +890,7 @@ func TestStoragePoolUpdateDeviceOriginalPathways(t *testing.T) {
 			server, _, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			storagePool := NewStoragePool(client)
 			err := storagePool.UpdateDeviceOriginalPathways("mock-device-id")
 
@@ -951,7 +951,7 @@ func TestStoragePoolRemoveDevice(t *testing.T) {
 			server, _, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			storagePool := NewStoragePool(client)
 			err := storagePool.RemoveDevice("mock-device-id")
 
@@ -1011,7 +1011,7 @@ func TestStoragePoolAttachDevice(t *testing.T) {
 			server, _, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			storagePool := NewStoragePool(client)
 			deviceParam := &types.DeviceParam{
 				Name: "mock-device-name",

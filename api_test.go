@@ -1,4 +1,4 @@
-// Copyright © 2019 - 2022 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2019 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -313,7 +313,7 @@ func TestClientVersion(t *testing.T) {
 		// Test OIDC authentication fails
 		_, err = client.Authenticate(&ConfigConnect{
 			Username:         "ScaleIOUser",
-			Password:         "password",
+			Password:         "password", // #nosec G101 - Test credential
 			Version:          "4.0",
 			AuthType:         "OIDC",
 			PfmpIP:           server.URL,
@@ -456,7 +456,7 @@ func TestGetJSONWithRetry(t *testing.T) {
 			}
 		}))
 		defer ts.Close()
-		c, err := NewClientWithArgs(ts.URL, "3.5", math.MaxInt64, true, false)
+		c, err := NewClientWithArgs(ts.URL, "3.5", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -486,6 +486,139 @@ func TestGetJSONWithRetry(t *testing.T) {
 		if !reflect.DeepEqual(gotHeaders, wantHeaders) {
 			t.Errorf("retried headers: got %q, want %q", gotHeaders, wantHeaders)
 		}
+	})
+}
+
+func TestNewClientWithCAFile(t *testing.T) {
+	assert := assert.New(t)
+
+	tests := []struct {
+		name       string
+		caFilePath string
+		wantErr    bool
+		errMsg     string
+	}{
+		{
+			name:       "valid CA file",
+			caFilePath: "test_data/ca.pem",
+			wantErr:    false,
+		},
+		{
+			name:       "non-existent CA file",
+			caFilePath: "test_data/nonexistent.pem",
+			wantErr:    true,
+			errMsg:     "unable to read rootCA file",
+		},
+		{
+			name:       "invalid CA file content",
+			caFilePath: "test_data/bad_ca.pem",
+			wantErr:    true,
+			errMsg:     "failed to decode PEM block containing certificate",
+		},
+		{
+			name:       "empty CA file path",
+			caFilePath: "",
+			wantErr:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(*testing.T) {
+			ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer ts.Close()
+
+			client, err := NewClientWithArgs(ts.URL, "4.0", math.MaxInt64, false, true, tt.caFilePath)
+
+			if tt.wantErr {
+				assert.Error(err)
+				assert.Contains(err.Error(), tt.errMsg)
+				assert.Nil(client)
+			} else {
+				assert.NoError(err)
+				assert.NotNil(client)
+			}
+		})
+	}
+}
+
+func TestNewClientWithCAFileEnvironment(t *testing.T) {
+	assert := assert.New(t)
+
+	// Test with environment variable set
+	oldCaPath := os.Getenv("GOSCALEIO_CAFILEPATH")
+	oldEndpoint := os.Getenv("GOSCALEIO_ENDPOINT")
+	defer os.Setenv("GOSCALEIO_CAFILEPATH", oldCaPath)
+	defer os.Setenv("GOSCALEIO_ENDPOINT", oldEndpoint)
+
+	t.Run("CA file in env", func(*testing.T) {
+		os.Setenv("GOSCALEIO_CAFILEPATH", "test_data/ca.pem")
+
+		ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+		defer ts.Close()
+
+		// Set the endpoint to our test server
+		os.Setenv("GOSCALEIO_ENDPOINT", ts.URL)
+
+		client, err := NewClient()
+
+		assert.NoError(err)
+		assert.NotNil(client)
+	})
+	t.Run("non-existent CA file in env", func(*testing.T) {
+		os.Setenv("GOSCALEIO_CAFILEPATH", "test_data/nonexistent.pem")
+
+		ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+		defer ts.Close()
+
+		// Set the endpoint to our test server
+		os.Setenv("GOSCALEIO_ENDPOINT", ts.URL)
+
+		client, err := NewClient()
+
+		assert.Error(err)
+		assert.Contains(err.Error(), "unable to read rootCA file")
+		assert.Nil(client)
+	})
+
+	t.Run("invalid CA file in env", func(*testing.T) {
+		os.Setenv("GOSCALEIO_CAFILEPATH", "test_data/bad_ca.pem")
+
+		ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+		defer ts.Close()
+
+		// Set the endpoint to our test server
+		os.Setenv("GOSCALEIO_ENDPOINT", ts.URL)
+
+		client, err := NewClient()
+
+		assert.Error(err)
+		assert.Contains(err.Error(), "failed to decode PEM block containing certificate")
+		assert.Nil(client)
+	})
+
+	t.Run("empty env var", func(*testing.T) {
+		os.Setenv("GOSCALEIO_CAFILEPATH", "")
+
+		ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+		defer ts.Close()
+
+		// Set the endpoint to our test server
+		os.Setenv("GOSCALEIO_ENDPOINT", ts.URL)
+
+		client, err := NewClient()
+
+		assert.NoError(err)
+		assert.NotNil(client)
 	})
 }
 
@@ -593,7 +726,7 @@ func TestNewClientWithArgs(t *testing.T) {
 			if tt.setEnv != nil {
 				tt.setEnv()
 			}
-			_, err := NewClientWithArgs(tt.endpoint, "3.5", math.MaxInt64, true, false)
+			_, err := NewClientWithArgs(tt.endpoint, "3.5", math.MaxInt64, true, false, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewClientWithArgs() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -665,7 +798,7 @@ func TestGetStringWithRetry(t *testing.T) {
 				}
 			}))
 			defer ts.Close()
-			client, err := NewClientWithArgs(ts.URL, "3.5", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "3.5", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -687,7 +820,7 @@ func TestWithContext(t *testing.T) {
 
 	defer server.Close()
 
-	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}

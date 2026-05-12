@@ -1,4 +1,4 @@
-// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ func TestGetPeerMdm(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -113,7 +113,7 @@ func TestModifyPeerMdm(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +193,7 @@ func TestAddPeerMdm(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -238,7 +238,7 @@ func TestRemovePeerMdm(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -298,7 +298,7 @@ func TestGetReplicationConsistencyGroup(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -389,7 +389,7 @@ func TestCreateReplicationConsistencyGroup(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -438,7 +438,7 @@ func TestRemoveReplicationConsistencyGroup(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -509,7 +509,7 @@ func TestCreateReplicationPair(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -562,7 +562,7 @@ func TestRemoveReplicationPair(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -607,7 +607,7 @@ func TestReplicationPairActions(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -683,7 +683,7 @@ func TestReplicationConsistencyGroupAction(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}

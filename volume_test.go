@@ -1,4 +1,4 @@
-// Copyright © 2020 - 2022 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2020 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ func TestGetVolumeStatistics(t *testing.T) {
 			ts, vol, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -329,7 +329,7 @@ func TestGetVolumeSP(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -443,7 +443,7 @@ func TestCreateVolumeSP(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -535,7 +535,7 @@ func TestGetVTree(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -615,7 +615,7 @@ func TestRemoveVolume(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -673,7 +673,7 @@ func TestSetVolumeName(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -753,7 +753,7 @@ func TestSetVolumeSize(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -844,7 +844,7 @@ func TestLockAutoSnapshot(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -935,7 +935,7 @@ func TestUnlockAutoSnapshot(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1015,7 +1015,7 @@ func TestSetVolumeAccessModeLimit(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1095,7 +1095,7 @@ func TestSetSnapshotSecurity(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1172,7 +1172,7 @@ func TestSetVolumeMappingAccessMode(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1249,7 +1249,7 @@ func TestSetVolumeUseRmCache(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1326,7 +1326,7 @@ func TestSetCompressionMethod(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1384,7 +1384,7 @@ func TestUnmarkForReplication(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}

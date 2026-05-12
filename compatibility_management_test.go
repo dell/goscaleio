@@ -1,4 +1,4 @@
-// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ func TestGetCompatibility(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(mockServer.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -99,7 +99,7 @@ func TestSetCompatibility(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		client, err := NewClientWithArgs(mockServer.URL, "4.0", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(mockServer.URL, "4.0", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
