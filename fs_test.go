@@ -1,4 +1,4 @@
-// Copyright © 2021 - 2023 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2021 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -189,7 +189,7 @@ func TestGetFileSystemByIDName(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -211,7 +211,7 @@ func TestGetFileSystemByIDName(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -299,7 +299,7 @@ func TestCreateFileSystem(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -394,7 +394,7 @@ func TestCreateFileSystemSnapshot(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -497,7 +497,7 @@ func TestGetFsSnapshotsByVolumeID(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -621,7 +621,7 @@ func TestRestoreFileSystemFromSnapshot(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -660,7 +660,7 @@ func TestDeleteFileSystem(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 	client.configConnect.Version = "4.0"
 	if err != nil {
 		t.Fatal(err)
@@ -703,7 +703,7 @@ func TestModifyFileSystem(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}

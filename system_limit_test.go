@@ -1,4 +1,4 @@
-// Copyright © 2021 - 2023 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2021 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -126,7 +126,7 @@ func TestGetSystemLimits(t *testing.T) {
 
 			// Create a test client and call GetSystemLimits.
 			// client := NewTestClient(ts.URL) // Replace with your own client creation logic.
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -250,7 +250,7 @@ func TestGetMaxVol(t *testing.T) {
 			defer ts.Close()
 
 			// Create a test client and call GetMaxVol.
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)

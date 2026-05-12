@@ -1,4 +1,4 @@
-// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ func TestCreateSds(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -256,7 +256,7 @@ func TestCreateSdsWithParams(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -309,7 +309,7 @@ func TestGetSds(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -360,7 +360,7 @@ func TestGetAllSds(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -445,7 +445,7 @@ func TestFindSds(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -530,7 +530,7 @@ func TestFindSdsSystem(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -591,7 +591,7 @@ func TestGetSdsByID(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -638,7 +638,7 @@ func TestSdsActionsSuccess(t *testing.T) {
 		}
 	}))
 
-	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}

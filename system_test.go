@@ -1,6 +1,6 @@
 /*
  *
- * Copyright © 2021-2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+ * Copyright © 2021 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ func TestModifyPerformanceProfile(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -135,7 +135,7 @@ func TestAddStandByMDM(t *testing.T) {
 		defer tc.server.Close()
 
 		t.Run(name, func(_ *testing.T) {
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -200,7 +200,7 @@ func TestRemoveStandByMDM(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -263,7 +263,7 @@ func TestChangeMDMOwnership(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -329,7 +329,7 @@ func TestSwitchClusterMode(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -393,7 +393,7 @@ func TestGetMDMClusterDetails(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "3.6"
 			if err != nil {
 				t.Fatal(err)
@@ -451,7 +451,7 @@ func TestRenameMdm(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "3.6"
 			if err != nil {
 				t.Fatal(err)
@@ -536,7 +536,7 @@ func TestGetSystems(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			defer tc.server.Close()
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 
 			// Call the GetSystems function
 			result, err := client.GetSystems()
@@ -676,7 +676,7 @@ func TestFindSystem(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 
 			// Call the GetSystems function
 			result, err := client.FindSystem(tc.instanceID, tc.name, tc.href)
@@ -766,7 +766,7 @@ func TestSystemGetStatistics(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 
 			tc.system.client = client
 
@@ -860,7 +860,7 @@ func TestCreateSnapshotConsistencyGroup(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 
 			tc.system.client = client
 
@@ -985,7 +985,7 @@ func TestCreateThinClone(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1123,7 +1123,7 @@ func TestCreateSnapshot(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			defer tc.server.Close()
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1196,7 +1196,7 @@ func TestClient_GetMetrics(t *testing.T) {
 			}))
 			defer server.Close()
 
-			client, err := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}

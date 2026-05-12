@@ -1,4 +1,4 @@
-// Copyright © 2019 - 2022 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2019 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ func SetUpProtectionDomain(url string) (ProtectionDomain, error) {
 		ID:   pdID,
 	}
 
-	client, err := NewClientWithArgs(url, "", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(url, "", math.MaxInt64, true, false, "")
 	if err != nil {
 		return ProtectionDomain{}, err
 	}
@@ -110,7 +110,7 @@ func TestCreateStoragePool(t *testing.T) {
 			ts, protectionDomain, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -193,7 +193,7 @@ func TestModifyStoragePoolName(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -250,7 +250,7 @@ func TestDeleteStoragePool(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -324,7 +324,7 @@ func TestModifyStoragePoolMedia(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -469,7 +469,7 @@ func TestGetPoolStorage(t *testing.T) {
 			ts := tt.ts
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -555,7 +555,7 @@ func TestGetStoragePoolByID(t *testing.T) {
 			ts, system, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -645,7 +645,7 @@ func TestGetAllStoragePools(t *testing.T) {
 			ts, system, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -757,7 +757,7 @@ func TestModifyRMCache(t *testing.T) {
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer ts.Close()
-	client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -862,7 +862,7 @@ func TestEnableRFCache(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -941,7 +941,7 @@ func TestDisableRFCache(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -990,7 +990,7 @@ func TestFragmentation(t *testing.T) {
 			}))
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1068,7 +1068,7 @@ func TestGetStatistics(t *testing.T) {
 			ts, storagePool, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1152,7 +1152,7 @@ func TestGetSDSStoragePool(t *testing.T) {
 			ts, storagePool, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}

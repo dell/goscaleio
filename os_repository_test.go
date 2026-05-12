@@ -1,4 +1,4 @@
-// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ func TestGetAllOSRepositories(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 		client.configConnect.Version = "3.6"
 		if err != nil {
 			t.Fatal(err)
@@ -105,7 +105,7 @@ func TestGetOSRepositoryByID(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 		client.configConnect.Version = "3.6"
 		if err != nil {
 			t.Fatal(err)
@@ -172,7 +172,7 @@ func TestCreateOSRepository(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 		client.configConnect.Version = "3.6"
 		if err != nil {
 			t.Fatal(err)
@@ -226,7 +226,7 @@ func TestRemoveOSRepository(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 		client.configConnect.Version = "3.6"
 		if err != nil {
 			t.Fatal(err)

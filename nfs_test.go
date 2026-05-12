@@ -1,6 +1,6 @@
 /*
  *
- * Copyright © 2020-2023 Dell Inc. or its subsidiaries. All Rights Reserved.
+ * Copyright © 2020 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,7 +235,7 @@ func TestGetNasByIDName(t *testing.T) {
 			ts, system, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -258,7 +258,7 @@ func TestGetNasByIDName(t *testing.T) {
 			ts, system, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -355,7 +355,7 @@ func TestCreateNAS(t *testing.T) {
 			ts, system, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -423,7 +423,7 @@ func TestDeleteNAS(t *testing.T) {
 			ts, system, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -509,7 +509,7 @@ func TestPingNAS(t *testing.T) {
 			ts, system, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -619,7 +619,7 @@ func TestGeFileInterfaace(t *testing.T) {
 			ts, system, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -683,7 +683,7 @@ func TestIsNFSEnabled(t *testing.T) {
 				fmt.Fprint(w, resp)
 			}))
 
-			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			return ts, &System{client: client}, check(hasNoError, expectTrue)
 		},
 
@@ -700,7 +700,7 @@ func TestIsNFSEnabled(t *testing.T) {
 				fmt.Fprint(w, resp)
 			}))
 
-			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			return ts, &System{client: client}, check(hasNoError, expectTrue)
 		},
 
@@ -717,7 +717,7 @@ func TestIsNFSEnabled(t *testing.T) {
 				fmt.Fprint(w, resp)
 			}))
 
-			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			return ts, &System{client: client}, check(hasNoError, expectFalse)
 		},
 
@@ -729,7 +729,7 @@ func TestIsNFSEnabled(t *testing.T) {
 				fmt.Fprint(w, resp)
 			}))
 
-			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			return ts, &System{client: client}, check(hasError)
 		},
 
@@ -739,7 +739,7 @@ func TestIsNFSEnabled(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				fmt.Fprint(w, resp)
 			}))
-			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			return ts, &System{client: client}, check(hasNoError, expectFalse)
 		},
 
@@ -752,7 +752,7 @@ func TestIsNFSEnabled(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 				fmt.Fprint(w, resp)
 			}))
-			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			return ts, &System{client: client}, check(hasNoError, expectTrue)
 		},
 	}

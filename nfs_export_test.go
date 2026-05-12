@@ -1,6 +1,6 @@
 /*
  *
- * Copyright © 2020-2023 Dell Inc. or its subsidiaries. All Rights Reserved.
+ * Copyright © 2020 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,7 +186,7 @@ func TestGetNFSExportByIDName(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -208,7 +208,7 @@ func TestGetNFSExportByIDName(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)
@@ -235,7 +235,7 @@ func TestDeleteNFSExport(t *testing.T) {
 	}))
 	defer svr.Close()
 
-	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+	client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 	client.configConnect.Version = "4.0"
 	if err != nil {
 		t.Fatal(err)
@@ -315,7 +315,7 @@ func TestCreateNFSExport(t *testing.T) {
 			ts, checkFns := tc(t)
 			defer ts.Close()
 
-			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(ts.URL, "", math.MaxInt64, true, false, "")
 			client.configConnect.Version = "4.0"
 			if err != nil {
 				t.Fatal(err)

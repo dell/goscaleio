@@ -1,4 +1,4 @@
-// Copyright © 2021 - 2022 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2021 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -72,7 +72,8 @@ func initClient2() bool {
 		os.Getenv("GOSCALEIO_VERSION"),
 		math.MaxInt64,
 		os.Getenv("GOSCALEIO_INSECURE") == "true",
-		os.Getenv("GOSCALEIO_INSECURE") == "true")
+		os.Getenv("GOSCALEIO_USECERTS") == "true",
+		os.Getenv("GOSCALEIO_CAFILEPATH"))
 	if err != nil {
 		panic(err)
 	}

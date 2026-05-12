@@ -1,6 +1,6 @@
 /*
  *
- * Copyright © 2021-2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+ * Copyright © 2021 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ func TestGetVTrees(t *testing.T) {
 		}))
 		defer svr.Close()
 
-		client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 		client.configConnect.Version = "3.6"
 		if err != nil {
 			t.Fatal(err)
@@ -54,7 +54,7 @@ func TestGetVTrees(t *testing.T) {
 		}))
 		defer svr.Close()
 
-		client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 		client.configConnect.Version = "3.6"
 		if err != nil {
 			t.Fatal(err)
@@ -100,7 +100,7 @@ func TestGetVTreeByID(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -164,7 +164,7 @@ func TestGetVTreeInstances(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(_ *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -216,7 +216,7 @@ func TestGetVTreeByVolumeID(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 		t.Run("", func(t *testing.T) {
-			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(svr.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}

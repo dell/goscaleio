@@ -1,4 +1,4 @@
-// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ func Test_GetAllSdts(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -237,7 +237,7 @@ func Test_GetSdtByID(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -342,7 +342,7 @@ func Test_CreateSdt(t *testing.T) {
 			server, sdtParam, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			pd := NewProtectionDomain(client)
 			resp, err := pd.CreateSdt(sdtParam)
 
@@ -403,7 +403,7 @@ func Test_RenameSdt(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -467,7 +467,7 @@ func Test_SetSdtNvmePort(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -531,7 +531,7 @@ func Test_SetSdtStoragePort(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -595,7 +595,7 @@ func Test_SetSdtDiscoveryPort(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -659,7 +659,7 @@ func Test_AddSdtTargetIP(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -723,7 +723,7 @@ func Test_RemoveSdtTargetIP(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -787,7 +787,7 @@ func Test_ModifySdtIPRole(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -851,7 +851,7 @@ func Test_DeleteSdt(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -915,7 +915,7 @@ func Test_EnterSdtMaintenanceMode(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -979,7 +979,7 @@ func Test_ExitSdtMaintenanceMode(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,

@@ -1,4 +1,4 @@
-// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ func Test_GetAllNvmeHosts(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -259,7 +259,7 @@ func Test_GetNvmeHostByID(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -333,7 +333,7 @@ func Test_CreateNvmeHost(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -403,7 +403,7 @@ func Test_ChangeNvmeHostName(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -467,7 +467,7 @@ func Test_ChangeNvmeHostMaxNumPaths(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -531,7 +531,7 @@ func Test_ChangeNvmeHostMaxNumSysPorts(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -595,7 +595,7 @@ func Test_DeleteNvmeHost(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -708,7 +708,7 @@ func Test_GetHostNvmeControllers(t *testing.T) {
 			server, sys, checkFns := tc(t)
 			defer server.Close()
 
-			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false)
+			client, _ := NewClientWithArgs(server.URL, "", math.MaxInt64, true, false, "")
 			system := System{
 				System: &sys,
 				client: client,
@@ -790,7 +790,7 @@ func TestMapVolumeNVMe(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+		client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -845,7 +845,7 @@ func TestRemoveMappedHost(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "3.6", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}

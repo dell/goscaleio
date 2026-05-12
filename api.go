@@ -1,4 +1,4 @@
-// Copyright © 2019 - 2025 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2019 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import (
 	"time"
 
 	"github.com/dell/goscaleio/api"
-	"github.com/dell/goscaleio/log"
+	logger "github.com/dell/goscaleio/log"
 	types "github.com/dell/goscaleio/types/v1"
 	"github.com/zitadel/oidc/v3/pkg/client/rp"
 	"golang.org/x/oauth2"
@@ -80,6 +80,10 @@ type ConfigConnect struct {
 	Scopes           []string
 }
 
+func (c *Client) SetCustomHTTPHeaders(headers http.Header) {
+	c.api.SetCustomHTTPHeaders(headers)
+}
+
 // GetVersion returns version
 func (c *Client) GetVersion() (string, error) {
 	ctx := c.Context()
@@ -92,7 +96,7 @@ func (c *Client) GetVersion() (string, error) {
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			log.DoLog(log.Log.Error, err.Error())
+			logger.DoLog(logger.Log.Error, err.Error())
 		}
 	}()
 	// parse the response
@@ -159,13 +163,13 @@ func (c *Client) Authenticate(configConnect *ConfigConnect) (Cluster, error) {
 	var err error
 
 	if configConnect.AuthType == "OIDC" {
-		log.DoLog(log.Log.Info, "Authenticating with OIDC")
+		logger.DoLog(logger.Log.Info, "Authenticating with OIDC")
 		token, err = c.oidcAuthenticate(configConnect)
 		if err != nil {
 			return Cluster{}, err
 		}
 	} else {
-		log.DoLog(log.Log.Info, "Basic Authentication")
+		logger.DoLog(logger.Log.Info, "Basic Authentication")
 		token, err = c.basicAuthenticate(ctx, configConnect)
 		if err != nil {
 			return Cluster{}, err
@@ -196,7 +200,7 @@ func (c *Client) basicAuthenticate(ctx context.Context, configConnect *ConfigCon
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			log.DoLog(log.Log.Error, err.Error())
+			logger.DoLog(logger.Log.Error, err.Error())
 		}
 	}()
 
@@ -384,7 +388,7 @@ func (c *Client) oidcAuthenticate(configConnect *ConfigConnect) (string, error) 
 		},
 	}
 
-	resp, err := client.Do(req)
+	resp, err := client.Do(req) // #nosec G704 - Request to user-provided OIDC authentication endpoint (PfmpIP). This is intended SDK behavior where users configure their own auth server
 	if err != nil {
 		return "", err
 	}
@@ -403,7 +407,7 @@ func extractOauth2Token(response *http.Response) string {
 	token := &oauth2.Token{}
 	err := json.NewDecoder(response.Body).Decode(token)
 	if err != nil {
-		log.DoLog(log.Log.Error, err.Error())
+		logger.DoLog(logger.Log.Error, err.Error())
 	}
 	return token.AccessToken
 }
@@ -416,7 +420,7 @@ func basicAuth(username, password string) string {
 func (c *Client) xmlRequest(method, uri string, body, resp interface{}) (*http.Response, error) {
 	response, err := c.api.DoXMLRequest(context.Background(), method, uri, c.configConnect.Version, body, resp)
 	if err != nil {
-		log.DoLog(log.Log.Error, err.Error())
+		logger.DoLog(logger.Log.Error, err.Error())
 	}
 	return response, err
 }
@@ -445,9 +449,9 @@ var getJSONWithRetryFunc = func(c *Client, method, uri string, body, resp interf
 
 	// check if we need to authenticate
 	if e, ok := err.(*types.Error); ok {
-		log.DoLog(log.Log.Debug, err.Error())
+		logger.DoLog(logger.Log.Debug, err.Error())
 		if e.HTTPStatusCode == 401 {
-			log.DoLog(log.Log.Info, "Need to re-auth")
+			logger.DoLog(logger.Log.Info, "Need to re-auth")
 			// Authenticate then try again
 			if _, err := c.Authenticate(c.configConnect); err != nil {
 				return fmt.Errorf("Error Authenticating: %s", err)
@@ -456,7 +460,7 @@ var getJSONWithRetryFunc = func(c *Client, method, uri string, body, resp interf
 				ctx, method, uri, headers, body, resp, c.configConnect.Version)
 		}
 	}
-	log.DoLog(log.Log.Error, err.Error())
+	logger.DoLog(logger.Log.Error, err.Error())
 
 	return err
 }
@@ -496,7 +500,7 @@ func (c *Client) getStringWithRetry(
 	checkResponse := func(resp *http.Response) (string, bool, error) {
 		defer func() {
 			if err := resp.Body.Close(); err != nil {
-				log.DoLog(log.Log.Error, err.Error())
+				logger.DoLog(logger.Log.Error, err.Error())
 			}
 		}()
 
@@ -526,7 +530,7 @@ func (c *Client) getStringWithRetry(
 	s, retry, httpErr := checkResponse(resp)
 	if httpErr != nil {
 		if retry {
-			log.DoLog(log.Log.Info, "need to re-auth")
+			logger.DoLog(logger.Log.Info, "need to re-auth")
 			// Authenticate then try again
 			if _, err = c.Authenticate(c.configConnect); err != nil {
 				return "", fmt.Errorf("Error Authenticating: %s", err)
@@ -584,7 +588,8 @@ func NewClient() (client *Client, err error) {
 		os.Getenv("GOSCALEIO_VERSION"),
 		math.MaxInt64,
 		os.Getenv("GOSCALEIO_INSECURE") == "true",
-		os.Getenv("GOSCALEIO_USECERTS") == "true")
+		os.Getenv("GOSCALEIO_USECERTS") == "true",
+		os.Getenv("GOSCALEIO_CAFILEPATH"))
 }
 
 // ClientConnectTimeout is used for unit testing to set the connection timeout much lower
@@ -597,36 +602,39 @@ func NewClientWithArgs(
 	timeout int64,
 	insecure,
 	useCerts bool,
+	caFilePath string,
 ) (client *Client, err error) {
 	if showHTTP {
 		debug = true
 	}
 	if debug {
-		log.SetLogLevel(slog.LevelDebug)
-		log.DoLog(log.Log.Info, "Setting log level to debug in GoScaleIO")
+		logger.SetLogLevel(slog.LevelDebug)
+		logger.DoLog(logger.Log.Info, "Setting log level to debug in GoScaleIO")
 	}
 
 	fields := map[string]interface{}{
-		"endpoint": endpoint,
-		"insecure": insecure,
-		"useCerts": useCerts,
-		"version":  version,
-		"debug":    debug,
-		"showHTTP": showHTTP,
+		"endpoint":   endpoint,
+		"insecure":   insecure,
+		"useCerts":   useCerts,
+		"caFilePath": caFilePath,
+		"version":    version,
+		"debug":      debug,
+		"showHTTP":   showHTTP,
 	}
-	log.DoLog(log.Log.Debug, fmt.Sprintf("goscaleio client init, Fields: %+v", fields))
+	logger.DoLog(logger.Log.Debug, fmt.Sprintf("goscaleio client init, Fields: %+v", fields))
 
 	if endpoint == "" {
-		log.DoLog(log.Log.Error, fmt.Sprintf("endpoint is required, Fields: %+v", fields))
+		logger.DoLog(logger.Log.Error, fmt.Sprintf("endpoint is required, Fields: %+v", fields))
 		return nil,
 			withFields(fields, "endpoint is required")
 	}
 
 	opts := api.ClientOptions{
-		Insecure: insecure,
-		UseCerts: useCerts,
-		ShowHTTP: showHTTP,
-		Timeout:  time.Duration(timeout) * time.Second,
+		Insecure:   insecure,
+		UseCerts:   useCerts,
+		CAFilePath: caFilePath,
+		ShowHTTP:   showHTTP,
+		Timeout:    time.Duration(timeout) * time.Second,
 	}
 
 	if ClientConnectTimeout != 0 {
@@ -635,7 +643,7 @@ func NewClientWithArgs(
 
 	ac, err := api.New(context.Background(), endpoint, opts, debug)
 	if err != nil {
-		log.DoLog(log.Log.Error, fmt.Sprintf("Unable to create HTTP client: %s", err.Error()))
+		logger.DoLog(logger.Log.Error, fmt.Sprintf("Unable to create HTTP client: %s", err.Error()))
 		return nil, err
 	}
 

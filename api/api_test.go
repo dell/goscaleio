@@ -1,4 +1,4 @@
-// Copyright © 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,6 +51,130 @@ func TestNew(t *testing.T) {
 			if !reflect.DeepEqual(err, tt.expectedErr) {
 				t.Errorf("Got error: %v, expected: %v", err, tt.expectedErr)
 				return
+			}
+		})
+	}
+}
+
+func TestNewWithCAFile(t *testing.T) {
+	assert := assert.New(t)
+
+	tests := []struct {
+		name        string
+		host        string
+		opts        ClientOptions
+		expectedErr string
+	}{
+		{
+			name: "valid CA file",
+			host: "https://example.com",
+			opts: ClientOptions{
+				CAFilePath: "../test_data/ca.pem",
+				UseCerts:   true,
+				Insecure:   false,
+			},
+			expectedErr: "",
+		},
+		{
+			name: "empty CA file path",
+			host: "https://example.com",
+			opts: ClientOptions{
+				CAFilePath: "",
+				UseCerts:   true,
+				Insecure:   false,
+			},
+		},
+		{
+			name: "CA file ignored when insecure",
+			host: "https://example.com",
+			opts: ClientOptions{
+				CAFilePath: "../test_data/nonexistent.pem",
+				Insecure:   true,
+				UseCerts:   false,
+			},
+		},
+		{
+			name: "directory not accessible",
+			host: "https://example.com",
+			opts: ClientOptions{
+				CAFilePath: "/nonexistent/ca.pem",
+				UseCerts:   true,
+				Insecure:   false,
+			},
+			expectedErr: "unable to read rootCA file",
+		},
+		{
+			name: "file path is a directory",
+			host: "https://example.com",
+			opts: ClientOptions{
+				CAFilePath: "../test_data",
+				UseCerts:   true,
+				Insecure:   false,
+			},
+			expectedErr: "unable to read rootCA file",
+		},
+		{
+			name: "non-existent CA file",
+			host: "https://example.com",
+			opts: ClientOptions{
+				CAFilePath: "../test_data/nonexistent.pem",
+				UseCerts:   true,
+				Insecure:   false,
+			},
+			expectedErr: "unable to read rootCA file",
+		},
+		{
+			name: "invalid CA file content",
+			host: "https://example.com",
+			opts: ClientOptions{
+				CAFilePath: "../test_data/bad_ca.pem",
+				UseCerts:   true,
+				Insecure:   false,
+			},
+			expectedErr: "failed to decode PEM block containing certificate",
+		},
+		{
+			name: "fail to parse certificate",
+			host: "https://example.com",
+			opts: ClientOptions{
+				CAFilePath: "../test_data/invalid_cert.pem",
+				UseCerts:   true,
+				Insecure:   false,
+			},
+			expectedErr: "failed to parse certificate",
+		},
+		{
+			name: "certificate is not a CA",
+			host: "https://example.com",
+			opts: ClientOptions{
+				CAFilePath: "../test_data/non_ca_cert.pem",
+				UseCerts:   true,
+				Insecure:   false,
+			},
+			expectedErr: "is not a CA",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, err := New(context.Background(), tt.host, tt.opts, false)
+
+			if tt.expectedErr != "" {
+				if err == nil {
+					t.Errorf("Expected error containing '%s' but got nil", tt.expectedErr)
+					return
+				}
+				if !strings.Contains(err.Error(), tt.expectedErr) {
+					t.Errorf("Expected error containing '%s' but got '%s'", tt.expectedErr, err.Error())
+					return
+				}
+				assert.Nil(client)
+			} else {
+				if err != nil {
+					t.Errorf("Expected no error but got: %v", err)
+					return
+				}
+				assert.NotNil(client)
 			}
 		})
 	}
@@ -1100,4 +1224,16 @@ func TestParseJSONError(t *testing.T) {
 		err := c.ParseJSONError(response)
 		assert.NotNil(t, err)
 	})
+}
+
+func TestCustomHTTPHeaders(t *testing.T) {
+	c := client{customHTTPHeaders: NewSafeHeader()}
+
+	want := http.Header{
+		"foo": {"bar"},
+	}
+	c.SetCustomHTTPHeaders(want)
+
+	got := c.GetCustomHTTPHeaders()
+	assert.Equal(t, want, got)
 }

@@ -1,6 +1,6 @@
 /*
  *
- * Copyright © 2021-2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+ * Copyright © 2021 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ func TestCreateUser(t *testing.T) {
 		t.Run(name, func(_ *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -111,7 +111,7 @@ func TestGetUser(t *testing.T) {
 		t.Run(name, func(_ *testing.T) {
 			defer tc.server.Close()
 
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -251,7 +251,7 @@ func TestGetUserByIDName(t *testing.T) {
 		tc := tc
 		t.Run(name, func(_ *testing.T) {
 			defer tc.server.Close()
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -294,7 +294,7 @@ func TestRemoveUser(t *testing.T) {
 
 		tc := tc
 		t.Run(name, func(_ *testing.T) {
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -343,7 +343,7 @@ func TestSetRole(t *testing.T) {
 
 		tc := tc
 		t.Run(name, func(_ *testing.T) {
-			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false)
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
