@@ -1,4 +1,4 @@
-// Copyright © 2023 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright (c) 2023-2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dell/csmlog"
 	"github.com/dell/goscaleio/api"
-	logger "github.com/dell/goscaleio/log"
 	types "github.com/dell/goscaleio/types/v1"
 	"gopkg.in/yaml.v3"
 )
@@ -71,6 +71,7 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		gc.http.Transport = &http.Transport{
 			// #nosec G402
 			TLSClientConfig: &tls.Config{
+				MinVersion:         tls.VersionTLS12,
 				InsecureSkipVerify: true,
 				CipherSuites:       api.GetSecuredCipherSuites(),
 			},
@@ -86,6 +87,7 @@ func NewGateway(host string, username, password string, insecure, useCerts bool)
 		gc.http.Transport = &http.Transport{
 			// #nosec G402
 			TLSClientConfig: &tls.Config{
+				MinVersion:         tls.VersionTLS12,
 				RootCAs:            pool,
 				InsecureSkipVerify: insecure,
 				CipherSuites:       api.GetSecuredCipherSuites(),
@@ -144,7 +146,10 @@ func (gc *GatewayClient) NewTokenGeneration() (string, error) {
 
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			logger.DoLog(logger.Log.Error, err.Error())
+			csmlog.WithFields(csmlog.Fields{
+				csmlog.FieldComponent: "goscaleio",
+				csmlog.FieldOperation: "GatewayClient.NewToken",
+			}).Errorf("Failed to close response body while getting token: %v", err)
 		}
 	}()
 
@@ -170,7 +175,10 @@ func (gc *GatewayClient) NewTokenGeneration() (string, error) {
 	}
 
 	if result["access_token"] == nil {
-		logger.DoLog(logger.Log.Info, "authentication defaulting to basic authentication.")
+		csmlog.WithFields(csmlog.Fields{
+			csmlog.FieldComponent: "goscaleio",
+			csmlog.FieldOperation: "GatewayClient.NewToken",
+		}).Info("authentication defaulting to basic authentication")
 		return "", nil
 	}
 
@@ -318,7 +326,10 @@ func (gc *GatewayClient) ParseCSV(filePath string) (*types.GatewayResponse, erro
 	defer func() {
 		err := file.Close()
 		if err != nil {
-			fmt.Printf("failed to close file: %v", err)
+			csmlog.WithFields(csmlog.Fields{
+				csmlog.FieldComponent: "goscaleio",
+				csmlog.FieldOperation: "UploadPackages",
+			}).Errorf("Failed to close file: %v", err)
 		}
 	}()
 

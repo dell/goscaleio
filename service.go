@@ -23,7 +23,7 @@ import (
 	"strconv"
 	"time"
 
-	logger "github.com/dell/goscaleio/log"
+	"github.com/dell/csmlog"
 	types "github.com/dell/goscaleio/types/v1"
 	"github.com/google/uuid"
 )
@@ -450,7 +450,10 @@ func (gc *GatewayClient) GetServiceDetailsByID(deploymentID string, newToken boo
 
 		defer func() {
 			if err := resp.Body.Close(); err != nil {
-				logger.DoLog(logger.Log.Error, err.Error())
+				csmlog.WithFields(csmlog.Fields{
+					csmlog.FieldComponent: "goscaleio",
+					csmlog.FieldOperation: "GatewayClient.GetServiceDetailsByFilter",
+				}).Errorf("Failed to close response body while getting service details: %v", err)
 			}
 		}()
 
@@ -567,7 +570,7 @@ func (gc *GatewayClient) GetServiceDetailsByFilter(filter, value string) ([]type
 
 // GetAllServiceDetails retrieves all service details from the GatewayClient.
 func (gc *GatewayClient) GetAllServiceDetails() ([]types.ServiceResponse, error) {
-	defer TimeSpent("DeploGetServiceDetailsByIDyService", time.Now())
+	defer TimeSpent("GetAllServiceDetails", time.Now())
 
 	req, httpError := http.NewRequest(http.MethodGet, gc.host+"/Api/V1/Deployment/", nil)
 	if httpError != nil {

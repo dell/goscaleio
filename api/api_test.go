@@ -1,4 +1,4 @@
-// Copyright © 2024 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright (c) 2024-2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@ package api
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -30,12 +30,66 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNewTLSConfigUsesTLS12Minimum(t *testing.T) {
+	for _, opts := range []ClientOptions{
+		{Insecure: true},
+		{UseCerts: true},
+	} {
+		apiClient, err := New(context.Background(), "https://example.com", opts)
+		if err != nil {
+			t.Fatalf("New() returned an error: %v", err)
+		}
+
+		transport := apiClient.(*client).http.Transport.(*http.Transport)
+		if got := transport.TLSClientConfig.MinVersion; got != tls.VersionTLS12 {
+			t.Errorf("TLS MinVersion = %v, want %v", got, tls.VersionTLS12)
+		}
+	}
+}
+
+func TestNewTLSConfigHandshake(t *testing.T) {
+	for _, tt := range []struct {
+		name       string
+		serverTLS  uint16
+		wantClient bool
+	}{
+		{name: "TLS 1.2 accepted", serverTLS: tls.VersionTLS12, wantClient: true},
+		{name: "TLS 1.1 rejected", serverTLS: tls.VersionTLS11, wantClient: false},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			}))
+			server.TLS = &tls.Config{MinVersion: tt.serverTLS, MaxVersion: tt.serverTLS}
+			server.StartTLS()
+			defer server.Close()
+
+			apiClient, err := New(context.Background(), server.URL, ClientOptions{Insecure: true})
+			if err != nil {
+				t.Fatalf("New() returned an error: %v", err)
+			}
+
+			resp, err := apiClient.(*client).http.Get(server.URL)
+			if tt.wantClient {
+				if err != nil {
+					t.Fatalf("TLS 1.2 request failed: %v", err)
+				}
+				defer resp.Body.Close()
+				return
+			}
+			if err == nil {
+				resp.Body.Close()
+				t.Fatal("TLS 1.1 request succeeded; want protocol rejection")
+			}
+		})
+	}
+}
+
 func TestNew(t *testing.T) {
 	tests := []struct {
 		name        string
 		host        string
 		opts        ClientOptions
-		debug       bool
 		expectedErr error
 	}{
 		{
@@ -47,7 +101,7 @@ func TestNew(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := New(context.Background(), tt.host, tt.opts, true)
+			_, err := New(context.Background(), tt.host, tt.opts)
 			if !reflect.DeepEqual(err, tt.expectedErr) {
 				t.Errorf("Got error: %v, expected: %v", err, tt.expectedErr)
 				return
@@ -157,7 +211,7 @@ func TestNewWithCAFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client, err := New(context.Background(), tt.host, tt.opts, false)
+			client, err := New(context.Background(), tt.host, tt.opts)
 
 			if tt.expectedErr != "" {
 				if err == nil {
@@ -233,8 +287,7 @@ func TestGet(t *testing.T) {
 			c, err := New(context.Background(), ts.URL, ClientOptions{
 				Timeout:  10 * time.Second,
 				Insecure: true,
-				ShowHTTP: true,
-			}, true)
+			})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -331,7 +384,7 @@ func TestPost(t *testing.T) {
 			defer ts.Close()
 
 			// Create a new client and set the host to the test server
-			c, err := New(context.Background(), ts.URL, ClientOptions{}, false)
+			c, err := New(context.Background(), ts.URL, ClientOptions{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -431,7 +484,7 @@ func TestPut(t *testing.T) {
 			defer ts.Close()
 
 			// Create a new client and set the host to the test server
-			c, err := New(context.Background(), ts.URL, ClientOptions{}, false)
+			c, err := New(context.Background(), ts.URL, ClientOptions{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -519,7 +572,7 @@ func TestDelete(t *testing.T) {
 			defer ts.Close()
 
 			// Create a new client and set the host to the test server
-			c, err := New(context.Background(), ts.URL, ClientOptions{}, false)
+			c, err := New(context.Background(), ts.URL, ClientOptions{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -590,7 +643,7 @@ func TestDo(t *testing.T) {
 			defer ts.Close()
 
 			// Create a new client and set the host to the test server
-			c, err := New(context.Background(), ts.URL, ClientOptions{}, false)
+			c, err := New(context.Background(), ts.URL, ClientOptions{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -662,7 +715,7 @@ func TestDoXMLRequest_FailDecode(t *testing.T) {
 			defer ts.Close()
 
 			// Create a new client and set the host to the test server
-			c, err := New(context.Background(), ts.URL, ClientOptions{}, false)
+			c, err := New(context.Background(), ts.URL, ClientOptions{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -820,7 +873,7 @@ func TestDoXMLRequest(t *testing.T) {
 			defer ts.Close()
 
 			// Create a new client and set the host to the test server
-			c, err := New(context.Background(), ts.URL, ClientOptions{}, false)
+			c, err := New(context.Background(), ts.URL, ClientOptions{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -964,7 +1017,7 @@ func TestDoWithHeaders(t *testing.T) {
 			defer ts.Close()
 
 			// Create a new client and set the host to the test server
-			c, err := New(context.Background(), ts.URL, ClientOptions{}, false)
+			c, err := New(context.Background(), ts.URL, ClientOptions{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1127,7 +1180,7 @@ func TestDoAndGetResponseBody(t *testing.T) {
 			defer ts.Close()
 
 			// Create a new client and set the host to the test server
-			c, err := New(context.Background(), ts.URL, ClientOptions{}, false)
+			c, err := New(context.Background(), ts.URL, ClientOptions{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1140,7 +1193,8 @@ func TestDoAndGetResponseBody(t *testing.T) {
 				tt.method,
 				tt.path,
 				tt.headers,
-				tt.body, tt.version)
+				tt.body, tt.version,
+			)
 
 			// Check if the error matches the expected error
 			if tt.expectedErr != nil {
@@ -1153,7 +1207,7 @@ func TestDoAndGetResponseBody(t *testing.T) {
 
 			// Check if the response body matches the expected body
 			if tt.expectedBody != "" {
-				b, err := ioutil.ReadAll(res.Body)
+				b, err := io.ReadAll(res.Body)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -1162,6 +1216,73 @@ func TestDoAndGetResponseBody(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestDoAndGetResponseBody_EncodeError(t *testing.T) {
+	client, err := New(context.Background(), "http://example.com", ClientOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	body := struct {
+		Channel chan int `json:"channel"`
+	}{
+		Channel: make(chan int),
+	}
+
+	_, err = client.DoAndGetResponseBody(
+		context.Background(),
+		http.MethodPost,
+		"/api/test",
+		map[string]string{"Content-Type": "application/json"},
+		body,
+		"4.0",
+	)
+	if err == nil || !strings.Contains(err.Error(), "unsupported type") {
+		t.Fatalf("expected unsupported type error, got %v", err)
+	}
+}
+
+func TestDoAndGetResponseBody_InvalidVersionAndCustomHeaders(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Get("X-Custom-Header"); got != "custom-value" {
+			t.Fatalf("expected custom header custom-value, got %s", got)
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"message":"success"}`))
+	}))
+	defer ts.Close()
+
+	client, err := New(context.Background(), ts.URL, ClientOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.SetCustomHTTPHeaders(http.Header{"X-Custom-Header": []string{"custom-value"}})
+
+	res, err := client.DoAndGetResponseBody(
+		context.Background(),
+		http.MethodGet,
+		"/api/test",
+		nil,
+		nil,
+		"",
+	)
+	if err != nil {
+		t.Fatalf("unexpected error for custom header request: %v", err)
+	}
+	defer res.Body.Close()
+
+	_, err = client.DoAndGetResponseBody(
+		context.Background(),
+		http.MethodGet,
+		"/api/test",
+		nil,
+		nil,
+		"invalid_version",
+	)
+	if err == nil || !strings.Contains(err.Error(), "invalid syntax") {
+		t.Fatalf("expected invalid version error, got %v", err)
 	}
 }
 
@@ -1175,7 +1296,7 @@ func TestParseJSONError(t *testing.T) {
 			response: &http.Response{
 				StatusCode: http.StatusBadRequest,
 				Header:     http.Header{"Content-Type": []string{"application/json"}},
-				Body:       ioutil.NopCloser(strings.NewReader(`{"message":"Bad Request"}`)),
+				Body:       io.NopCloser(strings.NewReader(`{"message":"Bad Request"}`)),
 			},
 			expectedErr: &types.Error{
 				HTTPStatusCode: http.StatusBadRequest,
@@ -1187,7 +1308,7 @@ func TestParseJSONError(t *testing.T) {
 				StatusCode: http.StatusBadRequest,
 				Status:     "Bad Request",
 				Header:     http.Header{"Content-Type": []string{"text/html"}},
-				Body:       ioutil.NopCloser(strings.NewReader("<html><body>Bad Request</body></html>")),
+				Body:       io.NopCloser(strings.NewReader("<html><body>Bad Request</body></html>")),
 			},
 			expectedErr: &types.Error{
 				HTTPStatusCode: http.StatusBadRequest,
@@ -1197,7 +1318,7 @@ func TestParseJSONError(t *testing.T) {
 		"No content type": {
 			response: &http.Response{
 				StatusCode: http.StatusBadRequest,
-				Body:       ioutil.NopCloser(strings.NewReader(`{"message":"Bad Request"}`)),
+				Body:       io.NopCloser(strings.NewReader(`{"message":"Bad Request"}`)),
 			},
 			expectedErr: &types.Error{
 				HTTPStatusCode: http.StatusBadRequest,
@@ -1219,7 +1340,7 @@ func TestParseJSONError(t *testing.T) {
 	t.Run("Bad response", func(t *testing.T) {
 		c := &client{}
 		response := &http.Response{
-			Body: ioutil.NopCloser(strings.NewReader("{Bad response}")),
+			Body: io.NopCloser(strings.NewReader("{Bad response}")),
 		}
 		err := c.ParseJSONError(response)
 		assert.NotNil(t, err)

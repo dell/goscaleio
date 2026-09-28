@@ -195,7 +195,7 @@ func TestLogResponse(_ *testing.T) {
 		Header:     http.Header{"Content-Type": []string{"application/json"}},
 		Body:       io.NopCloser(strings.NewReader(`{"message": "success"}`)),
 	}
-	logResponse(context.Background(), res, nil)
+	logResponse(context.Background(), res)
 
 	// Test case: Logging a failed response
 	res = &http.Response{
@@ -203,7 +203,7 @@ func TestLogResponse(_ *testing.T) {
 		Header:     http.Header{"Content-Type": []string{"text/plain"}},
 		Body:       io.NopCloser(strings.NewReader("Internal server error")),
 	}
-	logResponse(context.Background(), res, nil)
+	logResponse(context.Background(), res)
 
 	// Test case: Logging a response with binary content
 	res = &http.Response{
@@ -211,7 +211,7 @@ func TestLogResponse(_ *testing.T) {
 		Header:     http.Header{"Content-Type": []string{"application/octet-stream"}},
 		Body:       io.NopCloser(bytes.NewReader([]byte{0x01, 0x02, 0x03})),
 	}
-	logResponse(context.Background(), res, nil)
+	logResponse(context.Background(), res)
 
 	// Test case: Failed response with binary content and error body
 	res = &http.Response{
@@ -219,19 +219,7 @@ func TestLogResponse(_ *testing.T) {
 		Header:     http.Header{"Content-Type": []string{"text/plain"}},
 		Body:       io.NopCloser(NewErrorReader(fmt.Errorf("simulated error while reading body"))),
 	}
-	logResponse(context.Background(), res, nil)
-}
-
-func logChecker(msg string) func(func(msg string, args ...any), string) {
-	return func(lf func(msg string, args ...any), message string) {
-		if !strings.Contains(msg, "GOSCALEIO HTTP REQUEST") {
-			// If the message does not contain the expected string, call the logging function with an error message
-			lf(fmt.Sprintf("Expected request log, got %s", msg))
-		}
-
-		// You can log the original message if needed
-		lf(message)
-	}
+	logResponse(context.Background(), res)
 }
 
 func TestLogRequest(t *testing.T) {
@@ -240,8 +228,7 @@ func TestLogRequest(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	logFunc := logChecker("GOSCALEIO HTTP REQUEST")
-	logRequest(context.Background(), req, logFunc)
+	logRequest(context.Background(), req)
 
 	// Test case: Error in dumpRequest
 	req, err = http.NewRequest("GET", "https://example.com/instances", NewErrorReader(errors.New("simulated error while reading request body")))
@@ -253,7 +240,7 @@ func TestLogRequest(t *testing.T) {
 		t.Fatalf("Expected error when reading request body, got nil")
 	}
 
-	logRequest(context.Background(), req, logFunc)
+	logRequest(context.Background(), req)
 
 	// Test case: Error in WriteIndented
 	req, err = http.NewRequest("GET", "https://example.com/instances", nil)
@@ -263,7 +250,7 @@ func TestLogRequest(t *testing.T) {
 
 	req.Header.Set(HeaderKeyContentType, "application/json")
 
-	logRequest(context.Background(), req, logFunc)
+	logRequest(context.Background(), req)
 }
 
 // errorReader is a custom io.Reader that always returns an error when Read is called.

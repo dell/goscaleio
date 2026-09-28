@@ -799,3 +799,104 @@ func TestReplicationConsistencyGroupAction(t *testing.T) {
 func TestNewPeerMDM(t *testing.T) {
 	assert.NotNil(t, NewPeerMDM(nil, nil))
 }
+
+func TestRCGGetStatistics(t *testing.T) {
+	groupID := uuid.NewString()
+	selfHREF := fmt.Sprintf("/api/instances/ReplicationConsistencyGroup::%s", groupID)
+
+	statsPayload := types.ReplicationConsistencyGroupStatistics{
+		LagReceivedInMillis:   5000,
+		LagAppliedInMillis:    4000,
+		LagPersistentInMillis: 3000,
+		LagReceivedSkew:       true,
+		RplTransmitBwc:        types.BWC{TotalWeightInKb: 10240, NumSeconds: 10, NumOccured: 5},
+		RplReceiveBwc:         types.BWC{TotalWeightInKb: 8192, NumSeconds: 10, NumOccured: 4},
+		NumOfRplPairs:         2,
+		InitialCopyProgress:   75.5,
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		switch req.RequestURI {
+		case selfHREF + "/relationships/Statistics":
+			resp.WriteHeader(http.StatusOK)
+			content, err := json.Marshal(statsPayload)
+			if err != nil {
+				t.Fatal(err)
+			}
+			resp.Write(content)
+		default:
+			resp.WriteHeader(http.StatusBadRequest)
+		}
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rcg := NewReplicationConsistencyGroup(client)
+	rcg.ReplicationConsistencyGroup = &types.ReplicationConsistencyGroup{
+		ID: groupID,
+		Links: []*types.Link{
+			{Rel: "self", HREF: selfHREF},
+		},
+	}
+
+	stats, err := rcg.GetStatistics()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, int64(5000), stats.LagReceivedInMillis)
+	assert.Equal(t, int64(4000), stats.LagAppliedInMillis)
+	assert.Equal(t, int64(3000), stats.LagPersistentInMillis)
+	assert.True(t, stats.LagReceivedSkew)
+	assert.Equal(t, 10240, stats.RplTransmitBwc.TotalWeightInKb)
+	assert.Equal(t, 8192, stats.RplReceiveBwc.TotalWeightInKb)
+	assert.Equal(t, 2, stats.NumOfRplPairs)
+	assert.InDelta(t, 75.5, stats.InitialCopyProgress, 0.001)
+}
+
+func TestRCGGetStatistics_NoSelfLink(t *testing.T) {
+	client, err := NewClientWithArgs("http://localhost", "3.6", math.MaxInt64, true, false, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rcg := NewReplicationConsistencyGroup(client)
+	rcg.ReplicationConsistencyGroup = &types.ReplicationConsistencyGroup{
+		ID:    "some-id",
+		Links: []*types.Link{},
+	}
+
+	_, err = rcg.GetStatistics()
+	assert.Error(t, err, "GetStatistics should fail when no self link is present")
+}
+
+func TestRCGGetStatistics_ServerError(t *testing.T) {
+	groupID := uuid.NewString()
+	selfHREF := fmt.Sprintf("/api/instances/ReplicationConsistencyGroup::%s", groupID)
+
+	server := httptest.NewServer(http.HandlerFunc(func(resp http.ResponseWriter, _ *http.Request) {
+		resp.WriteHeader(http.StatusInternalServerError)
+		resp.Write([]byte(`{"message":"internal error","httpStatusCode":500,"errorCode":0}`))
+	}))
+	defer server.Close()
+
+	client, err := NewClientWithArgs(server.URL, "3.6", math.MaxInt64, true, false, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rcg := NewReplicationConsistencyGroup(client)
+	rcg.ReplicationConsistencyGroup = &types.ReplicationConsistencyGroup{
+		ID: groupID,
+		Links: []*types.Link{
+			{Rel: "self", HREF: selfHREF},
+		},
+	}
+
+	_, err = rcg.GetStatistics()
+	assert.Error(t, err, "GetStatistics should return error on server error")
+}

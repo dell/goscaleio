@@ -1,4 +1,4 @@
-// Copyright © 2023 - 2024 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright (c) 2023-2024 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
 package goscaleio
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -139,6 +139,67 @@ func TestNewGatewayInsecure(t *testing.T) {
 	assert.NotNil(t, gc, "GatewayClient is nil")
 	assert.Equal(t, "mock_access_token", gc.token, "Unexpected access token")
 	assert.Equal(t, "4.0", gc.version, "Unexpected version")
+}
+
+func TestNewGatewayTLSConfigUsesTLS12Minimum(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/rest/auth/login" {
+			fmt.Fprintln(w, `{"access_token":"mock_access_token"}`)
+			return
+		}
+		fmt.Fprintln(w, "4.0")
+	}))
+	defer server.Close()
+
+	for _, insecure := range []bool{true, false} {
+		gateway, err := NewGateway(server.URL, "username", "password", insecure, false)
+		if err != nil {
+			t.Fatalf("NewGateway() returned an error: %v", err)
+		}
+
+		transport := gateway.http.Transport.(*http.Transport)
+		if got := transport.TLSClientConfig.MinVersion; got != tls.VersionTLS12 {
+			t.Errorf("TLS MinVersion = %v, want %v", got, tls.VersionTLS12)
+		}
+	}
+}
+
+func TestNewGatewayTLSConfigHandshake(t *testing.T) {
+	for _, tt := range []struct {
+		name       string
+		serverTLS  uint16
+		wantClient bool
+	}{
+		{name: "TLS 1.2 accepted", serverTLS: tls.VersionTLS12, wantClient: true},
+		{name: "TLS 1.1 rejected", serverTLS: tls.VersionTLS11, wantClient: false},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path == "/rest/auth/login" {
+					fmt.Fprintln(w, `{"access_token":"mock_access_token"}`)
+					return
+				}
+				fmt.Fprintln(w, "4.0")
+			}))
+			server.TLS = &tls.Config{MinVersion: tt.serverTLS, MaxVersion: tt.serverTLS}
+			server.StartTLS()
+			defer server.Close()
+
+			gateway, err := NewGateway(server.URL, "username", "password", true, false)
+			if tt.wantClient {
+				if err != nil {
+					t.Fatalf("TLS 1.2 gateway request failed: %v", err)
+				}
+				if gateway == nil {
+					t.Fatal("NewGateway() returned nil client")
+				}
+				return
+			}
+			if err == nil {
+				t.Fatal("TLS 1.1 gateway request succeeded; want protocol rejection")
+			}
+		})
+	}
 }
 
 // errorTransport simulates an error during response body reading
@@ -1687,7 +1748,7 @@ func TestParseJSONError(t *testing.T) {
 			response: &http.Response{
 				StatusCode: http.StatusBadRequest,
 				Header:     http.Header{"Content-Type": []string{"application/json"}},
-				Body:       ioutil.NopCloser(strings.NewReader(`{"message":"Bad Request"}`)),
+				Body:       io.NopCloser(strings.NewReader(`{"message":"Bad Request"}`)),
 			},
 			expectedErr: &types.Error{
 				HTTPStatusCode: http.StatusBadRequest,
@@ -1699,7 +1760,7 @@ func TestParseJSONError(t *testing.T) {
 				StatusCode: http.StatusBadRequest,
 				Status:     "Bad Request",
 				Header:     http.Header{"Content-Type": []string{"text/html"}},
-				Body:       ioutil.NopCloser(strings.NewReader("<html><body>Bad Request</body></html>")),
+				Body:       io.NopCloser(strings.NewReader("<html><body>Bad Request</body></html>")),
 			},
 			expectedErr: &types.Error{
 				HTTPStatusCode: http.StatusBadRequest,
@@ -1709,7 +1770,7 @@ func TestParseJSONError(t *testing.T) {
 		"No content type": {
 			response: &http.Response{
 				StatusCode: http.StatusBadRequest,
-				Body:       ioutil.NopCloser(strings.NewReader(`{"message":"Bad Request"}`)),
+				Body:       io.NopCloser(strings.NewReader(`{"message":"Bad Request"}`)),
 			},
 			expectedErr: &types.Error{
 				HTTPStatusCode: http.StatusBadRequest,

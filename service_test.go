@@ -15,9 +15,9 @@ package goscaleio
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -42,7 +42,7 @@ func TestDeployService(t *testing.T) {
 	nodes := "3"
 
 	serviceTemplateJSONFile := "response/service_template_response.json"
-	serviceTemplateResponse, err := ioutil.ReadFile(serviceTemplateJSONFile)
+	serviceTemplateResponse, err := os.ReadFile(serviceTemplateJSONFile)
 	if err != nil {
 		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
@@ -262,7 +262,7 @@ func TestUpdateService(t *testing.T) {
 	}
 
 	responseJSONFile := "response/update_service_response.json"
-	responseData, err := ioutil.ReadFile(responseJSONFile)
+	responseData, err := os.ReadFile(responseJSONFile)
 	if err != nil {
 		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
@@ -432,7 +432,7 @@ func TestUpdateService(t *testing.T) {
 
 func TestGetServiceDetailsByID(t *testing.T) {
 	responseJSONFile := "response/update_service_response.json"
-	responseData, err := ioutil.ReadFile(responseJSONFile)
+	responseData, err := os.ReadFile(responseJSONFile)
 	if err != nil {
 		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
@@ -472,7 +472,7 @@ func TestGetServiceDetailsByID(t *testing.T) {
 
 func TestGetServiceDetailsByFilter(t *testing.T) {
 	responseJSONFile := "response/services_response.json"
-	responseData, err := ioutil.ReadFile(responseJSONFile)
+	responseData, err := os.ReadFile(responseJSONFile)
 	if err != nil {
 		t.Fatalf("Failed to read response JSON file: %v", err)
 	}
@@ -510,7 +510,7 @@ func TestGetServiceDetailsByFilter(t *testing.T) {
 
 func TestGetAllServiceDetails(t *testing.T) {
 	responseJSONFile := "response/services_response.json"
-	responseData, err := ioutil.ReadFile(responseJSONFile)
+	responseData, err := os.ReadFile(responseJSONFile)
 	if err != nil {
 		t.Fatalf("Failed to read response JSON file: %v", err)
 	}

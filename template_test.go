@@ -14,11 +14,11 @@ package goscaleio
 
 import (
 	"fmt"
-	"io/ioutil"
 	"math"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 
@@ -44,7 +44,7 @@ func TestGetTemplateByID(t *testing.T) {
 			id: "12345",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				responseJSONFile := "response/template_response.json"
-				responseData, err := ioutil.ReadFile(responseJSONFile)
+				responseData, err := os.ReadFile(responseJSONFile)
 				if err != nil {
 					t.Fatalf("Failed to read response JSON file: %v", err)
 				}
@@ -64,7 +64,7 @@ func TestGetTemplateByID(t *testing.T) {
 			id: "12345",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				responseJSONFile := "response/template_response.json"
-				responseData, err := ioutil.ReadFile(responseJSONFile)
+				responseData, err := os.ReadFile(responseJSONFile)
 				if err != nil {
 					t.Fatalf("Failed to read response JSON file: %v", err)
 				}
@@ -122,7 +122,7 @@ func TestGetTemplateByFilters(t *testing.T) {
 		"success with version 4.0": {
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				responseJSONFile := "response/templates_response.json"
-				responseData, err := ioutil.ReadFile(responseJSONFile)
+				responseData, err := os.ReadFile(responseJSONFile)
 				if err != nil {
 					t.Fatalf("Failed to read response JSON file: %v", err)
 				}
@@ -141,7 +141,7 @@ func TestGetTemplateByFilters(t *testing.T) {
 		"success with version 3.0": {
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				responseJSONFile := "response/templates_response.json"
-				responseData, err := ioutil.ReadFile(responseJSONFile)
+				responseData, err := os.ReadFile(responseJSONFile)
 				if err != nil {
 					t.Fatalf("Failed to read response JSON file: %v", err)
 				}
@@ -212,7 +212,7 @@ func TestGetAllTemplates(t *testing.T) {
 		"success with version 4.0": {
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				responseJSONFile := "response/templates_response.json"
-				responseData, err := ioutil.ReadFile(responseJSONFile)
+				responseData, err := os.ReadFile(responseJSONFile)
 				if err != nil {
 					t.Fatalf("Failed to read response JSON file: %v", err)
 				}
@@ -231,7 +231,7 @@ func TestGetAllTemplates(t *testing.T) {
 		"success with version 3.0": {
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				responseJSONFile := "response/templates_response.json"
-				responseData, err := ioutil.ReadFile(responseJSONFile)
+				responseData, err := os.ReadFile(responseJSONFile)
 				if err != nil {
 					t.Fatalf("Failed to read response JSON file: %v", err)
 				}
@@ -317,7 +317,7 @@ func TestCloneTemplate(t *testing.T) {
 					return
 				}
 				responseJSONFile := "response/templates_response.json"
-				responseData, err := ioutil.ReadFile(responseJSONFile)
+				responseData, err := os.ReadFile(responseJSONFile)
 				if err != nil {
 					t.Fatalf("Failed to read response JSON file: %v", err)
 				}
