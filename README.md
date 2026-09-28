@@ -70,17 +70,9 @@ Once you have a ```System``` struct you can then get other things like ```Protec
       log.Fatalf("error getting protection domains: %v", err)
     }
 
-## Debugging
+## Logging
 
-Two environment variables can be set to aid in debugging
-
-Env Var | Default Value |
--- | -- |
-`GOSCALEIO_DEBUG` | `false`
-`GOSCALEIO_SHOWHTTP` | `false`
-
-Setting `GOSCALEIO_DEBUG` well enable logging to `stdout`.
-Setting `GOSCALEIO_SHOWHTTP` will log all HTTP requests and responses to `stdout`.
+This library uses [csmlog](https://github.com/dell/csmlog) for structured logging. Log level is controlled via `csmlog` configuration. HTTP request/response logging is emitted at `DEBUG` level.
 
 
 <a id="licensing">Licensing</a>

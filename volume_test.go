@@ -1401,3 +1401,71 @@ func TestUnmarkForReplication(t *testing.T) {
 		})
 	}
 }
+
+func TestQuerySelectedVolumeStatistics(t *testing.T) {
+	bwc := types.BWC{NumOccured: 5, NumSeconds: 10, TotalWeightInKb: 1024}
+
+	type testCase struct {
+		ids         []string
+		properties  []string
+		server      *httptest.Server
+		expectedErr bool
+		expected    map[string]types.VolumeStatistics
+	}
+
+	const apiPath = "/api/types/Volume/instances/action/querySelectedStatistics"
+
+	cases := map[string]testCase{
+		"success: returns stats for requested volumes": {
+			ids:        []string{"vol-1", "vol-2"},
+			properties: []string{"userDataReadBwc", "userDataWriteBwc"},
+			expected: map[string]types.VolumeStatistics{
+				"vol-1": {UserDataReadBwc: bwc, UserDataWriteBwc: bwc},
+				"vol-2": {UserDataReadBwc: bwc, UserDataWriteBwc: bwc},
+			},
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPost {
+					t.Errorf("expected POST, got %s", r.Method)
+				}
+				if r.URL.Path != apiPath {
+					t.Errorf("expected path %s, got %s", apiPath, r.URL.Path)
+				}
+				resp := map[string]types.VolumeStatistics{
+					"vol-1": {UserDataReadBwc: bwc, UserDataWriteBwc: bwc},
+					"vol-2": {UserDataReadBwc: bwc, UserDataWriteBwc: bwc},
+				}
+				data, _ := json.Marshal(resp)
+				w.WriteHeader(http.StatusOK)
+				w.Write(data)
+			})),
+		},
+		"error: server returns non-OK": {
+			ids:         []string{"vol-1"},
+			properties:  []string{"userDataReadBwc"},
+			expectedErr: true,
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte(`{"message":"bad request","httpStatusCode":400,"errorCode":0}`))
+			})),
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			defer tc.server.Close()
+
+			client, err := NewClientWithArgs(tc.server.URL, "", math.MaxInt64, true, false, "")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			result, err := client.QuerySelectedVolumeStatistics(tc.ids, tc.properties)
+			if tc.expectedErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expected, result)
+		})
+	}
+}

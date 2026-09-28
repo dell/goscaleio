@@ -17,8 +17,11 @@ import (
 	"encoding/xml"
 	"fmt"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
+
+	"github.com/dell/csmlog"
 )
 
 const errorWithDetails = "Error with details"
@@ -52,7 +55,7 @@ type Error struct {
 
 func (e Error) Error() string {
 	if e.Message == errorWithDetails && len(e.ErrorDetails) > 0 {
-		fmt.Printf("goscaleio.Error Error with details  %#v\n", e)
+		csmlog.Debugf("goscaleio returned Error with details: %v", e)
 		if e.ErrorDetails[0].ErrorMessage != "" {
 			e.Message = e.ErrorDetails[0].ErrorMessage
 			return e.ErrorDetails[0].ErrorMessage
@@ -215,85 +218,90 @@ type BWC struct {
 
 // Statistics defines struct of Statistics for PowerFlex Array
 type Statistics struct {
-	PrimaryReadFromDevBwc                    BWC `json:"primaryReadFromDevBwc"`
-	NumOfStoragePools                        int `json:"numOfStoragePools"`
-	ProtectedCapacityInKb                    int `json:"protectedCapacityInKb"`
-	MovingCapacityInKb                       int `json:"movingCapacityInKb"`
-	SnapCapacityInUseOccupiedInKb            int `json:"snapCapacityInUseOccupiedInKb"`
-	SnapCapacityInUseInKb                    int `json:"snapCapacityInUseInKb"`
-	ActiveFwdRebuildCapacityInKb             int `json:"activeFwdRebuildCapacityInKb"`
-	DegradedHealthyVacInKb                   int `json:"degradedHealthyVacInKb"`
-	ActiveMovingRebalanceJobs                int `json:"activeMovingRebalanceJobs"`
-	TotalReadBwc                             BWC `json:"totalReadBwc"`
-	MaxCapacityInKb                          int `json:"maxCapacityInKb"`
-	PendingBckRebuildCapacityInKb            int `json:"pendingBckRebuildCapacityInKb"`
-	ActiveMovingOutFwdRebuildJobs            int `json:"activeMovingOutFwdRebuildJobs"`
-	CapacityLimitInKb                        int `json:"capacityLimitInKb"`
-	SecondaryVacInKb                         int `json:"secondaryVacInKb"`
-	PendingFwdRebuildCapacityInKb            int `json:"pendingFwdRebuildCapacityInKb"`
-	ThinCapacityInUseInKb                    int `json:"thinCapacityInUseInKb"`
-	AtRestCapacityInKb                       int `json:"atRestCapacityInKb"`
-	ActiveMovingInBckRebuildJobs             int `json:"activeMovingInBckRebuildJobs"`
-	DegradedHealthyCapacityInKb              int `json:"degradedHealthyCapacityInKb"`
-	NumOfScsiInitiators                      int `json:"numOfScsiInitiators"`
-	NumOfUnmappedVolumes                     int `json:"numOfUnmappedVolumes"`
-	FailedCapacityInKb                       int `json:"failedCapacityInKb"`
-	SecondaryReadFromDevBwc                  BWC `json:"secondaryReadFromDevBwc"`
-	NumOfVolumes                             int `json:"numOfVolumes"`
-	SecondaryWriteBwc                        BWC `json:"secondaryWriteBwc"`
-	ActiveBckRebuildCapacityInKb             int `json:"activeBckRebuildCapacityInKb"`
-	FailedVacInKb                            int `json:"failedVacInKb"`
-	PendingMovingCapacityInKb                int `json:"pendingMovingCapacityInKb"`
-	ActiveMovingInRebalanceJobs              int `json:"activeMovingInRebalanceJobs"`
-	PendingMovingInRebalanceJobs             int `json:"pendingMovingInRebalanceJobs"`
-	BckRebuildReadBwc                        BWC `json:"bckRebuildReadBwc"`
-	DegradedFailedVacInKb                    int `json:"degradedFailedVacInKb"`
-	NumOfSnapshots                           int `json:"numOfSnapshots"`
-	RebalanceCapacityInKb                    int `json:"rebalanceCapacityInKb"`
-	FwdRebuildReadBwc                        BWC `json:"fwdRebuildReadBwc"`
-	NumOfSdc                                 int `json:"numOfSdc"`
-	ActiveMovingInFwdRebuildJobs             int `json:"activeMovingInFwdRebuildJobs"`
-	NumOfVtrees                              int `json:"numOfVtrees"`
-	ThickCapacityInUseInKb                   int `json:"thickCapacityInUseInKb"`
-	ProtectedVacInKb                         int `json:"protectedVacInKb"`
-	PendingMovingInBckRebuildJobs            int `json:"pendingMovingInBckRebuildJobs"`
-	CapacityAvailableForVolumeAllocationInKb int `json:"capacityAvailableForVolumeAllocationInKb"`
-	VolumeAllocationLimitInKb                int `json:"volumeAllocationLimitInKb"`
-	PendingRebalanceCapacityInKb             int `json:"pendingRebalanceCapacityInKb"`
-	PendingMovingRebalanceJobs               int `json:"pendingMovingRebalanceJobs"`
-	NumOfProtectionDomains                   int `json:"numOfProtectionDomains"`
-	NumOfSds                                 int `json:"numOfSds"`
-	CapacityInUseInKb                        int `json:"capacityInUseInKb"`
-	BckRebuildWriteBwc                       BWC `json:"bckRebuildWriteBwc"`
-	DegradedFailedCapacityInKb               int `json:"degradedFailedCapacityInKb"`
-	NumOfThinBaseVolumes                     int `json:"numOfThinBaseVolumes"`
-	PendingMovingOutFwdRebuildJobs           int `json:"pendingMovingOutFwdRebuildJobs"`
-	SecondaryReadBwc                         BWC `json:"secondaryReadBwc"`
-	PendingMovingOutBckRebuildJobs           int `json:"pendingMovingOutBckRebuildJobs"`
-	RebalanceWriteBwc                        BWC `json:"rebalanceWriteBwc"`
-	PrimaryReadBwc                           BWC `json:"primaryReadBwc"`
-	NumOfVolumesInDeletion                   int `json:"numOfVolumesInDeletion"`
-	NumOfDevices                             int `json:"numOfDevices"`
-	RebalanceReadBwc                         BWC `json:"rebalanceReadBwc"`
-	InUseVacInKb                             int `json:"inUseVacInKb"`
-	UnreachableUnusedCapacityInKb            int `json:"unreachableUnusedCapacityInKb"`
-	TotalWriteBwc                            BWC `json:"totalWriteBwc"`
-	SpareCapacityInKb                        int `json:"spareCapacityInKb"`
-	ActiveMovingOutBckRebuildJobs            int `json:"activeMovingOutBckRebuildJobs"`
-	PrimaryVacInKb                           int `json:"primaryVacInKb"`
-	NumOfThickBaseVolumes                    int `json:"numOfThickBaseVolumes"`
-	BckRebuildCapacityInKb                   int `json:"bckRebuildCapacityInKb"`
-	NumOfMappedToAllVolumes                  int `json:"numOfMappedToAllVolumes"`
-	ActiveMovingCapacityInKb                 int `json:"activeMovingCapacityInKb"`
-	PendingMovingInFwdRebuildJobs            int `json:"pendingMovingInFwdRebuildJobs"`
-	ActiveRebalanceCapacityInKb              int `json:"activeRebalanceCapacityInKb"`
-	RmcacheSizeInKb                          int `json:"rmcacheSizeInKb"`
-	FwdRebuildCapacityInKb                   int `json:"fwdRebuildCapacityInKb"`
-	FwdRebuildWriteBwc                       BWC `json:"fwdRebuildWriteBwc"`
-	PrimaryWriteBwc                          BWC `json:"primaryWriteBwc"`
-	NetUserDataCapacityInKb                  int `json:"netUserDataCapacityInKb"`
-	NetUnusedCapacityInKb                    int `json:"netUnusedCapacityInKb"`
-	VolumeAddressSpaceInKb                   int `json:"volumeAddressSpaceInKb"`
+	PrimaryReadFromDevBwc                    BWC     `json:"primaryReadFromDevBwc"`
+	NumOfStoragePools                        int     `json:"numOfStoragePools"`
+	ProtectedCapacityInKb                    int     `json:"protectedCapacityInKb"`
+	MovingCapacityInKb                       int     `json:"movingCapacityInKb"`
+	SnapCapacityInUseOccupiedInKb            int     `json:"snapCapacityInUseOccupiedInKb"`
+	SnapCapacityInUseInKb                    int     `json:"snapCapacityInUseInKb"`
+	ActiveFwdRebuildCapacityInKb             int     `json:"activeFwdRebuildCapacityInKb"`
+	DegradedHealthyVacInKb                   int     `json:"degradedHealthyVacInKb"`
+	ActiveMovingRebalanceJobs                int     `json:"activeMovingRebalanceJobs"`
+	TotalReadBwc                             BWC     `json:"totalReadBwc"`
+	MaxCapacityInKb                          int     `json:"maxCapacityInKb"`
+	PendingBckRebuildCapacityInKb            int     `json:"pendingBckRebuildCapacityInKb"`
+	ActiveMovingOutFwdRebuildJobs            int     `json:"activeMovingOutFwdRebuildJobs"`
+	CapacityLimitInKb                        int     `json:"capacityLimitInKb"`
+	SecondaryVacInKb                         int     `json:"secondaryVacInKb"`
+	PendingFwdRebuildCapacityInKb            int     `json:"pendingFwdRebuildCapacityInKb"`
+	ThinCapacityInUseInKb                    int     `json:"thinCapacityInUseInKb"`
+	AtRestCapacityInKb                       int     `json:"atRestCapacityInKb"`
+	ActiveMovingInBckRebuildJobs             int     `json:"activeMovingInBckRebuildJobs"`
+	DegradedHealthyCapacityInKb              int     `json:"degradedHealthyCapacityInKb"`
+	NumOfScsiInitiators                      int     `json:"numOfScsiInitiators"`
+	NumOfUnmappedVolumes                     int     `json:"numOfUnmappedVolumes"`
+	FailedCapacityInKb                       int     `json:"failedCapacityInKb"`
+	SecondaryReadFromDevBwc                  BWC     `json:"secondaryReadFromDevBwc"`
+	NumOfVolumes                             int     `json:"numOfVolumes"`
+	SecondaryWriteBwc                        BWC     `json:"secondaryWriteBwc"`
+	ActiveBckRebuildCapacityInKb             int     `json:"activeBckRebuildCapacityInKb"`
+	FailedVacInKb                            int     `json:"failedVacInKb"`
+	PendingMovingCapacityInKb                int     `json:"pendingMovingCapacityInKb"`
+	ActiveMovingInRebalanceJobs              int     `json:"activeMovingInRebalanceJobs"`
+	PendingMovingInRebalanceJobs             int     `json:"pendingMovingInRebalanceJobs"`
+	BckRebuildReadBwc                        BWC     `json:"bckRebuildReadBwc"`
+	DegradedFailedVacInKb                    int     `json:"degradedFailedVacInKb"`
+	NumOfSnapshots                           int     `json:"numOfSnapshots"`
+	RebalanceCapacityInKb                    int     `json:"rebalanceCapacityInKb"`
+	FwdRebuildReadBwc                        BWC     `json:"fwdRebuildReadBwc"`
+	NumOfSdc                                 int     `json:"numOfSdc"`
+	ActiveMovingInFwdRebuildJobs             int     `json:"activeMovingInFwdRebuildJobs"`
+	NumOfVtrees                              int     `json:"numOfVtrees"`
+	ThickCapacityInUseInKb                   int     `json:"thickCapacityInUseInKb"`
+	ProtectedVacInKb                         int     `json:"protectedVacInKb"`
+	PendingMovingInBckRebuildJobs            int     `json:"pendingMovingInBckRebuildJobs"`
+	CapacityAvailableForVolumeAllocationInKb int     `json:"capacityAvailableForVolumeAllocationInKb"`
+	VolumeAllocationLimitInKb                int     `json:"volumeAllocationLimitInKb"`
+	PendingRebalanceCapacityInKb             int     `json:"pendingRebalanceCapacityInKb"`
+	PendingMovingRebalanceJobs               int     `json:"pendingMovingRebalanceJobs"`
+	NumOfProtectionDomains                   int     `json:"numOfProtectionDomains"`
+	NumOfSds                                 int     `json:"numOfSds"`
+	CapacityInUseInKb                        int     `json:"capacityInUseInKb"`
+	BckRebuildWriteBwc                       BWC     `json:"bckRebuildWriteBwc"`
+	DegradedFailedCapacityInKb               int     `json:"degradedFailedCapacityInKb"`
+	NumOfThinBaseVolumes                     int     `json:"numOfThinBaseVolumes"`
+	PendingMovingOutFwdRebuildJobs           int     `json:"pendingMovingOutFwdRebuildJobs"`
+	SecondaryReadBwc                         BWC     `json:"secondaryReadBwc"`
+	PendingMovingOutBckRebuildJobs           int     `json:"pendingMovingOutBckRebuildJobs"`
+	RebalanceWriteBwc                        BWC     `json:"rebalanceWriteBwc"`
+	PrimaryReadBwc                           BWC     `json:"primaryReadBwc"`
+	NumOfVolumesInDeletion                   int     `json:"numOfVolumesInDeletion"`
+	NumOfDevices                             int     `json:"numOfDevices"`
+	RebalanceReadBwc                         BWC     `json:"rebalanceReadBwc"`
+	InUseVacInKb                             int     `json:"inUseVacInKb"`
+	UnreachableUnusedCapacityInKb            int     `json:"unreachableUnusedCapacityInKb"`
+	TotalWriteBwc                            BWC     `json:"totalWriteBwc"`
+	SpareCapacityInKb                        int     `json:"spareCapacityInKb"`
+	ActiveMovingOutBckRebuildJobs            int     `json:"activeMovingOutBckRebuildJobs"`
+	PrimaryVacInKb                           int     `json:"primaryVacInKb"`
+	NumOfThickBaseVolumes                    int     `json:"numOfThickBaseVolumes"`
+	BckRebuildCapacityInKb                   int     `json:"bckRebuildCapacityInKb"`
+	NumOfMappedToAllVolumes                  int     `json:"numOfMappedToAllVolumes"`
+	ActiveMovingCapacityInKb                 int     `json:"activeMovingCapacityInKb"`
+	PendingMovingInFwdRebuildJobs            int     `json:"pendingMovingInFwdRebuildJobs"`
+	ActiveRebalanceCapacityInKb              int     `json:"activeRebalanceCapacityInKb"`
+	RmcacheSizeInKb                          int     `json:"rmcacheSizeInKb"`
+	FwdRebuildCapacityInKb                   int     `json:"fwdRebuildCapacityInKb"`
+	FwdRebuildWriteBwc                       BWC     `json:"fwdRebuildWriteBwc"`
+	PrimaryWriteBwc                          BWC     `json:"primaryWriteBwc"`
+	NetUserDataCapacityInKb                  int     `json:"netUserDataCapacityInKb"`
+	NetUnusedCapacityInKb                    int     `json:"netUnusedCapacityInKb"`
+	ThinCapacityAllocatedInKb                int64   `json:"thinCapacityAllocatedInKb,omitempty"`
+	OverallUsageRatio                        float64 `json:"overallUsageRatio,omitempty"`
+	VolumeAddressSpaceInKb                   int     `json:"volumeAddressSpaceInKb"`
+	CompressionRatio                         float64 `json:"compressionRatio"`
+	CompressedDataCompressionRatio           float64 `json:"compressedDataCompressionRatio"`
+	NetFglCompressedDataSizeInKb             int64   `json:"netFglCompressedDataSizeInKb"`
 }
 
 // OSRepository defines struct of OS Repository
@@ -373,6 +381,45 @@ type Resource struct {
 type Metric struct {
 	Name   string    `json:"name"`
 	Values []float64 `json:"values"`
+}
+
+// UnmarshalJSON handles both string and float64 values in the values array
+func (m *Metric) UnmarshalJSON(data []byte) error {
+	// Use a temporary struct to avoid infinite recursion
+	type Alias Metric
+	temp := &struct {
+		Values []json.RawMessage `json:"values"`
+		*Alias
+	}{
+		Alias: (*Alias)(m),
+	}
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+
+	// Convert each value, handling both strings and floats
+	m.Values = make([]float64, len(temp.Values))
+	for i, v := range temp.Values {
+		var val interface{}
+		if err := json.Unmarshal(v, &val); err != nil {
+			return err
+		}
+
+		switch t := val.(type) {
+		case float64:
+			m.Values[i] = t
+		case string:
+			// Parse string to float64
+			f, err := strconv.ParseFloat(t, 64)
+			if err != nil {
+				return fmt.Errorf("cannot parse metric value '%s' as float64: %w", t, err)
+			}
+			m.Values[i] = f
+		default:
+			return fmt.Errorf("unexpected metric value type: %T", t)
+		}
+	}
+	return nil
 }
 
 // SdcStatistics defines struct of Statistics for PowerFlex SDC
@@ -1431,6 +1478,55 @@ type QueryReplicationPairStatistics struct {
 	InitialCopyProgress float64 `json:"initialCopyProgress"`
 }
 
+// ReplicationConsistencyGroupStatistics holds lag, bandwidth, and latency statistics
+// for a Replication Consistency Group, returned by the /relationships/Statistics endpoint.
+// Requires PowerFlex 4.0+.
+type ReplicationConsistencyGroupStatistics struct {
+	LagReceivedInMillis   int64 `json:"lagReceivedInMillis"`
+	LagAppliedInMillis    int64 `json:"lagAppliedInMillis"`
+	LagPersistentInMillis int64 `json:"lagPersistentInMillis"`
+	LagReceivedSkew       bool  `json:"lagReceivedSkew"`
+	LagAppliedSkew        bool  `json:"lagAppliedSkew"`
+	LagPersistentSkew     bool  `json:"lagPersistentSkew"`
+
+	RplTransmitBwc    BWC `json:"rplTransmitBwc"`
+	RplReceiveBwc     BWC `json:"rplReceiveBwc"`
+	RplRemoteApplyBwc BWC `json:"rplRemoteApplyBwc"`
+	RcgLocalWriteBwc  BWC `json:"rcgLocalWriteBwc"`
+	RcgLocalReadBwc   BWC `json:"rcgLocalReadBwc"`
+	RcgRemoteWriteBwc BWC `json:"rcgRemoteWriteBwc"`
+	RcgRemoteReadBwc  BWC `json:"rcgRemoteReadBwc"`
+
+	RplTransmitLatency BWC `json:"rplTransmitLatency"`
+	RplReceiveLatency  BWC `json:"rplReceiveLatency"`
+	RplApplyLatency    BWC `json:"rplApplyLatency"`
+
+	RplPairIDs          []string `json:"rplPairIds"`
+	NumOfRplPairs       int      `json:"numOfRplPairs"`
+	InitialCopyProgress float64  `json:"initialCopyProgress"`
+	FreezeTransmit      bool     `json:"freezeTransmit"`
+	IsInSlimMode        bool     `json:"isInSlimMode"`
+}
+
+// BandwidthKBps computes bandwidth in KB/s from a BWC counter.
+// Returns 0.0 when NumSeconds is zero to avoid division by zero.
+func BandwidthKBps(bwc BWC) float64 {
+	if bwc.NumSeconds == 0 {
+		return 0.0
+	}
+	return float64(bwc.TotalWeightInKb) / float64(bwc.NumSeconds) // #nosec G115
+}
+
+// LatencySeconds computes average I/O latency in seconds from a BWC latency counter.
+// PowerFlex stores cumulative latency in microseconds in TotalWeightInKb, and the
+// number of I/O operations in NumOccured. Returns 0.0 when NumOccured is zero.
+func LatencySeconds(bwc BWC) float64 {
+	if bwc.NumOccured == 0 {
+		return 0.0
+	}
+	return float64(bwc.TotalWeightInKb) / float64(bwc.NumOccured) / 1_000_000.0 // #nosec G115
+}
+
 // NASServerOperationalStatusEnum NAS lifecycle state.
 type NASServerOperationalStatusEnum string
 
@@ -2428,6 +2524,15 @@ type OSUserCredential struct {
 	SSHPrivateKey string `xml:"sshPrivateKey,omitempty"`
 	// Required if Private Key is set
 	KeyPairName string `xml:"keyPairName,omitempty"`
+}
+
+// QuerySelectedVolumeStatisticsParam defines the request body for the
+// POST /api/types/Volume/instances/action/querySelectedStatistics endpoint.
+// IDs is the list of volume IDs to query; Properties is the list of statistic
+// field names to return (e.g. "userDataReadBwc", "userDataWriteBwc").
+type QuerySelectedVolumeStatisticsParam struct {
+	IDs        []string `json:"ids"`
+	Properties []string `json:"properties"`
 }
 
 // SdcVolumeMetrics represents metrics for a single volume on a single SDC

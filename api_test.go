@@ -1,4 +1,4 @@
-// Copyright © 2019 - 2026 Dell Inc. or its subsidiaries. All Rights Reserved.
+// Copyright (c) 2019-2026 Dell Inc. or its subsidiaries. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -692,11 +692,38 @@ func TestWithFields(t *testing.T) {
 	}
 }
 
+func TestBuildTokenExchangeHTTPClient(t *testing.T) {
+	client := buildTokenExchangeHTTPClient(true)
+	transport := client.Transport.(*http.Transport)
+
+	if got := transport.TLSClientConfig.MinVersion; got != tls.VersionTLS12 {
+		t.Errorf("TLS MinVersion = %v, want %v", got, tls.VersionTLS12)
+	}
+	if got, want := client.Timeout, 20*time.Second; got != want {
+		t.Errorf("HTTP client timeout = %v, want %v", got, want)
+	}
+	if !transport.TLSClientConfig.InsecureSkipVerify {
+		t.Error("TLS InsecureSkipVerify = false, want true")
+	}
+}
+
+func TestBuildTokenExchangeHTTPClientEnforcesTimeout(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		time.Sleep(50 * time.Millisecond)
+	}))
+	defer server.Close()
+
+	client := buildTokenExchangeHTTPClientWithTimeout(true, 10*time.Millisecond)
+	_, err := client.Get(server.URL)
+	if err == nil || !os.IsTimeout(err) {
+		t.Fatalf("client.Get() error = %v, want timeout", err)
+	}
+}
+
 func TestNewClientWithArgs(t *testing.T) {
 	tests := []struct {
 		name     string
 		endpoint string
-		setEnv   func()
 		wantErr  bool
 	}{
 		{
@@ -705,27 +732,13 @@ func TestNewClientWithArgs(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			name:     "failure",
+			name:     "failure - empty endpoint",
 			endpoint: "",
-			setEnv: func() {
-				os.Setenv("GOSCALEIO_SHOWHTTP", "true")
-			},
-			wantErr: true,
-		},
-		{
-			name:     "Set GOSCALEIO_SHOWHTTP to true",
-			endpoint: "/testing",
-			setEnv: func() {
-				showHTTP = true
-			},
-			wantErr: false,
+			wantErr:  true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.setEnv != nil {
-				tt.setEnv()
-			}
 			_, err := NewClientWithArgs(tt.endpoint, "3.5", math.MaxInt64, true, false, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewClientWithArgs() error = %v, wantErr %v", err, tt.wantErr)
